@@ -1,0 +1,39 @@
+# Helper for development environments that cannot reach the npm registry.
+# Pushing a branch named "tooling/<anything>" runs this job, which refreshes
+# pnpm-lock.yaml and applies Prettier formatting, then commits the result back
+# to that same branch. It never runs on main or on pull requests.
+name: Sync lockfile and formatting
+
+on:
+  push:
+    branches: ['tooling/**']
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Refresh lockfile
+        run: pnpm install --no-frozen-lockfile
+      - name: Apply formatting
+        run: pnpm format
+      - name: Commit changes back to this branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --stat
+          if git diff --cached --quiet; then
+            echo "Nothing to update."
+          else
+            git commit -m "tooling: refresh lockfile and formatting"
+            git push
+          fi

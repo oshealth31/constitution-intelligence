@@ -6,8 +6,10 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { configureApp } from '../src/app.factory';
 import { AppModule } from '../src/app.module';
 import { loadConfig } from '../src/config/config';
+import { Public } from '../src/modules/access/decorators';
 
 /** A route that fails on purpose, to prove internal errors are not leaked. */
+@Public()
 @Controller('test-errors')
 class FailingController {
   @Get('crash')

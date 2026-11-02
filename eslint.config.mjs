@@ -35,7 +35,7 @@ export default tseslint.config(
   },
   {
     // Command-line scripts may print to the console.
-    files: ['**/*-cli.ts'],
+    files: ['**/*-cli.ts', 'apps/api/src/cli/**/*.ts'],
     rules: { 'no-console': 'off' },
   },
 );

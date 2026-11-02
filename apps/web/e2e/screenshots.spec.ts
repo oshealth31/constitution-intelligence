@@ -24,6 +24,8 @@ async function shot(page: Page, name: string) {
 }
 
 async function openChoir(page: Page) {
+  const menu = page.getByRole('button', { name: 'Menu' });
+  if (await menu.isVisible()) await menu.click();
   await page.getByRole('link', { name: 'Organisations' }).first().click();
   await page.getByRole('link', { name: 'Sample Community Choir (fictional)' }).click();
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Sample Community Choir');
@@ -51,6 +53,12 @@ test.describe('desktop', () => {
 
     await openChoir(page);
     await shot(page, 'desktop-05-organisation-detail');
+    const branding = page.getByRole('form', { name: 'Branding' });
+    await branding.getByLabel('Accent colour', { exact: true }).fill('#C8902E');
+    await branding.getByRole('button', { name: 'Save branding' }).click();
+    await expect(page.getByText('Branding saved.')).toBeVisible();
+    await page.getByRole('heading', { name: 'Branding' }).scrollIntoViewIfNeeded();
+    await page.screenshot({ path: path.join(OUT, 'desktop-05b-branding.png') });
 
     const access = page.getByRole('form', { name: 'Request support access' });
     await access.getByLabel(/Reason for viewing/).fill('Checking clause numbering for ticket 1042');
@@ -90,6 +98,8 @@ test.describe('phone', () => {
     await signIn(page);
     await expect(page.getByText('Operational').first()).toBeVisible();
     await shot(page, 'phone-01-overview');
+    await page.getByRole('button', { name: 'Menu' }).click();
+    await page.screenshot({ path: path.join(OUT, 'phone-01b-menu-open.png') });
     await openChoir(page);
     await shot(page, 'phone-02-organisation-detail');
   });

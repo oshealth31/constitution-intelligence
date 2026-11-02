@@ -3,7 +3,7 @@ on:
   push:
     branches: [tooling/bootstrap]
 permissions:
-  contents: read
+  contents: write
 jobs:
   bootstrap:
     runs-on: ubuntu-24.04
@@ -16,11 +16,12 @@ jobs:
           node-version-file: .nvmrc
       - run: pnpm install --no-frozen-lockfile
       - run: pnpm format
-      - run: git diff -- . ':(exclude).github/workflows/bootstrap.yml' > formatting.patch; git diff --stat
       - run: pnpm audit --prod --audit-level high || true
-      - uses: actions/upload-artifact@v4
-        with:
-          name: bootstrap-output
-          path: |
-            pnpm-lock.yaml
-            formatting.patch
+      - name: Commit lockfile and formatting back to this branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --stat
+          git commit -m "tooling: generated lockfile and formatting" || echo "nothing to commit"
+          git push

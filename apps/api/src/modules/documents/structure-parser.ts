@@ -205,7 +205,7 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
     else current.body += (newParagraph ? '\n' : ' ') + text;
   };
 
-  const classify = (line: ExtractedLine, previous: string | undefined): Marker | null => {
+  const classify = (line: ExtractedLine, _previous: string | undefined): Marker | null => {
     const text = line.text;
     let match = DIVISION.exec(text);
     if (match) {

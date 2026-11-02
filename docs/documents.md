@@ -74,10 +74,10 @@ Each check runs before anything is stored or opened:
 
 ## Text extraction
 
-| Format | How                                                                                                                                                                                                                              |
-| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Format | How                                                                                                                                                                                                                                                                                                    |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | PDF    | Mozilla PDF.js (version 6.2.108 or later, which fixes a known script-execution flaw) reads the text layer. JavaScript evaluation, fonts and rendering are all switched off. Lines are rebuilt from positions; repeated headers, footers and page numbers are removed; larger text counts as a heading. |
-| DOCX   | Our own small reader: paragraphs, heading styles (Title, Heading 1–2 and outline levels) and Word's automatic numbering ("1.", "(a)", "i."). Text inside deleted tracked changes is left out.                                    |
+| DOCX   | Our own small reader: paragraphs, heading styles (Title, Heading 1–2 and outline levels) and Word's automatic numbering ("1.", "(a)", "i."). Text inside deleted tracked changes is left out.                                                                                                          |
 
 The structure reader then recognises:
 

@@ -6,7 +6,6 @@
 // Refuses to run unless APP_ENV=local. Every run gives each account a NEW random password,
 // printed once to this terminal. There is no shared or default password.
 import {
-  constitutionVersions,
   constitutions,
   memberships,
   organisationBranding,
@@ -15,7 +14,7 @@ import {
   type Database,
 } from '@constitution/db';
 import { ROLE_LABELS, type OrganisationRole } from '@constitution/shared';
-import { and, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { DRIZZLE } from '../database/database.constants';
 import {
   SAMPLE_BRANDING,
@@ -187,32 +186,25 @@ async function main(): Promise<void> {
           db,
           filesService,
           createTenantScope(organisationId, ownerIds.get(sample.slug)!, 'owner'),
-          { name: sample.name, uniqueWord: sample.uniqueWord },
+          {
+            name: sample.name,
+            uniqueWord: sample.uniqueWord,
+            // Arrange the sample constitution in parts while it is still a draft.
+            beforePublish: (versionId) =>
+              enrichSampleConstitution(
+                db,
+                organisationId,
+                versionId,
+                sample.variant,
+                sample.uniqueWord,
+              ),
+          },
         );
       }
 
       // Portal branding: different colours, logo and welcome message for each organisation.
       const branding = SAMPLE_BRANDING[sample.variant];
       await applySampleBranding(db, organisationId, branding);
-      const [published] = await db
-        .select({ id: constitutionVersions.id })
-        .from(constitutionVersions)
-        .where(
-          and(
-            eq(constitutionVersions.organisationId, organisationId),
-            eq(constitutionVersions.status, 'published'),
-          ),
-        )
-        .limit(1);
-      if (published) {
-        await enrichSampleConstitution(
-          db,
-          organisationId,
-          published.id,
-          sample.variant,
-          sample.uniqueWord,
-        );
-      }
       const [current] = await db
         .select({ logoFileId: organisationBranding.logoFileId })
         .from(organisationBranding)

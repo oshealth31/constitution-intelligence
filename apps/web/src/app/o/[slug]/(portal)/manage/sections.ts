@@ -16,8 +16,8 @@ export const MANAGE_SECTIONS = [
   },
   {
     path: '/manage/content',
-    title: 'Content approval status',
-    description: 'Which versions are drafts, in review, approved or published.',
+    title: 'Documents',
+    description: 'Upload constitutions, check the text, approve and publish versions.',
     permission: 'content.review',
   },
   {

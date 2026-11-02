@@ -5,10 +5,10 @@ constitutions easy to access, search, understand and use.
 
 > _Empowering Your Governance, Safeguarding Your Future._
 
-**Status:** Stage 6 — organisation portals. Each organisation has its own branded portal
-(`/o/<portal address>`) for reading and searching its constitution, with an administrator area,
-on top of the control centre (Stage 5), tenant isolation (Stage 4) and sign-in and roles (Stage 3).
-It is **not production-ready**.
+**Status:** Stage 7 — constitution document management. Organisations upload PDF or Word
+constitutions, check and correct the extracted text, and approve and publish versions, inside
+their branded portals (Stage 6), on top of the control centre (Stage 5), tenant isolation (Stage 4)
+and sign-in and roles (Stage 3). It is **not production-ready**.
 
 ## What is in this repository
 
@@ -92,6 +92,7 @@ in production.
 - [docs/security/tenant-isolation.md](docs/security/tenant-isolation.md) — how organisations are kept apart
 - [docs/control-centre.md](docs/control-centre.md) — the Platform Super Admin control centre
 - [docs/portals.md](docs/portals.md) — organisation portals, branding and their safety rules
+- [docs/documents.md](docs/documents.md) — document upload, text extraction, review and the version workflow
 - [docs/decisions](docs/decisions) — short records of major technical decisions
 
 ## Ownership

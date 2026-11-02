@@ -93,6 +93,7 @@ export class OrganisationProfileService {
         sizeBytes: content.length,
         sha256: createHash('sha256').update(content).digest('hex'),
         uploadedByUserId: scope.userId,
+        purpose: 'branding_logo',
       });
       await tx
         .insert(organisationBranding)

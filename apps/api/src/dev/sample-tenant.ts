@@ -39,6 +39,8 @@ export interface SampleTenantOptions {
   name: string;
   /** A word that appears only in this organisation's constitution (to test search isolation). */
   uniqueWord: string;
+  /** Runs while the first version is still a draft, before it is approved and published. */
+  beforePublish?: (versionId: string) => Promise<void>;
 }
 
 /**
@@ -92,9 +94,9 @@ export async function createSampleTenantContent(
       constitutionId: constitution!.id,
       versionNumber: 1,
       label: 'Registered constitution',
-      status: 'published',
+      // Versions always start as drafts; this one is approved and published further down.
+      status: 'draft',
       sourceFileId: file.id,
-      publishedAt: new Date(),
     })
     .returning({ id: constitutionVersions.id });
   const [draft] = await db
@@ -164,6 +166,19 @@ export async function createSampleTenantContent(
     ])
     .returning({ id: sections.id, refKey: sections.refKey, versionId: sections.versionId });
   const quorum = inserted.find((s) => s.refKey === 's2' && s.versionId === published!.id)!;
+
+  await options.beforePublish?.(published!.id);
+  // The controlled workflow: draft -> in review -> approved -> published.
+  for (const status of ['in_review', 'approved', 'published'] as const) {
+    await db
+      .update(constitutionVersions)
+      .set({
+        status,
+        ...(status === 'published' ? { publishedAt: new Date() } : {}),
+        updatedAt: new Date(),
+      })
+      .where(eq(constitutionVersions.id, published!.id));
+  }
   const draftSection = inserted.find((s) => s.versionId === draft!.id)!;
 
   await db.insert(sectionChunks).values(

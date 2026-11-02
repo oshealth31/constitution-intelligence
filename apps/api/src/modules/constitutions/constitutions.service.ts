@@ -38,6 +38,9 @@ export interface ContentStatusVersion {
   publishedAt: string | null;
   updatedAt: string;
   sectionCount: number;
+  extractionStatus: string;
+  sectionsNeedingReview: number;
+  fileName: string | null;
   latestDecision: {
     decision: 'approved' | 'changes_requested';
     comment: string | null;
@@ -133,6 +136,7 @@ export class ConstitutionsService {
           label: constitutionVersions.label,
           status: constitutionVersions.status,
           publishedAt: constitutionVersions.publishedAt,
+          hasOriginal: sql<boolean>`${constitutionVersions.sourceFileId} IS NOT NULL`,
         })
         .from(constitutionVersions)
         .where(and(...conditions))
@@ -154,20 +158,26 @@ export class ConstitutionsService {
                v.published_at AS "publishedAt", v.updated_at AS "updatedAt",
                (SELECT count(*)::int FROM sections s
                  WHERE s.version_id = v.id AND s.organisation_id = v.organisation_id) AS "sectionCount",
+               (SELECT count(*)::int FROM sections s
+                 WHERE s.version_id = v.id AND s.organisation_id = v.organisation_id
+                   AND s.needs_review) AS "sectionsNeedingReview",
+               v.extraction_status AS "extractionStatus", f.original_filename AS "fileName",
                a.decision, a.comment, a.created_at AS "decidedAt", u.display_name AS "reviewerName"
         FROM constitutions c
-        JOIN constitution_versions v
+        LEFT JOIN constitution_versions v
           ON v.constitution_id = c.id AND v.organisation_id = c.organisation_id
         LEFT JOIN LATERAL (
           SELECT ca.decision, ca.comment, ca.created_at, ca.reviewer_user_id
           FROM content_approvals ca
           WHERE ca.version_id = v.id AND ca.organisation_id = v.organisation_id
+            AND ca.decision IN ('approved', 'changes_requested')
           ORDER BY ca.created_at DESC
           LIMIT 1
         ) a ON true
         LEFT JOIN users u ON u.id = a.reviewer_user_id
+        LEFT JOIN files f ON f.id = v.source_file_id AND f.organisation_id = v.organisation_id
         WHERE c.organisation_id = ${scope.organisationId}
-        ORDER BY c.title ASC, v.version_number DESC
+        ORDER BY c.title ASC, v.version_number DESC NULLS LAST
       `);
       type Row = {
         constitutionId: string;
@@ -179,6 +189,9 @@ export class ConstitutionsService {
         publishedAt: Date | string | null;
         updatedAt: Date | string;
         sectionCount: number;
+        sectionsNeedingReview: number;
+        extractionStatus: string;
+        fileName: string | null;
         decision: 'approved' | 'changes_requested' | null;
         comment: string | null;
         decidedAt: Date | string | null;
@@ -194,6 +207,8 @@ export class ConstitutionsService {
           title: row.title,
           versions: [],
         };
+        grouped.set(row.constitutionId, entry);
+        if (!row.id) continue; // a constitution with no versions yet
         entry.versions.push({
           id: row.id,
           versionNumber: Number(row.versionNumber),
@@ -202,6 +217,9 @@ export class ConstitutionsService {
           publishedAt: toIso(row.publishedAt),
           updatedAt: toIso(row.updatedAt) ?? '',
           sectionCount: Number(row.sectionCount),
+          extractionStatus: row.extractionStatus,
+          sectionsNeedingReview: Number(row.sectionsNeedingReview),
+          fileName: row.fileName,
           latestDecision: row.decision
             ? {
                 decision: row.decision,

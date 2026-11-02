@@ -22,6 +22,7 @@
     "drizzle-orm": "^0.45.2",
     "helmet": "^8.1.0",
     "nestjs-pino": "^4.4.0",
+    "pdfjs-dist": "^5.4.54",
     "pg": "^8.16.0",
     "pino": "^9.7.0",
     "pino-http": "^10.5.0",

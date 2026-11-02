@@ -37,6 +37,8 @@ and refuses to start if anything is missing or unsafe, listing the problem setti
 | `LOGIN_MAX_ATTEMPTS_PER_EMAIL`                                       | No                            | `5`                     | Sign-in attempts per email address per window.                                |
 | `LOGIN_MAX_ATTEMPTS_PER_IP`                                          | No                            | `50`                    | Sign-in attempts per network address per window.                              |
 | `MAIL_TRANSPORT`                                                     | No                            | `log`                   | `log` (local/test only) or `disabled`. A real provider comes later.           |
+| `STORAGE_DRIVER`, `STORAGE_LOCAL_DIR` | No | `local`, `.data/storage` | Where uploaded files are kept (private; never served directly). |
+| `DOCUMENT_MAX_BYTES` | No | `10485760` (10 MB) | Largest constitution document (PDF or DOCX) accepted for upload. Up to 50 MB. |
 | `TEST_DATABASE_URL`                                                  | For database tests            | —                       | Separate database used only by automated tests.                               |
 | `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_PORT` | Local Docker only             | —                       | Used by `infra/docker-compose.yml` to create the local database.              |
 

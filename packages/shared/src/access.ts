@@ -28,7 +28,11 @@ export const ROLE_LABELS: Readonly<Record<OrganisationRole | typeof PLATFORM_SUP
     auditor: 'Auditor (read-only)',
   };
 
-/** Actions inside an organisation. Content permissions are used from the content stages onward. */
+/**
+ * Actions inside an organisation.
+ * Content: edit = upload documents and correct extracted text; review = see drafts and their
+ * approval status; approve = approve, publish (make current) or archive a version.
+ */
 export const ORGANISATION_PERMISSIONS = [
   'organisation.read',
   'organisation.settings.manage',
@@ -51,17 +55,20 @@ export const ROLE_PERMISSIONS: Readonly<
   Record<OrganisationRole, readonly OrganisationPermission[]>
 > = {
   owner: ORGANISATION_PERMISSIONS,
+  // Administrators give the organisation's final approval to constitution versions (Stage 7).
   admin: [
     ...READ_BASICS,
     'content.edit',
     'content.review',
+    'content.approve',
     'members.read',
     'members.invite',
     'members.manage',
     'branding.manage',
     'audit.read',
   ],
-  content_reviewer: [...READ_BASICS, 'content.review', 'content.approve'],
+  // Reviewers check and correct extracted text and send it for approval; they do not approve.
+  content_reviewer: [...READ_BASICS, 'content.edit', 'content.review'],
   member: [...READ_BASICS],
   // Read-only oversight: can see members, billing and the audit trail, but change nothing.
   auditor: [...READ_BASICS, 'members.read', 'billing.read', 'audit.read'],

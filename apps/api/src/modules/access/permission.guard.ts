@@ -66,17 +66,18 @@ export class PermissionGuard implements CanActivate {
     }
 
     if (permission) {
-      const organisationId = request.params.organisationId;
-      if (!uuidSchema.safeParse(organisationId).success) {
+      const parsedId = uuidSchema.safeParse(request.params.organisationId);
+      if (!parsedId.success) {
         throw new NotFoundException(ORGANISATION_NOT_FOUND);
       }
+      const organisationId = parsedId.data;
       const [membership] = await this.db
         .select({ id: memberships.id, role: memberships.role })
         .from(memberships)
         .innerJoin(organisations, eq(memberships.organisationId, organisations.id))
         .where(
           and(
-            eq(memberships.organisationId, organisationId as string),
+            eq(memberships.organisationId, organisationId),
             eq(memberships.userId, auth.userId),
             eq(memberships.status, 'active'),
             eq(organisations.status, 'active'),
@@ -108,7 +109,7 @@ export class PermissionGuard implements CanActivate {
       }
       request.membership = {
         membershipId: membership.id,
-        organisationId: organisationId as string,
+        organisationId,
         role: membership.role,
       };
     }

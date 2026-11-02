@@ -23,7 +23,9 @@ test('rejects a wrong password with a clear message', async ({ page }) => {
   await page.getByLabel('Password').fill('definitely not the password');
   await page.getByRole('button', { name: 'Sign in' }).click();
   // (Next.js adds its own hidden route announcer with role=alert, so match on the text.)
-  await expect(page.getByRole('alert').filter({ hasText: 'Invalid email or password.' })).toBeVisible();
+  await expect(
+    page.getByRole('alert').filter({ hasText: 'Invalid email or password.' }),
+  ).toBeVisible();
 });
 
 test('sends signed-out visitors to the sign-in page', async ({ page }) => {

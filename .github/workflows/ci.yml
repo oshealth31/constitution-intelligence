@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Lint, type-check, test, build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+
+    services:
+      postgres:
+        # Throwaway database for tests only. "trust" auth means no password is needed or stored.
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_DB: ci
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    env:
+      TEST_DATABASE_URL: postgresql://ci@localhost:5432/ci
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm (version from package.json)
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js (version from .nvmrc)
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: |
+          if [ -f pnpm-lock.yaml ]; then
+            pnpm install --frozen-lockfile
+          else
+            echo "::warning::No pnpm-lock.yaml committed yet; resolving dependencies fresh."
+            pnpm install --no-frozen-lockfile
+          fi
+
+      - name: Upload lockfile (for committing to the repository)
+        uses: actions/upload-artifact@v4
+        with:
+          name: pnpm-lock
+          path: pnpm-lock.yaml
+          if-no-files-found: ignore
+
+      - name: Build shared packages
+        run: pnpm build:packages
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Type-check
+        run: pnpm -r run typecheck
+
+      - name: Test (unit + integration against PostgreSQL)
+        run: pnpm -r run test
+
+      - name: Build API and web
+        run: pnpm -r --filter @constitution/api --filter @constitution/web run build
+
+      - name: Apply migrations to the CI database
+        env:
+          DATABASE_URL: postgresql://ci@localhost:5432/ci
+        run: pnpm --filter @constitution/db run migrate
+
+      - name: Formatting check (advisory)
+        continue-on-error: true
+        run: pnpm format:check
+
+      - name: Dependency vulnerability audit (advisory)
+        continue-on-error: true
+        run: pnpm audit --prod --audit-level high

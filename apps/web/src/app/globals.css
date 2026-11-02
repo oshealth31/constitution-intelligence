@@ -1,0 +1,34 @@
+@import 'tailwindcss';
+
+/*
+ * Constitution Intelligence design tokens.
+ * Colour values are provisional until the official logo file is supplied
+ * (Stage 6 finalises the design system and per-organisation theming).
+ */
+@theme {
+  --color-navy-950: #071426;
+  --color-navy-900: #0b1f3a;
+  --color-navy-700: #1a3a63;
+  --color-teal-600: #138a8a;
+  --color-teal-500: #1ba6a6;
+  --color-teal-100: #d5f1f0;
+  --color-ivory-50: #fbf8f1;
+  --color-ivory-100: #f5efe2;
+  --color-ink: #1c2430;
+  --color-muted: #5b6575;
+
+  --font-sans:
+    system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans',
+    sans-serif;
+}
+
+html {
+  color: var(--color-ink);
+  background-color: var(--color-ivory-50);
+  -webkit-text-size-adjust: 100%;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-teal-500);
+  outline-offset: 2px;
+}

@@ -1,0 +1,33 @@
+{
+  "name": "@constitution/db",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Database connection, schema and migrations for Constitution Intelligence.",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "migrations"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "migrate": "tsx src/migrate-cli.ts",
+    "migration:new": "drizzle-kit generate --custom --name",
+    "migration:generate": "drizzle-kit generate"
+  },
+  "dependencies": {
+    "@constitution/shared": "workspace:*",
+    "drizzle-orm": "^0.44.0",
+    "pg": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/pg": "^8.15.0",
+    "drizzle-kit": "^0.31.0",
+    "tsx": "^4.20.0",
+    "typescript": "~5.9.2",
+    "vitest": "^3.2.0"
+  }
+}

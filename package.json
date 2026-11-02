@@ -1,0 +1,41 @@
+{
+  "name": "constitution-intelligence",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Constitution Intelligence — managed multi-tenant SaaS for organisational constitutions.",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22.12.0",
+    "pnpm": ">=10.0.0"
+  },
+  "scripts": {
+    "build:packages": "pnpm --filter \"./packages/**\" run build",
+    "build": "pnpm -r run build",
+    "dev": "pnpm build:packages && pnpm --parallel --filter @constitution/api --filter @constitution/web run dev",
+    "lint": "eslint .",
+    "typecheck": "pnpm build:packages && pnpm -r run typecheck",
+    "test": "pnpm build:packages && pnpm -r run test",
+    "check": "pnpm lint && pnpm typecheck && pnpm test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:up": "docker compose --env-file .env -f infra/docker-compose.yml up -d --wait",
+    "db:down": "docker compose --env-file .env -f infra/docker-compose.yml down",
+    "db:migrate": "pnpm --filter @constitution/shared run build && pnpm --filter @constitution/db run migrate"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.30.0",
+    "eslint": "^9.30.0",
+    "globals": "^16.3.0",
+    "prettier": "^3.6.0",
+    "typescript": "~5.9.2",
+    "typescript-eslint": "^8.38.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@swc/core",
+      "esbuild",
+      "sharp",
+      "unrs-resolver"
+    ]
+  }
+}

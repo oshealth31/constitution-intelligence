@@ -1,0 +1,61 @@
+# Configuration
+
+All settings come from **environment variables**. The API validates them when it starts
+and refuses to start if anything is missing or unsafe, listing the problem settings by name
+(values are never printed).
+
+## Where settings come from
+
+| Environment | Source | Notes |
+| --- | --- | --- |
+| Local development | `.env` (root) and `apps/web/.env.local` | Copied from the `.example` files. Never committed. |
+| Automated tests | Set by the test code; `TEST_DATABASE_URL` from `.env` locally or from the CI workflow | Separate test database. |
+| Staging / production | The hosting provider's secret manager / environment settings | `.env` files are **ignored** when `NODE_ENV=production`. |
+
+## API and database settings (root `.env`)
+
+| Variable | Required | Default | Description |
+| --- | --- | --- | --- |
+| `NODE_ENV` | No | `development` | `development`, `test` or `production`. |
+| `APP_ENV` | No | `local` | Where this copy runs: `local`, `test`, `staging`, `production`. |
+| `APP_VERSION` | No | `0.1.0` | Shown by the liveness check; set by the deployment pipeline. |
+| `API_HOST` | No | `127.0.0.1` | Network address to listen on. Use `0.0.0.0` inside containers. |
+| `API_PORT` | No | `4000` | Port the API listens on. |
+| `CORS_ORIGINS` | In staging/production | *(none)* | Comma-separated web origins allowed to call the API from a browser. |
+| `TRUST_PROXY` | No | `false` | `true` only behind a trusted load balancer, so client IPs are read correctly. |
+| `LOG_LEVEL` | No | `info` | `fatal`, `error`, `warn`, `info`, `debug`, `trace`, `silent`. |
+| `LOG_PRETTY` | No | `false` | Human-readable logs for local development. |
+| `DATABASE_URL` | **Yes** | — | PostgreSQL connection string. Contains a password: treat as a secret. |
+| `DATABASE_SSL` | In staging/production | `false` | Require an encrypted, certificate-verified database connection. |
+| `DATABASE_POOL_MAX` | No | `10` | Maximum open database connections per API instance. |
+| `TEST_DATABASE_URL` | For database tests | — | Separate database used only by automated tests. |
+| `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_PORT` | Local Docker only | — | Used by `infra/docker-compose.yml` to create the local database. |
+
+## Web settings (`apps/web/.env.local`)
+
+| Variable | Required | Default | Description |
+| --- | --- | --- | --- |
+| `NEXT_PUBLIC_API_BASE_URL` | No | `http://localhost:4000/api/v1` | API address as seen from the browser. |
+
+**Anything starting with `NEXT_PUBLIC_` is visible to every visitor.** Never put secrets,
+passwords or API keys in web settings. AI provider keys will only ever be API settings.
+
+## Development vs production rules
+
+These rules are enforced in code (`apps/api/src/config/config.ts`) and covered by tests:
+
+| Rule | Local / test | Staging / production |
+| --- | --- | --- |
+| `.env` file loaded | Yes | **No** (`NODE_ENV=production`) |
+| `NODE_ENV=production` when `APP_ENV=production` | — | **Required** |
+| Encrypted database connection (`DATABASE_SSL=true`) | Optional | **Required** |
+| Pretty logs (`LOG_PRETTY`) | Allowed | **Forbidden** (structured JSON only) |
+| `CORS_ORIGINS` | Optional | **Required, `https://` only** |
+| Error responses | Generic for unexpected errors | Generic for unexpected errors (details only in server logs) |
+
+## Adding a new setting
+
+1. Add it to the schema in `apps/api/src/config/config.ts` with a safe default or mark it required.
+2. Add it, with a placeholder value and a comment, to `.env.example`.
+3. Add a test in `apps/api/src/config/config.spec.ts` if it has production rules.
+4. Document it in the table above.

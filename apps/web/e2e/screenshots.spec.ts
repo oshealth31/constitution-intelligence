@@ -84,7 +84,12 @@ test.describe('desktop', () => {
 });
 
 test.describe('phone', () => {
-  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+  test.use({
+    viewport: { width: 390, height: 844 },
+    isMobile: true,
+    hasTouch: true,
+    deviceScaleFactor: 2,
+  });
 
   test('capture', async ({ page }) => {
     await signIn(page);

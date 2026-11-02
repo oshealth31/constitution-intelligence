@@ -60,7 +60,7 @@ jobs:
           fi
 
       - name: Upload lockfile (for committing to the repository)
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pnpm-lock
           path: pnpm-lock.yaml

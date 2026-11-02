@@ -147,7 +147,11 @@ function Search() {
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm text-slate-500">{match.constitutionTitle}</span>
                     <span className="mt-0.5 block text-lg font-semibold text-[var(--brand-ink)]">
-                      {sectionTitle({ kind: 'clause', number: match.number, heading: match.heading })}
+                      {sectionTitle({
+                        kind: 'clause',
+                        number: match.number,
+                        heading: match.heading,
+                      })}
                     </span>
                     <span className="mt-1 block text-base text-slate-700">
                       {splitHighlights(match.snippet).map((part, index) =>

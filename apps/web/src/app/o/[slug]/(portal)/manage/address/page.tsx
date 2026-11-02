@@ -53,7 +53,9 @@ export default function PortalAddressPage() {
         <label className="block text-base font-medium text-slate-900">
           New address
           <span className="mt-2 flex items-stretch overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-[var(--brand-accent)]">
-            <span className="flex items-center bg-slate-100 px-3 text-base text-slate-600">/o/</span>
+            <span className="flex items-center bg-slate-100 px-3 text-base text-slate-600">
+              /o/
+            </span>
             <input
               value={value}
               onChange={(event) => {
@@ -71,7 +73,9 @@ export default function PortalAddressPage() {
           </span>
         </label>
         {!valid && value && (
-          <Notice tone="warning">Use only lower-case letters, numbers and hyphens (3 to 50).</Notice>
+          <Notice tone="warning">
+            Use only lower-case letters, numbers and hyphens (3 to 50).
+          </Notice>
         )}
         <label className="flex items-start gap-3 text-base text-slate-800">
           <input

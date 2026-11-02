@@ -25,7 +25,11 @@ export function PortalFinder() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-8 rounded-2xl border border-teal-100 bg-white p-5" aria-label="Open your organisation’s portal">
+    <form
+      onSubmit={onSubmit}
+      className="mt-8 rounded-2xl border border-teal-100 bg-white p-5"
+      aria-label="Open your organisation’s portal"
+    >
       <label htmlFor="portal-address" className="block text-base font-semibold text-navy-900">
         Open your organisation’s portal
       </label>

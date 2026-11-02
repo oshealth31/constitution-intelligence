@@ -25,7 +25,10 @@ export class ConstitutionsController {
   @Get('constitutions/:constitutionId')
   @RequireOrgPermission('constitution.read')
   constitution(@Tenant() tenant: TenantScope, @Param('constitutionId') constitutionId: string) {
-    return this.constitutionsService.getConstitution(tenant, parseId(constitutionId, 'Constitution'));
+    return this.constitutionsService.getConstitution(
+      tenant,
+      parseId(constitutionId, 'Constitution'),
+    );
   }
 
   /** Approval status of every version. Reviewers, administrators and owners. */

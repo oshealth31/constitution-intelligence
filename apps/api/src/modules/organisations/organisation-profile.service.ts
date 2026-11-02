@@ -68,7 +68,10 @@ export class OrganisationProfileService {
         organisationId: scope.organisationId,
         targetType: 'organisation',
         targetId: scope.organisationId,
-        metadata: { reason: contentType ? 'too_large' : 'not_an_allowed_image', size: content.length },
+        metadata: {
+          reason: contentType ? 'too_large' : 'not_an_allowed_image',
+          size: content.length,
+        },
         meta,
       });
       throw new BadRequestException(
@@ -157,7 +160,9 @@ export class OrganisationProfileService {
     } catch (error) {
       const code = (error as { cause?: { code?: string }; code?: string }).cause?.code;
       if (code === '23505') {
-        throw new ConflictException('That portal address is already in use. Please choose another.');
+        throw new ConflictException(
+          'That portal address is already in use. Please choose another.',
+        );
       }
       throw error;
     }

@@ -2,13 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
-import {
-  Notice,
-  Panel,
-  PortalButton,
-  PortalHeading,
-  UserIcon,
-} from '@/components/portal-ui';
+import { Notice, Panel, PortalButton, PortalHeading, UserIcon } from '@/components/portal-ui';
 import { apiFetch, describeError } from '@/lib/api';
 import { portalPath } from '@/lib/portal';
 import { usePortal } from '../portal-context';
@@ -23,12 +17,18 @@ export default function ProfilePage() {
 
   const [name, setName] = useState(user.displayName);
   const [nameBusy, setNameBusy] = useState(false);
-  const [nameMessage, setNameMessage] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
+  const [nameMessage, setNameMessage] = useState<{
+    tone: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [passwordBusy, setPasswordBusy] = useState(false);
-  const [passwordMessage, setPasswordMessage] = useState<{ tone: 'success' | 'error'; text: string } | null>(null);
+  const [passwordMessage, setPasswordMessage] = useState<{
+    tone: 'success' | 'error';
+    text: string;
+  } | null>(null);
   const [signingOut, setSigningOut] = useState<'here' | 'everywhere' | null>(null);
 
   async function saveName(event: FormEvent<HTMLFormElement>) {

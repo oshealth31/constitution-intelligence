@@ -184,7 +184,10 @@ export class ConstitutionsService {
         decidedAt: Date | string | null;
         reviewerName: string | null;
       };
-      const grouped = new Map<string, { id: string; title: string; versions: ContentStatusVersion[] }>();
+      const grouped = new Map<
+        string,
+        { id: string; title: string; versions: ContentStatusVersion[] }
+      >();
       for (const row of result.rows as unknown as Row[]) {
         const entry = grouped.get(row.constitutionId) ?? {
           id: row.constitutionId,

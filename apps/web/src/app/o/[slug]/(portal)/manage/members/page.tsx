@@ -73,7 +73,11 @@ export default function MembersPage() {
     <div className="space-y-5">
       {canInvite && (
         <Panel title="Invite someone" description="They will receive an email with a link to join.">
-          <form onSubmit={invite} className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end" aria-label="Invite someone">
+          <form
+            onSubmit={invite}
+            className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
+            aria-label="Invite someone"
+          >
             <label className="block text-base font-medium text-slate-900">
               Email address
               <input
@@ -86,7 +90,11 @@ export default function MembersPage() {
             </label>
             <label className="block text-base font-medium text-slate-900">
               Role
-              <select value={role} onChange={(event) => setRole(event.target.value)} className={FIELD}>
+              <select
+                value={role}
+                onChange={(event) => setRole(event.target.value)}
+                className={FIELD}
+              >
                 {ROLE_CHOICES.map((choice) => (
                   <option key={choice.value} value={choice.value}>
                     {choice.label}
@@ -110,7 +118,9 @@ export default function MembersPage() {
 
       <Panel title="Members">
         {members.loading && !members.data && <PortalLoading />}
-        {members.error !== undefined && <Notice tone="error">{describeError(members.error)}</Notice>}
+        {members.error !== undefined && (
+          <Notice tone="error">{describeError(members.error)}</Notice>
+        )}
         <ul className="divide-y divide-slate-200">
           {members.data?.map((member) => {
             const isYou = member.userId === user.id;
@@ -204,7 +214,8 @@ export default function MembersPage() {
                   onClick={() =>
                     act(
                       invitation.id,
-                      () => apiFetch(`${api}/invitations/${invitation.id}/revoke`, { method: 'POST' }),
+                      () =>
+                        apiFetch(`${api}/invitations/${invitation.id}/revoke`, { method: 'POST' }),
                       `The invitation to ${invitation.email} has been cancelled.`,
                     )
                   }

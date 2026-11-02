@@ -131,8 +131,7 @@ type Variant = 'primary' | 'secondary' | 'quiet';
 const VARIANTS: Record<Variant, string> = {
   primary:
     'bg-[var(--brand-primary)] text-[var(--brand-on-primary)] shadow-sm hover:brightness-110',
-  secondary:
-    'bg-white text-[var(--brand-ink)] ring-1 ring-inset ring-slate-300 hover:bg-slate-50',
+  secondary: 'bg-white text-[var(--brand-ink)] ring-1 ring-inset ring-slate-300 hover:bg-slate-50',
   quiet: 'text-[var(--brand-ink)] hover:bg-black/5',
 };
 const BASE =

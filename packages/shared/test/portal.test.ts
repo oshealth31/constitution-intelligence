@@ -9,7 +9,15 @@ describe('portal addresses', () => {
   });
 
   it('refuses badly formed addresses', () => {
-    for (const slug of ['ab', '-choir', 'choir-', 'Choir', 'choir club', 'choir/../admin', 'a'.repeat(51)]) {
+    for (const slug of [
+      'ab',
+      '-choir',
+      'choir-',
+      'Choir',
+      'choir club',
+      'choir/../admin',
+      'a'.repeat(51),
+    ]) {
       expect(isValidSlug(slug), slug).toBe(false);
     }
   });

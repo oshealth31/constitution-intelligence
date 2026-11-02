@@ -105,8 +105,8 @@ export default function SignedInPortalLayout({ children }: { children: ReactNode
           </h1>
           <p className="mt-3 text-base text-slate-600">
             {gate.email ? `You are signed in as ${gate.email}. ` : ''}
-            This portal is only for members of {publicPortal.name}. If you think this is a
-            mistake, please ask the organisation to invite you.
+            This portal is only for members of {publicPortal.name}. If you think this is a mistake,
+            please ask the organisation to invite you.
           </p>
           <PortalButton variant="secondary" className="mt-6" busy={signingOut} onClick={signOut}>
             Sign out
@@ -125,7 +125,14 @@ export default function SignedInPortalLayout({ children }: { children: ReactNode
     { href: portalPath(slug, '/library'), label: 'Read', short: 'Read', icon: BookIcon },
     { href: portalPath(slug, '/search'), label: 'Search', short: 'Search', icon: SearchIcon },
     ...(canManage(home.you.permissions)
-      ? [{ href: portalPath(slug, '/manage'), label: 'Manage', short: 'Manage', icon: SettingsIcon }]
+      ? [
+          {
+            href: portalPath(slug, '/manage'),
+            label: 'Manage',
+            short: 'Manage',
+            icon: SettingsIcon,
+          },
+        ]
       : []),
     { href: portalPath(slug, '/profile'), label: 'My profile', short: 'Profile', icon: UserIcon },
   ];

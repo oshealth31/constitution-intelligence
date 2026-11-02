@@ -4,7 +4,11 @@ import { organisations } from '@constitution/db';
 import { eq } from 'drizzle-orm';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { SAMPLE_BRANDING, applySampleBranding, makeSampleLogoPng } from '../src/dev/sample-branding';
+import {
+  SAMPLE_BRANDING,
+  applySampleBranding,
+  makeSampleLogoPng,
+} from '../src/dev/sample-branding';
 import { createSampleTenantContent, type SampleTenantIds } from '../src/dev/sample-tenant';
 import { FilesService } from '../src/modules/files/files.service';
 import { createTenantScope } from '../src/modules/tenancy/tenant-scope';
@@ -64,8 +68,7 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation portals', () => {
     };
   }
 
-  const orgUrl = (tenant: PortalTenant, path = '') =>
-    `/api/v1/organisations/${tenant.id}${path}`;
+  const orgUrl = (tenant: PortalTenant, path = '') => `/api/v1/organisations/${tenant.id}${path}`;
 
   beforeAll(async () => {
     context = await startTestApp();
@@ -228,7 +231,9 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation portals', () => {
       expect(response.body.logoFileId).toEqual(expect.any(String));
 
       const portal = await a.member.get(`/api/v1/portal/${a.slug}`).expect(200);
-      expect(portal.body.logoUrl).toBe(`/api/v1/portal/${a.slug}/logo?v=${response.body.logoFileId}`);
+      expect(portal.body.logoUrl).toBe(
+        `/api/v1/portal/${a.slug}/logo?v=${response.body.logoFileId}`,
+      );
       const logo = await a.member.get(portal.body.logoUrl).buffer(true).expect(200);
       expect(logo.headers['content-type']).toBe('image/png');
       expect(logo.headers['x-content-type-options']).toBe('nosniff');
@@ -238,7 +243,10 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation portals', () => {
 
     it('refuses SVG, HTML and other files, whatever they are called', async () => {
       const attempts = [
-        { fileName: 'logo.svg', content: '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>' },
+        {
+          fileName: 'logo.svg',
+          content: '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>',
+        },
         { fileName: 'logo.png', content: '<html><script>alert(1)</script></html>' },
         { fileName: 'logo.gif', content: 'GIF89a\u0001\u0000\u0001\u0000' },
       ];
@@ -250,7 +258,9 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation portals', () => {
         expect(response.body.error.message).toContain('PNG, JPEG or WebP');
       }
       const rejected = await auditEventsFor(context.db, 'organisation.logo_rejected');
-      expect(rejected.filter((event) => event.organisationId === a.id).length).toBeGreaterThanOrEqual(3);
+      expect(
+        rejected.filter((event) => event.organisationId === a.id).length,
+      ).toBeGreaterThanOrEqual(3);
     });
 
     it('refuses logos over 512 KB', async () => {
@@ -361,7 +371,10 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation portals', () => {
         .send({ slug: 'new-address-1' })
         .expect(403);
       await tenant.owner.patch(orgUrl(tenant, '/settings')).send({ slug: 'admin' }).expect(400);
-      await tenant.owner.patch(orgUrl(tenant, '/settings')).send({ slug: 'Bad Address' }).expect(400);
+      await tenant.owner
+        .patch(orgUrl(tenant, '/settings'))
+        .send({ slug: 'Bad Address' })
+        .expect(400);
       await tenant.owner.patch(orgUrl(tenant, '/settings')).send({ slug: b.slug }).expect(409);
       await a.owner.patch(orgUrl(tenant, '/settings')).send({ slug: 'stolen-address' }).expect(404);
 
@@ -381,7 +394,11 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation portals', () => {
     it('lets people change their own display name only', async () => {
       const response = await a.member
         .patch('/api/v1/auth/me')
-        .send({ displayName: 'Mpho Sample', email: 'changed@example.test', isPlatformSuperAdmin: true })
+        .send({
+          displayName: 'Mpho Sample',
+          email: 'changed@example.test',
+          isPlatformSuperAdmin: true,
+        })
         .expect(200);
       expect(response.body.user).toMatchObject({
         displayName: 'Mpho Sample',

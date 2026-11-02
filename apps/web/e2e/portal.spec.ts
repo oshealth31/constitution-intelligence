@@ -26,7 +26,10 @@ async function portalSignIn(page: Page, portal: string, email: string) {
 }
 
 async function headerColour(page: Page): Promise<string> {
-  return page.locator('header').first().evaluate((el) => getComputedStyle(el).backgroundColor);
+  return page
+    .locator('header')
+    .first()
+    .evaluate((el) => getComputedStyle(el).backgroundColor);
 }
 
 async function myOrganisationId(page: Page): Promise<string> {
@@ -51,11 +54,15 @@ test('each organisation has its own branded sign-in page from the same code', as
 
 test('a member reads, navigates and searches the constitution', async ({ page }) => {
   await portalSignIn(page, CHOIR, 'member@sample.test');
-  await expect(page.getByRole('heading', { name: 'Welcome to Sample Community Choir' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Welcome to Sample Community Choir' }),
+  ).toBeVisible();
   await expect(page.getByTestId('welcome-message')).toContainText('Welcome to our choir');
 
   await page.getByRole('link', { name: 'Read the constitution' }).click();
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Constitution of Sample Community Choir');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(
+    'Constitution of Sample Community Choir',
+  );
   await expect(page.getByText('Part 3 · Meetings and decisions').last()).toBeVisible();
   // Members see the published version only: no version picker, no draft warning.
   await expect(page.getByLabel('Version')).toHaveCount(0);
@@ -66,7 +73,10 @@ test('a member reads, navigates and searches the constitution', async ({ page })
   await expect(page).toHaveURL(/#section-s2$/);
   await expect(page.locator('#section-s2')).toBeInViewport();
 
-  await page.getByRole('navigation', { name: 'Main', exact: true }).getByRole('link', { name: 'Search' }).click();
+  await page
+    .getByRole('navigation', { name: 'Main', exact: true })
+    .getByRole('link', { name: 'Search' })
+    .click();
   await page.getByLabel('What are you looking for?').fill('quorum');
   await page.getByRole('button', { name: 'Search', exact: true }).click();
   await expect(page.getByText(/result.* for “quorum”/)).toBeVisible();
@@ -124,8 +134,14 @@ test('an administrator changes branding, and unsafe content stays harmless', asy
     void dialog.dismiss();
   });
   await portalSignIn(page, CHOIR, 'admin@sample.test');
-  await page.getByRole('navigation', { name: 'Main', exact: true }).getByRole('link', { name: 'Manage' }).click();
-  await page.getByRole('link', { name: /Branding/ }).first().click();
+  await page
+    .getByRole('navigation', { name: 'Main', exact: true })
+    .getByRole('link', { name: 'Manage' })
+    .click();
+  await page
+    .getByRole('link', { name: /Branding/ })
+    .first()
+    .click();
 
   const payload =
     '<img src=x onerror="window.__portalXss=1"><script>window.__portalXss=2</script> Rehearsals are on Tuesdays.';
@@ -156,13 +172,21 @@ test('an administrator changes branding, and unsafe content stays harmless', asy
   );
 
   // The welcome message is shown exactly as typed, as text, and nothing in it runs.
-  await page.getByRole('navigation', { name: 'Main', exact: true }).getByRole('link', { name: 'Home' }).click();
+  await page
+    .getByRole('navigation', { name: 'Main', exact: true })
+    .getByRole('link', { name: 'Home' })
+    .click();
   await expect(page.getByTestId('welcome-message')).toHaveText(payload);
   await expect(page.getByTestId('welcome-message').locator('img, script')).toHaveCount(0);
-  expect(await page.evaluate(() => (window as unknown as { __portalXss?: number }).__portalXss)).toBeUndefined();
+  expect(
+    await page.evaluate(() => (window as unknown as { __portalXss?: number }).__portalXss),
+  ).toBeUndefined();
   expect(dialogs).toEqual([]);
   expect(
-    await page.locator('header').first().evaluate((el) => getComputedStyle(el.querySelector('.h-1')!).backgroundColor),
+    await page
+      .locator('header')
+      .first()
+      .evaluate((el) => getComputedStyle(el.querySelector('.h-1')!).backgroundColor),
   ).toBe('rgb(192, 57, 43)');
 });
 
@@ -195,8 +219,14 @@ test.describe('on a phone', () => {
     await expect(page.getByRole('navigation', { name: 'Main', exact: true })).toBeHidden();
 
     await bottom.getByRole('link', { name: 'Read' }).click();
-    await expect(bottom.getByRole('link', { name: 'Read' })).toHaveAttribute('aria-current', 'page');
-    await page.getByRole('link', { name: /^Read / }).first().click();
+    await expect(bottom.getByRole('link', { name: 'Read' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    await page
+      .getByRole('link', { name: /^Read / })
+      .first()
+      .click();
     await page.getByRole('button', { name: 'Contents' }).click();
     const sheet = page.getByRole('dialog', { name: 'Contents' });
     await expect(sheet).toBeVisible();

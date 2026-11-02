@@ -164,7 +164,8 @@ export function splitHighlights(snippet: string): { text: string; highlight: boo
   const pattern = /\[\[(.*?)\]\]/g;
   let last = 0;
   for (let match = pattern.exec(snippet); match; match = pattern.exec(snippet)) {
-    if (match.index > last) parts.push({ text: snippet.slice(last, match.index), highlight: false });
+    if (match.index > last)
+      parts.push({ text: snippet.slice(last, match.index), highlight: false });
     if (match[1]) parts.push({ text: match[1], highlight: true });
     last = match.index + match[0].length;
   }

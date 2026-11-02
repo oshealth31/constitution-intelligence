@@ -222,7 +222,9 @@ function Reader() {
       )}
 
       {sections.loading && <PortalLoading label="Loading the document…" />}
-      {sections.error !== undefined && <Notice tone="error">{describeError(sections.error)}</Notice>}
+      {sections.error !== undefined && (
+        <Notice tone="error">{describeError(sections.error)}</Notice>
+      )}
 
       {sections.data && (
         <div className="lg:grid lg:grid-cols-[18rem_1fr] lg:gap-8">
@@ -243,7 +245,10 @@ function Reader() {
               <SectionBlock key={node.id} node={node} highlighted={highlighted} />
             ))}
             <p className="mt-10 border-t border-slate-200 pt-4 text-base">
-              <a href="#main" className="font-medium text-[var(--brand-ink)] underline underline-offset-4">
+              <a
+                href="#main"
+                className="font-medium text-[var(--brand-ink)] underline underline-offset-4"
+              >
                 Back to top
               </a>
             </p>
@@ -252,7 +257,12 @@ function Reader() {
       )}
 
       {contentsOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true" aria-label="Contents">
+        <div
+          className="fixed inset-0 z-40 lg:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Contents"
+        >
           <button
             type="button"
             aria-label="Close contents"
@@ -284,7 +294,9 @@ function Reader() {
 function SectionBlock({ node, highlighted }: { node: SectionNode; highlighted: string | null }) {
   const id = sectionAnchor(node.refKey);
   const isHighlighted = highlighted === id;
-  const ring = isHighlighted ? 'ring-2 ring-[var(--brand-accent)] bg-[var(--brand-secondary)]/40' : '';
+  const ring = isHighlighted
+    ? 'ring-2 ring-[var(--brand-accent)] bg-[var(--brand-secondary)]/40'
+    : '';
 
   if (node.kind === 'part' || node.kind === 'chapter') {
     return (

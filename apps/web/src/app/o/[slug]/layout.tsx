@@ -33,7 +33,11 @@ export default function OrganisationPortalLayout({ children }: { children: React
       })
       .catch((error: unknown) => {
         if (cancelled) return;
-        setState(error instanceof ApiError && error.status === 404 ? { kind: 'missing' } : { kind: 'error' });
+        setState(
+          error instanceof ApiError && error.status === 404
+            ? { kind: 'missing' }
+            : { kind: 'error' },
+        );
       });
     return () => {
       cancelled = true;
@@ -48,7 +52,10 @@ export default function OrganisationPortalLayout({ children }: { children: React
 
   if (state.kind === 'loading') {
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-ivory-50" style={brandStyle(null)}>
+      <div
+        className="flex min-h-dvh items-center justify-center bg-ivory-50"
+        style={brandStyle(null)}
+      >
         <PortalLoading label="Opening your organisation’s portal…" />
       </div>
     );
@@ -56,7 +63,11 @@ export default function OrganisationPortalLayout({ children }: { children: React
   if (state.kind !== 'ready') {
     return (
       <PlainMessage
-        title={state.kind === 'missing' ? 'We could not find this portal' : 'The portal could not be reached'}
+        title={
+          state.kind === 'missing'
+            ? 'We could not find this portal'
+            : 'The portal could not be reached'
+        }
       >
         {state.kind === 'missing'
           ? 'Please check the web address your organisation gave you. It usually looks like /o/your-organisation.'
@@ -74,7 +85,10 @@ export default function OrganisationPortalLayout({ children }: { children: React
   }
   return (
     <PublicPortalContext.Provider value={state.portal}>
-      <div style={brandStyle(state.portal.colours)} className="min-h-dvh bg-slate-50 text-slate-900">
+      <div
+        style={brandStyle(state.portal.colours)}
+        className="min-h-dvh bg-slate-50 text-slate-900"
+      >
         {children}
       </div>
     </PublicPortalContext.Provider>

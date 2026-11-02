@@ -57,7 +57,11 @@ export class PortalService {
       slug: row.slug,
       name: row.displayName ?? row.name,
       tagline: row.tagline,
-      colours: { primary: row.primaryColour, secondary: row.secondaryColour, accent: row.accentColour },
+      colours: {
+        primary: row.primaryColour,
+        secondary: row.secondaryColour,
+        accent: row.accentColour,
+      },
       logoUrl: logoUrl(row.slug, row.logoFileId),
       available: row.status === 'active',
     };

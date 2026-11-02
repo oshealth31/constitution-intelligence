@@ -11,12 +11,7 @@ import {
 } from '@/components/portal-ui';
 import { apiFetch, describeError } from '@/lib/api';
 import { brandStyle, colourWarnings, PLATFORM_COLOURS, safeColour } from '@/lib/branding';
-import {
-  fileToBase64,
-  LOGO_ACCEPT,
-  LOGO_MAX_BYTES,
-  type BrandingSettings,
-} from '@/lib/portal';
+import { fileToBase64, LOGO_ACCEPT, LOGO_MAX_BYTES, type BrandingSettings } from '@/lib/portal';
 import { useApi } from '@/lib/use-api';
 import { usePortal } from '../../portal-context';
 
@@ -72,7 +67,10 @@ export default function BrandingPage() {
       });
       branding.setData(updated);
       await reload();
-      setMessage({ tone: 'success', text: 'Branding saved. Everyone will see it next time they open the portal.' });
+      setMessage({
+        tone: 'success',
+        text: 'Branding saved. Everyone will see it next time they open the portal.',
+      });
     } catch (error) {
       setMessage({ tone: 'error', text: describeError(error) });
     } finally {
@@ -114,7 +112,9 @@ export default function BrandingPage() {
     setUploading(true);
     setLogoMessage(null);
     try {
-      const updated = await apiFetch<BrandingSettings>(`${api}/branding/logo`, { method: 'DELETE' });
+      const updated = await apiFetch<BrandingSettings>(`${api}/branding/logo`, {
+        method: 'DELETE',
+      });
       branding.setData(updated);
       await reload();
       setLogoMessage({ tone: 'success', text: 'Logo removed. Your initials are shown instead.' });
@@ -130,13 +130,17 @@ export default function BrandingPage() {
     return <Notice tone="error">{describeError(branding.error)}</Notice>;
   }
 
-  const previewName = displayName.trim() || branding.data?.organisationName || home.organisation.name;
+  const previewName =
+    displayName.trim() || branding.data?.organisationName || home.organisation.name;
   const warnings = colourWarnings({ primary, secondary, accent });
 
   return (
     <div className="grid gap-5 lg:grid-cols-[1fr_22rem]">
       <div className="space-y-5">
-        <Panel title="Logo" description="PNG, JPEG or WebP, up to 512 KB. A square image works best.">
+        <Panel
+          title="Logo"
+          description="PNG, JPEG or WebP, up to 512 KB. A square image works best."
+        >
           <div className="flex flex-wrap items-center gap-4">
             <OrganisationLogo name={previewName} logoUrl={home.organisation.logoUrl} size={72} />
             <div className="flex flex-wrap gap-2">
@@ -212,8 +216,8 @@ export default function BrandingPage() {
               <ColourField label="Accent colour" value={accent} onChange={setAccent} />
             </div>
             <p className="text-sm text-slate-600">
-              Primary: top bar and main buttons. Secondary: welcome panel and part headings.
-              Accent: highlights and the selected menu item.
+              Primary: top bar and main buttons. Secondary: welcome panel and part headings. Accent:
+              highlights and the selected menu item.
             </p>
             {warnings.length > 0 && (
               <Notice tone="warning">

@@ -41,8 +41,13 @@ const reasonSchema = z
   .trim()
   .min(10, { error: 'must explain why, in at least 10 characters' })
   .max(500);
-const statusChangeSchema = z.object({ status: z.enum(ORGANISATION_STATUSES), reason: reasonSchema });
-const colourSchema = z.string().regex(/^#[0-9A-Fa-f]{6}$/, { error: 'must be a colour like #0B1F3A' });
+const statusChangeSchema = z.object({
+  status: z.enum(ORGANISATION_STATUSES),
+  reason: reasonSchema,
+});
+const colourSchema = z
+  .string()
+  .regex(/^#[0-9A-Fa-f]{6}$/, { error: 'must be a colour like #0B1F3A' });
 const brandingSchema = z
   .object({
     displayName: z.string().trim().min(1).max(200).nullable().optional(),
@@ -109,7 +114,10 @@ export class PlatformController {
   @Get('organisations')
   listOrganisations(@Query() query: unknown) {
     const filter = parseInput(organisationQuerySchema, query);
-    return this.dashboard.listOrganisations({ status: filter.status, search: filter.search || undefined });
+    return this.dashboard.listOrganisations({
+      status: filter.status,
+      search: filter.search || undefined,
+    });
   }
 
   @Post('organisations')
@@ -190,7 +198,11 @@ export class PlatformController {
     const change = parseInput(subscriptionSchema, body);
     return this.dashboard.setSubscription(
       parseId(organisationId, 'Organisation'),
-      { planCode: change.planCode, status: change.status, currentPeriodEnd: change.currentPeriodEnd },
+      {
+        planCode: change.planCode,
+        status: change.status,
+        currentPeriodEnd: change.currentPeriodEnd,
+      },
       auth.userId,
       requestMeta(request),
     );

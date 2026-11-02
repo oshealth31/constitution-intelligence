@@ -16,7 +16,9 @@ function Breakdown({ items, empty }: { items: StatusCount[]; empty: string }) {
         <li key={item.status}>
           <div className="flex items-center justify-between text-sm">
             <span className="text-navy-900">{statusLabel(item.status)}</span>
-            <span className="font-medium tabular-nums text-navy-900">{formatNumber(item.count)}</span>
+            <span className="font-medium tabular-nums text-navy-900">
+              {formatNumber(item.count)}
+            </span>
           </div>
           <div className="mt-1 h-1.5 rounded-full bg-ivory-100">
             <div
@@ -71,10 +73,19 @@ export default function OverviewPage() {
 
           <div className="grid gap-6 lg:grid-cols-3">
             <Card title="Subscriptions" description="Current subscription of each organisation.">
-              <Breakdown items={overview.data.subscriptionsByStatus} empty="No subscriptions yet." />
+              <Breakdown
+                items={overview.data.subscriptionsByStatus}
+                empty="No subscriptions yet."
+              />
             </Card>
-            <Card title="Constitution processing" description="Versions by stage, all organisations.">
-              <Breakdown items={overview.data.versionsByStatus} empty="No constitutions uploaded yet." />
+            <Card
+              title="Constitution processing"
+              description="Versions by stage, all organisations."
+            >
+              <Breakdown
+                items={overview.data.versionsByStatus}
+                empty="No constitutions uploaded yet."
+              />
             </Card>
             <Card title="Usage (30 days)" description="Recorded platform usage.">
               {overview.data.usage30d.length === 0 ? (
@@ -99,7 +110,10 @@ export default function OverviewPage() {
               title="Newest organisations"
               className="lg:col-span-2"
               actions={
-                <Link href="/admin/organisations" className="text-sm font-medium text-teal-600 hover:underline">
+                <Link
+                  href="/admin/organisations"
+                  className="text-sm font-medium text-teal-600 hover:underline"
+                >
                   All organisations
                 </Link>
               }
@@ -109,7 +123,10 @@ export default function OverviewPage() {
               ) : (
                 <ul className="divide-y divide-ivory-100">
                   {overview.data.recentOrganisations.map((organisation) => (
-                    <li key={organisation.id} className="flex items-center justify-between gap-3 py-3">
+                    <li
+                      key={organisation.id}
+                      className="flex items-center justify-between gap-3 py-3"
+                    >
                       <div className="min-w-0">
                         <Link
                           href={`/admin/organisations/${organisation.id}`}
@@ -130,7 +147,10 @@ export default function OverviewPage() {
             <Card
               title="System health"
               actions={
-                <Link href="/admin/health" className="text-sm font-medium text-teal-600 hover:underline">
+                <Link
+                  href="/admin/health"
+                  className="text-sm font-medium text-teal-600 hover:underline"
+                >
                   Details
                 </Link>
               }

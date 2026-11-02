@@ -28,8 +28,8 @@ export default function HealthPage() {
             <div className="flex flex-wrap items-center gap-4">
               <StatusBadge status={data.status} />
               <p className="text-sm text-muted">
-                Version {data.version} · {data.environment} environment · up {formatDuration(data.uptimeSeconds)} ·
-                checked {formatDateTime(data.timestamp)}
+                Version {data.version} · {data.environment} environment · up{' '}
+                {formatDuration(data.uptimeSeconds)} · checked {formatDateTime(data.timestamp)}
               </p>
             </div>
           </Card>
@@ -41,18 +41,32 @@ export default function HealthPage() {
                   : 'Not responding.'}
               </p>
             </Card>
-            <Card title="Database migrations" actions={<StatusBadge status={data.checks.migrations.status} />}>
+            <Card
+              title="Database migrations"
+              actions={<StatusBadge status={data.checks.migrations.status} />}
+            >
               <p className="text-sm text-muted">
-                {data.checks.migrations.applied ?? '?'} of {data.checks.migrations.expected} applied.
+                {data.checks.migrations.applied ?? '?'} of {data.checks.migrations.expected}{' '}
+                applied.
               </p>
             </Card>
-            <Card title="File storage" actions={<StatusBadge status={data.checks.storage.status} />}>
-              <p className="text-sm text-muted">Driver: {data.checks.storage.driver}. A test file was written and removed.</p>
+            <Card
+              title="File storage"
+              actions={<StatusBadge status={data.checks.storage.status} />}
+            >
+              <p className="text-sm text-muted">
+                Driver: {data.checks.storage.driver}. A test file was written and removed.
+              </p>
             </Card>
-            <Card title="Email delivery" actions={<StatusBadge status={data.checks.email.status} />}>
+            <Card
+              title="Email delivery"
+              actions={<StatusBadge status={data.checks.email.status} />}
+            >
               <p className="text-sm text-muted">
                 No email provider is connected yet. Invitation and password emails are{' '}
-                {data.checks.email.transport === 'log' ? 'written to the server log (development only).' : 'not sent.'}
+                {data.checks.email.transport === 'log'
+                  ? 'written to the server log (development only).'
+                  : 'not sent.'}
               </p>
             </Card>
           </div>

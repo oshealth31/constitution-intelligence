@@ -65,7 +65,9 @@ function safeParse(text: string): unknown {
 /** A readable message for any error, including field-level details from the API. */
 export function describeError(error: unknown): string {
   if (error instanceof ApiError) {
-    return error.details.length > 0 ? `${error.message} ${error.details.join('; ')}` : error.message;
+    return error.details.length > 0
+      ? `${error.message} ${error.details.join('; ')}`
+      : error.message;
   }
   return 'Something went wrong. Please check your connection and try again.';
 }
@@ -109,7 +111,13 @@ export interface Overview {
   subscriptionsByStatus: StatusCount[];
   versionsByStatus: StatusCount[];
   usage30d: MetricTotal[];
-  recentOrganisations: { id: string; name: string; slug: string; status: string; createdAt: string }[];
+  recentOrganisations: {
+    id: string;
+    name: string;
+    slug: string;
+    status: string;
+    createdAt: string;
+  }[];
 }
 
 export interface OnboardingProgress {

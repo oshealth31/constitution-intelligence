@@ -29,7 +29,10 @@ describe.runIf(Boolean(testDatabaseUrl))('platform control centre', () => {
 
   beforeAll(async () => {
     context = await startTestApp();
-    const admin = await createUser(context.db, { email: uniqueEmail('platform'), superAdmin: true });
+    const admin = await createUser(context.db, {
+      email: uniqueEmail('platform'),
+      superAdmin: true,
+    });
     superUserId = admin.id;
     superAgent = await signIn(context, admin.email);
 
@@ -50,18 +53,19 @@ describe.runIf(Boolean(testDatabaseUrl))('platform control centre', () => {
     await context?.close();
   });
 
-  const platformRoutes = (organisationId: string) => [
-    ['get', '/api/v1/platform/overview'],
-    ['get', '/api/v1/platform/organisations'],
-    ['get', `/api/v1/platform/organisations/${organisationId}`],
-    ['get', '/api/v1/platform/audit-events'],
-    ['get', '/api/v1/platform/support'],
-    ['get', '/api/v1/platform/health'],
-    ['patch', `/api/v1/platform/organisations/${organisationId}`],
-    ['post', `/api/v1/platform/organisations/${organisationId}/status`],
-    ['put', `/api/v1/platform/organisations/${organisationId}/subscription`],
-    ['post', `/api/v1/platform/organisations/${organisationId}/support-access`],
-  ] as const;
+  const platformRoutes = (organisationId: string) =>
+    [
+      ['get', '/api/v1/platform/overview'],
+      ['get', '/api/v1/platform/organisations'],
+      ['get', `/api/v1/platform/organisations/${organisationId}`],
+      ['get', '/api/v1/platform/audit-events'],
+      ['get', '/api/v1/platform/support'],
+      ['get', '/api/v1/platform/health'],
+      ['patch', `/api/v1/platform/organisations/${organisationId}`],
+      ['post', `/api/v1/platform/organisations/${organisationId}/status`],
+      ['put', `/api/v1/platform/organisations/${organisationId}/subscription`],
+      ['post', `/api/v1/platform/organisations/${organisationId}/support-access`],
+    ] as const;
 
   describe('access control', () => {
     it('refuses every control-centre route to organisation owners, administrators and members', async () => {
@@ -132,7 +136,9 @@ describe.runIf(Boolean(testDatabaseUrl))('platform control centre', () => {
         .expect(201);
       organisationId = created.body.id;
 
-      const list = await superAgent.get(`/api/v1/platform/organisations?search=${slug}`).expect(200);
+      const list = await superAgent
+        .get(`/api/v1/platform/organisations?search=${slug}`)
+        .expect(200);
       expect(list.body).toHaveLength(1);
       expect(list.body[0]).toMatchObject({
         id: organisationId,
@@ -211,7 +217,9 @@ describe.runIf(Boolean(testDatabaseUrl))('platform control centre', () => {
         .expect(200);
       expect(suspended.body.organisation.status).toBe('suspended');
       await sampleMember.get(`/api/v1/organisations/${sample.organisationId}`).expect(404);
-      await sampleOwner.get(`/api/v1/organisations/${sample.organisationId}/constitutions`).expect(404);
+      await sampleOwner
+        .get(`/api/v1/organisations/${sample.organisationId}/constitutions`)
+        .expect(404);
 
       await superAgent
         .post(base)
@@ -280,7 +288,11 @@ describe.runIf(Boolean(testDatabaseUrl))('platform control centre', () => {
       const text = JSON.stringify(detail.body);
       expect(text).not.toContain('heron'); // a word that only appears in the constitution text
       expect(text).not.toContain('one third of members');
-      expect(detail.body.administrators.every((a: { role: string }) => ['owner', 'admin'].includes(a.role))).toBe(true);
+      expect(
+        detail.body.administrators.every((a: { role: string }) =>
+          ['owner', 'admin'].includes(a.role),
+        ),
+      ).toBe(true);
       expect(detail.body.memberCounts).toEqual(
         expect.arrayContaining([expect.objectContaining({ role: 'member', count: 1 })]),
       );
@@ -308,7 +320,9 @@ describe.runIf(Boolean(testDatabaseUrl))('platform control centre', () => {
         (event: { action: string }) => event.action === 'support.content_accessed',
       );
       expect(access).toBeDefined();
-      expect(access.metadata.reason).toBe('Customer asked us to check clause numbering (ticket 1042)');
+      expect(access.metadata.reason).toBe(
+        'Customer asked us to check clause numbering (ticket 1042)',
+      );
       expect(access.actorUserId).toBe(superUserId);
     });
   });
@@ -320,7 +334,9 @@ describe.runIf(Boolean(testDatabaseUrl))('platform control centre', () => {
         .expect(200);
       expect(byOrganisation.body.length).toBeGreaterThan(0);
       expect(
-        byOrganisation.body.every((e: { organisationId: string }) => e.organisationId === sample.organisationId),
+        byOrganisation.body.every(
+          (e: { organisationId: string }) => e.organisationId === sample.organisationId,
+        ),
       ).toBe(true);
 
       const failures = await superAgent
@@ -328,7 +344,8 @@ describe.runIf(Boolean(testDatabaseUrl))('platform control centre', () => {
         .expect(200);
       expect(
         failures.body.every(
-          (e: { action: string; outcome: string }) => e.action.startsWith('auth.login') && e.outcome === 'failure',
+          (e: { action: string; outcome: string }) =>
+            e.action.startsWith('auth.login') && e.outcome === 'failure',
         ),
       ).toBe(true);
 

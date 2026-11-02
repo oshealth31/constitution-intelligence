@@ -2,7 +2,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ApiError, apiFetch, describeError } from './api';
 
 function mockFetch(status: number, body: unknown) {
-  const fetchMock = vi.fn(async () => new Response(body === undefined ? null : JSON.stringify(body), { status }));
+  const fetchMock = vi.fn(
+    async () => new Response(body === undefined ? null : JSON.stringify(body), { status }),
+  );
   vi.stubGlobal('fetch', fetchMock);
   return fetchMock;
 }
@@ -24,7 +26,12 @@ describe('apiFetch', () => {
 
   it('turns API errors into ApiError with the message and details', async () => {
     mockFetch(400, {
-      error: { statusCode: 400, message: 'The request is invalid.', details: ['slug: must be valid'], requestId: 'r1' },
+      error: {
+        statusCode: 400,
+        message: 'The request is invalid.',
+        details: ['slug: must be valid'],
+        requestId: 'r1',
+      },
     });
     const error = await apiFetch('/x').catch((caught: unknown) => caught);
     expect(error).toBeInstanceOf(ApiError);

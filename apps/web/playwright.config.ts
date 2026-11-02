@@ -48,7 +48,10 @@ export default defineConfig({
     {
       command: `node ./node_modules/next/dist/bin/next start --port ${WEB_PORT} --hostname 127.0.0.1`,
       url: `${WEB_ORIGIN}/api/health`,
-      env: { ...(process.env as Record<string, string>), API_INTERNAL_URL: `http://127.0.0.1:${API_PORT}` },
+      env: {
+        ...(process.env as Record<string, string>),
+        API_INTERNAL_URL: `http://127.0.0.1:${API_PORT}`,
+      },
       timeout: 60_000,
       reuseExistingServer: false,
     },

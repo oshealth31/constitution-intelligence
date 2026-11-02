@@ -7,10 +7,14 @@ import path from 'node:path';
 export const ACCOUNTS_FILE = path.join(__dirname, '.auth', 'accounts.json');
 
 export default function globalSetup(): void {
-  const output = execFileSync('node', [path.join(__dirname, '..', '..', 'api', 'dist', 'cli', 'seed-dev.js')], {
-    env: { ...process.env, APP_ENV: 'local', NODE_ENV: 'development', LOG_LEVEL: 'warn' },
-    encoding: 'utf8',
-  });
+  const output = execFileSync(
+    'node',
+    [path.join(__dirname, '..', '..', 'api', 'dist', 'cli', 'seed-dev.js')],
+    {
+      env: { ...process.env, APP_ENV: 'local', NODE_ENV: 'development', LOG_LEVEL: 'warn' },
+      encoding: 'utf8',
+    },
+  );
   const accounts: Record<string, string> = {};
   for (const line of output.split('\n')) {
     const match = line.match(/(\S+@sample\.test)\s+(\S+)\s*$/);

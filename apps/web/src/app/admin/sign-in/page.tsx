@@ -31,7 +31,9 @@ export default function SignInPage() {
     <main className="flex min-h-dvh items-center justify-center bg-navy-950 px-4 py-12">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <p className="text-xs font-semibold tracking-[0.2em] text-teal-500 uppercase">Control centre</p>
+          <p className="text-xs font-semibold tracking-[0.2em] text-teal-500 uppercase">
+            Control centre
+          </p>
           <h1 className="mt-2 text-2xl font-semibold text-ivory-50">{brand.name}</h1>
           <p className="mt-2 text-sm text-ivory-100/70">{brand.tagline}</p>
         </div>
@@ -68,7 +70,10 @@ export default function SignInPage() {
           </p>
         </form>
         <p className="mt-6 text-center text-sm text-ivory-100/70">
-          <Link href="/forgot-password" className="underline underline-offset-4 hover:text-ivory-50">
+          <Link
+            href="/forgot-password"
+            className="underline underline-offset-4 hover:text-ivory-50"
+          >
             Forgotten your password?
           </Link>
         </p>

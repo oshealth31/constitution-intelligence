@@ -103,9 +103,11 @@ export function formatBytes(bytes: number): string {
 
 export function formatDate(value: string | null | undefined): string {
   if (!value) return '—';
-  return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).format(
-    new Date(value),
-  );
+  return new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(value));
 }
 
 export function formatDateTime(value: string | null | undefined): string {

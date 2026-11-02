@@ -151,7 +151,9 @@ export default function OrganisationDetailPage() {
                   <span
                     aria-hidden="true"
                     className={`flex size-5 items-center justify-center rounded-full text-[11px] font-bold ${
-                      step.done ? 'bg-teal-500 text-white' : 'border border-slate-300 text-transparent'
+                      step.done
+                        ? 'bg-teal-500 text-white'
+                        : 'border border-slate-300 text-transparent'
                     }`}
                   >
                     ✓
@@ -168,16 +170,22 @@ export default function OrganisationDetailPage() {
             {data.processing.latestVersion ? (
               <dl className="divide-y divide-ivory-100">
                 <Row label="Latest version">
-                  v{data.processing.latestVersion.versionNumber} · {data.processing.latestVersion.label}
+                  v{data.processing.latestVersion.versionNumber} ·{' '}
+                  {data.processing.latestVersion.label}
                 </Row>
                 <Row label="Stage">
                   <StatusBadge status={data.processing.latestVersion.status} />
                 </Row>
-                <Row label="Text extracted">{data.processing.latestVersion.textExtracted ? 'Yes' : 'No'}</Row>
-                <Row label="Sections">{formatNumber(data.processing.latestVersion.sectionCount)}</Row>
+                <Row label="Text extracted">
+                  {data.processing.latestVersion.textExtracted ? 'Yes' : 'No'}
+                </Row>
+                <Row label="Sections">
+                  {formatNumber(data.processing.latestVersion.sectionCount)}
+                </Row>
                 <Row label="Updated">{formatDateTime(data.processing.latestVersion.updatedAt)}</Row>
                 <Row label="Files">
-                  {formatNumber(data.processing.files)} ({formatBytes(data.processing.storageBytes)})
+                  {formatNumber(data.processing.files)} ({formatBytes(data.processing.storageBytes)}
+                  )
                 </Row>
               </dl>
             ) : (
@@ -253,7 +261,12 @@ function DetailsCard({ data, busy, run }: SectionProps) {
         }}
       >
         <TextField label="Name" required value={name} onChange={(e) => setName(e.target.value)} />
-        <TextField label="Web address (slug)" required value={slug} onChange={(e) => setSlug(e.target.value)} />
+        <TextField
+          label="Web address (slug)"
+          required
+          value={slug}
+          onChange={(e) => setSlug(e.target.value)}
+        />
         <div className="sm:col-span-2">
           <Button type="submit" variant="secondary" busy={busy === 'details'}>
             Save details
@@ -271,7 +284,9 @@ function DetailsCard({ data, busy, run }: SectionProps) {
             'POST',
             '/status',
             { status: isActive ? 'suspended' : 'active', reason },
-            isActive ? 'Organisation suspended. Its members can no longer sign in to it.' : 'Organisation activated.',
+            isActive
+              ? 'Organisation suspended. Its members can no longer sign in to it.'
+              : 'Organisation activated.',
           );
           if (ok) setReason('');
         }}
@@ -302,7 +317,12 @@ function DetailsCard({ data, busy, run }: SectionProps) {
   );
 }
 
-function AdministratorsCard({ data, busy, run, reload }: SectionProps & { reload: () => Promise<void> }) {
+function AdministratorsCard({
+  data,
+  busy,
+  run,
+  reload,
+}: SectionProps & { reload: () => Promise<void> }) {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState('owner');
 
@@ -318,7 +338,10 @@ function AdministratorsCard({ data, busy, run, reload }: SectionProps & { reload
           {data.administrators.map((admin) => {
             const suspended = admin.membershipStatus !== 'active';
             return (
-              <li key={admin.membershipId} className="flex flex-wrap items-center justify-between gap-3 py-3">
+              <li
+                key={admin.membershipId}
+                className="flex flex-wrap items-center justify-between gap-3 py-3"
+              >
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-navy-900">
                     {admin.displayName} <Badge tone="info">{roleLabel(admin.role)}</Badge>
@@ -356,10 +379,15 @@ function AdministratorsCard({ data, busy, run, reload }: SectionProps & { reload
           <h3 className="text-sm font-semibold text-navy-900">Pending invitations</h3>
           <ul className="mt-2 divide-y divide-ivory-100">
             {data.administratorInvitations.map((invitation) => (
-              <li key={invitation.id} className="flex flex-wrap items-center justify-between gap-3 py-2 text-sm">
+              <li
+                key={invitation.id}
+                className="flex flex-wrap items-center justify-between gap-3 py-2 text-sm"
+              >
                 <span className="text-navy-900">
                   {invitation.email} · {roleLabel(invitation.role)}
-                  <span className="block text-xs text-muted">expires {formatDateTime(invitation.expiresAt)}</span>
+                  <span className="block text-xs text-muted">
+                    expires {formatDateTime(invitation.expiresAt)}
+                  </span>
                 </span>
                 <Button
                   variant="ghost"
@@ -426,7 +454,9 @@ function AdministratorsCard({ data, busy, run, reload }: SectionProps & { reload
 function SubscriptionCard({ data, busy, run }: SectionProps) {
   const [planCode, setPlanCode] = useState(data.subscription?.planCode ?? 'trial');
   const [status, setStatus] = useState(data.subscription?.status ?? 'trialing');
-  const [periodEnd, setPeriodEnd] = useState(data.subscription?.currentPeriodEnd?.slice(0, 10) ?? '');
+  const [periodEnd, setPeriodEnd] = useState(
+    data.subscription?.currentPeriodEnd?.slice(0, 10) ?? '',
+  );
 
   return (
     <Card
@@ -452,7 +482,12 @@ function SubscriptionCard({ data, busy, run }: SectionProps) {
           );
         }}
       >
-        <SelectField label="Plan" value={planCode} onChange={(e) => setPlanCode(e.target.value)} options={PLANS} />
+        <SelectField
+          label="Plan"
+          value={planCode}
+          onChange={(e) => setPlanCode(e.target.value)}
+          options={PLANS}
+        />
         <SelectField
           label="Status"
           value={status}
@@ -503,8 +538,18 @@ function BrandingCard({ data, busy, run }: SectionProps) {
             );
           }}
         >
-          <TextField label="Display name" maxLength={200} value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
-          <TextField label="Tagline" maxLength={300} value={tagline} onChange={(e) => setTagline(e.target.value)} />
+          <TextField
+            label="Display name"
+            maxLength={200}
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+          />
+          <TextField
+            label="Tagline"
+            maxLength={300}
+            value={tagline}
+            onChange={(e) => setTagline(e.target.value)}
+          />
           <TextField
             label="Primary colour"
             type="color"
@@ -523,8 +568,14 @@ function BrandingCard({ data, busy, run }: SectionProps) {
             </Button>
           </div>
         </form>
-        <div aria-label="Branding preview" className="overflow-hidden rounded-xl border border-ivory-100">
-          <div className="px-4 py-3 text-sm font-semibold text-white" style={{ backgroundColor: primaryColour }}>
+        <div
+          aria-label="Branding preview"
+          className="overflow-hidden rounded-xl border border-ivory-100"
+        >
+          <div
+            className="px-4 py-3 text-sm font-semibold text-white"
+            style={{ backgroundColor: primaryColour }}
+          >
             {displayName || data.organisation.name}
           </div>
           <div className="space-y-2 bg-ivory-50 p-4">

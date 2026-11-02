@@ -88,8 +88,8 @@ export default function ConsoleLayout({ children }: { children: ReactNode }) {
         <div className="max-w-md rounded-2xl border border-ivory-100 bg-white p-8 text-center shadow-sm">
           <h1 className="text-xl font-semibold text-navy-900">This area is restricted</h1>
           <p className="mt-3 text-sm text-muted">
-            The control centre is only available to Constitution Intelligence platform administrators.
-            You are signed in as {gate.user.email}.
+            The control centre is only available to Constitution Intelligence platform
+            administrators. You are signed in as {gate.user.email}.
           </p>
           <Button variant="secondary" className="mt-6" busy={signingOut} onClick={signOut}>
             Sign out
@@ -100,7 +100,9 @@ export default function ConsoleLayout({ children }: { children: ReactNode }) {
   }
 
   const isActive = (href: string) =>
-    href === '/admin' ? pathname === '/admin' : pathname === href || pathname.startsWith(`${href}/`);
+    href === '/admin'
+      ? pathname === '/admin'
+      : pathname === href || pathname.startsWith(`${href}/`);
 
   return (
     <ConsoleUserContext.Provider value={gate.user}>
@@ -157,7 +159,9 @@ export default function ConsoleLayout({ children }: { children: ReactNode }) {
               Sign out ({gate.user.email})
             </button>
           </div>
-          <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10">{children}</main>
+          <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
+            {children}
+          </main>
         </div>
       </div>
     </ConsoleUserContext.Provider>

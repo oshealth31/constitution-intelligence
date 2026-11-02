@@ -52,7 +52,10 @@ function CreateOrganisationForm({ onCancel }: { onCancel: () => void }) {
   }
 
   return (
-    <Card title="New organisation" description="Creates the organisation with default branding and a 30-day trial.">
+    <Card
+      title="New organisation"
+      description="Creates the organisation with default branding and a 30-day trial."
+    >
       <form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-2" aria-label="New organisation">
         {error && (
           <div className="sm:col-span-2">
@@ -113,11 +116,7 @@ export default function OrganisationsPage() {
       <PageHeader
         title="Organisations"
         description="Every customer organisation, its subscription, onboarding progress and constitution status."
-        actions={
-          !creating && (
-            <Button onClick={() => setCreating(true)}>New organisation</Button>
-          )
-        }
+        actions={!creating && <Button onClick={() => setCreating(true)}>New organisation</Button>}
       />
       {creating && (
         <div className="mb-6">
@@ -166,12 +165,24 @@ export default function OrganisationsPage() {
             <table className="w-full min-w-[760px] text-left text-sm">
               <thead className="border-b border-ivory-100 text-xs tracking-wide text-muted uppercase">
                 <tr>
-                  <th scope="col" className="px-5 py-3 font-medium sm:px-6">Organisation</th>
-                  <th scope="col" className="px-3 py-3 font-medium">Status</th>
-                  <th scope="col" className="px-3 py-3 font-medium">Subscription</th>
-                  <th scope="col" className="px-3 py-3 font-medium">Onboarding</th>
-                  <th scope="col" className="px-3 py-3 font-medium">Constitution</th>
-                  <th scope="col" className="px-3 py-3 font-medium">Members</th>
+                  <th scope="col" className="px-5 py-3 font-medium sm:px-6">
+                    Organisation
+                  </th>
+                  <th scope="col" className="px-3 py-3 font-medium">
+                    Status
+                  </th>
+                  <th scope="col" className="px-3 py-3 font-medium">
+                    Subscription
+                  </th>
+                  <th scope="col" className="px-3 py-3 font-medium">
+                    Onboarding
+                  </th>
+                  <th scope="col" className="px-3 py-3 font-medium">
+                    Constitution
+                  </th>
+                  <th scope="col" className="px-3 py-3 font-medium">
+                    Members
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-ivory-100">
@@ -195,7 +206,9 @@ export default function OrganisationsPage() {
                       {organisation.subscription ? (
                         <div className="space-y-1">
                           <StatusBadge status={organisation.subscription.status} />
-                          <p className="text-xs text-muted capitalize">{organisation.subscription.planCode}</p>
+                          <p className="text-xs text-muted capitalize">
+                            {organisation.subscription.planCode}
+                          </p>
                         </div>
                       ) : (
                         <span className="text-xs text-muted">None</span>

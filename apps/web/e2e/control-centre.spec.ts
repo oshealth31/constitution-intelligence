@@ -43,7 +43,9 @@ test('super admin sees live overview figures and system health', async ({ page }
   await expect(page.getByText('Operational').first()).toBeVisible();
 });
 
-test('super admin creates an organisation and manages subscription, branding and status', async ({ page }) => {
+test('super admin creates an organisation and manages subscription, branding and status', async ({
+  page,
+}) => {
   const name = `E2E Bowls Club ${Date.now()} (fictional)`;
   await signIn(page, SUPER_ADMIN);
   await page.getByRole('link', { name: 'Organisations' }).first().click();
@@ -88,7 +90,9 @@ test('support access to content requires a reason and is recorded', async ({ pag
   await expect(page.getByText(/quorum for a general meeting/)).toHaveCount(0);
 
   const access = page.getByRole('form', { name: 'Request support access' });
-  await access.getByLabel(/Reason for viewing/).fill('Checking clause numbering for support ticket 77');
+  await access
+    .getByLabel(/Reason for viewing/)
+    .fill('Checking clause numbering for support ticket 77');
   await access.getByRole('button', { name: 'View published constitution' }).click();
   await expect(page.getByText(/quorum for a general meeting/).first()).toBeVisible();
 

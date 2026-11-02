@@ -35,7 +35,11 @@ function AuditLog() {
   const [organisationId, setOrganisationId] = useState(initialOrganisation);
   const [action, setAction] = useState('');
   const [outcome, setOutcome] = useState('');
-  const [applied, setApplied] = useState({ organisationId: initialOrganisation, action: '', outcome: '' });
+  const [applied, setApplied] = useState({
+    organisationId: initialOrganisation,
+    action: '',
+    outcome: '',
+  });
 
   const path = useMemo(() => {
     const params = new URLSearchParams({ limit: '200' });
@@ -66,7 +70,12 @@ function AuditLog() {
             value={organisationId}
             onChange={(event) => setOrganisationId(event.target.value)}
           />
-          <SelectField label="Area" value={action} onChange={(e) => setAction(e.target.value)} options={AREAS} />
+          <SelectField
+            label="Area"
+            value={action}
+            onChange={(e) => setAction(e.target.value)}
+            options={AREAS}
+          />
           <SelectField
             label="Outcome"
             value={outcome}
@@ -85,29 +94,49 @@ function AuditLog() {
 
         {events.error ? <Alert>{describeError(events.error)}</Alert> : null}
         {events.loading && !events.data ? <Loading /> : null}
-        {events.data && events.data.length === 0 && <EmptyState>No events match these filters.</EmptyState>}
+        {events.data && events.data.length === 0 && (
+          <EmptyState>No events match these filters.</EmptyState>
+        )}
         {events.data && events.data.length > 0 && (
           <div className="-mx-5 overflow-x-auto sm:-mx-6">
             <table className="w-full min-w-[820px] text-left text-sm">
               <thead className="border-b border-ivory-100 text-xs tracking-wide text-muted uppercase">
                 <tr>
-                  <th scope="col" className="px-5 py-2 font-medium sm:px-6">When</th>
-                  <th scope="col" className="px-3 py-2 font-medium">Event</th>
-                  <th scope="col" className="px-3 py-2 font-medium">Outcome</th>
-                  <th scope="col" className="px-3 py-2 font-medium">By</th>
-                  <th scope="col" className="px-3 py-2 font-medium">Organisation</th>
-                  <th scope="col" className="px-3 py-2 font-medium">Details</th>
+                  <th scope="col" className="px-5 py-2 font-medium sm:px-6">
+                    When
+                  </th>
+                  <th scope="col" className="px-3 py-2 font-medium">
+                    Event
+                  </th>
+                  <th scope="col" className="px-3 py-2 font-medium">
+                    Outcome
+                  </th>
+                  <th scope="col" className="px-3 py-2 font-medium">
+                    By
+                  </th>
+                  <th scope="col" className="px-3 py-2 font-medium">
+                    Organisation
+                  </th>
+                  <th scope="col" className="px-3 py-2 font-medium">
+                    Details
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-ivory-100">
                 {events.data.map((event) => (
                   <tr key={event.id} className="align-top">
-                    <td className="px-5 py-2 whitespace-nowrap text-muted sm:px-6">{formatDateTime(event.occurredAt)}</td>
-                    <td className="px-3 py-2 font-medium text-navy-900">{actionLabel(event.action)}</td>
+                    <td className="px-5 py-2 whitespace-nowrap text-muted sm:px-6">
+                      {formatDateTime(event.occurredAt)}
+                    </td>
+                    <td className="px-3 py-2 font-medium text-navy-900">
+                      {actionLabel(event.action)}
+                    </td>
                     <td className="px-3 py-2">
                       <StatusBadge status={event.outcome} />
                     </td>
-                    <td className="px-3 py-2 text-muted">{event.actorEmail ?? 'System / anonymous'}</td>
+                    <td className="px-3 py-2 text-muted">
+                      {event.actorEmail ?? 'System / anonymous'}
+                    </td>
                     <td className="px-3 py-2">
                       {event.organisationId ? (
                         <Link
@@ -121,7 +150,9 @@ function AuditLog() {
                       )}
                     </td>
                     <td className="max-w-xs px-3 py-2 text-xs break-words text-muted">
-                      {Object.keys(event.metadata ?? {}).length > 0 ? JSON.stringify(event.metadata) : '—'}
+                      {Object.keys(event.metadata ?? {}).length > 0
+                        ? JSON.stringify(event.metadata)
+                        : '—'}
                     </td>
                   </tr>
                 ))}

@@ -1,6 +1,11 @@
 'use client';
 
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react';
+import type {
+  ButtonHTMLAttributes,
+  InputHTMLAttributes,
+  ReactNode,
+  SelectHTMLAttributes,
+} from 'react';
 import { statusLabel, statusTone, type Tone } from '@/lib/format';
 
 const TONE_CLASSES: Record<Tone, string> = {
@@ -68,11 +73,7 @@ export function Stat({
   tone?: Tone;
 }) {
   const accent =
-    tone === 'critical'
-      ? 'text-rose-700'
-      : tone === 'warning'
-        ? 'text-amber-700'
-        : 'text-navy-900';
+    tone === 'critical' ? 'text-rose-700' : tone === 'warning' ? 'text-amber-700' : 'text-navy-900';
   return (
     <div className="rounded-2xl border border-ivory-100 bg-white p-5 shadow-[0_1px_2px_rgba(11,31,58,0.06)]">
       <p className="text-xs font-medium tracking-wide text-muted uppercase">{label}</p>
@@ -213,7 +214,15 @@ export function PageHeader({
   );
 }
 
-export function ProgressBar({ value, total, label }: { value: number; total: number; label: string }) {
+export function ProgressBar({
+  value,
+  total,
+  label,
+}: {
+  value: number;
+  total: number;
+  label: string;
+}) {
   const percent = total === 0 ? 0 : Math.round((value / total) * 100);
   return (
     <div>

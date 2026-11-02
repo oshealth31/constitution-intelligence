@@ -173,7 +173,11 @@ export class PlatformDashboardService {
       status: row.status,
       createdAt: row.createdAt,
       subscription: row.planCode
-        ? { planCode: row.planCode, status: row.subscriptionStatus, currentPeriodEnd: row.currentPeriodEnd }
+        ? {
+            planCode: row.planCode,
+            status: row.subscriptionStatus,
+            currentPeriodEnd: row.currentPeriodEnd,
+          }
         : null,
       activeMembers: row.activeMembers,
       publishedVersions: row.publishedVersions,
@@ -372,7 +376,12 @@ export class PlatformDashboardService {
 
   async updateBranding(
     organisationId: string,
-    change: { displayName?: string | null; tagline?: string | null; primaryColour?: string; accentColour?: string },
+    change: {
+      displayName?: string | null;
+      tagline?: string | null;
+      primaryColour?: string;
+      accentColour?: string;
+    },
     actorUserId: string,
     meta: RequestMeta,
   ) {
@@ -469,7 +478,11 @@ export class PlatformDashboardService {
       targetId: before?.id,
       metadata: {
         from: before
-          ? { planCode: before.planCode, status: before.status, currentPeriodEnd: before.currentPeriodEnd }
+          ? {
+              planCode: before.planCode,
+              status: before.status,
+              currentPeriodEnd: before.currentPeriodEnd,
+            }
           : null,
         to: change,
         by: 'platform',
@@ -495,7 +508,9 @@ export class PlatformDashboardService {
       const [target] = await tx
         .select()
         .from(memberships)
-        .where(and(eq(memberships.id, membershipId), eq(memberships.organisationId, organisationId)))
+        .where(
+          and(eq(memberships.id, membershipId), eq(memberships.organisationId, organisationId)),
+        )
         .limit(1);
       if (!target || (target.role !== 'owner' && target.role !== 'admin')) {
         throw new NotFoundException('Administrator not found.');
@@ -533,7 +548,13 @@ export class PlatformDashboardService {
         organisationId,
         targetType: 'membership',
         targetId: membershipId,
-        metadata: { userId: target.userId, role: target.role, from: target.status, to: status, by: 'platform' },
+        metadata: {
+          userId: target.userId,
+          role: target.role,
+          from: target.status,
+          to: status,
+          by: 'platform',
+        },
         meta,
       });
     });
@@ -582,7 +603,8 @@ export class PlatformDashboardService {
     if (filter.organisationId) conditions.push(sql`e.organisation_id = ${filter.organisationId}`);
     if (filter.actionPrefix) conditions.push(sql`e.action LIKE ${`${filter.actionPrefix}%`}`);
     if (filter.outcome) conditions.push(sql`e.outcome = ${filter.outcome}`);
-    if (filter.before) conditions.push(sql`e.occurred_at < ${filter.before.toISOString()}::timestamptz`);
+    if (filter.before)
+      conditions.push(sql`e.occurred_at < ${filter.before.toISOString()}::timestamptz`);
     return rowsOf<Row>(
       await this.db.execute(sql`
         SELECT e.id, e.occurred_at AS "occurredAt", e.action, e.outcome,
@@ -643,12 +665,21 @@ export class PlatformDashboardService {
       ...event,
       targetId: event.targetType === 'email' ? maskEmail(event.targetId as string) : event.targetId,
     }));
-    return { counts, organisationsWithoutOwner, trialsEndingSoon, paymentAttention, recentSecurityEvents };
+    return {
+      counts,
+      organisationsWithoutOwner,
+      trialsEndingSoon,
+      paymentAttention,
+      recentSecurityEvents,
+    };
   }
 
   async health() {
     const started = Date.now();
-    let database: { status: 'ok' | 'down'; latencyMs: number | null } = { status: 'down', latencyMs: null };
+    let database: { status: 'ok' | 'down'; latencyMs: number | null } = {
+      status: 'down',
+      latencyMs: null,
+    };
     try {
       await pingDatabase(this.pool);
       database = { status: 'ok', latencyMs: Date.now() - started };
@@ -656,7 +687,11 @@ export class PlatformDashboardService {
       database = { status: 'down', latencyMs: null };
     }
 
-    let migrations: { status: 'ok' | 'pending' | 'unknown'; applied: number | null; expected: number } = {
+    let migrations: {
+      status: 'ok' | 'pending' | 'unknown';
+      applied: number | null;
+      expected: number;
+    } = {
       status: 'unknown',
       applied: null,
       expected: this.expectedMigrations(),
@@ -664,10 +699,16 @@ export class PlatformDashboardService {
     if (database.status === 'ok') {
       try {
         const [row] = rowsOf<{ applied: number }>(
-          await this.db.execute(sql`SELECT count(*)::int AS applied FROM drizzle.__drizzle_migrations`),
+          await this.db.execute(
+            sql`SELECT count(*)::int AS applied FROM drizzle.__drizzle_migrations`,
+          ),
         );
         const applied = row?.applied ?? 0;
-        migrations = { status: applied >= migrations.expected ? 'ok' : 'pending', applied, expected: migrations.expected };
+        migrations = {
+          status: applied >= migrations.expected ? 'ok' : 'pending',
+          applied,
+          expected: migrations.expected,
+        };
       } catch {
         // leave as unknown
       }

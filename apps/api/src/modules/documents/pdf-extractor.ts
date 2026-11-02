@@ -33,7 +33,6 @@ interface PdfDocument {
   getPage(
     page: number,
   ): Promise<{ getTextContent(): Promise<{ items: unknown[] }>; cleanup(): void }>;
-  destroy(): Promise<void>;
 }
 
 // PDF.js is published as an ES module. In the compiled API (CommonJS), import() becomes require(),
@@ -226,6 +225,7 @@ export async function extractPdf(content: Buffer): Promise<RawExtraction> {
     }
     return { format: 'pdf', lines, pageCount: document.numPages, issues };
   } finally {
-    await document.destroy();
+    // Frees the document and its worker (PDF.js 6 closes documents through the loading task).
+    await task.destroy();
   }
 }

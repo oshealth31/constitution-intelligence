@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Inject,
+  Patch,
   Post,
   Req,
   Res,
@@ -12,7 +13,13 @@ import {
 import type { Response } from 'express';
 import { z } from 'zod';
 import { requestMeta, type AppRequest, type AuthContext } from '../../common/request-context';
-import { emailSchema, parseInput, passwordInputSchema } from '../../common/validation';
+import {
+  displayNameSchema,
+  emailSchema,
+  parseInput,
+  passwordInputSchema,
+} from '../../common/validation';
+import { AuditService } from '../audit/audit.service';
 import type { AppConfig } from '../../config/config';
 import { APP_CONFIG } from '../../config/config.module';
 import { CurrentAuth, Public } from '../access/decorators';
@@ -25,6 +32,12 @@ const forgotSchema = z.object({ email: emailSchema });
 const tokenSchema = z.string({ error: 'is required' }).min(20).max(200);
 
 const resetSchema = z.object({ token: tokenSchema, newPassword: passwordInputSchema });
+const profileSchema = z.object({
+  // eslint-disable-next-line no-control-regex -- refusing control characters is the point
+  displayName: displayNameSchema.refine((value) => !/[\u0000-\u001F\u007F]/.test(value), {
+    error: 'must not contain hidden control characters',
+  }),
+});
 const changeSchema = z.object({
   currentPassword: passwordInputSchema,
   newPassword: passwordInputSchema,
@@ -40,6 +53,7 @@ export class AuthController {
     @Inject(APP_CONFIG) private readonly config: AppConfig,
     private readonly authService: AuthService,
     private readonly usersService: UsersService,
+    private readonly audit: AuditService,
   ) {}
 
   @Public()
@@ -83,6 +97,27 @@ export class AuthController {
     const user = await this.usersService.findById(auth.userId);
     const memberships = await this.usersService.listActiveMemberships(auth.userId);
     return { user: user ? toPublicUser(user) : null, memberships };
+  }
+
+  /** Lets a signed-in person change their own display name (nothing else). */
+  @Patch('me')
+  async updateMe(
+    @CurrentAuth() auth: AuthContext,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
+    const { displayName } = parseInput(profileSchema, body);
+    const user = await this.usersService.updateDisplayName(auth.userId, displayName);
+    await this.audit.record({
+      action: 'user.profile_updated',
+      outcome: 'success',
+      actorUserId: auth.userId,
+      targetType: 'user',
+      targetId: auth.userId,
+      metadata: { fields: ['displayName'] },
+      meta: requestMeta(request),
+    });
+    return { user: user ? toPublicUser(user) : null };
   }
 
   @Public()

@@ -11,4 +11,9 @@ describe('HomePage', () => {
     expect(html.match(/<h1/g)).toHaveLength(1);
     expect(html).toContain('<main');
   });
+
+  it('offers a way to open an organisation portal', () => {
+    const html = renderToStaticMarkup(<HomePage />);
+    expect(html).toContain('Open your organisation’s portal');
+  });
 });

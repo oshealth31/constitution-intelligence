@@ -76,6 +76,7 @@ describe.runIf(Boolean(testDatabaseUrl))('tenant isolation', () => {
       `${base}/versions/${target.publishedVersionId}/approvals`,
       `${base}/files/${target.fileId}/content`,
       `${base}/ai/conversations/${target.conversationId}`,
+      `${base}/constitutions/${target.constitutionId}`,
     ];
   }
 
@@ -93,6 +94,9 @@ describe.runIf(Boolean(testDatabaseUrl))('tenant isolation', () => {
       `${base}/audit-events`,
       `${base}/ai/conversations`,
       `${base}/search?q=quorum`,
+      `${base}/portal`,
+      `${base}/library`,
+      `${base}/content-status`,
     ];
   }
 
@@ -130,6 +134,8 @@ describe.runIf(Boolean(testDatabaseUrl))('tenant isolation', () => {
     it('refuses writes into organisation B', async () => {
       const base = `/api/v1/organisations/${b.ids.organisationId}`;
       await a.owner.patch(`${base}/branding`).send({ displayName: 'Taken over' }).expect(404);
+      await a.owner.patch(`${base}/settings`).send({ slug: 'taken-over' }).expect(404);
+      await a.owner.delete(`${base}/branding/logo`).expect(404);
       await a.owner
         .post(`${base}/invitations`)
         .send({ email: 'intruder@example.test', role: 'owner' })

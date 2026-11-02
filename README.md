@@ -5,10 +5,10 @@ constitutions easy to access, search, understand and use.
 
 > _Empowering Your Governance, Safeguarding Your Future._
 
-**Status:** Stage 5 — control centre. The platform owner's private dashboard (`/admin`) manages
-organisations, administrators, branding, subscriptions, onboarding, support, audit and system
-health, on top of sign-in and roles (Stage 3) and tenant isolation (Stage 4). Organisation portals
-are not built yet. It is **not production-ready**.
+**Status:** Stage 6 — organisation portals. Each organisation has its own branded portal
+(`/o/<portal address>`) for reading and searching its constitution, with an administrator area,
+on top of the control centre (Stage 5), tenant isolation (Stage 4) and sign-in and roles (Stage 3).
+It is **not production-ready**.
 
 ## What is in this repository
 
@@ -41,6 +41,8 @@ Then open:
 
 - Web app: <http://localhost:3000>
 - Control centre: <http://localhost:3000/admin> (run `pnpm seed:dev` for fictional accounts)
+- Organisation portals: <http://localhost:3000/o/sample-community-choir> and
+  <http://localhost:3000/o/sample-netball-club> (fictional, created by `pnpm seed:dev`)
 - Web health check: <http://localhost:3000/api/health>
 - API liveness: <http://localhost:4000/api/v1/health/live>
 - API readiness (checks the database): <http://localhost:4000/api/v1/health/ready>
@@ -89,6 +91,7 @@ in production.
 - [docs/security/authentication.md](docs/security/authentication.md) — roles, permissions, sign-in, sessions, audit events
 - [docs/security/tenant-isolation.md](docs/security/tenant-isolation.md) — how organisations are kept apart
 - [docs/control-centre.md](docs/control-centre.md) — the Platform Super Admin control centre
+- [docs/portals.md](docs/portals.md) — organisation portals, branding and their safety rules
 - [docs/decisions](docs/decisions) — short records of major technical decisions
 
 ## Ownership

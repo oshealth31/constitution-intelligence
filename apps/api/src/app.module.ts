@@ -17,6 +17,7 @@ import { FilesModule } from './modules/files/files.module';
 import { MailModule } from './modules/mail/mail.module';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { PlatformModule } from './modules/platform/platform.module';
+import { PortalModule } from './modules/portal/portal.module';
 import { TenancyModule } from './modules/tenancy/tenancy.module';
 
 /**
@@ -45,6 +46,7 @@ export class AppModule {
         FilesModule,
         ConstitutionsModule,
         AiModule,
+        PortalModule,
       ],
       providers: [
         { provide: APP_FILTER, useClass: AllExceptionsFilter },

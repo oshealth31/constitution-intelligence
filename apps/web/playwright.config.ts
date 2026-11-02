@@ -1,4 +1,4 @@
-// Browser tests for the control centre. They run the REAL API and web app against a real
+// Browser tests for the control centre and organisation portals. They run the REAL API and web app against a real
 // PostgreSQL database (in CI) and drive them through Chromium.
 //
 // Requirements: DATABASE_URL (migrated), API and web built with API_INTERNAL_URL pointing to
@@ -21,6 +21,8 @@ const apiEnv: Record<string, string> = {
   LOG_PRETTY: 'false',
   MAIL_TRANSPORT: 'log',
   LOGIN_MAX_ATTEMPTS_PER_EMAIL: '100',
+  // Every browser test signs in from the same address.
+  LOGIN_MAX_ATTEMPTS_PER_IP: '1000',
 };
 
 export default defineConfig({

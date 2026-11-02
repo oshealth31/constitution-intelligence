@@ -10,6 +10,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Query,
   Req,
 } from '@nestjs/common';
@@ -31,6 +32,7 @@ import type { TenantScope } from '../tenancy/tenant-scope';
 import { AuditService } from '../audit/audit.service';
 import { InvitationsService } from './invitations.service';
 import { MembershipsService } from './memberships.service';
+import { brandingChangeSchema, logoUploadSchema, slugSchema } from './branding-input';
 import { OrganisationProfileService } from './organisation-profile.service';
 
 const inviteSchema = z.object({ email: emailSchema, role: z.enum(ORGANISATION_ROLES) });
@@ -43,19 +45,7 @@ const updateMemberSchema = z
     error: 'Provide a role or a status to change.',
   });
 const limitSchema = z.coerce.number().int().min(1).max(500).default(100);
-const colourSchema = z
-  .string()
-  .regex(/^#[0-9A-Fa-f]{6}$/, { error: 'must be a colour like #0B1F3A' });
-// Unknown fields (for example an "organisationId") are discarded: the organisation always
-// comes from the verified membership.
-const brandingSchema = z
-  .object({
-    displayName: z.string().trim().min(1).max(200).nullable().optional(),
-    tagline: z.string().trim().max(300).nullable().optional(),
-    primaryColour: colourSchema.optional(),
-    accentColour: colourSchema.optional(),
-  })
-  .refine((value) => Object.keys(value).length > 0, { error: 'Provide at least one field.' });
+const settingsSchema = z.object({ slug: slugSchema });
 
 /**
  * Organisation-level access management. Every route requires membership of the organisation
@@ -190,8 +180,35 @@ export class OrganisationsController {
   @Patch('branding')
   @RequireOrgPermission('branding.manage')
   updateBranding(@Tenant() tenant: TenantScope, @Body() body: unknown, @Req() request: AppRequest) {
-    const change = parseInput(brandingSchema, body);
+    const change = parseInput(brandingChangeSchema, body);
     return this.profile.updateBranding(tenant, change, requestMeta(request));
+  }
+
+  /** Body: { fileName, dataBase64 }. The image type is worked out from the bytes themselves. */
+  @Put('branding/logo')
+  @RequireOrgPermission('branding.manage')
+  uploadLogo(@Tenant() tenant: TenantScope, @Body() body: unknown, @Req() request: AppRequest) {
+    const { fileName, dataBase64 } = parseInput(logoUploadSchema, body);
+    return this.profile.setLogo(
+      tenant,
+      fileName,
+      Buffer.from(dataBase64, 'base64'),
+      requestMeta(request),
+    );
+  }
+
+  @Delete('branding/logo')
+  @RequireOrgPermission('branding.manage')
+  removeLogo(@Tenant() tenant: TenantScope, @Req() request: AppRequest) {
+    return this.profile.removeLogo(tenant, requestMeta(request));
+  }
+
+  /** Portal address (slug). Owners only: changing it changes the link every member uses. */
+  @Patch('settings')
+  @RequireOrgPermission('organisation.settings.manage')
+  updateSettings(@Tenant() tenant: TenantScope, @Body() body: unknown, @Req() request: AppRequest) {
+    const { slug } = parseInput(settingsSchema, body);
+    return this.profile.changeSlug(tenant, slug, requestMeta(request));
   }
 
   @Get('subscription')

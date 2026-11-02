@@ -15,6 +15,29 @@ export class ConstitutionsController {
     return this.constitutionsService.listConstitutions(tenant);
   }
 
+  /** The constitution library shown in the organisation portal. */
+  @Get('library')
+  @RequireOrgPermission('constitution.read')
+  library(@Tenant() tenant: TenantScope) {
+    return this.constitutionsService.library(tenant);
+  }
+
+  @Get('constitutions/:constitutionId')
+  @RequireOrgPermission('constitution.read')
+  constitution(@Tenant() tenant: TenantScope, @Param('constitutionId') constitutionId: string) {
+    return this.constitutionsService.getConstitution(
+      tenant,
+      parseId(constitutionId, 'Constitution'),
+    );
+  }
+
+  /** Approval status of every version. Reviewers, administrators and owners. */
+  @Get('content-status')
+  @RequireOrgPermission('content.review')
+  contentStatus(@Tenant() tenant: TenantScope) {
+    return this.constitutionsService.contentStatus(tenant);
+  }
+
   @Get('constitutions/:constitutionId/versions')
   @RequireOrgPermission('constitution.read')
   versions(@Tenant() tenant: TenantScope, @Param('constitutionId') constitutionId: string) {

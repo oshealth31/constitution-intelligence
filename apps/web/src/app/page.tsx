@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { brand } from '@/lib/brand';
+import { PortalFinder } from './portal-finder';
 
 /**
- * Placeholder home page for the Stage 2 foundation.
- * Product screens (portals, consoles) are built in later stages.
+ * Platform home page. Each organisation has its own branded portal at /o/<portal address>.
  */
 export default function HomePage() {
   return (
@@ -17,9 +17,7 @@ export default function HomePage() {
           {brand.name}
         </h1>
         <p className="mt-4 text-lg text-teal-600">{brand.tagline}</p>
-        <p className="mt-8 rounded-lg border border-teal-100 bg-white p-4 text-sm text-muted">
-          Organisation portals will appear here in upcoming releases.
-        </p>
+        <PortalFinder />
         <p className="mt-6 text-sm">
           <Link href="/admin" className="font-medium text-teal-600 underline underline-offset-4">
             Platform administrators: control centre

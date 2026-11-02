@@ -12,3 +12,4 @@ export {
   roleHasPermission,
 } from './access';
 export type { OrganisationPermission, OrganisationRole } from './access';
+export { RESERVED_SLUGS, SLUG_PATTERN, isReservedSlug, isValidSlug } from './portal';

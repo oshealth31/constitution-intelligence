@@ -18,17 +18,11 @@ import { parseId } from '../../common/ids';
 import { requestMeta, type AppRequest, type AuthContext } from '../../common/request-context';
 import { emailSchema, parseInput, uuidSchema } from '../../common/validation';
 import { CurrentAuth, RequireSuperAdmin } from '../access/decorators';
+import { brandingChangeSchema, slugSchema } from '../organisations/branding-input';
 import { InvitationsService } from '../organisations/invitations.service';
 import { PlatformDashboardService } from './platform-dashboard.service';
 import { PlatformService } from './platform.service';
 
-const slugSchema = z
-  .string()
-  .trim()
-  .toLowerCase()
-  .regex(/^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$/, {
-    error: 'must be 3-50 lower-case letters, numbers or hyphens',
-  });
 const nameSchema = z.string().trim().min(2).max(200);
 const createOrganisationSchema = z.object({ name: nameSchema, slug: slugSchema });
 const updateOrganisationSchema = z
@@ -45,17 +39,6 @@ const statusChangeSchema = z.object({
   status: z.enum(ORGANISATION_STATUSES),
   reason: reasonSchema,
 });
-const colourSchema = z
-  .string()
-  .regex(/^#[0-9A-Fa-f]{6}$/, { error: 'must be a colour like #0B1F3A' });
-const brandingSchema = z
-  .object({
-    displayName: z.string().trim().min(1).max(200).nullable().optional(),
-    tagline: z.string().trim().max(300).nullable().optional(),
-    primaryColour: colourSchema.optional(),
-    accentColour: colourSchema.optional(),
-  })
-  .refine((value) => Object.keys(value).length > 0, { error: 'Provide at least one field.' });
 const subscriptionSchema = z.object({
   planCode: z
     .string()
@@ -178,7 +161,7 @@ export class PlatformController {
     @Body() body: unknown,
     @Req() request: AppRequest,
   ) {
-    const change = parseInput(brandingSchema, body);
+    const change = parseInput(brandingChangeSchema, body);
     return this.dashboard.updateBranding(
       parseId(organisationId, 'Organisation'),
       change,

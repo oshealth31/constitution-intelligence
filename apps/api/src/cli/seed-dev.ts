@@ -1,15 +1,30 @@
-// Fills a LOCAL development database with TWO fictional organisations, sample constitution
-// content for each, and one account per role.
+// Fills a LOCAL development database with TWO fictional organisations, each with its own portal
+// branding (colours, logo, welcome message), sample constitution content, and accounts per role.
 //
 //   pnpm seed:dev
 //
 // Refuses to run unless APP_ENV=local. Every run gives each account a NEW random password,
 // printed once to this terminal. There is no shared or default password.
-import { constitutions, memberships, organisations, users, type Database } from '@constitution/db';
+import {
+  constitutionVersions,
+  constitutions,
+  memberships,
+  organisationBranding,
+  organisations,
+  users,
+  type Database,
+} from '@constitution/db';
 import { ROLE_LABELS, type OrganisationRole } from '@constitution/shared';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { DRIZZLE } from '../database/database.constants';
+import {
+  SAMPLE_BRANDING,
+  applySampleBranding,
+  enrichSampleConstitution,
+  makeSampleLogoPng,
+} from '../dev/sample-branding';
 import { createSampleTenantContent } from '../dev/sample-tenant';
+import { OrganisationProfileService } from '../modules/organisations/organisation-profile.service';
 import { PasswordService } from '../modules/auth/password.service';
 import { generateRandomPassword } from '../modules/auth/tokens';
 import { FilesService } from '../modules/files/files.service';
@@ -21,11 +36,13 @@ const SAMPLE_ORGANISATIONS = [
     slug: 'sample-community-choir',
     name: 'Sample Community Choir (fictional)',
     uniqueWord: 'nightingale',
+    variant: 'choir',
   },
   {
     slug: 'sample-netball-club',
     name: 'Sample Netball Club (fictional)',
     uniqueWord: 'kingfisher',
+    variant: 'netball',
   },
 ] as const;
 
@@ -95,6 +112,7 @@ async function main(): Promise<void> {
     const db = app.get<Database>(DRIZZLE);
     const passwords = app.get(PasswordService);
     const filesService = app.get(FilesService);
+    const profile = app.get(OrganisationProfileService);
 
     const organisationIds = new Map<SampleSlug, string>();
     for (const sample of SAMPLE_ORGANISATIONS) {
@@ -172,6 +190,41 @@ async function main(): Promise<void> {
           { name: sample.name, uniqueWord: sample.uniqueWord },
         );
       }
+
+      // Portal branding: different colours, logo and welcome message for each organisation.
+      const branding = SAMPLE_BRANDING[sample.variant];
+      await applySampleBranding(db, organisationId, branding);
+      const [published] = await db
+        .select({ id: constitutionVersions.id })
+        .from(constitutionVersions)
+        .where(
+          and(
+            eq(constitutionVersions.organisationId, organisationId),
+            eq(constitutionVersions.status, 'published'),
+          ),
+        )
+        .limit(1);
+      if (published) {
+        await enrichSampleConstitution(
+          db,
+          organisationId,
+          published.id,
+          sample.variant,
+          sample.uniqueWord,
+        );
+      }
+      const [current] = await db
+        .select({ logoFileId: organisationBranding.logoFileId })
+        .from(organisationBranding)
+        .where(eq(organisationBranding.organisationId, organisationId));
+      if (!current?.logoFileId) {
+        await profile.setLogo(
+          createTenantScope(organisationId, ownerIds.get(sample.slug)!, 'owner'),
+          'logo.png',
+          makeSampleLogoPng(branding.primaryColour, branding.accentColour),
+          { ipAddress: null, userAgent: 'seed-dev', requestId: null },
+        );
+      }
     }
 
     console.log(
@@ -179,7 +232,8 @@ async function main(): Promise<void> {
         '',
         'Fictional development data ready:',
         ...SAMPLE_ORGANISATIONS.map(
-          (sample) => `  ${sample.name.padEnd(40)} id ${organisationIds.get(sample.slug)}`,
+          (sample) =>
+            `  ${sample.name.padEnd(40)} portal: /o/${sample.slug}  (id ${organisationIds.get(sample.slug)})`,
         ),
         '',
         '  Role                             Email                        Password (this run only)',

@@ -23,6 +23,7 @@ import type { AppConfig } from '../../config/config';
 import { APP_CONFIG } from '../../config/config.module';
 import { DATABASE_POOL, DRIZZLE } from '../../database/database.constants';
 import { AuditService } from '../audit/audit.service';
+import type { BrandingChange } from '../organisations/branding-input';
 import { StorageService } from '../files/storage.service';
 import { TenantDatabase } from '../tenancy/tenant-database.service';
 import { createTenantScope } from '../tenancy/tenant-scope';
@@ -203,7 +204,8 @@ export class PlatformDashboardService {
     const [branding] = rowsOf<Row>(
       await this.db.execute(sql`
         SELECT display_name AS "displayName", tagline, primary_colour AS "primaryColour",
-               accent_colour AS "accentColour", logo_file_id AS "logoFileId", updated_at AS "updatedAt"
+               accent_colour AS "accentColour", secondary_colour AS "secondaryColour",
+               welcome_message AS "welcomeMessage", logo_file_id AS "logoFileId", updated_at AS "updatedAt"
         FROM organisation_branding WHERE organisation_id = ${organisationId}`),
     );
     const [subscription] = rowsOf<Row>(
@@ -376,12 +378,7 @@ export class PlatformDashboardService {
 
   async updateBranding(
     organisationId: string,
-    change: {
-      displayName?: string | null;
-      tagline?: string | null;
-      primaryColour?: string;
-      accentColour?: string;
-    },
+    change: BrandingChange,
     actorUserId: string,
     meta: RequestMeta,
   ) {

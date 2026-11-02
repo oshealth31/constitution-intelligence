@@ -400,10 +400,26 @@ describe.runIf(Boolean(testDatabaseUrl))('access control', () => {
 
   describe('audit log', () => {
     it('cannot be edited or deleted, even directly in the database', async () => {
-      await expect(
-        context.db.execute(sql`UPDATE audit_events SET action = 'tampered'`),
-      ).rejects.toThrow(/append-only/);
-      await expect(context.db.execute(sql`DELETE FROM audit_events`)).rejects.toThrow(
+      // The database's own message is carried in the driver error's "cause".
+      const databaseMessage = async (statement: Promise<unknown>) => {
+        try {
+          await statement;
+        } catch (error) {
+          const cause = (error as { cause?: { message?: string } }).cause;
+          return cause?.message ?? (error as Error).message;
+        }
+        return 'no error';
+      };
+      const before = await context.db.execute(sql`SELECT count(*)::int AS n FROM audit_events`);
+      expect(Number((before.rows[0] as { n: number }).n)).toBeGreaterThan(0);
+
+      expect(
+        await databaseMessage(context.db.execute(sql`UPDATE audit_events SET action = 'tampered'`)),
+      ).toMatch(/append-only/);
+      expect(await databaseMessage(context.db.execute(sql`DELETE FROM audit_events`))).toMatch(
+        /append-only/,
+      );
+      expect(await databaseMessage(context.db.execute(sql`TRUNCATE audit_events`))).toMatch(
         /append-only/,
       );
     });

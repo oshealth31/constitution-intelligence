@@ -1,14 +1,16 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
+import { FilesModule } from '../files/files.module';
 import { OrganisationsModule } from '../organisations/organisations.module';
 import { PlatformController } from './platform.controller';
+import { PlatformDashboardService } from './platform-dashboard.service';
 import { PlatformService } from './platform.service';
 
 /** Platform Super Admin operations. */
 @Module({
-  imports: [AuthModule, OrganisationsModule],
+  imports: [AuthModule, OrganisationsModule, FilesModule],
   controllers: [PlatformController],
-  providers: [PlatformService],
+  providers: [PlatformService, PlatformDashboardService],
   exports: [PlatformService],
 })
 export class PlatformModule {}

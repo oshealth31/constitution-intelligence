@@ -8,45 +8,117 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Query,
   Req,
 } from '@nestjs/common';
-import { USER_STATUSES } from '@constitution/db';
+import { ORGANISATION_STATUSES, SUBSCRIPTION_STATUSES, USER_STATUSES } from '@constitution/db';
 import { z } from 'zod';
 import { parseId } from '../../common/ids';
 import { requestMeta, type AppRequest, type AuthContext } from '../../common/request-context';
-import { emailSchema, parseInput } from '../../common/validation';
+import { emailSchema, parseInput, uuidSchema } from '../../common/validation';
 import { CurrentAuth, RequireSuperAdmin } from '../access/decorators';
-import { AuditService } from '../audit/audit.service';
 import { InvitationsService } from '../organisations/invitations.service';
+import { PlatformDashboardService } from './platform-dashboard.service';
 import { PlatformService } from './platform.service';
 
-const createOrganisationSchema = z.object({
-  name: z.string().trim().min(2).max(200),
-  slug: z
+const slugSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(/^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$/, {
+    error: 'must be 3-50 lower-case letters, numbers or hyphens',
+  });
+const nameSchema = z.string().trim().min(2).max(200);
+const createOrganisationSchema = z.object({ name: nameSchema, slug: slugSchema });
+const updateOrganisationSchema = z
+  .object({ name: nameSchema.optional(), slug: slugSchema.optional() })
+  .refine((value) => value.name !== undefined || value.slug !== undefined, {
+    error: 'Provide a name or a slug to change.',
+  });
+const reasonSchema = z
+  .string({ error: 'is required' })
+  .trim()
+  .min(10, { error: 'must explain why, in at least 10 characters' })
+  .max(500);
+const statusChangeSchema = z.object({
+  status: z.enum(ORGANISATION_STATUSES),
+  reason: reasonSchema,
+});
+const colourSchema = z
+  .string()
+  .regex(/^#[0-9A-Fa-f]{6}$/, { error: 'must be a colour like #0B1F3A' });
+const brandingSchema = z
+  .object({
+    displayName: z.string().trim().min(1).max(200).nullable().optional(),
+    tagline: z.string().trim().max(300).nullable().optional(),
+    primaryColour: colourSchema.optional(),
+    accentColour: colourSchema.optional(),
+  })
+  .refine((value) => Object.keys(value).length > 0, { error: 'Provide at least one field.' });
+const subscriptionSchema = z.object({
+  planCode: z
     .string()
     .trim()
     .toLowerCase()
-    .regex(/^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$/, {
-      error: 'must be 3-50 lower-case letters, numbers or hyphens',
-    }),
+    .regex(/^[a-z0-9_-]{2,40}$/, { error: 'must be 2-40 lower-case letters, numbers, - or _' }),
+  status: z.enum(SUBSCRIPTION_STATUSES),
+  currentPeriodEnd: z.iso
+    .datetime({ offset: true, error: 'must be a date and time' })
+    .nullable()
+    .optional()
+    .transform((value) => (value ? new Date(value) : null)),
 });
 const ownerInvitationSchema = z.object({ email: emailSchema });
+const administratorInvitationSchema = z.object({
+  email: emailSchema,
+  role: z.enum(['owner', 'admin']),
+});
+const administratorStatusSchema = z.object({ status: z.enum(['active', 'suspended']) });
+const supportAccessSchema = z.object({ reason: reasonSchema });
 const userStatusSchema = z.object({ status: z.enum(USER_STATUSES) });
-const limitSchema = z.coerce.number().int().min(1).max(500).default(100);
+const organisationQuerySchema = z.object({
+  status: z.enum(ORGANISATION_STATUSES).optional(),
+  search: z.string().trim().max(100).optional(),
+});
+const auditQuerySchema = z.object({
+  organisationId: uuidSchema.optional(),
+  action: z
+    .string()
+    .regex(/^[a-z_.]{1,60}$/)
+    .optional(),
+  outcome: z.enum(['success', 'failure', 'denied']).optional(),
+  before: z.iso.datetime({ offset: true }).optional(),
+  limit: z.coerce.number().int().min(1).max(500).default(100),
+});
 
 /**
- * Platform Super Admin operations. Base path: /api/v1/platform
- * Organisation management is expanded in a later stage.
+ * The Platform Super Admin control centre. Base path: /api/v1/platform
+ * Every route requires a signed-in Platform Super Admin (checked on the server by PermissionGuard);
+ * every change is written to the audit log.
  */
 @Controller('platform')
 @RequireSuperAdmin()
 export class PlatformController {
   constructor(
     private readonly platform: PlatformService,
+    private readonly dashboard: PlatformDashboardService,
     private readonly invitations: InvitationsService,
-    private readonly audit: AuditService,
   ) {}
+
+  @Get('overview')
+  overview() {
+    return this.dashboard.overview();
+  }
+
+  @Get('organisations')
+  listOrganisations(@Query() query: unknown) {
+    const filter = parseInput(organisationQuerySchema, query);
+    return this.dashboard.listOrganisations({
+      status: filter.status,
+      search: filter.search || undefined,
+    });
+  }
 
   @Post('organisations')
   @HttpCode(HttpStatus.CREATED)
@@ -59,9 +131,81 @@ export class PlatformController {
     return this.platform.createOrganisation(name, slug, auth.userId, requestMeta(request));
   }
 
-  @Get('organisations')
-  listOrganisations() {
-    return this.platform.listOrganisations();
+  @Get('organisations/:organisationId')
+  getOrganisation(@Param('organisationId') organisationId: string) {
+    return this.dashboard.getOrganisation(parseId(organisationId, 'Organisation'));
+  }
+
+  @Patch('organisations/:organisationId')
+  updateOrganisation(
+    @CurrentAuth() auth: AuthContext,
+    @Param('organisationId') organisationId: string,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
+    const change = parseInput(updateOrganisationSchema, body);
+    return this.dashboard.updateOrganisation(
+      parseId(organisationId, 'Organisation'),
+      change,
+      auth.userId,
+      requestMeta(request),
+    );
+  }
+
+  /** Activate, suspend or archive. Suspension immediately blocks the organisation's members. */
+  @Post('organisations/:organisationId/status')
+  @HttpCode(HttpStatus.OK)
+  setOrganisationStatus(
+    @CurrentAuth() auth: AuthContext,
+    @Param('organisationId') organisationId: string,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
+    const { status, reason } = parseInput(statusChangeSchema, body);
+    return this.dashboard.setOrganisationStatus(
+      parseId(organisationId, 'Organisation'),
+      status,
+      reason,
+      auth.userId,
+      requestMeta(request),
+    );
+  }
+
+  @Patch('organisations/:organisationId/branding')
+  updateBranding(
+    @CurrentAuth() auth: AuthContext,
+    @Param('organisationId') organisationId: string,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
+    const change = parseInput(brandingSchema, body);
+    return this.dashboard.updateBranding(
+      parseId(organisationId, 'Organisation'),
+      change,
+      auth.userId,
+      requestMeta(request),
+    );
+  }
+
+  /** Manual subscription management. No payment provider is connected yet. */
+  @Put('organisations/:organisationId/subscription')
+  setSubscription(
+    @CurrentAuth() auth: AuthContext,
+    @Param('organisationId') organisationId: string,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
+    const change = parseInput(subscriptionSchema, body);
+    return this.dashboard.setSubscription(
+      parseId(organisationId, 'Organisation'),
+      {
+        planCode: change.planCode,
+        status: change.status,
+        currentPeriodEnd: change.currentPeriodEnd,
+      },
+      auth.userId,
+      requestMeta(request),
+    );
   }
 
   /** Invites the first (or an additional) Organisation Owner. */
@@ -83,6 +227,80 @@ export class PlatformController {
     );
   }
 
+  /** Invites an Owner or Administrator. */
+  @Post('organisations/:organisationId/administrator-invitations')
+  @HttpCode(HttpStatus.CREATED)
+  inviteAdministrator(
+    @CurrentAuth() auth: AuthContext,
+    @Param('organisationId') organisationId: string,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
+    const { email, role } = parseInput(administratorInvitationSchema, body);
+    return this.invitations.create(
+      parseId(organisationId, 'Organisation'),
+      { kind: 'platform', userId: auth.userId },
+      email,
+      role,
+      requestMeta(request),
+    );
+  }
+
+  @Post('organisations/:organisationId/invitations/:invitationId/revoke')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async revokeInvitation(
+    @CurrentAuth() auth: AuthContext,
+    @Param('organisationId') organisationId: string,
+    @Param('invitationId') invitationId: string,
+    @Req() request: AppRequest,
+  ): Promise<void> {
+    await this.invitations.revoke(
+      parseId(organisationId, 'Organisation'),
+      parseId(invitationId, 'Invitation'),
+      auth.userId,
+      requestMeta(request),
+    );
+  }
+
+  @Patch('organisations/:organisationId/administrators/:membershipId')
+  setAdministratorStatus(
+    @CurrentAuth() auth: AuthContext,
+    @Param('organisationId') organisationId: string,
+    @Param('membershipId') membershipId: string,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
+    const { status } = parseInput(administratorStatusSchema, body);
+    return this.dashboard.setAdministratorStatus(
+      parseId(organisationId, 'Organisation'),
+      parseId(membershipId, 'Administrator'),
+      status,
+      auth.userId,
+      requestMeta(request),
+    );
+  }
+
+  /**
+   * Restricted access to an organisation's published constitution text for support purposes.
+   * A reason is required; the access is recorded in the platform AND the organisation's audit log.
+   */
+  @Post('organisations/:organisationId/support-access')
+  @HttpCode(HttpStatus.OK)
+  supportAccess(
+    @CurrentAuth() auth: AuthContext,
+    @Param('organisationId') organisationId: string,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
+    const { reason } = parseInput(supportAccessSchema, body);
+    return this.dashboard.supportContentAccess(
+      parseId(organisationId, 'Organisation'),
+      reason,
+      auth.userId,
+      requestMeta(request),
+    );
+  }
+
   @Patch('users/:userId/status')
   setUserStatus(
     @CurrentAuth() auth: AuthContext,
@@ -100,11 +318,27 @@ export class PlatformController {
   }
 
   @Get('audit-events')
-  listAuditEvents(@Query('limit') limit?: string) {
-    const parsed = limitSchema.safeParse(limit);
-    if (!parsed.success) {
-      throw new BadRequestException('limit must be a whole number between 1 and 500.');
+  listAuditEvents(@Query() query: unknown) {
+    const filter = parseInput(auditQuerySchema, query);
+    if (filter.before && Number.isNaN(Date.parse(filter.before))) {
+      throw new BadRequestException('before must be a date and time.');
     }
-    return this.audit.listAll(parsed.data);
+    return this.dashboard.auditEvents({
+      organisationId: filter.organisationId,
+      actionPrefix: filter.action,
+      outcome: filter.outcome,
+      before: filter.before ? new Date(filter.before) : undefined,
+      limit: filter.limit,
+    });
+  }
+
+  @Get('support')
+  support() {
+    return this.dashboard.support();
+  }
+
+  @Get('health')
+  health() {
+    return this.dashboard.health();
   }
 }

@@ -91,9 +91,11 @@ export class InvitationsService {
     meta: RequestMeta,
   ): Promise<InvitationSummary> {
     // Privilege escalation check: members may only grant roles at or below their own,
-    // and only Owners may create Owners. The platform may only invite Owners.
+    // and only Owners may create Owners. The platform may only invite Owners and Administrators.
     const allowed =
-      inviter.kind === 'platform' ? role === 'owner' : canAssignRole(inviter.role, role);
+      inviter.kind === 'platform'
+        ? role === 'owner' || role === 'admin'
+        : canAssignRole(inviter.role, role);
     if (!allowed) {
       await this.audit.record({
         action: 'permission.denied',

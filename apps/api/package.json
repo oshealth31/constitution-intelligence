@@ -15,7 +15,7 @@
     "@constitution/shared": "workspace:*",
     "@nestjs/common": "^11.1.0",
     "@nestjs/core": "^11.1.0",
-    "@nestjs/platform-express": "^11.1.0",
+    "@nestjs/platform-express": "^12.3.2",
     "helmet": "^8.1.0",
     "nestjs-pino": "^4.4.0",
     "pg": "^8.16.0",

@@ -13,7 +13,7 @@ The full, approved architecture is the **Stage 1 Architecture & Master Plan** do
 - **Worker.** The same API codebase started in a different mode runs background jobs
   (added in a later stage).
 - **PostgreSQL** holds data, full-text search, embeddings (pgvector) and the job queue.
-- **Tenant isolation** is enforced in the API *and* by PostgreSQL Row-Level Security (Stage 3).
+- **Tenant isolation** is enforced in the API _and_ by PostgreSQL Row-Level Security (Stage 3).
 
 ## Request path (today)
 
@@ -29,13 +29,13 @@ Browser ──HTTPS──> API (NestJS, port 4000, prefix /api/v1)
 
 ## Where new code goes
 
-| Kind of code | Location |
-| --- | --- |
-| A new API feature module | `apps/api/src/modules/<module-name>/` (controller, service, repository, tests) |
-| Database tables | `packages/db/src/schema/` + a migration in `packages/db/migrations/` |
-| Code shared by API and scripts | `packages/shared/src/` |
-| Web pages | `apps/web/src/app/` |
-| Design tokens | `apps/web/src/app/globals.css` (`@theme` block) |
+| Kind of code                   | Location                                                                       |
+| ------------------------------ | ------------------------------------------------------------------------------ |
+| A new API feature module       | `apps/api/src/modules/<module-name>/` (controller, service, repository, tests) |
+| Database tables                | `packages/db/src/schema/` + a migration in `packages/db/migrations/`           |
+| Code shared by API and scripts | `packages/shared/src/`                                                         |
+| Web pages                      | `apps/web/src/app/`                                                            |
+| Design tokens                  | `apps/web/src/app/globals.css` (`@theme` block)                                |
 
 ## Stage 2 deviations from the Stage 1 plan
 

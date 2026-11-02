@@ -2,21 +2,21 @@
 
 This guide takes you from a new computer to a running copy of Constitution Intelligence.
 Commands are typed into a terminal: **PowerShell** or **Windows Terminal** on Windows, or
-**Terminal** on macOS/Linux. In VS Code you can open one with *View → Terminal*.
+**Terminal** on macOS/Linux. In VS Code you can open one with _View → Terminal_.
 
 ## 1. Install the required software (once)
 
-| Software | Version | Where to get it | Check it works |
-| --- | --- | --- | --- |
-| Node.js | 22 LTS, 22.12 or newer | <https://nodejs.org> (choose the 22.x LTS installer) | `node -v` → `v22.x.x` |
-| Git | 2.40 or newer | <https://git-scm.com> | `git --version` |
-| Docker Desktop | Recent, with Compose v2 | <https://www.docker.com/products/docker-desktop> | `docker compose version` |
-| VS Code (recommended) | Latest | <https://code.visualstudio.com> | — |
+| Software              | Version                 | Where to get it                                      | Check it works           |
+| --------------------- | ----------------------- | ---------------------------------------------------- | ------------------------ |
+| Node.js               | 22 LTS, 22.12 or newer  | <https://nodejs.org> (choose the 22.x LTS installer) | `node -v` → `v22.x.x`    |
+| Git                   | 2.40 or newer           | <https://git-scm.com>                                | `git --version`          |
+| Docker Desktop        | Recent, with Compose v2 | <https://www.docker.com/products/docker-desktop>     | `docker compose version` |
+| VS Code (recommended) | Latest                  | <https://code.visualstudio.com>                      | —                        |
 
 Windows notes:
 
 - During Docker Desktop installation, keep the **"Use WSL 2"** option enabled. Restart when asked.
-- Start Docker Desktop and wait until it says *Engine running* before using the database commands.
+- Start Docker Desktop and wait until it says _Engine running_ before using the database commands.
 
 Then enable pnpm (the package manager). The exact version (10.28.0) is pinned in
 `package.json` and selected automatically:
@@ -68,11 +68,11 @@ Docker volume, so it survives restarts. `pnpm db:down` stops it without deleting
 pnpm dev
 ```
 
-| What | Address | Expected result |
-| --- | --- | --- |
-| Web app | <http://localhost:3000> | Constitution Intelligence placeholder page |
-| Web health | <http://localhost:3000/api/health> | `{"status":"ok","service":"web",...}` |
-| API liveness | <http://localhost:4000/api/v1/health/live> | `{"status":"ok","service":"api",...}` |
+| What          | Address                                     | Expected result                                  |
+| ------------- | ------------------------------------------- | ------------------------------------------------ |
+| Web app       | <http://localhost:3000>                     | Constitution Intelligence placeholder page       |
+| Web health    | <http://localhost:3000/api/health>          | `{"status":"ok","service":"web",...}`            |
+| API liveness  | <http://localhost:4000/api/v1/health/live>  | `{"status":"ok","service":"api",...}`            |
 | API readiness | <http://localhost:4000/api/v1/health/ready> | `{"status":"ok","checks":{"database":"ok"},...}` |
 
 Stop with `Ctrl + C`.
@@ -135,12 +135,12 @@ production); add a new migration instead.
 
 ## Troubleshooting
 
-| Problem | Fix |
-| --- | --- |
-| `API failed to start. Invalid configuration: DATABASE_URL is required` | Create `.env` from `.env.example` (step 3). |
-| `pnpm db:up` says *Set POSTGRES_PASSWORD in .env* | Set `POSTGRES_PASSWORD` in `.env`. |
-| `pnpm db:up` cannot connect to Docker | Start Docker Desktop and wait for *Engine running*. |
-| Port 5432 already in use | Another PostgreSQL is running. Stop it, or set `POSTGRES_PORT=5433` in `.env` and update the port in `DATABASE_URL` and `TEST_DATABASE_URL`. |
-| Readiness shows `"database":"unavailable"` | Run `pnpm db:up` and check the password in `DATABASE_URL` matches `POSTGRES_PASSWORD`. |
+| Problem                                                                 | Fix                                                                                                                                                                                                                           |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `API failed to start. Invalid configuration: DATABASE_URL is required`  | Create `.env` from `.env.example` (step 3).                                                                                                                                                                                   |
+| `pnpm db:up` says _Set POSTGRES_PASSWORD in .env_                       | Set `POSTGRES_PASSWORD` in `.env`.                                                                                                                                                                                            |
+| `pnpm db:up` cannot connect to Docker                                   | Start Docker Desktop and wait for _Engine running_.                                                                                                                                                                           |
+| Port 5432 already in use                                                | Another PostgreSQL is running. Stop it, or set `POSTGRES_PORT=5433` in `.env` and update the port in `DATABASE_URL` and `TEST_DATABASE_URL`.                                                                                  |
+| Readiness shows `"database":"unavailable"`                              | Run `pnpm db:up` and check the password in `DATABASE_URL` matches `POSTGRES_PASSWORD`.                                                                                                                                        |
 | Changed `POSTGRES_PASSWORD` after the first `db:up` and login now fails | The password is fixed when the database is first created. Either restore the old password, or reset local data: `docker compose --env-file .env -f infra/docker-compose.yml down -v` (deletes local data), then `pnpm db:up`. |
-| `ERR_PNPM_UNSUPPORTED_ENGINE` | Install Node.js 22 LTS (step 1). |
+| `ERR_PNPM_UNSUPPORTED_ENGINE`                                           | Install Node.js 22 LTS (step 1).                                                                                                                                                                                              |

@@ -172,9 +172,10 @@ For local development only (`APP_ENV=local`):
 pnpm seed:dev
 ```
 
-This creates a fictional organisation ("Sample Community Choir (fictional)") and one account per role
+This creates two fictional organisations ("Sample Community Choir (fictional)" and "Sample Netball
+Club (fictional)") with sample constitution content, and accounts: one per role in the choir
 (`superadmin@sample.test`, `owner@sample.test`, `admin@sample.test`, `reviewer@sample.test`,
-`member@sample.test`, `auditor@sample.test`). Each run sets **new random passwords**, printed once.
+`member@sample.test`, `auditor@sample.test`) plus `netball.owner@sample.test` and `netball.member@sample.test`. Each run sets **new random passwords**, printed once.
 The `.test` domain is reserved and can never receive real email.
 
 ## Known limitations (planned)
@@ -182,5 +183,5 @@ The `.test` domain is reserved and can never receive real email.
 - Two-factor authentication for privileged roles (Stage 1 requirement) is not yet implemented.
 - Breached-password checking is not yet implemented.
 - Email is not yet delivered (log transport only).
-- Row-Level Security policies in PostgreSQL (database-level tenant isolation) come in the tenant-isolation stage.
+- Database-level tenant isolation is described in [tenant-isolation.md](tenant-isolation.md).
 - Web sign-in screens are built with the portal user interface.

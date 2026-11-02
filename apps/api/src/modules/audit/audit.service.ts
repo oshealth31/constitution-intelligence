@@ -4,6 +4,8 @@ import { desc, eq } from 'drizzle-orm';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import type { RequestMeta } from '../../common/request-context';
 import { DRIZZLE } from '../../database/database.constants';
+import { TenantDatabase } from '../tenancy/tenant-database.service';
+import type { TenantScope } from '../tenancy/tenant-scope';
 
 /** Names of recorded events. Keep in sync with docs/security/authentication.md. */
 export type AuditAction =
@@ -30,6 +32,7 @@ export type AuditAction =
   | 'user.status_changed'
   | 'user.super_admin_granted'
   | 'organisation.created'
+  | 'organisation.branding_updated'
   | 'permission.denied';
 
 export interface AuditEntry {
@@ -49,6 +52,7 @@ export class AuditService {
   constructor(
     @Inject(DRIZZLE) private readonly db: Database,
     @InjectPinoLogger(AuditService.name) private readonly logger: PinoLogger,
+    private readonly tenantDb: TenantDatabase,
   ) {}
 
   /**
@@ -77,13 +81,16 @@ export class AuditService {
     }
   }
 
-  listForOrganisation(organisationId: string, limit: number) {
-    return this.db
-      .select()
-      .from(auditEvents)
-      .where(eq(auditEvents.organisationId, organisationId))
-      .orderBy(desc(auditEvents.occurredAt))
-      .limit(limit);
+  /** An organisation's own audit events, read under Row-Level Security. */
+  listForOrganisation(scope: TenantScope, limit: number) {
+    return this.tenantDb.run(scope, (tx) =>
+      tx
+        .select()
+        .from(auditEvents)
+        .where(eq(auditEvents.organisationId, scope.organisationId))
+        .orderBy(desc(auditEvents.occurredAt))
+        .limit(limit),
+    );
   }
 
   listAll(limit: number) {

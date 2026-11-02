@@ -69,6 +69,11 @@ export const configSchema = z
     // "log" writes emails to the server log (local development only).
     // "disabled" drops them. A real email provider is added in a later stage.
     MAIL_TRANSPORT: z.enum(['log', 'disabled']).default('log'),
+
+    // Where uploaded files are kept. "local" = a folder on this computer (development and tests).
+    // A cloud object-storage driver is added in the deployment stage.
+    STORAGE_DRIVER: z.enum(['local']).default('local'),
+    STORAGE_LOCAL_DIR: z.string().min(1).default('.data/storage'),
   })
   .superRefine((config, ctx) => {
     const deployed = config.APP_ENV === 'staging' || config.APP_ENV === 'production';

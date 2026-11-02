@@ -1,5 +1,6 @@
 import type { OrganisationRole } from '@constitution/shared';
 import type { Request } from 'express';
+import type { TenantScope } from '../modules/tenancy/tenant-scope';
 
 /** Who is making the request (set by AuthGuard from a valid session). */
 export interface AuthContext {
@@ -15,6 +16,8 @@ export interface MembershipContext {
   membershipId: string;
   organisationId: string;
   role: OrganisationRole;
+  /** Verified tenant context for tenant-scoped services. */
+  tenant: TenantScope;
 }
 
 export type AppRequest = Request & {

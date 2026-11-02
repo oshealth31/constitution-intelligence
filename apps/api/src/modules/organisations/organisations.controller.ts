@@ -26,10 +26,12 @@ import {
 } from '../../common/request-context';
 import { emailSchema, parseInput } from '../../common/validation';
 import { DRIZZLE } from '../../database/database.constants';
-import { CurrentAuth, CurrentMembership, RequireOrgPermission } from '../access/decorators';
+import { CurrentAuth, CurrentMembership, RequireOrgPermission, Tenant } from '../access/decorators';
+import type { TenantScope } from '../tenancy/tenant-scope';
 import { AuditService } from '../audit/audit.service';
 import { InvitationsService } from './invitations.service';
 import { MembershipsService } from './memberships.service';
+import { OrganisationProfileService } from './organisation-profile.service';
 
 const inviteSchema = z.object({ email: emailSchema, role: z.enum(ORGANISATION_ROLES) });
 const updateMemberSchema = z
@@ -41,6 +43,19 @@ const updateMemberSchema = z
     error: 'Provide a role or a status to change.',
   });
 const limitSchema = z.coerce.number().int().min(1).max(500).default(100);
+const colourSchema = z
+  .string()
+  .regex(/^#[0-9A-Fa-f]{6}$/, { error: 'must be a colour like #0B1F3A' });
+// Unknown fields (for example an "organisationId") are discarded: the organisation always
+// comes from the verified membership.
+const brandingSchema = z
+  .object({
+    displayName: z.string().trim().min(1).max(200).nullable().optional(),
+    tagline: z.string().trim().max(300).nullable().optional(),
+    primaryColour: colourSchema.optional(),
+    accentColour: colourSchema.optional(),
+  })
+  .refine((value) => Object.keys(value).length > 0, { error: 'Provide at least one field.' });
 
 /**
  * Organisation-level access management. Every route requires membership of the organisation
@@ -54,6 +69,7 @@ export class OrganisationsController {
     private readonly memberships: MembershipsService,
     private readonly invitations: InvitationsService,
     private readonly audit: AuditService,
+    private readonly profile: OrganisationProfileService,
   ) {}
 
   @Get()
@@ -74,8 +90,8 @@ export class OrganisationsController {
 
   @Get('members')
   @RequireOrgPermission('members.read')
-  listMembers(@CurrentMembership() membership: MembershipContext) {
-    return this.memberships.list(membership.organisationId);
+  listMembers(@Tenant() tenant: TenantScope) {
+    return this.memberships.list(tenant);
   }
 
   @Patch('members/:membershipId')
@@ -115,8 +131,8 @@ export class OrganisationsController {
 
   @Get('invitations')
   @RequireOrgPermission('members.read')
-  listInvitations(@CurrentMembership() membership: MembershipContext) {
-    return this.invitations.list(membership.organisationId);
+  listInvitations(@Tenant() tenant: TenantScope) {
+    return this.invitations.list(tenant);
   }
 
   @Post('invitations')
@@ -157,14 +173,36 @@ export class OrganisationsController {
 
   @Get('audit-events')
   @RequireOrgPermission('audit.read')
-  listAuditEvents(
-    @CurrentMembership() membership: MembershipContext,
-    @Query('limit') limit?: string,
-  ) {
+  listAuditEvents(@Tenant() tenant: TenantScope, @Query('limit') limit?: string) {
     const parsed = limitSchema.safeParse(limit);
     if (!parsed.success) {
       throw new BadRequestException('limit must be a whole number between 1 and 500.');
     }
-    return this.audit.listForOrganisation(membership.organisationId, parsed.data);
+    return this.audit.listForOrganisation(tenant, parsed.data);
+  }
+
+  @Get('branding')
+  @RequireOrgPermission('organisation.read')
+  getBranding(@Tenant() tenant: TenantScope) {
+    return this.profile.getBranding(tenant);
+  }
+
+  @Patch('branding')
+  @RequireOrgPermission('branding.manage')
+  updateBranding(@Tenant() tenant: TenantScope, @Body() body: unknown, @Req() request: AppRequest) {
+    const change = parseInput(brandingSchema, body);
+    return this.profile.updateBranding(tenant, change, requestMeta(request));
+  }
+
+  @Get('subscription')
+  @RequireOrgPermission('billing.read')
+  getSubscription(@Tenant() tenant: TenantScope) {
+    return this.profile.getSubscription(tenant);
+  }
+
+  @Get('usage')
+  @RequireOrgPermission('billing.read')
+  getUsage(@Tenant() tenant: TenantScope) {
+    return this.profile.usageSummary(tenant);
   }
 }

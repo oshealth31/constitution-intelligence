@@ -1,6 +1,7 @@
 import { createParamDecorator, ExecutionContext, SetMetadata } from '@nestjs/common';
 import type { OrganisationPermission } from '@constitution/shared';
 import type { AppRequest, AuthContext, MembershipContext } from '../../common/request-context';
+import type { TenantScope } from '../tenancy/tenant-scope';
 
 export const IS_PUBLIC = 'access:isPublic';
 export const REQUIRED_ORG_PERMISSION = 'access:orgPermission';
@@ -32,4 +33,13 @@ export const CurrentAuth = createParamDecorator(
 export const CurrentMembership = createParamDecorator(
   (_data: unknown, context: ExecutionContext): MembershipContext | undefined =>
     context.switchToHttp().getRequest<AppRequest>().membership,
+);
+
+/**
+ * The verified tenant context (organisation, user, role) for routes using RequireOrgPermission.
+ * This is the ONLY way controllers obtain an organisation for tenant-scoped work.
+ */
+export const Tenant = createParamDecorator(
+  (_data: unknown, context: ExecutionContext): TenantScope | undefined =>
+    context.switchToHttp().getRequest<AppRequest>().membership?.tenant,
 );

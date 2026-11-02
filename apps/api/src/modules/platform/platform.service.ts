@@ -5,7 +5,14 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { organisations, users, type Database, type User } from '@constitution/db';
+import {
+  organisationBranding,
+  organisations,
+  subscriptions,
+  users,
+  type Database,
+  type User,
+} from '@constitution/db';
 import { desc, eq } from 'drizzle-orm';
 import type { RequestMeta } from '../../common/request-context';
 import { DRIZZLE } from '../../database/database.constants';
@@ -13,6 +20,8 @@ import { AuditService } from '../audit/audit.service';
 import { AuthService } from '../auth/auth.service';
 import { SessionService } from '../auth/session.service';
 import { toPublicUser, type PublicUser } from '../auth/users.service';
+
+const TRIAL_DAYS = 30;
 
 /** Platform Super Admin operations. Organisation management is expanded in a later stage. */
 @Injectable()
@@ -24,15 +33,39 @@ export class PlatformService {
     private readonly auth: AuthService,
   ) {}
 
+  /**
+   * Creates an organisation with its default branding and a trial subscription,
+   * all in one transaction.
+   */
   async createOrganisation(name: string, slug: string, actorUserId: string, meta: RequestMeta) {
-    const [created] = await this.db
-      .insert(organisations)
-      .values({ name, slug })
-      .onConflictDoNothing({ target: organisations.slug })
-      .returning();
-    if (!created) {
-      throw new ConflictException('An organisation with this web address (slug) already exists.');
-    }
+    const created = await this.db.transaction(async (tx) => {
+      const [organisation] = await tx
+        .insert(organisations)
+        .values({ name, slug })
+        .onConflictDoNothing({ target: organisations.slug })
+        .returning();
+      if (!organisation) {
+        throw new ConflictException('An organisation with this web address (slug) already exists.');
+      }
+      const [subscription] = await tx
+        .insert(subscriptions)
+        .values({
+          organisationId: organisation.id,
+          planCode: 'trial',
+          status: 'trialing',
+          currentPeriodEnd: new Date(Date.now() + TRIAL_DAYS * 86_400_000),
+        })
+        .returning({ id: subscriptions.id });
+      await tx
+        .insert(organisationBranding)
+        .values({ organisationId: organisation.id, displayName: name });
+      const [updated] = await tx
+        .update(organisations)
+        .set({ currentSubscriptionId: subscription!.id })
+        .where(eq(organisations.id, organisation.id))
+        .returning();
+      return updated!;
+    });
     await this.audit.record({
       action: 'organisation.created',
       outcome: 'success',

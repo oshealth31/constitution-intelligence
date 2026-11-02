@@ -1,6 +1,5 @@
 import { createRequire } from 'node:module';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
 import {
   DocumentRejectedError,
   type ExtractedLine,
@@ -37,13 +36,12 @@ interface PdfDocument {
   destroy(): Promise<void>;
 }
 
-// PDF.js is published as an ES module; load it with a real dynamic import (this API is compiled
-// to CommonJS, which would otherwise turn import() into require()).
-const importModule = new Function('specifier', 'return import(specifier)') as (
-  specifier: string,
-) => Promise<unknown>;
+// PDF.js is published as an ES module. In the compiled API (CommonJS), import() becomes require(),
+// which Node 22 supports for ES modules; test runners keep it as a real import(). The specifier is a
+// plain string variable so TypeScript does not look for type declarations of the .mjs file.
+const PDFJS_ENTRY = String('pdfjs-dist/legacy/build/pdf.mjs');
 
-let pdfjsPromise: Promise<{ pdfjs: PdfJs; standardFontDataUrl: string }> | undefined;
+let pdfjsPromise: Promise<{ pdfjs: PdfJs; standardFontDataUrl: string | undefined }> | undefined;
 
 /**
  * PDF.js creates a DOMMatrix when it loads (it is used for drawing pages, which we never do).
@@ -78,16 +76,18 @@ function provideDrawingStubs(): void {
 function loadPdfJs() {
   pdfjsPromise ??= (async () => {
     provideDrawingStubs();
-    // `require` exists in the compiled API; test runners may not provide it.
-    const resolver =
-      typeof require === 'function' ? require : createRequire(path.join(process.cwd(), 'index.js'));
-    const entry = resolver.resolve('pdfjs-dist/legacy/build/pdf.mjs');
-    const pdfjs = (await importModule(pathToFileURL(entry).href)) as PdfJs;
-    const packageRoot = path.resolve(path.dirname(entry), '..', '..', '..');
-    return {
-      pdfjs,
-      standardFontDataUrl: `${path.join(packageRoot, 'standard_fonts')}${path.sep}`,
-    };
+    const pdfjs = (await import(PDFJS_ENTRY)) as PdfJs;
+    // Where PDF.js keeps the data for the 14 standard PDF fonts (Helvetica, Times, ...).
+    let standardFontDataUrl: string | undefined;
+    try {
+      const resolver =
+        typeof require === 'function' ? require : createRequire(path.join(process.cwd(), 'index.js'));
+      const entry = resolver.resolve(PDFJS_ENTRY);
+      standardFontDataUrl = `${path.join(path.resolve(path.dirname(entry), '..', '..', '..'), 'standard_fonts')}${path.sep}`;
+    } catch {
+      standardFontDataUrl = undefined; // text can still be read without it
+    }
+    return { pdfjs, standardFontDataUrl };
   })();
   return pdfjsPromise;
 }

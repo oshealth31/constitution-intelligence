@@ -27,7 +27,12 @@ async function shot(page: Page, name: string, fullPage = true) {
 }
 
 test.describe('phone (Android size)', () => {
-  test.use({ viewport: { width: 412, height: 915 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+  test.use({
+    viewport: { width: 412, height: 915 },
+    isMobile: true,
+    hasTouch: true,
+    deviceScaleFactor: 2,
+  });
 
   test('capture', async ({ page }) => {
     await page.goto(`${CHOIR}/sign-in`);
@@ -42,7 +47,9 @@ test.describe('phone (Android size)', () => {
     await page.goto(`${CHOIR}/search?q=meeting`);
     await expect(page.getByText(/result/)).toBeVisible();
     await shot(page, 'phone-05-choir-search', false);
-    await page.request.post('/api/v1/auth/logout', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    await page.request.post('/api/v1/auth/logout', {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    });
     await signIn(page, NETBALL, 'netball.member@sample.test');
     await shot(page, 'phone-06-netball-home', false);
   });

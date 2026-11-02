@@ -15,7 +15,7 @@ import {
   TextField,
 } from '@/components/ui';
 import { describeError, type AuditEventItem } from '@/lib/api';
-import { actionLabel, formatDateTime } from '@/lib/format';
+import { actionLabel, describeAuditDetails, formatDateTime } from '@/lib/format';
 import { useApi } from '@/lib/use-api';
 
 const AREAS = [
@@ -29,6 +29,20 @@ const AREAS = [
   { value: 'support', label: 'Support content access' },
   { value: 'permission', label: 'Permission refusals' },
 ];
+
+function AuditDetails({ metadata }: { metadata: Record<string, unknown> }) {
+  const lines = describeAuditDetails(metadata);
+  if (lines.length === 0) return <span>—</span>;
+  return (
+    <ul className="space-y-0.5">
+      {lines.map((line, index) => (
+        <li key={index} className="break-words">
+          {line}
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 function AuditLog() {
   const initialOrganisation = useSearchParams().get('organisationId') ?? '';
@@ -149,10 +163,8 @@ function AuditLog() {
                         <span className="text-muted">Platform</span>
                       )}
                     </td>
-                    <td className="max-w-xs px-3 py-2 text-xs break-words text-muted">
-                      {Object.keys(event.metadata ?? {}).length > 0
-                        ? JSON.stringify(event.metadata)
-                        : '—'}
+                    <td className="max-w-xs px-3 py-2 text-xs text-muted">
+                      <AuditDetails metadata={event.metadata} />
                     </td>
                   </tr>
                 ))}

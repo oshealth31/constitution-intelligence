@@ -66,6 +66,7 @@ test('super admin creates an organisation and manages subscription, branding and
 
   const branding = page.getByRole('form', { name: 'Branding' });
   await branding.getByLabel('Tagline').fill('Fair play on every green');
+  await branding.getByLabel('Primary colour', { exact: true }).fill('#1A5E3A');
   await branding.getByRole('button', { name: 'Save branding' }).click();
   await expect(page.getByText('Branding saved.')).toBeVisible();
   await expect(page.getByText('3 of 7 steps').first()).toBeVisible();
@@ -80,6 +81,9 @@ test('super admin creates an organisation and manages subscription, branding and
   await expect(page.getByRole('heading', { name: 'Audit log' })).toBeVisible();
   await expect(page.getByText('Organisation · status changed').first()).toBeVisible();
   await expect(page.getByText('Subscription · updated').first()).toBeVisible();
+  // Details are shown as plain sentences, not raw data.
+  await expect(page.getByText('Reason: End-to-end test of suspension')).toBeVisible();
+  await expect(page.getByText('Changed from Active to Suspended')).toBeVisible();
 });
 
 test('support access to content requires a reason and is recorded', async ({ page }) => {
@@ -119,8 +123,16 @@ test.describe('on a phone', () => {
   test('the control centre is usable on a small screen', async ({ page }) => {
     await signIn(page, SUPER_ADMIN);
     await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible();
+    // Navigation sits behind a menu button on phones.
+    const menu = page.getByRole('button', { name: 'Menu' });
+    await expect(menu).toHaveAttribute('aria-expanded', 'false');
+    await expect(page.getByRole('link', { name: 'Audit log' })).toBeHidden();
+    await menu.click();
+    await expect(menu).toHaveAttribute('aria-expanded', 'true');
+    await expect(page.getByRole('link', { name: 'Audit log' })).toBeVisible();
     await page.getByRole('link', { name: 'Organisations' }).first().click();
     await expect(page.getByRole('heading', { name: 'Organisations' })).toBeVisible();
+    await expect(menu).toHaveAttribute('aria-expanded', 'false');
     const hasHorizontalScroll = await page.evaluate(
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
     );

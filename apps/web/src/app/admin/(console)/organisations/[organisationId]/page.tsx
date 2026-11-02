@@ -8,6 +8,7 @@ import {
   Badge,
   Button,
   Card,
+  ColourField,
   EmptyState,
   Loading,
   PageHeader,
@@ -550,18 +551,8 @@ function BrandingCard({ data, busy, run }: SectionProps) {
             value={tagline}
             onChange={(e) => setTagline(e.target.value)}
           />
-          <TextField
-            label="Primary colour"
-            type="color"
-            value={primaryColour}
-            onChange={(e) => setPrimaryColour(e.target.value.toUpperCase())}
-          />
-          <TextField
-            label="Accent colour"
-            type="color"
-            value={accentColour}
-            onChange={(e) => setAccentColour(e.target.value.toUpperCase())}
-          />
+          <ColourField label="Primary colour" value={primaryColour} onChange={setPrimaryColour} />
+          <ColourField label="Accent colour" value={accentColour} onChange={setAccentColour} />
           <div className="sm:col-span-2">
             <Button type="submit" variant="secondary" busy={busy === 'branding'}>
               Save branding

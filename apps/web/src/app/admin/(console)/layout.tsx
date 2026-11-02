@@ -32,6 +32,12 @@ export default function ConsoleLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [gate, setGate] = useState<GateState>({ kind: 'loading' });
   const [signingOut, setSigningOut] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // Close the phone menu after moving to another page.
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     let cancelled = false;
@@ -115,17 +121,32 @@ export default function ConsoleLayout({ children }: { children: ReactNode }) {
                 Control centre
               </p>
             </div>
+            <button
+              type="button"
+              className="inline-flex min-h-10 items-center gap-2 rounded-lg px-3 text-sm font-medium text-ivory-50 ring-1 ring-white/20 lg:hidden"
+              aria-expanded={menuOpen}
+              aria-controls="control-centre-navigation"
+              onClick={() => setMenuOpen((open) => !open)}
+            >
+              <span aria-hidden="true" className="flex w-4 flex-col gap-[3px]">
+                <span className="h-0.5 rounded bg-current" />
+                <span className="h-0.5 rounded bg-current" />
+                <span className="h-0.5 rounded bg-current" />
+              </span>
+              Menu
+            </button>
           </div>
           <nav
+            id="control-centre-navigation"
             aria-label="Control centre"
-            className="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-1 lg:flex-col lg:overflow-visible lg:px-3 lg:pb-0"
+            className={`${menuOpen ? 'flex' : 'hidden'} flex-col gap-1 border-t border-white/10 px-3 py-3 lg:flex lg:flex-1 lg:border-0 lg:py-0`}
           >
             {NAVIGATION.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 aria-current={isActive(item.href) ? 'page' : undefined}
-                className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap transition ${
+                className={`rounded-lg px-3 py-2.5 text-sm font-medium transition lg:py-2 ${
                   isActive(item.href)
                     ? 'bg-white/10 text-white shadow-[inset_3px_0_0_var(--color-teal-500)]'
                     : 'text-ivory-100/80 hover:bg-white/5 hover:text-white'
@@ -134,6 +155,14 @@ export default function ConsoleLayout({ children }: { children: ReactNode }) {
                 {item.label}
               </Link>
             ))}
+            <button
+              type="button"
+              onClick={signOut}
+              disabled={signingOut}
+              className="mt-2 rounded-lg px-3 py-2.5 text-left text-sm font-medium text-teal-500 lg:hidden"
+            >
+              Sign out ({gate.user.email})
+            </button>
           </nav>
           <div className="hidden border-t border-white/10 px-6 py-5 lg:block">
             <p className="truncate text-sm font-medium">{gate.user.displayName}</p>
@@ -149,16 +178,6 @@ export default function ConsoleLayout({ children }: { children: ReactNode }) {
           </div>
         </aside>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-end border-b border-ivory-100 bg-white px-4 py-2 lg:hidden">
-            <button
-              type="button"
-              onClick={signOut}
-              disabled={signingOut}
-              className="text-xs font-medium text-navy-900"
-            >
-              Sign out ({gate.user.email})
-            </button>
-          </div>
           <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
             {children}
           </main>

@@ -1,10 +1,13 @@
 'use client';
 
-import type {
-  ButtonHTMLAttributes,
-  InputHTMLAttributes,
-  ReactNode,
-  SelectHTMLAttributes,
+import {
+  useEffect,
+  useId,
+  useState,
+  type ButtonHTMLAttributes,
+  type InputHTMLAttributes,
+  type ReactNode,
+  type SelectHTMLAttributes,
 } from 'react';
 import { statusLabel, statusTone, type Tone } from '@/lib/format';
 
@@ -129,6 +132,56 @@ export function TextField({
       <input {...props} className={FIELD_CLASSES} />
       {hint && <span className="mt-1 block text-xs font-normal text-muted">{hint}</span>}
     </label>
+  );
+}
+
+/**
+ * Colour picker: a clickable swatch plus the hex value as text, so the colour can be
+ * chosen visually or typed exactly (e.g. from a brand guide).
+ */
+export function ColourField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const [text, setText] = useState(value);
+  useEffect(() => setText(value), [value]);
+  const id = useId();
+  return (
+    <div>
+      <label htmlFor={`${id}-hex`} className="block text-sm font-medium text-navy-900">
+        {label}
+      </label>
+      <div className="mt-1 flex items-center gap-2">
+        <input
+          type="color"
+          aria-label={`${label} swatch`}
+          value={/^#[0-9A-Fa-f]{6}$/.test(value) ? value : '#000000'}
+          onChange={(event) => onChange(event.target.value.toUpperCase())}
+          className="h-10 w-12 shrink-0 cursor-pointer rounded-lg border border-slate-300 bg-white p-1"
+        />
+        <input
+          id={`${id}-hex`}
+          type="text"
+          inputMode="text"
+          spellCheck={false}
+          maxLength={7}
+          pattern="#[0-9A-Fa-f]{6}"
+          title="A colour like #0B1F3A"
+          value={text}
+          onChange={(event) => {
+            const next = event.target.value.trim();
+            setText(next);
+            if (/^#[0-9A-Fa-f]{6}$/.test(next)) onChange(next.toUpperCase());
+          }}
+          className="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-sm text-ink uppercase shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 focus:outline-none"
+        />
+      </div>
+    </div>
   );
 }
 

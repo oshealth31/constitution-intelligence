@@ -10,6 +10,9 @@ next-env.d.ts
 
 # Test output
 coverage/
+playwright-report/
+test-results/
+apps/web/e2e/.auth/
 
 # Local file storage and other runtime data
 .data/

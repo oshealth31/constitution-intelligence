@@ -32,7 +32,11 @@ export type AuditAction =
   | 'user.status_changed'
   | 'user.super_admin_granted'
   | 'organisation.created'
+  | 'organisation.updated'
+  | 'organisation.status_changed'
   | 'organisation.branding_updated'
+  | 'subscription.updated'
+  | 'support.content_accessed'
   | 'permission.denied';
 
 export interface AuditEntry {

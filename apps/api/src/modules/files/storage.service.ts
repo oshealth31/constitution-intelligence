@@ -1,4 +1,5 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { findWorkspaceRoot } from '@constitution/shared';
@@ -39,6 +40,19 @@ export class StorageService {
 
   async get(scope: TenantScope, key: string): Promise<Buffer> {
     return readFile(this.resolve(scope, key));
+  }
+
+  /** Health check: can the storage location be written to? Writes and removes a small file. */
+  async checkWritable(): Promise<boolean> {
+    const probe = path.join(this.root, '.health', randomUUID());
+    try {
+      await mkdir(path.dirname(probe), { recursive: true });
+      await writeFile(probe, 'ok');
+      await rm(probe, { force: true });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   private resolve(scope: TenantScope, key: string): string {

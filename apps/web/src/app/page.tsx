@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { brand } from '@/lib/brand';
 
 /**
@@ -17,7 +18,12 @@ export default function HomePage() {
         </h1>
         <p className="mt-4 text-lg text-teal-600">{brand.tagline}</p>
         <p className="mt-8 rounded-lg border border-teal-100 bg-white p-4 text-sm text-muted">
-          Platform foundation is running. Features will appear here in upcoming releases.
+          Organisation portals will appear here in upcoming releases.
+        </p>
+        <p className="mt-6 text-sm">
+          <Link href="/admin" className="font-medium text-teal-600 underline underline-offset-4">
+            Platform administrators: control centre
+          </Link>
         </p>
       </section>
 

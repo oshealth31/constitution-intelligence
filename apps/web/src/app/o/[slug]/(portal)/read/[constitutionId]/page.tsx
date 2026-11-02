@@ -61,8 +61,9 @@ function Reader() {
 
   useEffect(() => {
     try {
-      const saved = Number(window.localStorage.getItem(SIZE_KEY));
-      if (saved >= 0 && saved < TEXT_SIZES.length) setSize(saved);
+      const stored = window.localStorage.getItem(SIZE_KEY);
+      const saved = stored === null ? Number.NaN : Number(stored);
+      if (Number.isInteger(saved) && saved >= 0 && saved < TEXT_SIZES.length) setSize(saved);
     } catch {
       // Storage can be unavailable (private browsing); the default size is fine.
     }

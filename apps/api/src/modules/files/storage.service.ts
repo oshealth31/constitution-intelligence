@@ -33,13 +33,25 @@ export class StorageService {
   }
 
   async put(scope: TenantScope, key: string, content: Buffer): Promise<void> {
-    const filePath = this.resolve(scope, key);
+    const filePath = this.resolve(scope.organisationId, key);
     await mkdir(path.dirname(filePath), { recursive: true });
     await writeFile(filePath, content, { flag: 'wx' }); // never overwrite an existing object
   }
 
   async get(scope: TenantScope, key: string): Promise<Buffer> {
-    return readFile(this.resolve(scope, key));
+    return readFile(this.resolve(scope.organisationId, key));
+  }
+
+  /**
+   * Reads one organisation's PUBLIC branding asset (its logo) for the portal sign-in page,
+   * where nobody is signed in yet. The same folder rules apply: the key must sit inside that
+   * organisation's own folder. Callers must take the key from the organisation's branding record.
+   */
+  async getPublicAsset(organisationId: string, key: string): Promise<Buffer> {
+    if (!key.startsWith(`${tenantPrefix(organisationId)}branding/`)) {
+      throw new ForbiddenException('File is not available to this organisation.');
+    }
+    return readFile(this.resolve(organisationId, key));
   }
 
   /** Health check: can the storage location be written to? Writes and removes a small file. */
@@ -55,9 +67,9 @@ export class StorageService {
     }
   }
 
-  private resolve(scope: TenantScope, key: string): string {
+  private resolve(organisationId: string, key: string): string {
     if (
-      !key.startsWith(tenantPrefix(scope.organisationId)) ||
+      !key.startsWith(tenantPrefix(organisationId)) ||
       !SAFE_KEY.test(key) ||
       key.includes('..')
     ) {

@@ -31,6 +31,16 @@ export class UsersService {
     return user;
   }
 
+  /** Changes the caller's own display name. Email and role are not changeable here. */
+  async updateDisplayName(id: string, displayName: string): Promise<User | undefined> {
+    const [user] = await this.db
+      .update(users)
+      .set({ displayName, updatedAt: new Date() })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+
   async findById(id: string): Promise<User | undefined> {
     const [user] = await this.db.select().from(users).where(eq(users.id, id)).limit(1);
     return user;

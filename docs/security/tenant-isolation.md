@@ -64,7 +64,13 @@ with explicit organisation filters and is covered by tests:
 - the membership lookup in `PermissionGuard` that _establishes_ the tenant;
 - invitation creation and acceptance, and member role changes (with organisation filters and row locks);
 - Platform Super Admin operations (creating organisations, suspending accounts, the platform audit log);
-- writing audit events.
+- writing audit events;
+- the **public portal lookup** by portal address (`GET /api/v1/portal/:slug` and its logo), used by
+  branded sign-in pages before anyone is signed in. It returns only display name, tagline, colours,
+  logo link and availability, and reads the logo only from that organisation's `branding/` folder
+  (see [../portals.md](../portals.md));
+- changing an organisation's portal address (owners only; the update is filtered to the caller's
+  own organisation).
 
 ## Deployment requirements
 
@@ -83,7 +89,7 @@ sections, AI chunks, a conversation with a cited answer, approval, usage, audit 
 deliberately attempts to:
 
 - read organisation B's records through organisation A's URLs, and through B's URLs as A's owner;
-- write into organisation B (branding, invitations, AI);
+- write into organisation B (branding, logo, portal address, invitations, AI);
 - smuggle B's ID in the request body, query string and headers;
 - find B's text through search and AI retrieval;
 - download B's files, and read B's storage keys directly through the storage service;

@@ -6,6 +6,8 @@ import type { TenantScope } from '../tenancy/tenant-scope';
 export interface SectionMatch {
   sectionId: string;
   versionId: string;
+  constitutionId: string;
+  constitutionTitle: string;
   refKey: string;
   number: string | null;
   heading: string | null;
@@ -27,6 +29,8 @@ export class SearchService {
       const result = await tx.execute(sql`
         SELECT s.id AS "sectionId",
                s.version_id AS "versionId",
+               c.id AS "constitutionId",
+               c.title AS "constitutionTitle",
                s.ref_key AS "refKey",
                s.number,
                s.heading,
@@ -35,6 +39,8 @@ export class SearchService {
         FROM sections s
         JOIN constitution_versions v
           ON v.id = s.version_id AND v.organisation_id = s.organisation_id
+        JOIN constitutions c
+          ON c.id = v.constitution_id AND c.organisation_id = v.organisation_id
         CROSS JOIN websearch_to_tsquery('simple', ${query}) AS q
         WHERE s.organisation_id = ${scope.organisationId}
           AND v.status = 'published'

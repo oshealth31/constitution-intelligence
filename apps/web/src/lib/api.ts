@@ -82,7 +82,13 @@ export interface CurrentUser {
     status: string;
     isPlatformSuperAdmin: boolean;
   } | null;
-  memberships: { organisationId: string; organisationName: string; role: string }[];
+  memberships: {
+    membershipId: string;
+    organisationId: string;
+    organisationSlug: string;
+    organisationName: string;
+    role: string;
+  }[];
 }
 
 export interface StatusCount {
@@ -152,7 +158,9 @@ export interface OrganisationDetail {
     displayName: string | null;
     tagline: string | null;
     primaryColour: string;
+    secondaryColour: string;
     accentColour: string;
+    welcomeMessage: string | null;
     logoFileId: string | null;
   } | null;
   subscription: {

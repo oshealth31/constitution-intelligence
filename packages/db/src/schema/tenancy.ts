@@ -1,4 +1,4 @@
-// Table definitions matching migrations/0002_multi_tenancy.sql.
+// Table definitions matching migrations/0002_multi_tenancy.sql (and 0003_organisation_portals.sql).
 // Every table here carries organisation_id; see docs/security/tenant-isolation.md.
 import {
   bigint,
@@ -70,6 +70,8 @@ export const organisationBranding = pgTable('organisation_branding', {
   tagline: text('tagline'),
   primaryColour: text('primary_colour').notNull().default('#0B1F3A'),
   accentColour: text('accent_colour').notNull().default('#1BA6A6'),
+  secondaryColour: text('secondary_colour').notNull().default('#F5EFE2'),
+  welcomeMessage: text('welcome_message'),
   logoFileId: uuid('logo_file_id'),
   updatedAt,
 });

@@ -516,9 +516,27 @@ function BrandingCard({ data, busy, run }: SectionProps) {
   const [tagline, setTagline] = useState(data.branding?.tagline ?? '');
   const [primaryColour, setPrimaryColour] = useState(data.branding?.primaryColour ?? '#0B1F3A');
   const [accentColour, setAccentColour] = useState(data.branding?.accentColour ?? '#1BA6A6');
+  const [secondaryColour, setSecondaryColour] = useState(
+    data.branding?.secondaryColour ?? '#F5EFE2',
+  );
 
   return (
-    <Card title="Branding" description="How the organisation's portal looks to its members.">
+    <Card
+      title="Branding"
+      description={
+        <>
+          How the organisation&apos;s portal looks to its members.{' '}
+          <a
+            href={`/o/${data.organisation.slug}/sign-in`}
+            target="_blank"
+            rel="noreferrer"
+            className="font-medium text-teal-600 underline underline-offset-4"
+          >
+            Open portal sign-in page
+          </a>
+        </>
+      }
+    >
       <div className="grid gap-6 lg:grid-cols-[1fr_220px]">
         <form
           className="grid gap-4 sm:grid-cols-2"
@@ -533,6 +551,7 @@ function BrandingCard({ data, busy, run }: SectionProps) {
                 displayName: displayName.trim() || null,
                 tagline: tagline.trim() || null,
                 primaryColour,
+                secondaryColour,
                 accentColour,
               },
               'Branding saved.',
@@ -552,6 +571,11 @@ function BrandingCard({ data, busy, run }: SectionProps) {
             onChange={(e) => setTagline(e.target.value)}
           />
           <ColourField label="Primary colour" value={primaryColour} onChange={setPrimaryColour} />
+          <ColourField
+            label="Secondary colour"
+            value={secondaryColour}
+            onChange={setSecondaryColour}
+          />
           <ColourField label="Accent colour" value={accentColour} onChange={setAccentColour} />
           <div className="sm:col-span-2">
             <Button type="submit" variant="secondary" busy={busy === 'branding'}>
@@ -569,7 +593,7 @@ function BrandingCard({ data, busy, run }: SectionProps) {
           >
             {displayName || data.organisation.name}
           </div>
-          <div className="space-y-2 bg-ivory-50 p-4">
+          <div className="space-y-2 p-4" style={{ backgroundColor: secondaryColour }}>
             <p className="text-xs text-muted">{tagline || 'Tagline appears here'}</p>
             <span
               className="inline-block rounded-md px-3 py-1 text-xs font-medium text-white"

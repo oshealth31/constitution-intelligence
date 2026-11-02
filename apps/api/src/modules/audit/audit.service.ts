@@ -35,6 +35,11 @@ export type AuditAction =
   | 'organisation.updated'
   | 'organisation.status_changed'
   | 'organisation.branding_updated'
+  | 'organisation.logo_updated'
+  | 'organisation.logo_removed'
+  | 'organisation.logo_rejected'
+  | 'organisation.slug_changed'
+  | 'user.profile_updated'
   | 'subscription.updated'
   | 'support.content_accessed'
   | 'permission.denied';

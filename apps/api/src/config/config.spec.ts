@@ -72,8 +72,19 @@ describe('loadConfig', () => {
         'DATABASE_SSL must be true in staging and production',
         'LOG_PRETTY must be false in staging and production (structured JSON logs only)',
         'CORS_ORIGINS must use https:// origins in staging and production',
+        'MAIL_TRANSPORT must not be "log" in staging and production (emails contain one-time links)',
+        'WEB_BASE_URL must use https:// in staging and production',
       ]),
     );
+  });
+
+  it('applies secure authentication defaults', () => {
+    const config = loadConfig({ DATABASE_URL: LOCAL_DB });
+    expect(config.LOGIN_MAX_ATTEMPTS_PER_EMAIL).toBe(5);
+    expect(config.AUTH_RATE_LIMIT_WINDOW_MINUTES).toBe(15);
+    expect(config.PASSWORD_RESET_TTL_MINUTES).toBe(30);
+    expect(config.SESSION_IDLE_MINUTES).toBe(1440);
+    expect(config.WEB_BASE_URL).toBe('http://localhost:3000');
   });
 
   it('accepts a correctly configured production environment', () => {
@@ -85,6 +96,8 @@ describe('loadConfig', () => {
       DATABASE_SSL: 'true',
       LOG_PRETTY: 'false',
       CORS_ORIGINS: 'https://admin.example.com,https://example.com',
+      WEB_BASE_URL: 'https://app.example.com',
+      MAIL_TRANSPORT: 'disabled',
     });
     expect(config.DATABASE_SSL).toBe(true);
     expect(config.CORS_ORIGINS).toHaveLength(2);

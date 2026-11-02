@@ -8,7 +8,9 @@
     "dev": "nest start --watch",
     "start": "node dist/main.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "super-admin:create": "nest build && node dist/cli/create-super-admin.js",
+    "seed:dev": "nest build && node dist/cli/seed-dev.js"
   },
   "dependencies": {
     "@constitution/db": "workspace:*",
@@ -16,6 +18,8 @@
     "@nestjs/common": "^11.1.0",
     "@nestjs/core": "^11.1.0",
     "@nestjs/platform-express": "^11.1.0",
+    "@node-rs/argon2": "^2.0.2",
+    "drizzle-orm": "^0.45.2",
     "helmet": "^8.1.0",
     "nestjs-pino": "^4.4.0",
     "pg": "^8.16.0",

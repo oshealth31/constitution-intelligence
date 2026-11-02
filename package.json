@@ -20,7 +20,9 @@
     "format:check": "prettier --check .",
     "db:up": "docker compose --env-file .env -f infra/docker-compose.yml up -d --wait",
     "db:down": "docker compose --env-file .env -f infra/docker-compose.yml down",
-    "db:migrate": "pnpm --filter @constitution/shared run build && pnpm --filter @constitution/db run migrate"
+    "db:migrate": "pnpm --filter @constitution/shared run build && pnpm --filter @constitution/db run migrate",
+    "super-admin:create": "pnpm build:packages && pnpm --filter @constitution/api super-admin:create",
+    "seed:dev": "pnpm build:packages && pnpm --filter @constitution/api seed:dev"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.0",

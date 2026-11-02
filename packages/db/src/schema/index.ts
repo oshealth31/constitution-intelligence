@@ -1,4 +1,4 @@
-// Drizzle table definitions live here.
-// Stage 2 intentionally defines no tables: the tenant-aware schema, Row-Level
-// Security policies and audit table are created in Stage 3.
-export {};
+// Drizzle table definitions. Every table here must also exist in a SQL migration.
+// Migrations are written by hand (see docs/decisions/0003) so that security features
+// such as triggers and Row-Level Security policies are explicit and reviewable.
+export * from './access';

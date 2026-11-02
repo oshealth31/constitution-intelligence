@@ -5,10 +5,9 @@ constitutions easy to access, search, understand and use.
 
 > _Empowering Your Governance, Safeguarding Your Future._
 
-**Status:** Stage 2 — project foundation. There are **no product features yet**. This
-repository currently contains the application skeletons, configuration, logging, error
-handling, health checks, database migrations tooling and automated tests that every later
-stage builds on. It is **not production-ready**.
+**Status:** Stage 3 — authentication and access control. The API supports sign-in, sessions,
+password reset, invitation-based onboarding, organisation roles and permissions, and an
+append-only audit log. There are no web screens for these yet. It is **not production-ready**.
 
 ## What is in this repository
 
@@ -85,6 +84,7 @@ in production.
 - [docs/development.md](docs/development.md) — local setup, running, testing, troubleshooting
 - [docs/configuration.md](docs/configuration.md) — environment variables, development vs production
 - [docs/architecture.md](docs/architecture.md) — architecture summary and where things go
+- [docs/security/authentication.md](docs/security/authentication.md) — roles, permissions, sign-in, sessions, audit events
 - [docs/decisions](docs/decisions) — short records of major technical decisions
 
 ## Ownership

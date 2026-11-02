@@ -45,6 +45,30 @@ export const configSchema = z
       }),
     DATABASE_SSL: booleanString('false'),
     DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(100).default(10),
+
+    // Address of the web app, used to build links in emails (password reset, invitations).
+    WEB_BASE_URL: z
+      .string()
+      .url({ error: 'must be a full URL, e.g. http://localhost:3000' })
+      .default('http://localhost:3000')
+      .transform((value) => value.replace(/\/+$/, '')),
+
+    // Sessions: signed-in users are signed out after this long without activity...
+    SESSION_IDLE_MINUTES: z.coerce.number().int().min(5).max(43_200).default(1_440),
+    // ...and always after this long, even if active.
+    SESSION_ABSOLUTE_HOURS: z.coerce.number().int().min(1).max(2_160).default(336),
+
+    PASSWORD_RESET_TTL_MINUTES: z.coerce.number().int().min(5).max(1_440).default(30),
+    INVITATION_TTL_HOURS: z.coerce.number().int().min(1).max(720).default(168),
+
+    // Brute-force protection for sign-in and password reset.
+    AUTH_RATE_LIMIT_WINDOW_MINUTES: z.coerce.number().int().min(1).max(1_440).default(15),
+    LOGIN_MAX_ATTEMPTS_PER_EMAIL: z.coerce.number().int().min(1).max(100).default(5),
+    LOGIN_MAX_ATTEMPTS_PER_IP: z.coerce.number().int().min(1).max(10_000).default(50),
+
+    // "log" writes emails to the server log (local development only).
+    // "disabled" drops them. A real email provider is added in a later stage.
+    MAIL_TRANSPORT: z.enum(['log', 'disabled']).default('log'),
   })
   .superRefine((config, ctx) => {
     const deployed = config.APP_ENV === 'staging' || config.APP_ENV === 'production';
@@ -80,6 +104,20 @@ export const configSchema = z
         message: 'must list the allowed web origins in staging and production',
       });
     }
+    if (config.MAIL_TRANSPORT === 'log') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['MAIL_TRANSPORT'],
+        message: 'must not be "log" in staging and production (emails contain one-time links)',
+      });
+    }
+    if (!config.WEB_BASE_URL.startsWith('https://')) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['WEB_BASE_URL'],
+        message: 'must use https:// in staging and production',
+      });
+    }
     if (config.CORS_ORIGINS.some((origin) => !origin.startsWith('https://'))) {
       ctx.addIssue({
         code: 'custom',
@@ -107,4 +145,9 @@ export function loadConfig(env: Record<string, string | undefined>): AppConfig {
     );
   }
   return Object.freeze(result.data);
+}
+
+/** True for staging and production: stricter security settings apply. */
+export function isDeployedEnvironment(config: AppConfig): boolean {
+  return config.APP_ENV === 'staging' || config.APP_ENV === 'production';
 }

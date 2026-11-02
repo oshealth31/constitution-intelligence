@@ -77,7 +77,18 @@ pnpm dev
 
 Stop with `Ctrl + C`.
 
-## 6. Run the checks
+## 6. Create accounts for local testing
+
+There is no default administrator or password. For fictional local accounts, one per role:
+
+```bash
+pnpm seed:dev     # prints new random passwords for *@sample.test accounts (local only)
+```
+
+To create a real Platform Super Admin (for example on a server), see
+[security/authentication.md](security/authentication.md#creating-the-first-platform-super-admin).
+
+## 7. Run the checks
 
 ```bash
 pnpm check
@@ -127,8 +138,10 @@ structure. They are applied in order and recorded, so each one runs exactly once
 ```bash
 pnpm db:migrate                                          # apply pending migrations
 pnpm --filter @constitution/db migration:new add_thing   # create an empty migration to write by hand
-pnpm --filter @constitution/db migration:generate        # generate SQL from the Drizzle schema (from Stage 3)
 ```
+
+Migrations are written by hand in SQL (see `docs/decisions/0003-authentication-implementation.md`).
+When adding a table, also add its Drizzle definition in `packages/db/src/schema/` so the API can query it.
 
 Rules: never edit a migration that has already been applied anywhere shared (staging,
 production); add a new migration instead.

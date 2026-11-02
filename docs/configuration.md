@@ -28,6 +28,15 @@ and refuses to start if anything is missing or unsafe, listing the problem setti
 | `DATABASE_URL`                                                       | **Yes**               | —             | PostgreSQL connection string. Contains a password: treat as a secret.         |
 | `DATABASE_SSL`                                                       | In staging/production | `false`       | Require an encrypted, certificate-verified database connection.               |
 | `DATABASE_POOL_MAX`                                                  | No                    | `10`          | Maximum open database connections per API instance.                           |
+| `WEB_BASE_URL` | In staging/production (https) | `http://localhost:3000` | Web app address used in emailed links. |
+| `SESSION_IDLE_MINUTES` | No | `1440` | Sign-out after this long without activity. |
+| `SESSION_ABSOLUTE_HOURS` | No | `336` | Maximum session length, even when active. |
+| `PASSWORD_RESET_TTL_MINUTES` | No | `30` | Lifetime of a password-reset link. |
+| `INVITATION_TTL_HOURS` | No | `168` | Lifetime of an invitation link. |
+| `AUTH_RATE_LIMIT_WINDOW_MINUTES` | No | `15` | Brute-force counting window. |
+| `LOGIN_MAX_ATTEMPTS_PER_EMAIL` | No | `5` | Sign-in attempts per email address per window. |
+| `LOGIN_MAX_ATTEMPTS_PER_IP` | No | `50` | Sign-in attempts per network address per window. |
+| `MAIL_TRANSPORT` | No | `log` | `log` (local/test only) or `disabled`. A real provider comes later. |
 | `TEST_DATABASE_URL`                                                  | For database tests    | —             | Separate database used only by automated tests.                               |
 | `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_PORT` | Local Docker only     | —             | Used by `infra/docker-compose.yml` to create the local database.              |
 

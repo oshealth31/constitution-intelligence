@@ -1,8 +1,10 @@
 import { Global, Module } from '@nestjs/common';
-import { createPool } from '@constitution/db';
+import { createPool, schema, type Database } from '@constitution/db';
+import { drizzle } from 'drizzle-orm/node-postgres';
+import type { Pool } from 'pg';
 import type { AppConfig } from '../config/config';
 import { APP_CONFIG } from '../config/config.module';
-import { DATABASE_POOL } from './database.constants';
+import { DATABASE_POOL, DRIZZLE } from './database.constants';
 import { DatabaseService } from './database.service';
 
 @Global()
@@ -19,8 +21,13 @@ import { DatabaseService } from './database.service';
           applicationName: `constitution-api-${config.APP_ENV}`,
         }),
     },
+    {
+      provide: DRIZZLE,
+      inject: [DATABASE_POOL],
+      useFactory: (pool: Pool): Database => drizzle(pool, { schema }),
+    },
     DatabaseService,
   ],
-  exports: [DATABASE_POOL, DatabaseService],
+  exports: [DATABASE_POOL, DRIZZLE, DatabaseService],
 })
 export class DatabaseModule {}

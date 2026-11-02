@@ -3,6 +3,7 @@ import type { Response } from 'express';
 import type { AppConfig } from '../config/config';
 import { APP_CONFIG } from '../config/config.module';
 import { DatabaseService } from '../database/database.service';
+import { Public } from '../modules/access/decorators';
 
 /**
  * Health checks used by the hosting platform and uptime monitoring.
@@ -10,6 +11,7 @@ import { DatabaseService } from '../database/database.service';
  *   GET /api/v1/health/ready  -> the API can serve traffic (database reachable)
  * They reveal no internal details (no versions of dependencies, no error messages).
  */
+@Public()
 @Controller('health')
 export class HealthController {
   constructor(

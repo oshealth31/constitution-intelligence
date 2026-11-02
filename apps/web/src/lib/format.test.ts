@@ -45,16 +45,17 @@ describe('describeAuditDetails', () => {
     expect(describeAuditDetails({ required: 'platform_super_admin' })).toEqual([
       'Needed: Platform Super Admin',
     ]);
-    expect(describeAuditDetails({ sessionsRevoked: 2, fields: ['tagline', 'primaryColour'] })).toEqual([
-      '2 session(s) signed out',
-      'Fields: tagline, primary colour',
-    ]);
+    expect(
+      describeAuditDetails({ sessionsRevoked: 2, fields: ['tagline', 'primaryColour'] }),
+    ).toEqual(['2 session(s) signed out', 'Fields: tagline, primary colour']);
     expect(describeAuditDetails({ reason: 'wrong_password' })).toEqual(['Reason: wrong password']);
   });
 
   it('summarises nested values such as subscription changes', () => {
     expect(
-      describeAuditDetails({ to: { planCode: 'standard', status: 'active', currentPeriodEnd: null } }),
+      describeAuditDetails({
+        to: { planCode: 'standard', status: 'active', currentPeriodEnd: null },
+      }),
     ).toEqual(['Changed from none to plan code standard, status Active']);
     expect(describeAuditDetails({})).toEqual([]);
   });

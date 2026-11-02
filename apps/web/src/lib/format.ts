@@ -157,7 +157,10 @@ const VALUE_LABELS: Record<string, string> = {
 };
 
 function words(key: string): string {
-  const text = key.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_.]/g, ' ').toLowerCase();
+  const text = key
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/[_.]/g, ' ')
+    .toLowerCase();
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
@@ -185,7 +188,9 @@ function plainValue(value: unknown): string {
  * Turns an audit event's technical details into short, readable lines, for example
  * "Changed from Trial to Active" or "Reason: Customer asked us to check clause numbering".
  */
-export function describeAuditDetails(metadata: Record<string, unknown> | null | undefined): string[] {
+export function describeAuditDetails(
+  metadata: Record<string, unknown> | null | undefined,
+): string[] {
   if (!metadata) return [];
   const lines: string[] = [];
   const { from, to, changes, ...rest } = metadata as Record<string, unknown> & {
@@ -196,7 +201,9 @@ export function describeAuditDetails(metadata: Record<string, unknown> | null | 
   }
   if (changes && typeof changes === 'object') {
     for (const [field, change] of Object.entries(changes)) {
-      lines.push(`${words(field)} changed from ${plainValue(change?.from)} to ${plainValue(change?.to)}`);
+      lines.push(
+        `${words(field)} changed from ${plainValue(change?.from)} to ${plainValue(change?.to)}`,
+      );
     }
   }
   for (const [key, value] of Object.entries(rest)) {
@@ -208,7 +215,9 @@ export function describeAuditDetails(metadata: Record<string, unknown> | null | 
     } else if (key === 'required') {
       lines.push(`Needed: ${plainValue(value)}`);
     } else if (key === 'fields') {
-      lines.push(`Fields: ${Array.isArray(value) ? value.map((field) => words(String(field)).toLowerCase()).join(', ') : plainValue(value)}`);
+      lines.push(
+        `Fields: ${Array.isArray(value) ? value.map((field) => words(String(field)).toLowerCase()).join(', ') : plainValue(value)}`,
+      );
     } else {
       lines.push(`${words(key)}: ${plainValue(value)}`);
     }

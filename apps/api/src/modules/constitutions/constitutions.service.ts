@@ -24,7 +24,11 @@ export class ConstitutionsService {
   listConstitutions(scope: TenantScope) {
     return this.tenantDb.run(scope, (tx) =>
       tx
-        .select({ id: constitutions.id, title: constitutions.title, createdAt: constitutions.createdAt })
+        .select({
+          id: constitutions.id,
+          title: constitutions.title,
+          createdAt: constitutions.createdAt,
+        })
         .from(constitutions)
         .where(eq(constitutions.organisationId, scope.organisationId))
         .orderBy(asc(constitutions.title)),
@@ -82,7 +86,9 @@ export class ConstitutionsService {
           position: sections.position,
         })
         .from(sections)
-        .where(and(eq(sections.versionId, versionId), eq(sections.organisationId, scope.organisationId)))
+        .where(
+          and(eq(sections.versionId, versionId), eq(sections.organisationId, scope.organisationId)),
+        )
         .orderBy(asc(sections.position));
     });
   }
@@ -91,7 +97,11 @@ export class ConstitutionsService {
     return this.tenantDb.run(scope, async (tx) => {
       await this.assertVersionVisible(tx, scope, versionId);
       return tx
-        .select({ id: extractedTexts.id, content: extractedTexts.content, extractedAt: extractedTexts.extractedAt })
+        .select({
+          id: extractedTexts.id,
+          content: extractedTexts.content,
+          extractedAt: extractedTexts.extractedAt,
+        })
         .from(extractedTexts)
         .where(
           and(

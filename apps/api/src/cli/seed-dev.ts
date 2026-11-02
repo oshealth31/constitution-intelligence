@@ -22,7 +22,11 @@ const SAMPLE_ORGANISATIONS = [
     name: 'Sample Community Choir (fictional)',
     uniqueWord: 'nightingale',
   },
-  { slug: 'sample-netball-club', name: 'Sample Netball Club (fictional)', uniqueWord: 'kingfisher' },
+  {
+    slug: 'sample-netball-club',
+    name: 'Sample Netball Club (fictional)',
+    uniqueWord: 'kingfisher',
+  },
 ] as const;
 
 type SampleSlug = (typeof SAMPLE_ORGANISATIONS)[number]['slug'];
@@ -34,13 +38,48 @@ const ACCOUNTS: {
   organisation?: SampleSlug;
 }[] = [
   { email: 'superadmin@sample.test', name: 'Sample Super Admin', role: 'platform_super_admin' },
-  { email: 'owner@sample.test', name: 'Choir Owner', role: 'owner', organisation: 'sample-community-choir' },
-  { email: 'admin@sample.test', name: 'Choir Administrator', role: 'admin', organisation: 'sample-community-choir' },
-  { email: 'reviewer@sample.test', name: 'Choir Content Reviewer', role: 'content_reviewer', organisation: 'sample-community-choir' },
-  { email: 'member@sample.test', name: 'Choir Member', role: 'member', organisation: 'sample-community-choir' },
-  { email: 'auditor@sample.test', name: 'Choir Auditor', role: 'auditor', organisation: 'sample-community-choir' },
-  { email: 'netball.owner@sample.test', name: 'Netball Owner', role: 'owner', organisation: 'sample-netball-club' },
-  { email: 'netball.member@sample.test', name: 'Netball Member', role: 'member', organisation: 'sample-netball-club' },
+  {
+    email: 'owner@sample.test',
+    name: 'Choir Owner',
+    role: 'owner',
+    organisation: 'sample-community-choir',
+  },
+  {
+    email: 'admin@sample.test',
+    name: 'Choir Administrator',
+    role: 'admin',
+    organisation: 'sample-community-choir',
+  },
+  {
+    email: 'reviewer@sample.test',
+    name: 'Choir Content Reviewer',
+    role: 'content_reviewer',
+    organisation: 'sample-community-choir',
+  },
+  {
+    email: 'member@sample.test',
+    name: 'Choir Member',
+    role: 'member',
+    organisation: 'sample-community-choir',
+  },
+  {
+    email: 'auditor@sample.test',
+    name: 'Choir Auditor',
+    role: 'auditor',
+    organisation: 'sample-community-choir',
+  },
+  {
+    email: 'netball.owner@sample.test',
+    name: 'Netball Owner',
+    role: 'owner',
+    organisation: 'sample-netball-club',
+  },
+  {
+    email: 'netball.member@sample.test',
+    name: 'Netball Member',
+    role: 'member',
+    organisation: 'sample-netball-club',
+  },
 ];
 
 async function main(): Promise<void> {
@@ -99,7 +138,11 @@ async function main(): Promise<void> {
         const role = account.role as OrganisationRole;
         await db
           .insert(memberships)
-          .values({ organisationId: organisationIds.get(account.organisation)!, userId: user!.id, role })
+          .values({
+            organisationId: organisationIds.get(account.organisation)!,
+            userId: user!.id,
+            role,
+          })
           .onConflictDoUpdate({
             target: [memberships.organisationId, memberships.userId],
             set: { role, status: 'active' },

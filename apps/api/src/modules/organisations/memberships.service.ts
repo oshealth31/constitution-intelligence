@@ -39,19 +39,19 @@ export class MembershipsService {
   list(scope: TenantScope) {
     return this.tenantDb.run(scope, (tx) =>
       tx
-      .select({
-        membershipId: memberships.id,
-        userId: users.id,
-        email: users.email,
-        displayName: users.displayName,
-        role: memberships.role,
-        status: memberships.status,
-        joinedAt: memberships.createdAt,
-      })
-      .from(memberships)
-      .innerJoin(users, eq(memberships.userId, users.id))
-      .where(eq(memberships.organisationId, scope.organisationId))
-      .orderBy(users.displayName),
+        .select({
+          membershipId: memberships.id,
+          userId: users.id,
+          email: users.email,
+          displayName: users.displayName,
+          role: memberships.role,
+          status: memberships.status,
+          joinedAt: memberships.createdAt,
+        })
+        .from(memberships)
+        .innerJoin(users, eq(memberships.userId, users.id))
+        .where(eq(memberships.organisationId, scope.organisationId))
+        .orderBy(users.displayName),
     );
   }
 

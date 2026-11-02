@@ -56,7 +56,9 @@ export class PlatformService {
           currentPeriodEnd: new Date(Date.now() + TRIAL_DAYS * 86_400_000),
         })
         .returning({ id: subscriptions.id });
-      await tx.insert(organisationBranding).values({ organisationId: organisation.id, displayName: name });
+      await tx
+        .insert(organisationBranding)
+        .values({ organisationId: organisation.id, displayName: name });
       const [updated] = await tx
         .update(organisations)
         .set({ currentSubscriptionId: subscription!.id })

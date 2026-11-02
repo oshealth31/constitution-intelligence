@@ -98,7 +98,10 @@ describe.runIf(Boolean(testDatabaseUrl))('tenant isolation', () => {
 
   describe('direct API requests', () => {
     it('sanity check: organisation B can read all of its own records', async () => {
-      for (const url of [...recordUrls(b.ids.organisationId, b.ids), ...listUrls(b.ids.organisationId)]) {
+      for (const url of [
+        ...recordUrls(b.ids.organisationId, b.ids),
+        ...listUrls(b.ids.organisationId),
+      ]) {
         const response = await b.owner.get(url);
         expect(response.status, url).toBe(200);
       }
@@ -113,7 +116,10 @@ describe.runIf(Boolean(testDatabaseUrl))('tenant isolation', () => {
     });
 
     it("refuses every organisation B URL to organisation A's owner, revealing nothing", async () => {
-      for (const url of [...recordUrls(b.ids.organisationId, b.ids), ...listUrls(b.ids.organisationId)]) {
+      for (const url of [
+        ...recordUrls(b.ids.organisationId, b.ids),
+        ...listUrls(b.ids.organisationId),
+      ]) {
         const response = await a.owner.get(url);
         expect(response.status, url).toBe(404);
         expect(response.body.error.message, url).toBe('Organisation not found.');
@@ -134,7 +140,9 @@ describe.runIf(Boolean(testDatabaseUrl))('tenant isolation', () => {
     it('lists contain only the caller organisation’s records', async () => {
       const base = `/api/v1/organisations/${a.ids.organisationId}`;
       const constitutionsList = await a.owner.get(`${base}/constitutions`).expect(200);
-      expect(constitutionsList.body.map((c: { id: string }) => c.id)).toEqual([a.ids.constitutionId]);
+      expect(constitutionsList.body.map((c: { id: string }) => c.id)).toEqual([
+        a.ids.constitutionId,
+      ]);
 
       const filesList = await a.owner.get(`${base}/files`).expect(200);
       expect(filesList.body.map((f: { id: string }) => f.id)).toEqual([a.ids.fileId]);
@@ -180,7 +188,9 @@ describe.runIf(Boolean(testDatabaseUrl))('tenant isolation', () => {
       const shared = await memberA.get(`${base}/search?q=quorum`).expect(200);
       expect(shared.body.length).toBeGreaterThan(0);
       expect(
-        shared.body.every((match: { versionId: string }) => match.versionId === a.ids.publishedVersionId),
+        shared.body.every(
+          (match: { versionId: string }) => match.versionId === a.ids.publishedVersionId,
+        ),
       ).toBe(true);
 
       const theirWord = await memberA.get(`${base}/search?q=${b.uniqueWord}`).expect(200);
@@ -206,25 +216,35 @@ describe.runIf(Boolean(testDatabaseUrl))('tenant isolation', () => {
       const quorum = await memberA.post(url).send({ question: 'quorum' }).expect(200);
       expect(quorum.body.length).toBeGreaterThan(0);
       expect(
-        quorum.body.every((match: { versionId: string }) => match.versionId === a.ids.publishedVersionId),
+        quorum.body.every(
+          (match: { versionId: string }) => match.versionId === a.ids.publishedVersionId,
+        ),
       ).toBe(true);
       expect(JSON.stringify(quorum.body)).not.toContain(b.uniqueWord);
     });
 
     it('keeps AI conversations private to their user, even inside the organisation', async () => {
       await memberA
-        .get(`/api/v1/organisations/${a.ids.organisationId}/ai/conversations/${a.ids.conversationId}`)
+        .get(
+          `/api/v1/organisations/${a.ids.organisationId}/ai/conversations/${a.ids.conversationId}`,
+        )
         .expect(404);
       const own = await a.owner
-        .get(`/api/v1/organisations/${a.ids.organisationId}/ai/conversations/${a.ids.conversationId}`)
+        .get(
+          `/api/v1/organisations/${a.ids.organisationId}/ai/conversations/${a.ids.conversationId}`,
+        )
         .expect(200);
       const answer = own.body.messages.find((m: { role: string }) => m.role === 'assistant');
-      expect(answer.citations).toEqual([expect.objectContaining({ sectionId: a.ids.quorumSectionId })]);
+      expect(answer.citations).toEqual([
+        expect.objectContaining({ sectionId: a.ids.quorumSectionId }),
+      ]);
     });
 
     it('shows members the published constitution only', async () => {
       const base = `/api/v1/organisations/${a.ids.organisationId}`;
-      const versions = await memberA.get(`${base}/constitutions/${a.ids.constitutionId}/versions`).expect(200);
+      const versions = await memberA
+        .get(`${base}/constitutions/${a.ids.constitutionId}/versions`)
+        .expect(200);
       expect(versions.body.map((v: { status: string }) => v.status)).toEqual(['published']);
       await memberA.get(`${base}/versions/${a.ids.draftVersionId}/sections`).expect(404);
       await reviewerA.get(`${base}/versions/${a.ids.draftVersionId}/sections`).expect(200);
@@ -259,7 +279,9 @@ describe.runIf(Boolean(testDatabaseUrl))('tenant isolation', () => {
         .expect(200);
       expect(events.body.length).toBeGreaterThan(0);
       expect(
-        events.body.every((event: { organisationId: string }) => event.organisationId === a.ids.organisationId),
+        events.body.every(
+          (event: { organisationId: string }) => event.organisationId === a.ids.organisationId,
+        ),
       ).toBe(true);
     });
   });
@@ -291,7 +313,10 @@ describe.runIf(Boolean(testDatabaseUrl))('tenant isolation', () => {
           tx.execute(sql.raw(`SELECT DISTINCT organisation_id::text AS id FROM ${table}`)),
         );
         const ids = (rows.rows as { id: string }[]).map((row) => row.id);
-        expect(ids.every((id) => id === a.ids.organisationId), table).toBe(true);
+        expect(
+          ids.every((id) => id === a.ids.organisationId),
+          table,
+        ).toBe(true);
       }
       const orgs = await tenantDb.run(a.scope, (tx) =>
         tx.execute(sql`SELECT id::text AS id FROM organisations`),
@@ -319,7 +344,9 @@ describe.runIf(Boolean(testDatabaseUrl))('tenant isolation', () => {
       expect(message).toMatch(/row-level security/);
 
       const updated = await tenantDb.run(a.scope, (tx) =>
-        tx.execute(sql`UPDATE constitutions SET title = 'Defaced' WHERE organisation_id = ${b.ids.organisationId}`),
+        tx.execute(
+          sql`UPDATE constitutions SET title = 'Defaced' WHERE organisation_id = ${b.ids.organisationId}`,
+        ),
       );
       expect(updated.rowCount).toBe(0);
     });
@@ -327,10 +354,14 @@ describe.runIf(Boolean(testDatabaseUrl))('tenant isolation', () => {
     it('stops tenant transactions reading password hashes or rewriting history', async () => {
       const tenantDb = context.app.get(TenantDatabase);
       expect(
-        await databaseError(tenantDb.run(a.scope, (tx) => tx.execute(sql`SELECT password_hash FROM users`))),
+        await databaseError(
+          tenantDb.run(a.scope, (tx) => tx.execute(sql`SELECT password_hash FROM users`)),
+        ),
       ).toMatch(/permission denied/);
       expect(
-        await databaseError(tenantDb.run(a.scope, (tx) => tx.execute(sql`DELETE FROM audit_events`))),
+        await databaseError(
+          tenantDb.run(a.scope, (tx) => tx.execute(sql`DELETE FROM audit_events`)),
+        ),
       ).toMatch(/permission denied/);
     });
 
@@ -369,7 +400,13 @@ describe.runIf(Boolean(testDatabaseUrl))('tenant isolation', () => {
     it('guardrail: every organisation-specific table has a tenant column and Row-Level Security', async () => {
       // Tables that are deliberately global. Adding a new table without organisation_id fails this test
       // until someone decides, and documents, why it is global.
-      const GLOBAL_TABLES = ['organisations', 'users', 'sessions', 'password_reset_tokens', 'auth_rate_limits'];
+      const GLOBAL_TABLES = [
+        'organisations',
+        'users',
+        'sessions',
+        'password_reset_tokens',
+        'auth_rate_limits',
+      ];
       const result = await context.db.execute(sql`
         SELECT c.relname AS name,
                c.relrowsecurity AS rls,

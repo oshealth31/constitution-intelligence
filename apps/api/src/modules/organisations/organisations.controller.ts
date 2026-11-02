@@ -43,7 +43,9 @@ const updateMemberSchema = z
     error: 'Provide a role or a status to change.',
   });
 const limitSchema = z.coerce.number().int().min(1).max(500).default(100);
-const colourSchema = z.string().regex(/^#[0-9A-Fa-f]{6}$/, { error: 'must be a colour like #0B1F3A' });
+const colourSchema = z
+  .string()
+  .regex(/^#[0-9A-Fa-f]{6}$/, { error: 'must be a colour like #0B1F3A' });
 // Unknown fields (for example an "organisationId") are discarded: the organisation always
 // comes from the verified membership.
 const brandingSchema = z

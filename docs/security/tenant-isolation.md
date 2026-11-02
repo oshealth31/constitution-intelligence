@@ -10,39 +10,39 @@ and by PostgreSQL itself.
 
 ## The layers
 
-| # | Layer | What it does | Where |
-| --- | --- | --- | --- |
-| 1 | Authentication | Every non-public route needs a valid server-side session. | `AuthGuard` |
-| 2 | Verified membership | The organisation ID in the URL is checked against the caller's **active** membership in an **active** organisation. Non-members get 404, so other organisations cannot even be confirmed to exist. | `PermissionGuard` |
-| 3 | Trusted tenant context | Only after step 2 does the server create a `TenantScope` (organisation, user, role). Tenant services accept only a `TenantScope`, never a plain ID, so an ID from a body, query string or header cannot be used. Unknown request fields are discarded. | `tenant-scope.ts`, `@Tenant()` |
-| 4 | Explicit filters | Every tenant query also filters by `organisation_id = scope.organisationId`. | every tenant service |
-| 5 | Row-Level Security (RLS) | Tenant work runs in a transaction that switches to the restricted database role `app_tenant` and sets the organisation for that transaction. PostgreSQL then hides, and refuses to write, any row of another organisation, even if application code forgets a filter. With no organisation set, no rows are visible. | `TenantDatabase.run`, migration 0002 |
-| 6 | Same-tenant constraints | Links between tenant records use composite foreign keys `(organisation_id, id)`, so a version, section, citation, file reference or subscription can never point at another organisation's record. | migration 0002 |
-| 7 | File storage paths | Objects are stored under `tenants/<organisationId>/…`. The storage service refuses any key outside the caller's folder or containing path tricks, and the database refuses a file record whose key is outside its organisation's folder. | `StorageService`, `files_storage_key_in_tenant_folder` |
-| 8 | Least privilege | `app_tenant` cannot bypass RLS, cannot read password hashes or session data, and can only read and append (never change or delete) audit events. | migration 0002 grants |
+| #   | Layer                    | What it does                                                                                                                                                                                                                                                                                                         | Where                                                  |
+| --- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| 1   | Authentication           | Every non-public route needs a valid server-side session.                                                                                                                                                                                                                                                            | `AuthGuard`                                            |
+| 2   | Verified membership      | The organisation ID in the URL is checked against the caller's **active** membership in an **active** organisation. Non-members get 404, so other organisations cannot even be confirmed to exist.                                                                                                                   | `PermissionGuard`                                      |
+| 3   | Trusted tenant context   | Only after step 2 does the server create a `TenantScope` (organisation, user, role). Tenant services accept only a `TenantScope`, never a plain ID, so an ID from a body, query string or header cannot be used. Unknown request fields are discarded.                                                               | `tenant-scope.ts`, `@Tenant()`                         |
+| 4   | Explicit filters         | Every tenant query also filters by `organisation_id = scope.organisationId`.                                                                                                                                                                                                                                         | every tenant service                                   |
+| 5   | Row-Level Security (RLS) | Tenant work runs in a transaction that switches to the restricted database role `app_tenant` and sets the organisation for that transaction. PostgreSQL then hides, and refuses to write, any row of another organisation, even if application code forgets a filter. With no organisation set, no rows are visible. | `TenantDatabase.run`, migration 0002                   |
+| 6   | Same-tenant constraints  | Links between tenant records use composite foreign keys `(organisation_id, id)`, so a version, section, citation, file reference or subscription can never point at another organisation's record.                                                                                                                   | migration 0002                                         |
+| 7   | File storage paths       | Objects are stored under `tenants/<organisationId>/…`. The storage service refuses any key outside the caller's folder or containing path tricks, and the database refuses a file record whose key is outside its organisation's folder.                                                                             | `StorageService`, `files_storage_key_in_tenant_folder` |
+| 8   | Least privilege          | `app_tenant` cannot bypass RLS, cannot read password hashes or session data, and can only read and append (never change or delete) audit events.                                                                                                                                                                     | migration 0002 grants                                  |
 
 ## What belongs to a tenant
 
-| Record | Table | Tenant link |
-| --- | --- | --- |
-| Organisation (name, unique slug, status, timestamps, current subscription) | `organisations` | is the tenant |
-| Branding configuration | `organisation_branding` | `organisation_id` (primary key) |
-| Subscription records | `subscriptions` | `organisation_id`; `organisations.current_subscription_id` must belong to the same organisation |
-| Users | `users` | Global: one account can belong to several organisations. Under RLS a tenant sees only its own members' id, email, name and status. |
-| Memberships and roles | `memberships` | `organisation_id` |
-| Invitations | `invitations` | `organisation_id` |
-| Constitutions | `constitutions` | `organisation_id` |
-| Document versions | `constitution_versions` | `organisation_id` + same-tenant link to constitution and source file |
-| Uploaded files | `files` | `organisation_id` + storage key inside `tenants/<organisation_id>/` |
-| Extracted text | `extracted_texts` | `organisation_id` + same-tenant links |
-| Sections and clauses | `sections` | `organisation_id` + same-tenant links to version and parent section |
-| AI retrieval chunks | `section_chunks` | `organisation_id` + same-tenant links |
-| AI conversations | `ai_conversations` | `organisation_id` + owning user (private to that user) |
-| AI answers | `ai_messages` | `organisation_id` + same-tenant link to conversation |
-| AI citations | `ai_citations` | `organisation_id`; may only cite a section of the same organisation |
-| Content approvals | `content_approvals` | `organisation_id` + same-tenant link to version |
-| Usage records | `usage_records` | `organisation_id` |
-| Audit records | `audit_events` | `organisation_id` (empty for platform-level events, which tenants never see) |
+| Record                                                                     | Table                   | Tenant link                                                                                                                        |
+| -------------------------------------------------------------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Organisation (name, unique slug, status, timestamps, current subscription) | `organisations`         | is the tenant                                                                                                                      |
+| Branding configuration                                                     | `organisation_branding` | `organisation_id` (primary key)                                                                                                    |
+| Subscription records                                                       | `subscriptions`         | `organisation_id`; `organisations.current_subscription_id` must belong to the same organisation                                    |
+| Users                                                                      | `users`                 | Global: one account can belong to several organisations. Under RLS a tenant sees only its own members' id, email, name and status. |
+| Memberships and roles                                                      | `memberships`           | `organisation_id`                                                                                                                  |
+| Invitations                                                                | `invitations`           | `organisation_id`                                                                                                                  |
+| Constitutions                                                              | `constitutions`         | `organisation_id`                                                                                                                  |
+| Document versions                                                          | `constitution_versions` | `organisation_id` + same-tenant link to constitution and source file                                                               |
+| Uploaded files                                                             | `files`                 | `organisation_id` + storage key inside `tenants/<organisation_id>/`                                                                |
+| Extracted text                                                             | `extracted_texts`       | `organisation_id` + same-tenant links                                                                                              |
+| Sections and clauses                                                       | `sections`              | `organisation_id` + same-tenant links to version and parent section                                                                |
+| AI retrieval chunks                                                        | `section_chunks`        | `organisation_id` + same-tenant links                                                                                              |
+| AI conversations                                                           | `ai_conversations`      | `organisation_id` + owning user (private to that user)                                                                             |
+| AI answers                                                                 | `ai_messages`           | `organisation_id` + same-tenant link to conversation                                                                               |
+| AI citations                                                               | `ai_citations`          | `organisation_id`; may only cite a section of the same organisation                                                                |
+| Content approvals                                                          | `content_approvals`     | `organisation_id` + same-tenant link to version                                                                                    |
+| Usage records                                                              | `usage_records`         | `organisation_id`                                                                                                                  |
+| Audit records                                                              | `audit_events`          | `organisation_id` (empty for platform-level events, which tenants never see)                                                       |
 
 Deliberately global tables: `organisations`, `users`, `sessions`, `password_reset_tokens`,
 `auth_rate_limits`. An automated **guardrail test** fails if any other table is added without a
@@ -61,7 +61,7 @@ Some work happens before a tenant is known, or is platform-wide. It runs as the 
 with explicit organisation filters and is covered by tests:
 
 - sign-in, sessions, password reset (global accounts);
-- the membership lookup in `PermissionGuard` that *establishes* the tenant;
+- the membership lookup in `PermissionGuard` that _establishes_ the tenant;
 - invitation creation and acceptance, and member role changes (with organisation filters and row locks);
 - Platform Super Admin operations (creating organisations, suspending accounts, the platform audit log);
 - writing audit events.

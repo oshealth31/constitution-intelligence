@@ -110,7 +110,12 @@ export async function createSampleTenantContent(
 
   const [extracted] = await db
     .insert(extractedTexts)
-    .values({ organisationId, versionId: published!.id, fileId: file.id, content: constitutionText })
+    .values({
+      organisationId,
+      versionId: published!.id,
+      fileId: file.id,
+      content: constitutionText,
+    })
     .returning({ id: extractedTexts.id });
 
   const inserted = await db

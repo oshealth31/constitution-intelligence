@@ -1,10 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  organisationBranding,
-  organisations,
-  subscriptions,
-  usageRecords,
-} from '@constitution/db';
+import { organisationBranding, organisations, subscriptions, usageRecords } from '@constitution/db';
 import { and, eq, gte, sql } from 'drizzle-orm';
 import type { RequestMeta } from '../../common/request-context';
 import { AuditService } from '../audit/audit.service';

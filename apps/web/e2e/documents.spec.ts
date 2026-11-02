@@ -79,7 +79,7 @@ test('upload, check, approve and publish a document; members only see it once pu
   // Correct a heading, then confirm the flagged clause after comparing with the original.
   const meetings = page.getByRole('listitem', { name: 'Section 1. Meetings' });
   await meetings.getByRole('button', { name: 'Edit' }).click();
-  await meetings.getByLabel('Heading').fill('Committee meetings');
+  await meetings.getByRole('textbox', { name: 'Heading', exact: true }).fill('Committee meetings');
   await meetings.getByRole('button', { name: 'Save section' }).click();
   await expect(page.getByText('Section saved.')).toBeVisible();
   await page.getByRole('button', { name: 'Mark as checked' }).click();

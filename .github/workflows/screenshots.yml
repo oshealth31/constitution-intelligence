@@ -1,0 +1,54 @@
+# Captures control-centre screenshots against the real API and database, and commits them
+# back to the pushed branch. Runs only on branches named "tooling/screenshots*".
+name: Capture screenshots
+
+on:
+  push:
+    branches: ['tooling/screenshots*']
+
+permissions:
+  contents: write
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_DB: ci
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      DATABASE_URL: postgresql://ci@localhost:5432/ci
+      STORAGE_LOCAL_DIR: /tmp/ci-e2e-storage
+      API_INTERNAL_URL: http://127.0.0.1:4100
+      CAPTURE_SCREENSHOTS: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: pnpm install --frozen-lockfile
+      - run: |
+          pnpm build:packages
+          pnpm --filter @constitution/api run build
+          pnpm --filter @constitution/web run build
+      - run: pnpm --filter @constitution/db run migrate
+      - run: pnpm --filter @constitution/web exec playwright install --with-deps chromium
+      - run: pnpm --filter @constitution/web exec playwright test e2e/screenshots.spec.ts
+      - name: Commit screenshots back to this branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f apps/web/screenshots
+          git commit -m "tooling: control centre screenshots" && git push || echo "Nothing to commit."

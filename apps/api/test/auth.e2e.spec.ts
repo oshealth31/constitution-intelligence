@@ -83,7 +83,10 @@ describe.runIf(Boolean(testDatabaseUrl))('authentication', () => {
         .send({ email: 'not-an-email', password: '' })
         .expect(400);
       expect(response.body.error.details).toEqual(
-        expect.arrayContaining([expect.stringMatching(/^email:/), expect.stringMatching(/^password:/)]),
+        expect.arrayContaining([
+          expect.stringMatching(/^email:/),
+          expect.stringMatching(/^password:/),
+        ]),
       );
     });
   });
@@ -96,7 +99,9 @@ describe.runIf(Boolean(testDatabaseUrl))('authentication', () => {
       expect(me.body.user).toMatchObject({ id: user.id, isPlatformSuperAdmin: false });
       expect(me.body.memberships).toEqual([]);
 
-      const anonymous = await request(context.app.getHttpServer()).get('/api/v1/auth/me').expect(401);
+      const anonymous = await request(context.app.getHttpServer())
+        .get('/api/v1/auth/me')
+        .expect(401);
       expect(anonymous.body.error.code).toBe('UNAUTHORIZED');
     });
 

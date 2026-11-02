@@ -6,9 +6,16 @@ import { AppModule } from '../app.module';
 import { loadConfig, type AppConfig } from '../config/config';
 
 /** Starts the application without a web server, for command-line maintenance tasks. */
-export async function createCliContext(): Promise<{ app: INestApplicationContext; config: AppConfig }> {
+export async function createCliContext(): Promise<{
+  app: INestApplicationContext;
+  config: AppConfig;
+}> {
   loadLocalEnv();
-  const config = loadConfig({ ...process.env, LOG_LEVEL: process.env.LOG_LEVEL ?? 'warn', LOG_PRETTY: 'false' });
+  const config = loadConfig({
+    ...process.env,
+    LOG_LEVEL: process.env.LOG_LEVEL ?? 'warn',
+    LOG_PRETTY: 'false',
+  });
   const app = await NestFactory.createApplicationContext(AppModule.register(config), {
     logger: ['error', 'warn'],
   });

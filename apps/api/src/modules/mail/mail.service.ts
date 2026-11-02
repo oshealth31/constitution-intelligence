@@ -27,7 +27,10 @@ export class MailService {
 
   async send(mail: OutgoingMail): Promise<void> {
     if (this.config.MAIL_TRANSPORT === 'disabled') {
-      this.logger.warn({ subject: mail.subject }, 'Email delivery is not configured; message dropped');
+      this.logger.warn(
+        { subject: mail.subject },
+        'Email delivery is not configured; message dropped',
+      );
       return;
     }
     this.outbox.push(mail);

@@ -12,22 +12,28 @@ import { PasswordService } from '../modules/auth/password.service';
 import { generateRandomPassword } from '../modules/auth/tokens';
 import { createCliContext } from './cli-app';
 
-const SAMPLE_ORGANISATION = { slug: 'sample-community-choir', name: 'Sample Community Choir (fictional)' };
+const SAMPLE_ORGANISATION = {
+  slug: 'sample-community-choir',
+  name: 'Sample Community Choir (fictional)',
+};
 
-const ACCOUNTS: { email: string; name: string; role: OrganisationRole | 'platform_super_admin' }[] = [
-  { email: 'superadmin@sample.test', name: 'Sample Super Admin', role: 'platform_super_admin' },
-  { email: 'owner@sample.test', name: 'Sample Owner', role: 'owner' },
-  { email: 'admin@sample.test', name: 'Sample Administrator', role: 'admin' },
-  { email: 'reviewer@sample.test', name: 'Sample Content Reviewer', role: 'content_reviewer' },
-  { email: 'member@sample.test', name: 'Sample Member', role: 'member' },
-  { email: 'auditor@sample.test', name: 'Sample Auditor', role: 'auditor' },
-];
+const ACCOUNTS: { email: string; name: string; role: OrganisationRole | 'platform_super_admin' }[] =
+  [
+    { email: 'superadmin@sample.test', name: 'Sample Super Admin', role: 'platform_super_admin' },
+    { email: 'owner@sample.test', name: 'Sample Owner', role: 'owner' },
+    { email: 'admin@sample.test', name: 'Sample Administrator', role: 'admin' },
+    { email: 'reviewer@sample.test', name: 'Sample Content Reviewer', role: 'content_reviewer' },
+    { email: 'member@sample.test', name: 'Sample Member', role: 'member' },
+    { email: 'auditor@sample.test', name: 'Sample Auditor', role: 'auditor' },
+  ];
 
 async function main(): Promise<void> {
   const { app, config } = await createCliContext();
   try {
     if (config.APP_ENV !== 'local') {
-      console.error(`Refusing to seed: APP_ENV is "${config.APP_ENV}". Seeding is only allowed when APP_ENV=local.`);
+      console.error(
+        `Refusing to seed: APP_ENV is "${config.APP_ENV}". Seeding is only allowed when APP_ENV=local.`,
+      );
       process.exitCode = 1;
       return;
     }
@@ -59,19 +65,30 @@ async function main(): Promise<void> {
         })
         .onConflictDoUpdate({
           target: users.email,
-          set: { passwordHash, passwordChangedAt: new Date(), status: 'active', isPlatformSuperAdmin: isSuperAdmin },
+          set: {
+            passwordHash,
+            passwordChangedAt: new Date(),
+            status: 'active',
+            isPlatformSuperAdmin: isSuperAdmin,
+          },
         })
         .returning();
       if (!isSuperAdmin) {
         await db
           .insert(memberships)
-          .values({ organisationId: organisation!.id, userId: user!.id, role: account.role as OrganisationRole })
+          .values({
+            organisationId: organisation!.id,
+            userId: user!.id,
+            role: account.role as OrganisationRole,
+          })
           .onConflictDoUpdate({
             target: [memberships.organisationId, memberships.userId],
             set: { role: account.role as OrganisationRole, status: 'active' },
           });
       }
-      printed.push(`  ${ROLE_LABELS[account.role].padEnd(32)} ${account.email.padEnd(24)} ${password}`);
+      printed.push(
+        `  ${ROLE_LABELS[account.role].padEnd(32)} ${account.email.padEnd(24)} ${password}`,
+      );
     }
 
     console.log(

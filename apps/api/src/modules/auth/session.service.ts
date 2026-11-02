@@ -91,7 +91,11 @@ export class SessionService {
   }
 
   /** Signs the user out everywhere (optionally keeping the current session). Returns how many were revoked. */
-  async revokeAllForUser(userId: string, reason: string, exceptSessionId?: string): Promise<number> {
+  async revokeAllForUser(
+    userId: string,
+    reason: string,
+    exceptSessionId?: string,
+  ): Promise<number> {
     const conditions = [eq(sessions.userId, userId), isNull(sessions.revokedAt)];
     if (exceptSessionId) {
       conditions.push(ne(sessions.id, exceptSessionId));

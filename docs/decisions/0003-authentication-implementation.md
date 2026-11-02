@@ -11,9 +11,9 @@
   - opaque, random 256-bit session tokens in HttpOnly cookies, stored only as SHA-256 hashes;
   - server-side sessions in PostgreSQL (instant revocation);
   - roles and permissions defined once in `packages/shared/src/access.ts`.
-  Database migrations are written by hand in SQL, because security features (triggers, Row-Level
-  Security policies, append-only audit) must be explicit and reviewable. Drizzle table definitions
-  mirror the SQL for type-safe queries; `drizzle-kit generate` is no longer used.
+    Database migrations are written by hand in SQL, because security features (triggers, Row-Level
+    Security policies, append-only audit) must be explicit and reviewable. Drizzle table definitions
+    mirror the SQL for type-safe queries; `drizzle-kit generate` is no longer used.
 - **Consequences:** No third-party auth service or per-user fees; full control of every rule; all
   behaviour is covered by our own tests. We own the maintenance of this code, so it is kept small and
   documented in `docs/security/authentication.md`. Two-factor authentication must be added by us

@@ -36,7 +36,10 @@ export class PermissionGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const targets = [context.getHandler(), context.getClass()];
-    const needsSuperAdmin = this.reflector.getAllAndOverride<boolean>(REQUIRES_SUPER_ADMIN, targets);
+    const needsSuperAdmin = this.reflector.getAllAndOverride<boolean>(
+      REQUIRES_SUPER_ADMIN,
+      targets,
+    );
     const permission = this.reflector.getAllAndOverride<OrganisationPermission | undefined>(
       REQUIRED_ORG_PERMISSION,
       targets,

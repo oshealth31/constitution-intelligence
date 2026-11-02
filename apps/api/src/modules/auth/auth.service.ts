@@ -94,7 +94,9 @@ export class AuthService {
         metadata: { reason: `account_${user.status}` },
         meta,
       });
-      throw new ForbiddenException('This account is not active. Please contact your administrator.');
+      throw new ForbiddenException(
+        'This account is not active. Please contact your administrator.',
+      );
     }
 
     await this.rateLimits.reset(emailKey);
@@ -297,9 +299,17 @@ export class AuthService {
     const now = new Date();
     await this.db
       .update(users)
-      .set({ passwordHash: await this.passwords.hash(newPassword), passwordChangedAt: now, updatedAt: now })
+      .set({
+        passwordHash: await this.passwords.hash(newPassword),
+        passwordChangedAt: now,
+        updatedAt: now,
+      })
       .where(eq(users.id, userId));
-    const revoked = await this.sessions.revokeAllForUser(userId, 'password_changed', currentSessionId);
+    const revoked = await this.sessions.revokeAllForUser(
+      userId,
+      'password_changed',
+      currentSessionId,
+    );
     await this.audit.record({
       action: 'auth.password.changed',
       outcome: 'success',

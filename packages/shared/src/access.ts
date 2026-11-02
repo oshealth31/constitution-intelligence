@@ -107,7 +107,10 @@ export function canAssignRole(actorRole: OrganisationRole, targetRole: Organisat
  * Owners may manage anyone; Administrators only people ranked below them
  * (so an Administrator cannot demote or remove an Owner or another Administrator).
  */
-export function canManageMember(actorRole: OrganisationRole, targetRole: OrganisationRole): boolean {
+export function canManageMember(
+  actorRole: OrganisationRole,
+  targetRole: OrganisationRole,
+): boolean {
   if (!roleHasPermission(actorRole, 'members.manage')) {
     return false;
   }

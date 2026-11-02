@@ -33,7 +33,10 @@ export interface PasswordContext {
 }
 
 /** Returns a plain-language problem, or null if the password is acceptable. */
-export function checkPasswordPolicy(password: string, context: PasswordContext = {}): string | null {
+export function checkPasswordPolicy(
+  password: string,
+  context: PasswordContext = {},
+): string | null {
   if (password.length < PASSWORD_MIN_LENGTH) {
     return `Password must be at least ${PASSWORD_MIN_LENGTH} characters long.`;
   }

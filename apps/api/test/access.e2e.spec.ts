@@ -47,7 +47,11 @@ describe.runIf(Boolean(testDatabaseUrl))('access control', () => {
         .post(`/api/v1/platform/organisations/${organisationId}/owner-invitations`)
         .send({ email: ownerEmail })
         .expect(201);
-      expect(invitation.body).toMatchObject({ email: ownerEmail, role: 'owner', status: 'pending' });
+      expect(invitation.body).toMatchObject({
+        email: ownerEmail,
+        role: 'owner',
+        status: 'pending',
+      });
       expect(JSON.stringify(invitation.body)).not.toMatch(/token/i);
 
       const newOwner = client(context);
@@ -70,7 +74,10 @@ describe.runIf(Boolean(testDatabaseUrl))('access control', () => {
 
     it('does not give the super admin automatic access to organisation data', async () => {
       const organisation = await createOrganisation(context.db);
-      const admin = await createUser(context.db, { email: uniqueEmail('super2'), superAdmin: true });
+      const admin = await createUser(context.db, {
+        email: uniqueEmail('super2'),
+        superAdmin: true,
+      });
       const superAgent = await signIn(context, admin.email);
       await superAgent.get(`/api/v1/organisations/${organisation.id}/members`).expect(404);
     });
@@ -89,7 +96,10 @@ describe.runIf(Boolean(testDatabaseUrl))('access control', () => {
     });
 
     it('suspends a user account and immediately ends their sessions', async () => {
-      const admin = await createUser(context.db, { email: uniqueEmail('super3'), superAdmin: true });
+      const admin = await createUser(context.db, {
+        email: uniqueEmail('super3'),
+        superAdmin: true,
+      });
       const superAgent = await signIn(context, admin.email);
       const target = await createUser(context.db, { email: uniqueEmail('target') });
       const targetAgent = await signIn(context, target.email);
@@ -131,12 +141,15 @@ describe.runIf(Boolean(testDatabaseUrl))('access control', () => {
           let response;
           if (action === 'GET organisation') response = await agents[role].get(base);
           else if (action === 'GET members') response = await agents[role].get(`${base}/members`);
-          else if (action === 'GET audit-events') response = await agents[role].get(`${base}/audit-events`);
+          else if (action === 'GET audit-events')
+            response = await agents[role].get(`${base}/audit-events`);
           else
             response = await agents[role]
               .post(`${base}/invitations`)
               .send({ email: uniqueEmail(`invitee-${role}`), role: 'member' });
-          expect(response.status).toBe(allowed(role) ? (action.startsWith('POST') ? 201 : 200) : 403);
+          expect(response.status).toBe(
+            allowed(role) ? (action.startsWith('POST') ? 201 : 200) : 403,
+          );
         });
       }
     }
@@ -164,9 +177,18 @@ describe.runIf(Boolean(testDatabaseUrl))('access control', () => {
       const organisation = await createOrganisation(context.db);
       const { agent } = await signedInMember(context, organisation.id, 'admin');
       const base = `/api/v1/organisations/${organisation.id}/invitations`;
-      await agent.post(base).send({ email: uniqueEmail('wannabe'), role: 'owner' }).expect(403);
-      await agent.post(base).send({ email: uniqueEmail('peer'), role: 'admin' }).expect(201);
-      await agent.post(base).send({ email: uniqueEmail('aud'), role: 'auditor' }).expect(201);
+      await agent
+        .post(base)
+        .send({ email: uniqueEmail('wannabe'), role: 'owner' })
+        .expect(403);
+      await agent
+        .post(base)
+        .send({ email: uniqueEmail('peer'), role: 'admin' })
+        .expect(201);
+      await agent
+        .post(base)
+        .send({ email: uniqueEmail('aud'), role: 'auditor' })
+        .expect(201);
     });
 
     it('stops an administrator from changing an owner or promoting anyone to owner', async () => {
@@ -176,13 +198,22 @@ describe.runIf(Boolean(testDatabaseUrl))('access control', () => {
       const member = await signedInMember(context, organisation.id, 'member');
       const base = `/api/v1/organisations/${organisation.id}/members`;
 
-      await admin.agent.patch(`${base}/${owner.membership.id}`).send({ role: 'member' }).expect(403);
+      await admin.agent
+        .patch(`${base}/${owner.membership.id}`)
+        .send({ role: 'member' })
+        .expect(403);
       await admin.agent.delete(`${base}/${owner.membership.id}`).expect(403);
-      await admin.agent.patch(`${base}/${member.membership.id}`).send({ role: 'owner' }).expect(403);
+      await admin.agent
+        .patch(`${base}/${member.membership.id}`)
+        .send({ role: 'owner' })
+        .expect(403);
       await admin.agent.patch(`${base}/${admin.membership.id}`).send({ role: 'owner' }).expect(403);
 
       // Allowed: an administrator changes a member to auditor.
-      await admin.agent.patch(`${base}/${member.membership.id}`).send({ role: 'auditor' }).expect(204);
+      await admin.agent
+        .patch(`${base}/${member.membership.id}`)
+        .send({ role: 'auditor' })
+        .expect(204);
       const changes = await auditEventsFor(context.db, 'membership.role_changed');
       expect(
         changes.some(
@@ -257,7 +288,9 @@ describe.runIf(Boolean(testDatabaseUrl))('access control', () => {
         .get(`/api/v1/organisations/${first.id}/audit-events`)
         .expect(200);
       expect(
-        (events.body as { organisationId: string }[]).every((event) => event.organisationId === first.id),
+        (events.body as { organisationId: string }[]).every(
+          (event) => event.organisationId === first.id,
+        ),
       ).toBe(true);
     });
   });
@@ -340,7 +373,11 @@ describe.runIf(Boolean(testDatabaseUrl))('access control', () => {
       await owner.agent.post(base).send({ email: weakEmail, role: 'member' }).expect(201);
       const weak = await client(context)
         .post('/api/v1/invitations/accept')
-        .send({ token: lastTokenSentTo(context, weakEmail), displayName: 'Weak', password: 'short' })
+        .send({
+          token: lastTokenSentTo(context, weakEmail),
+          displayName: 'Weak',
+          password: 'short',
+        })
         .expect(400);
       expect(weak.body.error.message).toMatch(/at least 12/);
     });
@@ -363,10 +400,12 @@ describe.runIf(Boolean(testDatabaseUrl))('access control', () => {
 
   describe('audit log', () => {
     it('cannot be edited or deleted, even directly in the database', async () => {
-      await expect(context.db.execute(sql`UPDATE audit_events SET action = 'tampered'`)).rejects.toThrow(
+      await expect(
+        context.db.execute(sql`UPDATE audit_events SET action = 'tampered'`),
+      ).rejects.toThrow(/append-only/);
+      await expect(context.db.execute(sql`DELETE FROM audit_events`)).rejects.toThrow(
         /append-only/,
       );
-      await expect(context.db.execute(sql`DELETE FROM audit_events`)).rejects.toThrow(/append-only/);
     });
   });
 });

@@ -9,9 +9,7 @@ import { PlatformService } from '../modules/platform/platform.service';
 import { createCliContext, readArgument } from './cli-app';
 
 async function main(): Promise<void> {
-  const email = z
-    .email()
-    .safeParse(readArgument('email')?.trim().toLowerCase());
+  const email = z.email().safeParse(readArgument('email')?.trim().toLowerCase());
   const name = readArgument('name')?.trim() || 'Platform Administrator';
   if (!email.success) {
     console.error('Usage: pnpm super-admin:create --email you@example.com --name "Your Name"');

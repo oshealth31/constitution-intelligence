@@ -26,12 +26,12 @@ import { PasswordService } from '../auth/password.service';
 import { generateToken, hashToken } from '../auth/tokens';
 import { MailService } from '../mail/mail.service';
 
-export const INVALID_INVITATION = 'This invitation is invalid, has expired or has already been used.';
+export const INVALID_INVITATION =
+  'This invitation is invalid, has expired or has already been used.';
 
 /** Who is sending an invitation: an organisation member (with their role) or the platform. */
 export type Inviter =
-  | { kind: 'member'; userId: string; role: OrganisationRole }
-  | { kind: 'platform'; userId: string };
+  { kind: 'member'; userId: string; role: OrganisationRole } | { kind: 'platform'; userId: string };
 
 export interface InvitationSummary {
   id: string;
@@ -265,7 +265,9 @@ export class InvitationsService {
         );
       }
       if (existingUser.status !== 'active') {
-        throw new ForbiddenException('This account is not active. Please contact your administrator.');
+        throw new ForbiddenException(
+          'This account is not active. Please contact your administrator.',
+        );
       }
     } else if (auth) {
       await this.audit.record({
@@ -285,7 +287,9 @@ export class InvitationsService {
     let newUserDisplayName: string | undefined;
     if (!existingUser) {
       if (!input.displayName || !input.password) {
-        throw new BadRequestException('Please provide your name and a password to create your account.');
+        throw new BadRequestException(
+          'Please provide your name and a password to create your account.',
+        );
       }
       this.passwords.assertAcceptable(input.password, {
         email: invitation.email,

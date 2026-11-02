@@ -52,7 +52,8 @@ export default function ContentStatusPage() {
                   <StatusBadge status={version.status} />
                 </div>
                 <p className="mt-1 text-sm text-slate-600">
-                  {STATUS_HELP[version.status] ?? ''} {version.sectionCount} sections · last changed{' '}
+                  {STATUS_HELP[version.status] ?? ''} {version.sectionCount}{' '}
+                  {version.sectionCount === 1 ? 'section' : 'sections'} · last changed{' '}
                   {formatDate(version.updatedAt)}
                   {version.publishedAt ? ` · published ${formatDate(version.publishedAt)}` : ''}
                 </p>

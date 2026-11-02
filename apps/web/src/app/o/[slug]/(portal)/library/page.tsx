@@ -38,7 +38,7 @@ export default function LibraryPage() {
                 {item.published.publishedAt
                   ? ` · published ${formatDate(item.published.publishedAt)}`
                   : ''}
-                {` · ${item.published.sectionCount} sections`}
+                {` · ${item.published.sectionCount} ${item.published.sectionCount === 1 ? 'section' : 'sections'}`}
               </p>
             ) : (
               <p className="mt-1 text-base text-slate-600">Not published yet.</p>

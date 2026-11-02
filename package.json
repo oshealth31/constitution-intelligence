@@ -2,7 +2,7 @@
   "name": "constitution-intelligence",
   "version": "0.1.0",
   "private": true,
-  "description": "Constitution Intelligence — managed multi-tenant SaaS for organisational constitutions.",
+  "description": "Constitution Intelligence \u2014 managed multi-tenant SaaS for organisational constitutions.",
   "packageManager": "pnpm@10.28.0",
   "engines": {
     "node": ">=22.12.0",
@@ -36,6 +36,9 @@
       "esbuild",
       "sharp",
       "unrs-resolver"
-    ]
+    ],
+    "overrides": {
+      "multer": ">=2.5.0"
+    }
   }
 }

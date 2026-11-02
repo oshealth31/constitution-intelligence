@@ -6,11 +6,12 @@ import { z } from 'zod';
  * (names only, never values).
  */
 
-const booleanString = z
-  .enum(['true', 'false', '1', '0'], {
-    errorMap: () => ({ message: 'must be "true" or "false"' }),
-  })
-  .transform((value) => value === 'true' || value === '1');
+/** A "true"/"false" setting. The default is applied before conversion to a boolean. */
+const booleanString = (fallback: 'true' | 'false') =>
+  z
+    .enum(['true', 'false', '1', '0'], { error: () => 'must be "true" or "false"' })
+    .default(fallback)
+    .transform((value) => value === 'true' || value === '1');
 
 const LOG_LEVELS = ['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'] as const;
 
@@ -31,18 +32,18 @@ export const configSchema = z
           .map((origin) => origin.trim())
           .filter((origin) => origin.length > 0),
       ),
-    TRUST_PROXY: booleanString.default('false'),
+    TRUST_PROXY: booleanString('false'),
 
     LOG_LEVEL: z.enum(LOG_LEVELS).default('info'),
-    LOG_PRETTY: booleanString.default('false'),
+    LOG_PRETTY: booleanString('false'),
 
     DATABASE_URL: z
-      .string({ required_error: 'is required' })
-      .min(1, 'is required')
+      .string({ error: (issue) => (issue.input === undefined ? 'is required' : 'must be text') })
+      .min(1, { error: 'is required' })
       .refine((value) => /^postgres(ql)?:\/\/.+/.test(value), {
-        message: 'must start with postgres:// or postgresql://',
+        error: 'must start with postgres:// or postgresql://',
       }),
-    DATABASE_SSL: booleanString.default('false'),
+    DATABASE_SSL: booleanString('false'),
     DATABASE_POOL_MAX: z.coerce.number().int().min(1).max(100).default(10),
   })
   .superRefine((config, ctx) => {
@@ -50,7 +51,7 @@ export const configSchema = z
 
     if (config.APP_ENV === 'production' && config.NODE_ENV !== 'production') {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['NODE_ENV'],
         message: 'must be "production" when APP_ENV is "production"',
       });
@@ -60,28 +61,28 @@ export const configSchema = z
     }
     if (!config.DATABASE_SSL) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['DATABASE_SSL'],
         message: 'must be true in staging and production',
       });
     }
     if (config.LOG_PRETTY) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['LOG_PRETTY'],
         message: 'must be false in staging and production (structured JSON logs only)',
       });
     }
     if (config.CORS_ORIGINS.length === 0) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['CORS_ORIGINS'],
         message: 'must list the allowed web origins in staging and production',
       });
     }
     if (config.CORS_ORIGINS.some((origin) => !origin.startsWith('https://'))) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['CORS_ORIGINS'],
         message: 'must use https:// origins in staging and production',
       });

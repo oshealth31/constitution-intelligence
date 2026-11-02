@@ -7,7 +7,7 @@ import { z } from 'zod';
 const publicEnvSchema = z.object({
   NEXT_PUBLIC_API_BASE_URL: z
     .string()
-    .url('must be a full URL, e.g. http://localhost:4000/api/v1')
+    .url({ error: 'must be a full URL, e.g. http://localhost:4000/api/v1' })
     .default('http://localhost:4000/api/v1'),
 });
 

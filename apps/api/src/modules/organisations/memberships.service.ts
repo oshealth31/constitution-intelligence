@@ -16,6 +16,8 @@ import { and, eq, ne, sql } from 'drizzle-orm';
 import type { MembershipContext, RequestMeta } from '../../common/request-context';
 import { DRIZZLE } from '../../database/database.constants';
 import { AuditService } from '../audit/audit.service';
+import { TenantDatabase } from '../tenancy/tenant-database.service';
+import type { TenantScope } from '../tenancy/tenant-scope';
 
 export const LAST_OWNER =
   'An organisation must always keep at least one active Organisation Owner.';
@@ -30,10 +32,13 @@ export class MembershipsService {
   constructor(
     @Inject(DRIZZLE) private readonly db: Database,
     private readonly audit: AuditService,
+    private readonly tenantDb: TenantDatabase,
   ) {}
 
-  list(organisationId: string) {
-    return this.db
+  /** Member list, read under Row-Level Security for the caller's organisation. */
+  list(scope: TenantScope) {
+    return this.tenantDb.run(scope, (tx) =>
+      tx
       .select({
         membershipId: memberships.id,
         userId: users.id,
@@ -45,8 +50,9 @@ export class MembershipsService {
       })
       .from(memberships)
       .innerJoin(users, eq(memberships.userId, users.id))
-      .where(eq(memberships.organisationId, organisationId))
-      .orderBy(users.displayName);
+      .where(eq(memberships.organisationId, scope.organisationId))
+      .orderBy(users.displayName),
+    );
   }
 
   async update(

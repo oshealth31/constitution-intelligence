@@ -25,6 +25,8 @@ import { AuditService } from '../audit/audit.service';
 import { PasswordService } from '../auth/password.service';
 import { generateToken, hashToken } from '../auth/tokens';
 import { MailService } from '../mail/mail.service';
+import { TenantDatabase } from '../tenancy/tenant-database.service';
+import type { TenantScope } from '../tenancy/tenant-scope';
 
 export const INVALID_INVITATION =
   'This invitation is invalid, has expired or has already been used.';
@@ -78,6 +80,7 @@ export class InvitationsService {
     private readonly passwords: PasswordService,
     private readonly audit: AuditService,
     private readonly mail: MailService,
+    private readonly tenantDb: TenantDatabase,
   ) {}
 
   async create(
@@ -173,13 +176,16 @@ export class InvitationsService {
     return summarise(invitation);
   }
 
-  async list(organisationId: string): Promise<InvitationSummary[]> {
-    const rows = await this.db
-      .select()
-      .from(invitations)
-      .where(eq(invitations.organisationId, organisationId))
-      .orderBy(desc(invitations.createdAt))
-      .limit(200);
+  /** Invitations of the caller's organisation, read under Row-Level Security. */
+  async list(scope: TenantScope): Promise<InvitationSummary[]> {
+    const rows = await this.tenantDb.run(scope, (tx) =>
+      tx
+        .select()
+        .from(invitations)
+        .where(eq(invitations.organisationId, scope.organisationId))
+        .orderBy(desc(invitations.createdAt))
+        .limit(200),
+    );
     return rows.map(summarise);
   }
 

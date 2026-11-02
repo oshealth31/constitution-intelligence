@@ -9,11 +9,15 @@ import { createLoggingModule } from './logging/logging.module';
 import { AuthGuard } from './modules/access/auth.guard';
 import { CsrfGuard } from './modules/access/csrf.guard';
 import { PermissionGuard } from './modules/access/permission.guard';
+import { AiModule } from './modules/ai/ai.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { ConstitutionsModule } from './modules/constitutions/constitutions.module';
+import { FilesModule } from './modules/files/files.module';
 import { MailModule } from './modules/mail/mail.module';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
 import { PlatformModule } from './modules/platform/platform.module';
+import { TenancyModule } from './modules/tenancy/tenancy.module';
 
 /**
  * Root module. Feature modules live under src/modules.
@@ -31,12 +35,16 @@ export class AppModule {
         AppConfigModule.forRoot(config),
         createLoggingModule(config),
         DatabaseModule,
+        TenancyModule,
         AuditModule,
         MailModule,
         HealthModule,
         AuthModule,
         OrganisationsModule,
         PlatformModule,
+        FilesModule,
+        ConstitutionsModule,
+        AiModule,
       ],
       providers: [
         { provide: APP_FILTER, useClass: AllExceptionsFilter },

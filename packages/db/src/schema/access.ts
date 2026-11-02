@@ -19,6 +19,8 @@ export const organisations = pgTable('organisations', {
   slug: text('slug').notNull(),
   name: text('name').notNull(),
   status: text('status', { enum: ORGANISATION_STATUSES }).notNull().default('active'),
+  /** The organisation's current subscription (must belong to the same organisation). */
+  currentSubscriptionId: uuid('current_subscription_id'),
   ...timestamps,
 });
 

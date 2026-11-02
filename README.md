@@ -5,9 +5,9 @@ constitutions easy to access, search, understand and use.
 
 > _Empowering Your Governance, Safeguarding Your Future._
 
-**Status:** Stage 3 — authentication and access control. The API supports sign-in, sessions,
-password reset, invitation-based onboarding, organisation roles and permissions, and an
-append-only audit log. There are no web screens for these yet. It is **not production-ready**.
+**Status:** Stage 4 — multi-tenant foundation. On top of sign-in, roles and the audit log
+(Stage 3), every organisation's data is isolated by the application and by PostgreSQL
+Row-Level Security. There are no web screens yet. It is **not production-ready**.
 
 ## What is in this repository
 
@@ -85,6 +85,7 @@ in production.
 - [docs/configuration.md](docs/configuration.md) — environment variables, development vs production
 - [docs/architecture.md](docs/architecture.md) — architecture summary and where things go
 - [docs/security/authentication.md](docs/security/authentication.md) — roles, permissions, sign-in, sessions, audit events
+- [docs/security/tenant-isolation.md](docs/security/tenant-isolation.md) — how organisations are kept apart
 - [docs/decisions](docs/decisions) — short records of major technical decisions
 
 ## Ownership

@@ -2,3 +2,4 @@
 // Migrations are written by hand (see docs/decisions/0003) so that security features
 // such as triggers and Row-Level Security policies are explicit and reviewable.
 export * from './access';
+export * from './tenancy';

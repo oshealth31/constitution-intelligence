@@ -11,6 +11,9 @@ next-env.d.ts
 # Test output
 coverage/
 
+# Local file storage and other runtime data
+.data/
+
 # Environment files: real values must never be committed.
 .env
 .env.*

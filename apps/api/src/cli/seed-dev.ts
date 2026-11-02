@@ -1,31 +1,47 @@
-// Fills a LOCAL development database with a fictional organisation and one account per role.
+// Fills a LOCAL development database with TWO fictional organisations, sample constitution
+// content for each, and one account per role.
 //
 //   pnpm seed:dev
 //
 // Refuses to run unless APP_ENV=local. Every run gives each account a NEW random password,
 // printed once to this terminal. There is no shared or default password.
-import { memberships, organisations, users, type Database } from '@constitution/db';
+import { constitutions, memberships, organisations, users, type Database } from '@constitution/db';
 import { ROLE_LABELS, type OrganisationRole } from '@constitution/shared';
 import { eq } from 'drizzle-orm';
 import { DRIZZLE } from '../database/database.constants';
+import { createSampleTenantContent } from '../dev/sample-tenant';
 import { PasswordService } from '../modules/auth/password.service';
 import { generateRandomPassword } from '../modules/auth/tokens';
+import { FilesService } from '../modules/files/files.service';
+import { createTenantScope } from '../modules/tenancy/tenant-scope';
 import { createCliContext } from './cli-app';
 
-const SAMPLE_ORGANISATION = {
-  slug: 'sample-community-choir',
-  name: 'Sample Community Choir (fictional)',
-};
+const SAMPLE_ORGANISATIONS = [
+  {
+    slug: 'sample-community-choir',
+    name: 'Sample Community Choir (fictional)',
+    uniqueWord: 'nightingale',
+  },
+  { slug: 'sample-netball-club', name: 'Sample Netball Club (fictional)', uniqueWord: 'kingfisher' },
+] as const;
 
-const ACCOUNTS: { email: string; name: string; role: OrganisationRole | 'platform_super_admin' }[] =
-  [
-    { email: 'superadmin@sample.test', name: 'Sample Super Admin', role: 'platform_super_admin' },
-    { email: 'owner@sample.test', name: 'Sample Owner', role: 'owner' },
-    { email: 'admin@sample.test', name: 'Sample Administrator', role: 'admin' },
-    { email: 'reviewer@sample.test', name: 'Sample Content Reviewer', role: 'content_reviewer' },
-    { email: 'member@sample.test', name: 'Sample Member', role: 'member' },
-    { email: 'auditor@sample.test', name: 'Sample Auditor', role: 'auditor' },
-  ];
+type SampleSlug = (typeof SAMPLE_ORGANISATIONS)[number]['slug'];
+
+const ACCOUNTS: {
+  email: string;
+  name: string;
+  role: OrganisationRole | 'platform_super_admin';
+  organisation?: SampleSlug;
+}[] = [
+  { email: 'superadmin@sample.test', name: 'Sample Super Admin', role: 'platform_super_admin' },
+  { email: 'owner@sample.test', name: 'Choir Owner', role: 'owner', organisation: 'sample-community-choir' },
+  { email: 'admin@sample.test', name: 'Choir Administrator', role: 'admin', organisation: 'sample-community-choir' },
+  { email: 'reviewer@sample.test', name: 'Choir Content Reviewer', role: 'content_reviewer', organisation: 'sample-community-choir' },
+  { email: 'member@sample.test', name: 'Choir Member', role: 'member', organisation: 'sample-community-choir' },
+  { email: 'auditor@sample.test', name: 'Choir Auditor', role: 'auditor', organisation: 'sample-community-choir' },
+  { email: 'netball.owner@sample.test', name: 'Netball Owner', role: 'owner', organisation: 'sample-netball-club' },
+  { email: 'netball.member@sample.test', name: 'Netball Member', role: 'member', organisation: 'sample-netball-club' },
+];
 
 async function main(): Promise<void> {
   const { app, config } = await createCliContext();
@@ -39,17 +55,23 @@ async function main(): Promise<void> {
     }
     const db = app.get<Database>(DRIZZLE);
     const passwords = app.get(PasswordService);
+    const filesService = app.get(FilesService);
 
-    await db
-      .insert(organisations)
-      .values(SAMPLE_ORGANISATION)
-      .onConflictDoNothing({ target: organisations.slug });
-    const [organisation] = await db
-      .select()
-      .from(organisations)
-      .where(eq(organisations.slug, SAMPLE_ORGANISATION.slug));
+    const organisationIds = new Map<SampleSlug, string>();
+    for (const sample of SAMPLE_ORGANISATIONS) {
+      await db
+        .insert(organisations)
+        .values({ slug: sample.slug, name: sample.name })
+        .onConflictDoNothing({ target: organisations.slug });
+      const [organisation] = await db
+        .select({ id: organisations.id })
+        .from(organisations)
+        .where(eq(organisations.slug, sample.slug));
+      organisationIds.set(sample.slug, organisation!.id);
+    }
 
     const printed: string[] = [];
+    const ownerIds = new Map<SampleSlug, string>();
     for (const account of ACCOUNTS) {
       const password = generateRandomPassword();
       const passwordHash = await passwords.hash(password);
@@ -73,30 +95,51 @@ async function main(): Promise<void> {
           },
         })
         .returning();
-      if (!isSuperAdmin) {
+      if (account.organisation && !isSuperAdmin) {
+        const role = account.role as OrganisationRole;
         await db
           .insert(memberships)
-          .values({
-            organisationId: organisation!.id,
-            userId: user!.id,
-            role: account.role as OrganisationRole,
-          })
+          .values({ organisationId: organisationIds.get(account.organisation)!, userId: user!.id, role })
           .onConflictDoUpdate({
             target: [memberships.organisationId, memberships.userId],
-            set: { role: account.role as OrganisationRole, status: 'active' },
+            set: { role, status: 'active' },
           });
+        if (role === 'owner') {
+          ownerIds.set(account.organisation, user!.id);
+        }
       }
       printed.push(
-        `  ${ROLE_LABELS[account.role].padEnd(32)} ${account.email.padEnd(24)} ${password}`,
+        `  ${ROLE_LABELS[account.role].padEnd(32)} ${account.email.padEnd(28)} ${password}`,
       );
+    }
+
+    // Sample constitution content, created once per organisation.
+    for (const sample of SAMPLE_ORGANISATIONS) {
+      const organisationId = organisationIds.get(sample.slug)!;
+      const existing = await db
+        .select({ id: constitutions.id })
+        .from(constitutions)
+        .where(eq(constitutions.organisationId, organisationId))
+        .limit(1);
+      if (existing.length === 0) {
+        await createSampleTenantContent(
+          db,
+          filesService,
+          createTenantScope(organisationId, ownerIds.get(sample.slug)!, 'owner'),
+          { name: sample.name, uniqueWord: sample.uniqueWord },
+        );
+      }
     }
 
     console.log(
       [
         '',
-        `Fictional development data ready. Organisation: ${organisation!.name} (id ${organisation!.id})`,
+        'Fictional development data ready:',
+        ...SAMPLE_ORGANISATIONS.map(
+          (sample) => `  ${sample.name.padEnd(40)} id ${organisationIds.get(sample.slug)}`,
+        ),
         '',
-        '  Role                             Email                    Password (this run only)',
+        '  Role                             Email                        Password (this run only)',
         ...printed,
         '',
         'These accounts are fictional and for local development only. Run again to get new passwords.',

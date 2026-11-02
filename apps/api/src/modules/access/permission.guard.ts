@@ -13,6 +13,7 @@ import { and, eq } from 'drizzle-orm';
 import { requestMeta, type AppRequest } from '../../common/request-context';
 import { uuidSchema } from '../../common/validation';
 import { DRIZZLE } from '../../database/database.constants';
+import { createTenantScope } from '../tenancy/tenant-scope';
 import { AuditService } from '../audit/audit.service';
 import { REQUIRED_ORG_PERMISSION, REQUIRES_SUPER_ADMIN } from './decorators';
 
@@ -111,6 +112,7 @@ export class PermissionGuard implements CanActivate {
         membershipId: membership.id,
         organisationId,
         role: membership.role,
+        tenant: createTenantScope(organisationId, auth.userId, membership.role),
       };
     }
     return true;

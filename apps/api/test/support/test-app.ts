@@ -1,3 +1,6 @@
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
 import type { INestApplication } from '@nestjs/common';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
@@ -33,6 +36,7 @@ export interface TestContext {
 
 export async function startTestApp(overrides: Record<string, string> = {}): Promise<TestContext> {
   const database = await createTestDatabase();
+  const storageDir = mkdtempSync(path.join(tmpdir(), 'ci-storage-'));
   const config = loadConfig({
     NODE_ENV: 'test',
     APP_ENV: 'test',
@@ -42,6 +46,7 @@ export async function startTestApp(overrides: Record<string, string> = {}): Prom
     MAIL_TRANSPORT: 'log',
     // All test requests come from one address; per-address limits get their own test.
     LOGIN_MAX_ATTEMPTS_PER_IP: '10000',
+    STORAGE_LOCAL_DIR: storageDir,
     ...overrides,
   });
   const moduleRef = await Test.createTestingModule({
@@ -58,6 +63,7 @@ export async function startTestApp(overrides: Record<string, string> = {}): Prom
     async close() {
       await app.close();
       await database.drop();
+      rmSync(storageDir, { recursive: true, force: true });
     },
   };
 }

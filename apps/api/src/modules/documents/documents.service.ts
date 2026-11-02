@@ -96,7 +96,8 @@ export class DocumentsService {
     let failure: ExtractionIssue | null = null;
     try {
       validated = validateDocument(upload.fileName, upload.content, this.config.DOCUMENT_MAX_BYTES);
-      raw = validated.format === 'pdf' ? await extractPdf(upload.content) : extractDocx(upload.content);
+      raw =
+        validated.format === 'pdf' ? await extractPdf(upload.content) : extractDocx(upload.content);
     } catch (error) {
       if (error instanceof DocumentRejectedError) {
         await this.audit.record({
@@ -173,7 +174,9 @@ export class DocumentsService {
           organisationId: scope.organisationId,
           constitutionId,
           versionNumber,
-          label: upload.label ?? `Version ${versionNumber} (uploaded ${validated!.fileName})`.slice(0, 200),
+          label:
+            upload.label ??
+            `Version ${versionNumber} (uploaded ${validated!.fileName})`.slice(0, 200),
           status: 'draft',
           sourceFileId: fileId,
           createdByUserId: scope.userId,
@@ -194,7 +197,9 @@ export class DocumentsService {
           organisationId: scope.organisationId,
           versionId: version!.id,
           fileId,
-          content: raw.lines.map((line) => (line.autoNumber ? `${line.autoNumber} ${line.text}` : line.text)).join('\n'),
+          content: raw.lines
+            .map((line) => (line.autoNumber ? `${line.autoNumber} ${line.text}` : line.text))
+            .join('\n'),
         });
       }
       if (parsed && parsed.sections.length > 0) {
@@ -272,7 +277,9 @@ export class DocumentsService {
           reviewedAt: sections.reviewedAt,
         })
         .from(sections)
-        .where(and(eq(sections.versionId, versionId), eq(sections.organisationId, scope.organisationId)))
+        .where(
+          and(eq(sections.versionId, versionId), eq(sections.organisationId, scope.organisationId)),
+        )
         .orderBy(asc(sections.position));
       const history = await this.versionEvents(tx, scope, versionId);
       return {
@@ -349,7 +356,12 @@ export class DocumentsService {
   }
 
   /** A person has compared a flagged section with the original and confirms it is right. */
-  async resolveSection(scope: TenantScope, versionId: string, sectionId: string, meta: RequestMeta) {
+  async resolveSection(
+    scope: TenantScope,
+    versionId: string,
+    sectionId: string,
+    meta: RequestMeta,
+  ) {
     const refKey = await this.tenantDb.run(scope, async (tx) => {
       await this.assertDraft(tx, scope, versionId);
       const [updated] = await tx
@@ -360,7 +372,9 @@ export class DocumentsService {
       if (!updated) throw new NotFoundException('Section not found.');
       return updated.refKey;
     });
-    await this.record(scope, 'content.flag_resolved', 'version', versionId, meta, { section: refKey });
+    await this.record(scope, 'content.flag_resolved', 'version', versionId, meta, {
+      section: refKey,
+    });
     return this.getVersion(scope, versionId);
   }
 
@@ -410,7 +424,9 @@ export class DocumentsService {
       });
       return refKey;
     });
-    await this.record(scope, 'content.section_added', 'version', versionId, meta, { section: refKey });
+    await this.record(scope, 'content.section_added', 'version', versionId, meta, {
+      section: refKey,
+    });
     return this.getVersion(scope, versionId);
   }
 
@@ -425,7 +441,9 @@ export class DocumentsService {
       if (!removed) throw new NotFoundException('Section not found.');
       return removed.refKey;
     });
-    await this.record(scope, 'content.section_removed', 'version', versionId, meta, { section: refKey });
+    await this.record(scope, 'content.section_removed', 'version', versionId, meta, {
+      section: refKey,
+    });
     return this.getVersion(scope, versionId);
   }
 
@@ -470,7 +488,9 @@ export class DocumentsService {
   /** In review → back to draft, with the reason. */
   async requestChanges(scope: TenantScope, versionId: string, comment: string, meta: RequestMeta) {
     await this.transition(scope, versionId, ['in_review'], 'draft', 'changes_requested', comment);
-    await this.record(scope, 'version.changes_requested', 'version', versionId, meta, { reason: comment });
+    await this.record(scope, 'version.changes_requested', 'version', versionId, meta, {
+      reason: comment,
+    });
     return this.getVersion(scope, versionId);
   }
 
@@ -499,12 +519,23 @@ export class DocumentsService {
         .for('update');
       for (const old of previous) {
         await this.setStatus(tx, scope, old.id, 'superseded');
-        await this.addEvent(tx, scope, old.id, 'superseded', `Replaced by version ${version.versionNumber}.`);
+        await this.addEvent(
+          tx,
+          scope,
+          old.id,
+          'superseded',
+          `Replaced by version ${version.versionNumber}.`,
+        );
       }
       await tx
         .update(constitutionVersions)
         .set({ status: 'published', publishedAt: new Date(), updatedAt: new Date() })
-        .where(and(eq(constitutionVersions.id, versionId), eq(constitutionVersions.organisationId, scope.organisationId)));
+        .where(
+          and(
+            eq(constitutionVersions.id, versionId),
+            eq(constitutionVersions.organisationId, scope.organisationId),
+          ),
+        );
       await this.addEvent(tx, scope, versionId, 'published', null);
       return previous.map((row) => row.id);
     });
@@ -545,11 +576,14 @@ export class DocumentsService {
       if (version.status !== 'published' && !canSeeUnpublished(scope)) {
         throw new NotFoundException('Version not found.');
       }
-      if (!version.sourceFileId) throw new NotFoundException('This version has no original document.');
+      if (!version.sourceFileId)
+        throw new NotFoundException('This version has no original document.');
       const [row] = await tx
         .select()
         .from(files)
-        .where(and(eq(files.id, version.sourceFileId), eq(files.organisationId, scope.organisationId)));
+        .where(
+          and(eq(files.id, version.sourceFileId), eq(files.organisationId, scope.organisationId)),
+        );
       if (!row) throw new NotFoundException('This version has no original document.');
       return row;
     });
@@ -559,20 +593,39 @@ export class DocumentsService {
 
   // ----- Helpers ------------------------------------------------------------------------------
 
-  private async findConstitution(tx: TenantTransaction, scope: TenantScope, constitutionId: string) {
+  private async findConstitution(
+    tx: TenantTransaction,
+    scope: TenantScope,
+    constitutionId: string,
+  ) {
     const [constitution] = await tx
       .select({ id: constitutions.id, title: constitutions.title })
       .from(constitutions)
-      .where(and(eq(constitutions.id, constitutionId), eq(constitutions.organisationId, scope.organisationId)));
+      .where(
+        and(
+          eq(constitutions.id, constitutionId),
+          eq(constitutions.organisationId, scope.organisationId),
+        ),
+      );
     if (!constitution) throw new NotFoundException('Constitution not found.');
     return constitution;
   }
 
-  private async findVersion(tx: TenantTransaction, scope: TenantScope, versionId: string, lock = false) {
+  private async findVersion(
+    tx: TenantTransaction,
+    scope: TenantScope,
+    versionId: string,
+    lock = false,
+  ) {
     const query = tx
       .select()
       .from(constitutionVersions)
-      .where(and(eq(constitutionVersions.id, versionId), eq(constitutionVersions.organisationId, scope.organisationId)));
+      .where(
+        and(
+          eq(constitutionVersions.id, versionId),
+          eq(constitutionVersions.organisationId, scope.organisationId),
+        ),
+      );
     const [version] = lock ? await query.for('update') : await query;
     if (!version) throw new NotFoundException('Version not found.');
     return version;
@@ -612,11 +665,21 @@ export class DocumentsService {
     });
   }
 
-  private async setStatus(tx: TenantTransaction, scope: TenantScope, versionId: string, status: VersionStatus) {
+  private async setStatus(
+    tx: TenantTransaction,
+    scope: TenantScope,
+    versionId: string,
+    status: VersionStatus,
+  ) {
     await tx
       .update(constitutionVersions)
       .set({ status, updatedAt: new Date() })
-      .where(and(eq(constitutionVersions.id, versionId), eq(constitutionVersions.organisationId, scope.organisationId)));
+      .where(
+        and(
+          eq(constitutionVersions.id, versionId),
+          eq(constitutionVersions.organisationId, scope.organisationId),
+        ),
+      );
   }
 
   private async addEvent(
@@ -641,7 +704,13 @@ export class DocumentsService {
       FROM content_approvals a LEFT JOIN users u ON u.id = a.reviewer_user_id
       WHERE a.version_id = ${versionId} AND a.organisation_id = ${scope.organisationId}
       ORDER BY a.created_at ASC, a.id ASC`);
-    return result.rows as { id: string; event: string; comment: string | null; at: string; by: string | null }[];
+    return result.rows as {
+      id: string;
+      event: string;
+      comment: string | null;
+      at: string;
+      by: string | null;
+    }[];
   }
 
   private record(

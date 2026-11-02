@@ -133,7 +133,11 @@ export class DocumentsController {
   @Post('constitutions')
   @RequireOrgPermission('content.edit')
   @HttpCode(HttpStatus.CREATED)
-  createConstitution(@Tenant() tenant: TenantScope, @Body() body: unknown, @Req() request: AppRequest) {
+  createConstitution(
+    @Tenant() tenant: TenantScope,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
     const { title } = parseInput(createConstitutionSchema, body);
     return this.documents.createConstitution(tenant, title, requestMeta(request));
   }
@@ -229,7 +233,12 @@ export class DocumentsController {
     @Req() request: AppRequest,
   ) {
     const input = parseInput(addSectionSchema, body);
-    return this.documents.addSection(tenant, parseId(versionId, 'Version'), input, requestMeta(request));
+    return this.documents.addSection(
+      tenant,
+      parseId(versionId, 'Version'),
+      input,
+      requestMeta(request),
+    );
   }
 
   @Delete('versions/:versionId/sections/:sectionId')
@@ -251,31 +260,66 @@ export class DocumentsController {
   @Post('versions/:versionId/submit')
   @RequireOrgPermission('content.edit')
   @HttpCode(HttpStatus.OK)
-  submit(@Tenant() tenant: TenantScope, @Param('versionId') versionId: string, @Body() body: unknown, @Req() request: AppRequest) {
+  submit(
+    @Tenant() tenant: TenantScope,
+    @Param('versionId') versionId: string,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
     const input = parseInput(submitSchema, body);
-    return this.documents.submit(tenant, parseId(versionId, 'Version'), input.comment || null, requestMeta(request));
+    return this.documents.submit(
+      tenant,
+      parseId(versionId, 'Version'),
+      input.comment || null,
+      requestMeta(request),
+    );
   }
 
   @Post('versions/:versionId/approve')
   @RequireOrgPermission('content.approve')
   @HttpCode(HttpStatus.OK)
-  approve(@Tenant() tenant: TenantScope, @Param('versionId') versionId: string, @Body() body: unknown, @Req() request: AppRequest) {
+  approve(
+    @Tenant() tenant: TenantScope,
+    @Param('versionId') versionId: string,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
     const input = parseInput(approveSchema, body ?? {});
-    return this.documents.approve(tenant, parseId(versionId, 'Version'), input.comment || null, requestMeta(request));
+    return this.documents.approve(
+      tenant,
+      parseId(versionId, 'Version'),
+      input.comment || null,
+      requestMeta(request),
+    );
   }
 
   @Post('versions/:versionId/request-changes')
   @RequireOrgPermission('content.approve')
   @HttpCode(HttpStatus.OK)
-  requestChanges(@Tenant() tenant: TenantScope, @Param('versionId') versionId: string, @Body() body: unknown, @Req() request: AppRequest) {
+  requestChanges(
+    @Tenant() tenant: TenantScope,
+    @Param('versionId') versionId: string,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
     const input = parseInput(reasonSchema, body);
-    return this.documents.requestChanges(tenant, parseId(versionId, 'Version'), input.comment, requestMeta(request));
+    return this.documents.requestChanges(
+      tenant,
+      parseId(versionId, 'Version'),
+      input.comment,
+      requestMeta(request),
+    );
   }
 
   @Post('versions/:versionId/publish')
   @RequireOrgPermission('content.approve')
   @HttpCode(HttpStatus.OK)
-  publish(@Tenant() tenant: TenantScope, @Param('versionId') versionId: string, @Body() body: unknown, @Req() request: AppRequest) {
+  publish(
+    @Tenant() tenant: TenantScope,
+    @Param('versionId') versionId: string,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
     parseInput(publishSchema, body);
     return this.documents.publish(tenant, parseId(versionId, 'Version'), requestMeta(request));
   }
@@ -283,16 +327,33 @@ export class DocumentsController {
   @Post('versions/:versionId/archive')
   @RequireOrgPermission('content.approve')
   @HttpCode(HttpStatus.OK)
-  archive(@Tenant() tenant: TenantScope, @Param('versionId') versionId: string, @Body() body: unknown, @Req() request: AppRequest) {
+  archive(
+    @Tenant() tenant: TenantScope,
+    @Param('versionId') versionId: string,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
     const input = parseInput(reasonSchema, body);
-    return this.documents.archive(tenant, parseId(versionId, 'Version'), input.comment, requestMeta(request));
+    return this.documents.archive(
+      tenant,
+      parseId(versionId, 'Version'),
+      input.comment,
+      requestMeta(request),
+    );
   }
 
   /** The original uploaded document, always as a download (never shown inside our pages). */
   @Get('versions/:versionId/source')
   @RequireOrgPermission('constitution.read')
-  async source(@Tenant() tenant: TenantScope, @Param('versionId') versionId: string, @Res() response: Response): Promise<void> {
-    const { fileName, contentType, content } = await this.documents.readSource(tenant, parseId(versionId, 'Version'));
+  async source(
+    @Tenant() tenant: TenantScope,
+    @Param('versionId') versionId: string,
+    @Res() response: Response,
+  ): Promise<void> {
+    const { fileName, contentType, content } = await this.documents.readSource(
+      tenant,
+      parseId(versionId, 'Version'),
+    );
     const asciiName = fileName.replace(/[^A-Za-z0-9._ -]/g, '_');
     response
       .status(200)

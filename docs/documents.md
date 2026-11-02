@@ -16,14 +16,14 @@ upload ──► Draft ──► In review ──► Approved ──► Publishe
                 requested
 ```
 
-| Step                   | Who                                     | Rules                                                                                                                      |
-| ---------------------- | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Upload                 | Owner, Administrator, Content Reviewer  | Always creates a new **draft** version. Never published automatically.                                                     |
-| Check and correct      | Owner, Administrator, Content Reviewer  | Drafts only. Edit number, heading, text and type; add or remove sections; mark flagged sections as checked.               |
-| Send for approval      | Owner, Administrator, Content Reviewer  | Refused while any section is still flagged, if the text could not be read, or without confirming the text was compared with the original. |
-| Approve / send back    | **Owner, Administrator**                | "Send back" needs a reason and returns the version to draft.                                                               |
-| Make current (publish) | **Owner, Administrator**                | Only an approved version, with explicit confirmation. The previous current version becomes **superseded**, unchanged.      |
-| Archive                | **Owner, Administrator**                | Any version except the current one, with a reason.                                                                         |
+| Step                   | Who                                    | Rules                                                                                                                                     |
+| ---------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Upload                 | Owner, Administrator, Content Reviewer | Always creates a new **draft** version. Never published automatically.                                                                    |
+| Check and correct      | Owner, Administrator, Content Reviewer | Drafts only. Edit number, heading, text and type; add or remove sections; mark flagged sections as checked.                               |
+| Send for approval      | Owner, Administrator, Content Reviewer | Refused while any section is still flagged, if the text could not be read, or without confirming the text was compared with the original. |
+| Approve / send back    | **Owner, Administrator**               | "Send back" needs a reason and returns the version to draft.                                                                              |
+| Make current (publish) | **Owner, Administrator**               | Only an approved version, with explicit confirmation. The previous current version becomes **superseded**, unchanged.                     |
+| Archive                | **Owner, Administrator**               | Any version except the current one, with a reason.                                                                                        |
 
 Members and Auditors can read only the published (current) version, and download its original.
 
@@ -74,10 +74,10 @@ Each check runs before anything is stored or opened:
 
 ## Text extraction
 
-| Format | How                                                                                                                                                       |
-| ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Format | How                                                                                                                                                                                                                              |
+| ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | PDF    | Mozilla PDF.js reads the text layer. JavaScript evaluation, fonts and rendering are all switched off. Lines are rebuilt from positions; repeated headers, footers and page numbers are removed; larger text counts as a heading. |
-| DOCX   | Our own small reader: paragraphs, heading styles (Title, Heading 1–2 and outline levels) and Word's automatic numbering ("1.", "(a)", "i."). Text inside deleted tracked changes is left out. |
+| DOCX   | Our own small reader: paragraphs, heading styles (Title, Heading 1–2 and outline levels) and Word's automatic numbering ("1.", "(a)", "i."). Text inside deleted tracked changes is left out.                                    |
 
 The structure reader then recognises:
 
@@ -90,14 +90,14 @@ The structure reader then recognises:
 
 ### What gets flagged for a person to check
 
-| Flag (on a section)                                                   | Issue (whole document)                                                   |
-| --------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| Numbering gap ("Clause 4 follows 2")                                  | No text could be read (for example a scanned image). Status **failed**, so it cannot be submitted. |
-| The same number twice, or numbers out of order                        | Very little text found                                                   |
-| A list that does not start at its first item, or an item without a parent clause | No structure recognised: the text is kept as one block to divide by hand |
-| Unreadable characters (replacement characters or `(cid:…)` codes)     | Pages without text (probably scanned pages)                              |
-| Very long sections (possibly several clauses merged)                  | Word tracked changes present                                             |
-| Headings with no text under them, or parts with no clauses            |                                                                          |
+| Flag (on a section)                                                              | Issue (whole document)                                                                             |
+| -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Numbering gap ("Clause 4 follows 2")                                             | No text could be read (for example a scanned image). Status **failed**, so it cannot be submitted. |
+| The same number twice, or numbers out of order                                   | Very little text found                                                                             |
+| A list that does not start at its first item, or an item without a parent clause | No structure recognised: the text is kept as one block to divide by hand                           |
+| Unreadable characters (replacement characters or `(cid:…)` codes)                | Pages without text (probably scanned pages)                                                        |
+| Very long sections (possibly several clauses merged)                             | Word tracked changes present                                                                       |
+| Headings with no text under them, or parts with no clauses                       |                                                                                                    |
 
 Extraction status is **Text read** when nothing was flagged, **Needs checking** when anything was,
 and **Could not be read** when no text was found or reading failed unexpectedly. In the last case
@@ -115,16 +115,16 @@ superseded, archived), with who did it, when, and any comment.
 
 ## API endpoints (Stage 7)
 
-| Method & path (under `/api/v1/organisations/:id`)                                                                         | Permission          |
-| ------------------------------------------------------------------------------------------------------------------------- | ------------------- |
-| `POST /constitutions` `{ title }`                                                                                         | `content.edit`      |
-| `POST /constitutions/:cid/versions?label=…`: the file as the request body, name in `X-File-Name`                          | `content.edit`      |
-| `GET /constitutions/:cid/history`                                                                                         | `content.review`    |
-| `GET /versions/:vid/review`                                                                                               | `content.review`    |
-| `PATCH /versions/:vid/sections/:sid`, `POST /versions/:vid/sections`, `DELETE /versions/:vid/sections/:sid`, `POST /versions/:vid/sections/:sid/resolve` | `content.edit`      |
-| `POST /versions/:vid/submit` `{ confirmed: true, comment? }`                                                              | `content.edit`      |
-| `POST /versions/:vid/approve`, `/request-changes`, `/publish` `{ confirmed: true }`, `/archive`                           | `content.approve`   |
-| `GET /versions/:vid/source`                                                                                               | `constitution.read` (current version only for members) |
+| Method & path (under `/api/v1/organisations/:id`)                                                                                                        | Permission                                             |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| `POST /constitutions` `{ title }`                                                                                                                        | `content.edit`                                         |
+| `POST /constitutions/:cid/versions?label=…`: the file as the request body, name in `X-File-Name`                                                         | `content.edit`                                         |
+| `GET /constitutions/:cid/history`                                                                                                                        | `content.review`                                       |
+| `GET /versions/:vid/review`                                                                                                                              | `content.review`                                       |
+| `PATCH /versions/:vid/sections/:sid`, `POST /versions/:vid/sections`, `DELETE /versions/:vid/sections/:sid`, `POST /versions/:vid/sections/:sid/resolve` | `content.edit`                                         |
+| `POST /versions/:vid/submit` `{ confirmed: true, comment? }`                                                                                             | `content.edit`                                         |
+| `POST /versions/:vid/approve`, `/request-changes`, `/publish` `{ confirmed: true }`, `/archive`                                                          | `content.approve`                                      |
+| `GET /versions/:vid/source`                                                                                                                              | `constitution.read` (current version only for members) |
 
 ## Tests
 

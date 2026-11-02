@@ -23,7 +23,9 @@ export function decodeXml(text: string): string {
 }
 
 function safeCodePoint(code: number, fallback: string): string {
-  return Number.isInteger(code) && code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : fallback;
+  return Number.isInteger(code) && code > 0 && code <= 0x10ffff
+    ? String.fromCodePoint(code)
+    : fallback;
 }
 
 function attribute(xml: string, tag: string, name = 'w:val'): string | undefined {
@@ -42,7 +44,9 @@ function readNumbering(xml: string | null): Map<string, Level[]> {
   const result = new Map<string, Level[]>();
   if (!xml) return result;
   const abstracts = new Map<string, Level[]>();
-  for (const match of xml.matchAll(/<w:abstractNum\b[^>]*w:abstractNumId="([^"]+)"[^>]*>([\s\S]*?)<\/w:abstractNum>/g)) {
+  for (const match of xml.matchAll(
+    /<w:abstractNum\b[^>]*w:abstractNumId="([^"]+)"[^>]*>([\s\S]*?)<\/w:abstractNum>/g,
+  )) {
     const levels: Level[] = [];
     for (const lvl of match[2]!.matchAll(/<w:lvl\b[^>]*w:ilvl="(\d)"[^>]*>([\s\S]*?)<\/w:lvl>/g)) {
       levels[Number(lvl[1])] = {
@@ -63,8 +67,19 @@ function readNumbering(xml: string | null): Map<string, Level[]> {
 
 function roman(value: number): string {
   const numerals: [number, string][] = [
-    [1000, 'm'], [900, 'cm'], [500, 'd'], [400, 'cd'], [100, 'c'], [90, 'xc'],
-    [50, 'l'], [40, 'xl'], [10, 'x'], [9, 'ix'], [5, 'v'], [4, 'iv'], [1, 'i'],
+    [1000, 'm'],
+    [900, 'cm'],
+    [500, 'd'],
+    [400, 'cd'],
+    [100, 'c'],
+    [90, 'xc'],
+    [50, 'l'],
+    [40, 'xl'],
+    [10, 'x'],
+    [9, 'ix'],
+    [5, 'v'],
+    [4, 'iv'],
+    [1, 'i'],
   ];
   let rest = value;
   let output = '';
@@ -116,7 +131,9 @@ interface StyleInfo {
 function readStyles(xml: string | null): Map<string, StyleInfo> {
   const styles = new Map<string, StyleInfo>();
   if (!xml) return styles;
-  for (const match of xml.matchAll(/<w:style\b[^>]*w:styleId="([^"]+)"[^>]*>([\s\S]*?)<\/w:style>/g)) {
+  for (const match of xml.matchAll(
+    /<w:style\b[^>]*w:styleId="([^"]+)"[^>]*>([\s\S]*?)<\/w:style>/g,
+  )) {
     const id = match[1]!;
     const body = match[2]!;
     const name = (attribute(body, 'w:name') ?? '').toLowerCase();
@@ -201,7 +218,8 @@ export function extractDocx(content: Buffer): RawExtraction {
     if (numId && levels && levels[ilvl]) {
       const current = counters.get(numId) ?? [];
       for (let level = 0; level <= ilvl; level += 1) {
-        if (current[level] === undefined) current[level] = (levels[level]?.start ?? 1) - (level === ilvl ? 1 : 0);
+        if (current[level] === undefined)
+          current[level] = (levels[level]?.start ?? 1) - (level === ilvl ? 1 : 0);
       }
       current[ilvl] = (current[ilvl] ?? 0) + 1;
       current.length = ilvl + 1; // deeper levels restart
@@ -211,7 +229,10 @@ export function extractDocx(content: Buffer): RawExtraction {
         autoNumber = format.text
           .replace(/%(\d)/g, (_whole, digit: string) => {
             const level = Number(digit) - 1;
-            return formatNumber(current[level] ?? levels[level]?.start ?? 1, levels[level]?.format ?? 'decimal');
+            return formatNumber(
+              current[level] ?? levels[level]?.start ?? 1,
+              levels[level]?.format ?? 'decimal',
+            );
           })
           .trim();
       }

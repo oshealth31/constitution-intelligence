@@ -70,7 +70,13 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
 
   const url = (org: Org, path: string) => `/api/v1/organisations/${org.id}${path}`;
 
-  function upload(agent: TestAgent, org: Org, fileName: string, content: Buffer, options: { constitutionId?: string; label?: string; contentType?: string } = {}) {
+  function upload(
+    agent: TestAgent,
+    org: Org,
+    fileName: string,
+    content: Buffer,
+    options: { constitutionId?: string; label?: string; contentType?: string } = {},
+  ) {
     const constitutionId = options.constitutionId ?? org.ids.constitutionId;
     const query = options.label ? `?label=${encodeURIComponent(options.label)}` : '';
     return agent
@@ -107,7 +113,12 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
         ['macro.docx', makeSampleDocx([{ text: 'x' }], { macroEnabled: true }), /macros/],
         [
           'scripted.pdf',
-          Buffer.from(pdf.toString('latin1').replace('/Type /Catalog', '/Type /Catalog /OpenAction << /S /JavaScript /JS (x) >>'), 'latin1'),
+          Buffer.from(
+            pdf
+              .toString('latin1')
+              .replace('/Type /Catalog', '/Type /Catalog /OpenAction << /S /JavaScript /JS (x) >>'),
+            'latin1',
+          ),
           /scripts or actions/,
         ],
         ['damaged.pdf', Buffer.from('%PDF-1.7\nthis is not a real pdf'), /could not be opened/],
@@ -117,11 +128,18 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
         expect(response.status, fileName).toBe(400);
         expect(response.body.error.message, fileName).toMatch(message);
       }
-      const big = await upload(a.admin, a, 'big.pdf', Buffer.concat([pdf, Buffer.alloc(MAX_BYTES)]));
+      const big = await upload(
+        a.admin,
+        a,
+        'big.pdf',
+        Buffer.concat([pdf, Buffer.alloc(MAX_BYTES)]),
+      );
       expect(big.status).toBe(413);
 
       const rejected = await auditEventsFor(context.db, 'document.rejected');
-      expect(rejected.filter((event) => event.organisationId === a.id).length).toBeGreaterThanOrEqual(cases.length);
+      expect(
+        rejected.filter((event) => event.organisationId === a.id).length,
+      ).toBeGreaterThanOrEqual(cases.length);
     });
 
     it('needs the file itself, not a form or JSON, and a file name', async () => {
@@ -140,7 +158,9 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
   describe('upload, extraction and private storage', () => {
     it('stores the original privately and creates a DRAFT version that members cannot see', async () => {
       const pdf = constitutionPdf('Riverside Choir');
-      const response = await upload(a.admin, a, 'Riverside constitution.pdf', pdf, { label: 'Amended 2026' });
+      const response = await upload(a.admin, a, 'Riverside constitution.pdf', pdf, {
+        label: 'Amended 2026',
+      });
       expect(response.status).toBe(201);
       const version = response.body;
       expect(version).toMatchObject({
@@ -149,15 +169,28 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
         status: 'draft',
         editable: true,
         extraction: { status: 'succeeded', meta: { format: 'pdf', pageCount: 1, sectionCount: 8 } },
-        source: { fileName: 'Riverside constitution.pdf', contentType: 'application/pdf', sizeBytes: pdf.length },
+        source: {
+          fileName: 'Riverside constitution.pdf',
+          contentType: 'application/pdf',
+          sizeBytes: pdf.length,
+        },
       });
       expect(version.sections.map((s: Section) => s.number)).toEqual([
-        'Part 1', '1', '2', '(a)', '(b)', 'Part 2', '3', '4',
+        'Part 1',
+        '1',
+        '2',
+        '(a)',
+        '(b)',
+        'Part 2',
+        '3',
+        '4',
       ]);
 
       // Stored in the organisation's own private folder, marked as a constitution source.
       const [file] = (
-        await context.db.execute(sql`SELECT storage_key, purpose FROM files WHERE id = ${version.source.id}`)
+        await context.db.execute(
+          sql`SELECT storage_key, purpose FROM files WHERE id = ${version.source.id}`,
+        )
       ).rows as { storage_key: string; purpose: string }[];
       expect(file!.storage_key.startsWith(`tenants/${a.id}/documents/`)).toBe(true);
       expect(file!.purpose).toBe('constitution_source');
@@ -171,7 +204,10 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
 
       for (const action of ['document.uploaded', 'content.extracted']) {
         const events = await auditEventsFor(context.db, action);
-        expect(events.some((event) => event.targetId === version.id), action).toBe(true);
+        expect(
+          events.some((event) => event.targetId === version.id),
+          action,
+        ).toBe(true);
       }
     });
 
@@ -190,7 +226,9 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
       const response = await upload(a.reviewer, a, 'constitution.docx', docx);
       expect(response.status).toBe(201);
       expect(response.body.extraction.status).toBe('needs_review');
-      expect(response.body.extraction.issues.map((issue: { code: string }) => issue.code)).toContain('tracked_changes');
+      expect(
+        response.body.extraction.issues.map((issue: { code: string }) => issue.code),
+      ).toContain('tracked_changes');
       expect(response.body.sections.map((s: Section) => [s.number, s.heading])).toEqual([
         ['1', 'Name'],
         ['2', 'Objectives'],
@@ -204,7 +242,14 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
         a.admin,
         a,
         'gaps.pdf',
-        makeSamplePdf([[{ text: '1. Name' }, { text: 'Text one.' }, { text: '3. Money' }, { text: 'Text three.' }]]),
+        makeSamplePdf([
+          [
+            { text: '1. Name' },
+            { text: 'Text one.' },
+            { text: '3. Money' },
+            { text: 'Text three.' },
+          ],
+        ]),
       );
       expect(gaps.body.extraction.status).toBe('needs_review');
       const flagged = gaps.body.sections.filter((s: Section) => s.needsReview);
@@ -214,7 +259,10 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
       const scanned = await upload(a.admin, a, 'scanned.pdf', makeSamplePdf([[], []]));
       expect(scanned.status).toBe(201);
       expect(scanned.body.extraction.status).toBe('failed');
-      expect(scanned.body.extraction.issues[0]).toMatchObject({ code: 'no_text', severity: 'error' });
+      expect(scanned.body.extraction.issues[0]).toMatchObject({
+        code: 'no_text',
+        severity: 'error',
+      });
       const refused = await a.admin
         .post(url(a, `/versions/${scanned.body.id}/submit`))
         .send({ confirmed: true })
@@ -239,7 +287,10 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
         a.admin,
         a,
         'new.pdf',
-        constitutionPdf('Riverside Choir', ['6. Finance', 'The Treasurer keeps the accounts (heron).']),
+        constitutionPdf('Riverside Choir', [
+          '6. Finance',
+          'The Treasurer keeps the accounts (heron).',
+        ]),
         { label: 'Version with a gap' },
       );
       versionId = response.body.id;
@@ -249,7 +300,10 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
     it('cannot be submitted while flagged sections are unchecked, or without confirmation', async () => {
       const flagged = sections.filter((s) => s.needsReview);
       expect(flagged.map((s) => s.number)).toEqual(['6']);
-      await a.reviewer.post(url(a, `/versions/${versionId}/submit`)).send({}).expect(400);
+      await a.reviewer
+        .post(url(a, `/versions/${versionId}/submit`))
+        .send({})
+        .expect(400);
       const blocked = await a.reviewer
         .post(url(a, `/versions/${versionId}/submit`))
         .send({ confirmed: true })
@@ -278,7 +332,10 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
       expect(resolved.body.sectionsNeedingReview).toBe(0);
       for (const action of ['content.section_edited', 'content.flag_resolved']) {
         const events = await auditEventsFor(context.db, action);
-        expect(events.some((event) => event.targetId === versionId), action).toBe(true);
+        expect(
+          events.some((event) => event.targetId === versionId),
+          action,
+        ).toBe(true);
       }
     });
 
@@ -286,7 +343,13 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
       const last = sections[sections.length - 1]!;
       const added = await a.reviewer
         .post(url(a, `/versions/${versionId}/sections`))
-        .send({ afterSectionId: last.id, kind: 'clause', number: '6', heading: 'Dissolution', body: 'Remaining money goes to a similar charity.' })
+        .send({
+          afterSectionId: last.id,
+          kind: 'clause',
+          number: '6',
+          heading: 'Dissolution',
+          body: 'Remaining money goes to a similar charity.',
+        })
         .expect(201);
       const newSection = added.body.sections.find((s: Section) => s.heading === 'Dissolution');
       expect(newSection).toBeDefined();
@@ -310,7 +373,10 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
       expect(locked.body.error.message).toMatch(/can no longer be edited/);
 
       for (const agent of [a.reviewer, a.member, a.auditor]) {
-        await agent.post(url(a, `/versions/${versionId}/approve`)).send({}).expect(403);
+        await agent
+          .post(url(a, `/versions/${versionId}/approve`))
+          .send({})
+          .expect(403);
       }
       const approved = await a.admin
         .post(url(a, `/versions/${versionId}/approve`))
@@ -339,13 +405,21 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
         tx.execute(sql`UPDATE constitution_versions SET status = 'draft' WHERE id = ${versionId}`),
       );
       await expect(status).rejects.toMatchObject({
-        cause: expect.objectContaining({ message: expect.stringMatching(/cannot move from approved to draft/) }),
+        cause: expect.objectContaining({
+          message: expect.stringMatching(/cannot move from approved to draft/),
+        }),
       });
     });
 
     it('publishes only on an explicit, confirmed step; the previous version is kept as superseded', async () => {
-      await a.reviewer.post(url(a, `/versions/${versionId}/publish`)).send({ confirmed: true }).expect(403);
-      await a.admin.post(url(a, `/versions/${versionId}/publish`)).send({}).expect(400);
+      await a.reviewer
+        .post(url(a, `/versions/${versionId}/publish`))
+        .send({ confirmed: true })
+        .expect(403);
+      await a.admin
+        .post(url(a, `/versions/${versionId}/publish`))
+        .send({})
+        .expect(400);
       const published = await a.admin
         .post(url(a, `/versions/${versionId}/publish`))
         .send({ confirmed: true })
@@ -355,17 +429,25 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
       const library = await a.member.get(url(a, '/library')).expect(200);
       expect(library.body[0].published.versionId).toBe(versionId);
       const search = await a.member.get(url(a, '/search?q=heron')).expect(200);
-      expect(search.body.some((match: { versionId: string }) => match.versionId === versionId)).toBe(true);
+      expect(
+        search.body.some((match: { versionId: string }) => match.versionId === versionId),
+      ).toBe(true);
 
-      const old = await a.reviewer.get(url(a, `/versions/${a.ids.publishedVersionId}/review`)).expect(200);
+      const old = await a.reviewer
+        .get(url(a, `/versions/${a.ids.publishedVersionId}/review`))
+        .expect(200);
       expect(old.body.status).toBe('superseded');
       expect(old.body.sections.length).toBe(3); // kept unchanged
-      expect(old.body.history.map((event: { event: string }) => event.event)).toContain('superseded');
+      expect(old.body.history.map((event: { event: string }) => event.event)).toContain(
+        'superseded',
+      );
 
       const history = await a.reviewer
         .get(url(a, `/constitutions/${a.ids.constitutionId}/history`))
         .expect(200);
-      const current = history.body.versions.find((version: { id: string }) => version.id === versionId);
+      const current = history.body.versions.find(
+        (version: { id: string }) => version.id === versionId,
+      );
       expect(current.history.map((event: { event: string }) => event.event)).toEqual([
         'submitted',
         'approved',
@@ -374,12 +456,18 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
       expect(current.history[0]).toMatchObject({ comment: 'Checked against the signed copy.' });
       for (const action of ['version.submitted', 'version.approved', 'version.published']) {
         const events = await auditEventsFor(context.db, action);
-        expect(events.some((event) => event.targetId === versionId), action).toBe(true);
+        expect(
+          events.some((event) => event.targetId === versionId),
+          action,
+        ).toBe(true);
       }
     });
 
     it('lets members download the original of the current version, as a file', async () => {
-      const response = await a.member.get(url(a, `/versions/${versionId}/source`)).buffer(true).expect(200);
+      const response = await a.member
+        .get(url(a, `/versions/${versionId}/source`))
+        .buffer(true)
+        .expect(200);
       expect(response.headers['content-type']).toBe('application/pdf');
       expect(response.headers['content-disposition']).toMatch(/^attachment; filename="new.pdf"/);
       expect(response.headers['x-content-type-options']).toBe('nosniff');
@@ -387,7 +475,10 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
     });
 
     it('does not archive the current version; can archive others with a reason', async () => {
-      await a.admin.post(url(a, `/versions/${versionId}/archive`)).send({ comment: 'Old one' }).expect(409);
+      await a.admin
+        .post(url(a, `/versions/${versionId}/archive`))
+        .send({ comment: 'Old one' })
+        .expect(409);
       await a.admin
         .post(url(a, `/versions/${a.ids.draftVersionId}/archive`))
         .send({ comment: '' })
@@ -402,8 +493,14 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
     it('sends a version back to draft when changes are requested', async () => {
       const response = await upload(a.admin, a, 'another.pdf', constitutionPdf('Riverside Choir'));
       const id = response.body.id as string;
-      await a.admin.post(url(a, `/versions/${id}/submit`)).send({ confirmed: true }).expect(200);
-      await a.admin.post(url(a, `/versions/${id}/request-changes`)).send({}).expect(400);
+      await a.admin
+        .post(url(a, `/versions/${id}/submit`))
+        .send({ confirmed: true })
+        .expect(200);
+      await a.admin
+        .post(url(a, `/versions/${id}/request-changes`))
+        .send({})
+        .expect(400);
       const back = await a.admin
         .post(url(a, `/versions/${id}/request-changes`))
         .send({ comment: 'Clause 3 wording differs from the signed copy.' })
@@ -414,11 +511,17 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
         comment: 'Clause 3 wording differs from the signed copy.',
       });
       // A draft cannot jump straight to published.
-      await a.admin.post(url(a, `/versions/${id}/publish`)).send({ confirmed: true }).expect(409);
+      await a.admin
+        .post(url(a, `/versions/${id}/publish`))
+        .send({ confirmed: true })
+        .expect(409);
     });
 
     it('creates new constitutions for other documents', async () => {
-      const created = await a.admin.post(url(a, '/constitutions')).send({ title: 'Code of conduct' }).expect(201);
+      const created = await a.admin
+        .post(url(a, '/constitutions'))
+        .send({ title: 'Code of conduct' })
+        .expect(201);
       const response = await upload(a.admin, a, 'conduct.pdf', constitutionPdf('Conduct'), {
         constitutionId: created.body.id,
       });
@@ -434,19 +537,42 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
       const bSection = own.body.sections[0].id as string;
 
       // B's records through A's URL, and B's URL as A's administrator: both "not found".
-      expect((await upload(a.admin, a, 'x.pdf', constitutionPdf('X'), { constitutionId: b.ids.constitutionId })).status).toBe(404);
+      expect(
+        (
+          await upload(a.admin, a, 'x.pdf', constitutionPdf('X'), {
+            constitutionId: b.ids.constitutionId,
+          })
+        ).status,
+      ).toBe(404);
       expect((await upload(a.admin, b, 'x.pdf', constitutionPdf('X'))).status).toBe(404);
       for (const org of [a, b]) {
         await a.admin.get(url(org, `/versions/${bVersion}/review`)).expect(404);
         await a.admin.get(url(org, `/versions/${bVersion}/source`)).expect(404);
         await a.admin.get(url(org, `/constitutions/${b.ids.constitutionId}/history`)).expect(404);
-        await a.admin.patch(url(org, `/versions/${bVersion}/sections/${bSection}`)).send({ body: 'x' }).expect(404);
-        await a.admin.post(url(org, `/versions/${bVersion}/sections/${bSection}/resolve`)).expect(404);
+        await a.admin
+          .patch(url(org, `/versions/${bVersion}/sections/${bSection}`))
+          .send({ body: 'x' })
+          .expect(404);
+        await a.admin
+          .post(url(org, `/versions/${bVersion}/sections/${bSection}/resolve`))
+          .expect(404);
         await a.admin.delete(url(org, `/versions/${bVersion}/sections/${bSection}`)).expect(404);
-        await a.admin.post(url(org, `/versions/${bVersion}/submit`)).send({ confirmed: true }).expect(404);
-        await a.owner.post(url(org, `/versions/${bVersion}/approve`)).send({}).expect(404);
-        await a.owner.post(url(org, `/versions/${bVersion}/publish`)).send({ confirmed: true }).expect(404);
-        await a.owner.post(url(org, `/versions/${bVersion}/archive`)).send({ comment: 'Taken over' }).expect(404);
+        await a.admin
+          .post(url(org, `/versions/${bVersion}/submit`))
+          .send({ confirmed: true })
+          .expect(404);
+        await a.owner
+          .post(url(org, `/versions/${bVersion}/approve`))
+          .send({})
+          .expect(404);
+        await a.owner
+          .post(url(org, `/versions/${bVersion}/publish`))
+          .send({ confirmed: true })
+          .expect(404);
+        await a.owner
+          .post(url(org, `/versions/${bVersion}/archive`))
+          .send({ comment: 'Taken over' })
+          .expect(404);
       }
       // A section of B's version cannot be reached through one of A's versions either.
       await a.admin

@@ -169,7 +169,8 @@ function Reader() {
               Download the original document
             </a>
             <span className="block text-sm text-slate-600">
-              The original is the official text. If anything here differs from it, the original is correct.
+              The original is the official text. If anything here differs from it, the original is
+              correct.
             </span>
           </p>
         )}

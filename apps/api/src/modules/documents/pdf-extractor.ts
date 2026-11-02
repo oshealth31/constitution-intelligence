@@ -24,11 +24,16 @@ interface TextItem {
 }
 
 interface PdfJs {
-  getDocument(options: Record<string, unknown>): { promise: Promise<PdfDocument>; destroy(): Promise<void> };
+  getDocument(options: Record<string, unknown>): {
+    promise: Promise<PdfDocument>;
+    destroy(): Promise<void>;
+  };
 }
 interface PdfDocument {
   numPages: number;
-  getPage(page: number): Promise<{ getTextContent(): Promise<{ items: unknown[] }>; cleanup(): void }>;
+  getPage(
+    page: number,
+  ): Promise<{ getTextContent(): Promise<{ items: unknown[] }>; cleanup(): void }>;
   destroy(): Promise<void>;
 }
 
@@ -56,7 +61,14 @@ function provideDrawingStubs(): void {
       f = 0;
       constructor(init?: number[]) {
         if (Array.isArray(init) && init.length === 6) {
-          [this.a, this.b, this.c, this.d, this.e, this.f] = init as [number, number, number, number, number, number];
+          [this.a, this.b, this.c, this.d, this.e, this.f] = init as [
+            number,
+            number,
+            number,
+            number,
+            number,
+            number,
+          ];
         }
       }
     };
@@ -145,7 +157,10 @@ export async function extractPdf(content: Buffer): Promise<RawExtraction> {
         'The PDF is password-protected. Please upload a copy without a password.',
       );
     }
-    throw new DocumentRejectedError('invalid_pdf', 'The PDF could not be opened. It may be damaged.');
+    throw new DocumentRejectedError(
+      'invalid_pdf',
+      'The PDF could not be opened. It may be damaged.',
+    );
   }
 
   try {
@@ -186,10 +201,14 @@ export async function extractPdf(content: Buffer): Promise<RawExtraction> {
       }
     }
     const repeated = (text: string) =>
-      pages.length >= 3 && text.length <= 80 && (counts.get(text) ?? 0) >= Math.ceil(pages.length * 0.6);
+      pages.length >= 3 &&
+      text.length <= 80 &&
+      (counts.get(text) ?? 0) >= Math.ceil(pages.length * 0.6);
     const pageNumber = /^(page\s*)?\d{1,4}(\s*(of|\/)\s*\d{1,4})?$/i;
 
-    const sizes = pages.flatMap((page) => page.lines.map((line) => line.size)).sort((a, b) => a - b);
+    const sizes = pages
+      .flatMap((page) => page.lines.map((line) => line.size))
+      .sort((a, b) => a - b);
     const median = sizes[Math.floor(sizes.length / 2)] ?? 0;
 
     const lines: ExtractedLine[] = [];

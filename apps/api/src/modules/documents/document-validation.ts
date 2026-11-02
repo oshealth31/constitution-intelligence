@@ -83,9 +83,12 @@ export function validateDocument(
         'The PDF contains scripts or actions, which are not allowed. Please save or print it as a plain PDF and try again.',
       );
     }
-  } else if (
-    !(content[0] === 0x50 && content[1] === 0x4b && content[2] === 0x03 && content[3] === 0x04)
-  ) {
+  } else if (!(
+    content[0] === 0x50 &&
+    content[1] === 0x4b &&
+    content[2] === 0x03 &&
+    content[3] === 0x04
+  )) {
     throw new DocumentRejectedError(
       'type_mismatch',
       'The file is named .docx but is not a Word document.',

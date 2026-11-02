@@ -82,7 +82,9 @@ export default function DocumentsPage() {
             />
           )}
           {constitution.versions.length === 0 && (
-            <p className="mt-4 text-base text-slate-600">No versions yet. Upload the document to start.</p>
+            <p className="mt-4 text-base text-slate-600">
+              No versions yet. Upload the document to start.
+            </p>
           )}
           <ul
             className="mt-4 divide-y divide-slate-200 border-t border-slate-200"
@@ -96,7 +98,15 @@ export default function DocumentsPage() {
                   </p>
                   <StatusBadge status={version.status} />
                   {version.status === 'draft' && (
-                    <Badge tone={version.extractionStatus === 'failed' ? 'critical' : version.sectionsNeedingReview > 0 ? 'warning' : 'neutral'}>
+                    <Badge
+                      tone={
+                        version.extractionStatus === 'failed'
+                          ? 'critical'
+                          : version.sectionsNeedingReview > 0
+                            ? 'warning'
+                            : 'neutral'
+                      }
+                    >
                       {version.sectionsNeedingReview > 0
                         ? `${version.sectionsNeedingReview} to check`
                         : extractionLabel(version.extractionStatus)}
@@ -113,7 +123,9 @@ export default function DocumentsPage() {
                   <p className="mt-2 text-sm text-slate-800">
                     Latest review:{' '}
                     <strong>
-                      {version.latestDecision.decision === 'approved' ? 'Approved' : 'Changes requested'}
+                      {version.latestDecision.decision === 'approved'
+                        ? 'Approved'
+                        : 'Changes requested'}
                     </strong>{' '}
                     by {version.latestDecision.reviewerName ?? 'a former member'} on{' '}
                     {formatDate(version.latestDecision.createdAt)}
@@ -145,10 +157,21 @@ export default function DocumentsPage() {
           title="Add another document"
           description="For example a code of conduct or by-laws. You can upload its file next."
         >
-          <form onSubmit={createConstitution} className="flex flex-col gap-3 sm:flex-row sm:items-end" aria-label="Add another document">
+          <form
+            onSubmit={createConstitution}
+            className="flex flex-col gap-3 sm:flex-row sm:items-end"
+            aria-label="Add another document"
+          >
             <label className="block flex-1 text-base font-medium text-slate-900">
               Document title
-              <input value={title} onChange={(event) => setTitle(event.target.value)} required minLength={3} maxLength={300} className={FIELD} />
+              <input
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                required
+                minLength={3}
+                maxLength={300}
+                className={FIELD}
+              />
             </label>
             <PortalButton type="submit" busy={creating} variant="secondary">
               Add document
@@ -233,7 +256,13 @@ function UploadForm({
         </label>
         <label className="block text-base font-medium text-slate-900">
           Name for this version (optional)
-          <input value={label} onChange={(event) => setLabel(event.target.value)} maxLength={200} placeholder="e.g. Amended at the 2026 AGM" className={FIELD} />
+          <input
+            value={label}
+            onChange={(event) => setLabel(event.target.value)}
+            maxLength={200}
+            placeholder="e.g. Amended at the 2026 AGM"
+            className={FIELD}
+          />
         </label>
         <PortalButton type="submit" busy={busy}>
           {busy ? 'Reading the document…' : 'Upload'}

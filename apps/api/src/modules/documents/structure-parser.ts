@@ -31,11 +31,25 @@ export interface ParseResult {
 }
 
 const WORD_NUMBERS: Record<string, number> = {
-  one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
-  eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15,
+  one: 1,
+  two: 2,
+  three: 3,
+  four: 4,
+  five: 5,
+  six: 6,
+  seven: 7,
+  eight: 8,
+  nine: 9,
+  ten: 10,
+  eleven: 11,
+  twelve: 12,
+  thirteen: 13,
+  fourteen: 14,
+  fifteen: 15,
 };
 
-const DIVISION = /^(part|chapter)\s+([0-9]{1,3}|[ivxlc]{1,7}|[a-z]|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen)\b\s*[:.\-–—]?\s*(.*)$/i;
+const DIVISION =
+  /^(part|chapter)\s+([0-9]{1,3}|[ivxlc]{1,7}|[a-z]|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen)\b\s*[:.\-–—]?\s*(.*)$/i;
 const ARTICLE = /^(article|section|clause|rule)\s+(\d{1,3}[a-z]?)\b\s*[:.\-–—]?\s*(.*)$/i;
 const DECIMAL = /^(\d{1,3}(?:\.\d{1,3}){0,3})(\.|\))?\s+(\S.*)$/;
 const DECIMAL_ONLY = /^(\d{1,3}(?:\.\d{1,3}){0,3})(\.|\))?$/;
@@ -113,7 +127,9 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
   const lines = input
     .map((line) => ({
       ...line,
-      text: (line.autoNumber ? `${line.autoNumber} ${line.text}` : line.text).replace(/\s+/g, ' ').trim(),
+      text: (line.autoNumber ? `${line.autoNumber} ${line.text}` : line.text)
+        .replace(/\s+/g, ' ')
+        .trim(),
     }))
     .filter((line) => line.text.length > 0);
   for (const line of lines) characterCount += line.text.length;
@@ -136,7 +152,12 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
   }
 
   const makeKey = (base: string) => {
-    const clean = base.toLowerCase().replace(/[^a-z0-9._-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 56) || 's';
+    const clean =
+      base
+        .toLowerCase()
+        .replace(/[^a-z0-9._-]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 56) || 's';
     let key = clean;
     let suffix = 2;
     while (usedKeys.has(key)) key = `${clean}-${suffix++}`;
@@ -161,9 +182,16 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
     section.reviewReason = section.reviewReason ? `${section.reviewReason} ${reason}` : reason;
   };
 
-  const add = (section: Omit<ParsedSection, 'key' | 'needsReview' | 'reviewReason'> & { keyBase: string }) => {
+  const add = (
+    section: Omit<ParsedSection, 'key' | 'needsReview' | 'reviewReason'> & { keyBase: string },
+  ) => {
     const { keyBase, ...rest } = section;
-    const created: ParsedSection = { ...rest, key: makeKey(keyBase), needsReview: false, reviewReason: null };
+    const created: ParsedSection = {
+      ...rest,
+      key: makeKey(keyBase),
+      needsReview: false,
+      reviewReason: null,
+    };
     sections.push(created);
     current = created;
     return created;
@@ -172,7 +200,8 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
   const appendText = (text: string, newParagraph: boolean) => {
     if (!current) return;
     if (!current.body) current.body = text;
-    else if (current.body.endsWith('-') && /^[a-z]/.test(text)) current.body = current.body.slice(0, -1) + text;
+    else if (current.body.endsWith('-') && /^[a-z]/.test(text))
+      current.body = current.body.slice(0, -1) + text;
     else current.body += (newParagraph ? '\n' : ' ') + text;
   };
 
@@ -190,7 +219,13 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
     }
     match = ARTICLE.exec(text);
     if (match) {
-      return { kind: 'clause', number: match[2]!, value: Number.parseInt(match[2]!, 10), path: [match[2]!], rest: match[3]!.trim() };
+      return {
+        kind: 'clause',
+        number: match[2]!,
+        value: Number.parseInt(match[2]!, 10),
+        path: [match[2]!],
+        rest: match[3]!.trim(),
+      };
     }
     match = DECIMAL.exec(text);
     const alone = match ? null : DECIMAL_ONLY.exec(text);
@@ -203,7 +238,8 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
       // "2026 members attended" is a sentence, not clause 2026: a clause number needs a "." or ")",
       // a dotted form (3.2), Word's own numbering, or a short heading after it ("1 Name").
       const plausible =
-        top <= 300 && (Boolean(mark) || path.length > 1 || line.autoNumber !== undefined || isShortTitle(rest));
+        top <= 300 &&
+        (Boolean(mark) || path.length > 1 || line.autoNumber !== undefined || isShortTitle(rest));
       if (plausible) {
         return {
           kind: path.length === 1 ? 'clause' : 'subclause',
@@ -232,27 +268,51 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
       } else {
         value = token.length === 1 ? token.charCodeAt(0) - 96 : 0;
       }
-      return { kind: 'subclause', number: `(${token})`, value, bracketLevel: level, roman, rest: match[2]!.trim() };
+      return {
+        kind: 'subclause',
+        number: `(${token})`,
+        value,
+        bracketLevel: level,
+        roman,
+        rest: match[2]!.trim(),
+      };
     }
     match = LETTER_DOT.exec(text);
-    if (match && (match[1] === String.fromCharCode(97 + (lastLetterValue ?? 0)))) {
-      return { kind: 'subclause', number: `(${match[1]})`, value: match[1]!.charCodeAt(0) - 96, bracketLevel: 1, rest: match[2]!.trim() };
+    if (match && match[1] === String.fromCharCode(97 + (lastLetterValue ?? 0))) {
+      return {
+        kind: 'subclause',
+        number: `(${match[1]})`,
+        value: match[1]!.charCodeAt(0) - 96,
+        bracketLevel: 1,
+        rest: match[2]!.trim(),
+      };
     }
     return null;
   };
 
   // Numbering order checks, per parent and level.
   const lastValue = new Map<string, { value: number; number: string }>();
-  const checkOrder = (scope: string, section: ParsedSection, value: number | null, label: string) => {
+  const checkOrder = (
+    scope: string,
+    section: ParsedSection,
+    value: number | null,
+    label: string,
+  ) => {
     if (value === null) return;
     const previous = lastValue.get(scope);
     if (previous) {
       if (value === previous.value) {
         flag(section, `The number ${section.number} appears more than once here.`);
       } else if (value > previous.value + 1) {
-        flag(section, `${label} ${section.number} follows ${previous.number}. Something in between may be missing or was not recognised.`);
+        flag(
+          section,
+          `${label} ${section.number} follows ${previous.number}. Something in between may be missing or was not recognised.`,
+        );
       } else if (value < previous.value) {
-        flag(section, `${label} ${section.number} comes after ${previous.number}, which is out of order.`);
+        flag(
+          section,
+          `${label} ${section.number} comes after ${previous.number}, which is out of order.`,
+        );
       }
     } else if (value > 1 && scope.startsWith('bracket')) {
       flag(section, `This list starts at ${section.number} instead of the first item.`);
@@ -268,17 +328,30 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
 
     if (!marker) {
       // Title: a heading-styled or capitalised line before anything else.
-      if (!anyMarker && !current && title === null && (line.headingLevel === 0 || line.headingLevel === 1 || isAllCaps(line.text)) && isShortTitle(line.text)) {
+      if (
+        !anyMarker &&
+        !current &&
+        title === null &&
+        (line.headingLevel === 0 || line.headingLevel === 1 || isAllCaps(line.text)) &&
+        isShortTitle(line.text)
+      ) {
         title = line.text;
         continue;
       }
       // Unnumbered heading (Word heading style, larger PDF text or a short capitalised line)
       // followed by more content: becomes a heading section of its own.
       const headingLike =
-        (line.headingLevel !== undefined && line.headingLevel <= 2) || (isAllCaps(line.text) && isShortTitle(line.text));
+        (line.headingLevel !== undefined && line.headingLevel <= 2) ||
+        (isAllCaps(line.text) && isShortTitle(line.text));
       if (headingLike && isShortTitle(line.text) && next) {
         // A short heading directly after a numbered clause with no text yet names that clause.
-        if (current && current.kind !== 'part' && current.kind !== 'chapter' && !current.heading && !current.body) {
+        if (
+          current &&
+          current.kind !== 'part' &&
+          current.kind !== 'chapter' &&
+          !current.heading &&
+          !current.body
+        ) {
           current.heading = line.text;
           continue;
         }
@@ -300,10 +373,28 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
         continue;
       }
       if (!current) {
-        add({ keyBase: 'preamble', parentKey: null, kind: 'section', number: null, heading: 'Preamble', body: '', page: line.page ?? null });
+        add({
+          keyBase: 'preamble',
+          parentKey: null,
+          kind: 'section',
+          number: null,
+          heading: 'Preamble',
+          body: '',
+          page: line.page ?? null,
+        });
       }
       // A short line right after a clause number with no wording yet is the clause heading.
-      if (current && current.kind !== 'part' && current.kind !== 'chapter' && current.kind !== 'section' && !current.heading && !current.body && isShortTitle(line.text) && next && !classify(next, line.text)) {
+      if (
+        current &&
+        current.kind !== 'part' &&
+        current.kind !== 'chapter' &&
+        current.kind !== 'section' &&
+        !current.heading &&
+        !current.body &&
+        isShortTitle(line.text) &&
+        next &&
+        !classify(next, line.text)
+      ) {
         current.heading = line.text;
         continue;
       }
@@ -320,12 +411,25 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
         heading = next.text;
         index += 1;
       }
-      division = add({ keyBase: `${marker.kind}-${marker.number.split(' ')[1]}`, parentKey: null, kind: marker.kind, number: marker.number, heading, body: '', page: line.page ?? null });
-      checkOrder(`division-${marker.kind}`, division, marker.value, marker.kind === 'part' ? 'Part' : 'Chapter');
+      division = add({
+        keyBase: `${marker.kind}-${marker.number.split(' ')[1]}`,
+        parentKey: null,
+        kind: marker.kind,
+        number: marker.number,
+        heading,
+        body: '',
+        page: line.page ?? null,
+      });
+      checkOrder(
+        `division-${marker.kind}`,
+        division,
+        marker.value,
+        marker.kind === 'part' ? 'Part' : 'Chapter',
+      );
       clause = null;
       bracketParent = null;
       lastLetter = null;
-        lastLetterValue = null;
+      lastLetterValue = null;
       decimalChain.clear();
       continue;
     }
@@ -365,9 +469,17 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
         page: line.page ?? null,
       });
       if (depth > 1 && !decimalChain.has(parentPath)) {
-        flag(created, `Clause ${parentPath} was not found, so this item could not be placed under it.`);
+        flag(
+          created,
+          `Clause ${parentPath} was not found, so this item could not be placed under it.`,
+        );
       }
-      checkOrder(depth === 1 ? 'clause' : `decimal-${parentPath}`, created, marker.value, depth === 1 ? 'Clause' : 'Item');
+      checkOrder(
+        depth === 1 ? 'clause' : `decimal-${parentPath}`,
+        created,
+        marker.value,
+        depth === 1 ? 'Clause' : 'Item',
+      );
       decimalChain.set(marker.path.join('.'), created);
       for (const key of [...decimalChain.keys()]) {
         if (key.split('.').length > depth) decimalChain.delete(key);
@@ -375,7 +487,7 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
       if (depth === 1) clause = created;
       bracketParent = created;
       lastLetter = null;
-        lastLetterValue = null;
+      lastLetterValue = null;
       for (const key of [...lastValue.keys()]) {
         if (key.startsWith('bracket')) lastValue.delete(key);
       }
@@ -384,7 +496,7 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
 
     // Lettered / roman sub-items.
     const level = marker.bracketLevel ?? 1;
-    const owner = level === 2 && lastLetter ? lastLetter : bracketParent ?? clause ?? division;
+    const owner = level === 2 && lastLetter ? lastLetter : (bracketParent ?? clause ?? division);
     const created = add({
       keyBase: `${owner?.key ?? 'item'}-${marker.number.replace(/[()]/g, '')}`,
       parentKey: owner?.key ?? null,
@@ -411,21 +523,32 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
   // Checks on the finished structure.
   const childCount = new Map<string, number>();
   for (const section of sections) {
-    if (section.parentKey) childCount.set(section.parentKey, (childCount.get(section.parentKey) ?? 0) + 1);
+    if (section.parentKey)
+      childCount.set(section.parentKey, (childCount.get(section.parentKey) ?? 0) + 1);
   }
   for (const section of sections) {
     const text = `${section.heading ?? ''} ${section.body}`;
     if (looksGarbled(text)) {
-      flag(section, 'Some characters could not be read correctly. Please compare with the original.');
+      flag(
+        section,
+        'Some characters could not be read correctly. Please compare with the original.',
+      );
     }
     if (section.body.length > LONG_SECTION) {
-      flag(section, 'This section is very long. It may contain several clauses that were not separated.');
+      flag(
+        section,
+        'This section is very long. It may contain several clauses that were not separated.',
+      );
     }
     const children = childCount.get(section.key) ?? 0;
     if (!section.body && children === 0 && section.kind !== 'part' && section.kind !== 'chapter') {
       flag(section, 'No text was found under this heading.');
     }
-    if ((section.kind === 'part' || section.kind === 'chapter') && children === 0 && !section.body) {
+    if (
+      (section.kind === 'part' || section.kind === 'chapter') &&
+      children === 0 &&
+      !section.body
+    ) {
       flag(section, `This ${section.kind} has no clauses under it.`);
     }
   }

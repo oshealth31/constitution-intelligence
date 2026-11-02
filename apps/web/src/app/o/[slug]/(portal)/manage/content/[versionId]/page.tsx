@@ -3,13 +3,7 @@
 import { useParams } from 'next/navigation';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { Badge, StatusBadge } from '@/components/ui';
-import {
-  BackLink,
-  Notice,
-  Panel,
-  PortalButton,
-  PortalLoading,
-} from '@/components/portal-ui';
+import { BackLink, Notice, Panel, PortalButton, PortalLoading } from '@/components/portal-ui';
 import { apiFetch, describeError } from '@/lib/api';
 import { formatBytes, formatDate, formatDateTime } from '@/lib/format';
 import {
@@ -52,11 +46,20 @@ export default function VersionReviewPage() {
   const canEdit = can(home.you.permissions, 'content.edit');
   const canApprove = can(home.you.permissions, 'content.approve');
 
-  async function act(key: string, path: string, method: 'POST' | 'PATCH' | 'DELETE', body: unknown, success: string) {
+  async function act(
+    key: string,
+    path: string,
+    method: 'POST' | 'PATCH' | 'DELETE',
+    body: unknown,
+    success: string,
+  ) {
     setBusy(key);
     setMessage(null);
     try {
-      const updated = await apiFetch<VersionReview>(`${api}/versions/${versionId}${path}`, { method, body });
+      const updated = await apiFetch<VersionReview>(`${api}/versions/${versionId}${path}`, {
+        method,
+        body,
+      });
       review.setData(updated);
       setMessage({ tone: 'success', text: success });
       return true;
@@ -80,7 +83,9 @@ export default function VersionReviewPage() {
   const version = review.data;
   const editable = version.editable && canEdit;
   const step = workflowStep(version.status);
-  const visible = onlyFlagged ? version.sections.filter((section) => section.needsReview) : version.sections;
+  const visible = onlyFlagged
+    ? version.sections.filter((section) => section.needsReview)
+    : version.sections;
 
   return (
     <div className="space-y-5">
@@ -136,8 +141,14 @@ export default function VersionReviewPage() {
           >
             {version.sectionsNeedingReview > 0 && (
               <label className="mb-4 flex items-center gap-3 text-base text-slate-800">
-                <input type="checkbox" checked={onlyFlagged} onChange={(event) => setOnlyFlagged(event.target.checked)} className="size-5" />
-                Show only the {version.sectionsNeedingReview} section{version.sectionsNeedingReview === 1 ? '' : 's'} to check
+                <input
+                  type="checkbox"
+                  checked={onlyFlagged}
+                  onChange={(event) => setOnlyFlagged(event.target.checked)}
+                  className="size-5"
+                />
+                Show only the {version.sectionsNeedingReview} section
+                {version.sectionsNeedingReview === 1 ? '' : 's'} to check
               </label>
             )}
             {version.sections.length === 0 && (
@@ -151,16 +162,40 @@ export default function VersionReviewPage() {
                   editable={editable}
                   busy={busy}
                   onSave={(change) =>
-                    act(`edit-${section.id}`, `/sections/${section.id}`, 'PATCH', change, 'Section saved.')
+                    act(
+                      `edit-${section.id}`,
+                      `/sections/${section.id}`,
+                      'PATCH',
+                      change,
+                      'Section saved.',
+                    )
                   }
                   onResolve={() =>
-                    act(`resolve-${section.id}`, `/sections/${section.id}/resolve`, 'POST', undefined, 'Marked as checked.')
+                    act(
+                      `resolve-${section.id}`,
+                      `/sections/${section.id}/resolve`,
+                      'POST',
+                      undefined,
+                      'Marked as checked.',
+                    )
                   }
                   onRemove={() =>
-                    act(`remove-${section.id}`, `/sections/${section.id}`, 'DELETE', undefined, 'Section removed.')
+                    act(
+                      `remove-${section.id}`,
+                      `/sections/${section.id}`,
+                      'DELETE',
+                      undefined,
+                      'Section removed.',
+                    )
                   }
                   onAddAfter={(input) =>
-                    act(`add-${section.id}`, '/sections', 'POST', { afterSectionId: section.id, ...input }, 'Section added.')
+                    act(
+                      `add-${section.id}`,
+                      '/sections',
+                      'POST',
+                      { afterSectionId: section.id, ...input },
+                      'Section added.',
+                    )
                   }
                 />
               ))}
@@ -188,7 +223,9 @@ export default function VersionReviewPage() {
                 <li key={event.id} className="text-sm text-slate-700">
                   <strong>{eventLabel(event.event)}</strong> {formatDateTime(event.at)}
                   {event.by ? ` by ${event.by}` : ''}
-                  {event.comment ? <span className="block text-slate-600">“{event.comment}”</span> : null}
+                  {event.comment ? (
+                    <span className="block text-slate-600">“{event.comment}”</span>
+                  ) : null}
                 </li>
               ))}
             </ol>
@@ -227,7 +264,9 @@ function ExtractionPanel({ version }: { version: VersionReview }) {
       <p className="mt-3 text-sm text-slate-600">
         {meta.format === 'pdf' ? 'PDF' : meta.format === 'docx' ? 'Word document' : 'Document'}
         {meta.pageCount ? ` · ${meta.pageCount} page${meta.pageCount === 1 ? '' : 's'}` : ''}
-        {typeof meta.characterCount === 'number' ? ` · ${meta.characterCount.toLocaleString()} characters read` : ''}
+        {typeof meta.characterCount === 'number'
+          ? ` · ${meta.characterCount.toLocaleString()} characters read`
+          : ''}
         {meta.detectedTitle ? ` · title found: “${meta.detectedTitle}”` : ''}
       </p>
     </Panel>
@@ -238,13 +277,18 @@ function OriginalPanel({ version, api }: { version: VersionReview; api: string }
   if (!version.source) {
     return (
       <Panel title="Original document">
-        <p className="text-base text-slate-600">This version was not created from an uploaded file.</p>
+        <p className="text-base text-slate-600">
+          This version was not created from an uploaded file.
+        </p>
       </Panel>
     );
   }
   const source = version.source;
   return (
-    <Panel title="Original document" description="The uploaded file is the authoritative source. It is never changed.">
+    <Panel
+      title="Original document"
+      description="The uploaded file is the authoritative source. It is never changed."
+    >
       <dl className="space-y-1 text-sm text-slate-700">
         <div>
           <dt className="inline font-medium">File: </dt>
@@ -289,7 +333,13 @@ function WorkflowPanel({
   canEdit: boolean;
   canApprove: boolean;
   busy: string | null;
-  act: (key: string, path: string, method: 'POST', body: unknown, success: string) => Promise<boolean>;
+  act: (
+    key: string,
+    path: string,
+    method: 'POST',
+    body: unknown,
+    success: string,
+  ) => Promise<boolean>;
 }) {
   const [confirmed, setConfirmed] = useState(false);
   const [comment, setComment] = useState('');
@@ -310,20 +360,44 @@ function WorkflowPanel({
         className="space-y-3"
         onSubmit={(event: FormEvent<HTMLFormElement>) => {
           event.preventDefault();
-          void act('submit', '/submit', 'POST', { confirmed: true, comment: comment || undefined }, 'Sent for approval.');
+          void act(
+            'submit',
+            '/submit',
+            'POST',
+            { confirmed: true, comment: comment || undefined },
+            'Sent for approval.',
+          );
         }}
       >
-        <p className="text-base text-slate-700">When the text matches the original, send it to an administrator for approval.</p>
+        <p className="text-base text-slate-700">
+          When the text matches the original, send it to an administrator for approval.
+        </p>
         {blocked && <Notice tone="warning">{blocked}</Notice>}
         <label className="flex items-start gap-3 text-base text-slate-800">
-          <input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} className="mt-1 size-5" />
+          <input
+            type="checkbox"
+            checked={confirmed}
+            onChange={(event) => setConfirmed(event.target.checked)}
+            className="mt-1 size-5"
+          />
           I have compared this text with the original document.
         </label>
         <label className="block text-sm font-medium text-slate-900">
           Note for the approver (optional)
-          <textarea value={comment} onChange={(event) => setComment(event.target.value)} rows={2} maxLength={2000} className={FIELD} />
+          <textarea
+            value={comment}
+            onChange={(event) => setComment(event.target.value)}
+            rows={2}
+            maxLength={2000}
+            className={FIELD}
+          />
         </label>
-        <PortalButton type="submit" className="w-full" busy={busy === 'submit'} disabled={!confirmed || blocked !== null}>
+        <PortalButton
+          type="submit"
+          className="w-full"
+          busy={busy === 'submit'}
+          disabled={!confirmed || blocked !== null}
+        >
           Send for approval
         </PortalButton>
       </form>
@@ -338,12 +412,24 @@ function WorkflowPanel({
           className="space-y-3"
           onSubmit={(event: FormEvent<HTMLFormElement>) => {
             event.preventDefault();
-            void act('approve', '/approve', 'POST', { comment: comment || undefined }, 'Approved. You can now make it the current version.');
+            void act(
+              'approve',
+              '/approve',
+              'POST',
+              { comment: comment || undefined },
+              'Approved. You can now make it the current version.',
+            );
           }}
         >
           <label className="block text-sm font-medium text-slate-900">
             Comment (optional)
-            <textarea value={comment} onChange={(event) => setComment(event.target.value)} rows={2} maxLength={2000} className={FIELD} />
+            <textarea
+              value={comment}
+              onChange={(event) => setComment(event.target.value)}
+              rows={2}
+              maxLength={2000}
+              className={FIELD}
+            />
           </label>
           <PortalButton type="submit" className="w-full" busy={busy === 'approve'}>
             Approve
@@ -354,20 +440,41 @@ function WorkflowPanel({
           className="space-y-3 border-t border-slate-200 pt-4"
           onSubmit={(event: FormEvent<HTMLFormElement>) => {
             event.preventDefault();
-            void act('changes', '/request-changes', 'POST', { comment: reason }, 'Sent back for changes.');
+            void act(
+              'changes',
+              '/request-changes',
+              'POST',
+              { comment: reason },
+              'Sent back for changes.',
+            );
           }}
         >
           <label className="block text-sm font-medium text-slate-900">
             What needs to change?
-            <textarea value={reason} onChange={(event) => setReason(event.target.value)} rows={2} required minLength={5} maxLength={2000} className={FIELD} />
+            <textarea
+              value={reason}
+              onChange={(event) => setReason(event.target.value)}
+              rows={2}
+              required
+              minLength={5}
+              maxLength={2000}
+              className={FIELD}
+            />
           </label>
-          <PortalButton type="submit" variant="secondary" className="w-full" busy={busy === 'changes'}>
+          <PortalButton
+            type="submit"
+            variant="secondary"
+            className="w-full"
+            busy={busy === 'changes'}
+          >
             Send back for changes
           </PortalButton>
         </form>
       </div>
     ) : (
-      <p className="text-base text-slate-700">Waiting for an organisation administrator to approve it.</p>
+      <p className="text-base text-slate-700">
+        Waiting for an organisation administrator to approve it.
+      </p>
     );
   } else if (version.status === 'approved') {
     content = canApprove ? (
@@ -376,25 +483,46 @@ function WorkflowPanel({
         className="space-y-3"
         onSubmit={(event: FormEvent<HTMLFormElement>) => {
           event.preventDefault();
-          void act('publish', '/publish', 'POST', { confirmed: true }, 'This is now the current version that members read.');
+          void act(
+            'publish',
+            '/publish',
+            'POST',
+            { confirmed: true },
+            'This is now the current version that members read.',
+          );
         }}
       >
         <p className="text-base text-slate-700">
-          Approved. Making it current shows it to all members. The version they read now will be kept as “superseded”.
+          Approved. Making it current shows it to all members. The version they read now will be
+          kept as “superseded”.
         </p>
         <label className="flex items-start gap-3 text-base text-slate-800">
-          <input type="checkbox" checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} className="mt-1 size-5" />
+          <input
+            type="checkbox"
+            checked={confirmed}
+            onChange={(event) => setConfirmed(event.target.checked)}
+            className="mt-1 size-5"
+          />
           Yes, make this the current constitution.
         </label>
-        <PortalButton type="submit" className="w-full" busy={busy === 'publish'} disabled={!confirmed}>
+        <PortalButton
+          type="submit"
+          className="w-full"
+          busy={busy === 'publish'}
+          disabled={!confirmed}
+        >
           Make current
         </PortalButton>
       </form>
     ) : (
-      <p className="text-base text-slate-700">Approved. An administrator can make it the current version.</p>
+      <p className="text-base text-slate-700">
+        Approved. An administrator can make it the current version.
+      </p>
     );
   } else if (version.status === 'published') {
-    content = <p className="text-base text-slate-700">This is the current version that members read.</p>;
+    content = (
+      <p className="text-base text-slate-700">This is the current version that members read.</p>
+    );
   }
 
   const canArchive = canApprove && !['published', 'archived'].includes(version.status);
@@ -403,20 +531,41 @@ function WorkflowPanel({
       {content}
       {canArchive && (
         <details className="mt-4 border-t border-slate-200 pt-4">
-          <summary className="cursor-pointer text-base font-medium text-slate-800">Archive this version</summary>
+          <summary className="cursor-pointer text-base font-medium text-slate-800">
+            Archive this version
+          </summary>
           <form
             aria-label="Archive this version"
             className="mt-3 space-y-3"
             onSubmit={(event: FormEvent<HTMLFormElement>) => {
               event.preventDefault();
-              void act('archive', '/archive', 'POST', { comment: archiveReason }, 'Version archived.');
+              void act(
+                'archive',
+                '/archive',
+                'POST',
+                { comment: archiveReason },
+                'Version archived.',
+              );
             }}
           >
             <label className="block text-sm font-medium text-slate-900">
               Reason
-              <textarea value={archiveReason} onChange={(event) => setArchiveReason(event.target.value)} rows={2} required minLength={5} maxLength={2000} className={FIELD} />
+              <textarea
+                value={archiveReason}
+                onChange={(event) => setArchiveReason(event.target.value)}
+                rows={2}
+                required
+                minLength={5}
+                maxLength={2000}
+                className={FIELD}
+              />
             </label>
-            <PortalButton type="submit" variant="secondary" className="w-full" busy={busy === 'archive'}>
+            <PortalButton
+              type="submit"
+              variant="secondary"
+              className="w-full"
+              busy={busy === 'archive'}
+            >
               Archive
             </PortalButton>
           </form>
@@ -438,13 +587,24 @@ function SectionItem({
   section: ReviewSection;
   editable: boolean;
   busy: string | null;
-  onSave: (change: { kind: string; number: string; heading: string; body: string }) => Promise<boolean>;
+  onSave: (change: {
+    kind: string;
+    number: string;
+    heading: string;
+    body: string;
+  }) => Promise<boolean>;
   onResolve: () => Promise<boolean>;
   onRemove: () => Promise<boolean>;
-  onAddAfter: (input: { kind: string; number: string; heading: string; body: string }) => Promise<boolean>;
+  onAddAfter: (input: {
+    kind: string;
+    number: string;
+    heading: string;
+    body: string;
+  }) => Promise<boolean>;
 }) {
   const [mode, setMode] = useState<'view' | 'edit' | 'add' | 'remove'>('view');
-  const indent = section.kind === 'subclause' ? 'sm:ml-8' : section.kind === 'clause' ? 'sm:ml-4' : '';
+  const indent =
+    section.kind === 'subclause' ? 'sm:ml-8' : section.kind === 'clause' ? 'sm:ml-4' : '';
   const title = sectionTitle(section);
 
   return (
@@ -471,10 +631,18 @@ function SectionItem({
         />
       ) : (
         <>
-          <p className={section.kind === 'part' || section.kind === 'chapter' || section.kind === 'section' ? 'text-lg font-bold text-slate-900' : 'font-semibold text-slate-900'}>
+          <p
+            className={
+              section.kind === 'part' || section.kind === 'chapter' || section.kind === 'section'
+                ? 'text-lg font-bold text-slate-900'
+                : 'font-semibold text-slate-900'
+            }
+          >
             {title}
           </p>
-          {section.body && <p className="mt-1 text-base whitespace-pre-line text-slate-800">{section.body}</p>}
+          {section.body && (
+            <p className="mt-1 text-base whitespace-pre-line text-slate-800">{section.body}</p>
+          )}
           <p className="mt-1 text-xs text-slate-500">
             {KINDS.find((kind) => kind.value === section.kind)?.label}
             {section.sourcePage ? ` · page ${section.sourcePage}` : ''}
@@ -486,29 +654,55 @@ function SectionItem({
       {editable && mode === 'view' && (
         <div className="mt-3 flex flex-wrap gap-2">
           {section.needsReview && (
-            <PortalButton className="min-h-10 py-2 text-sm" busy={busy === `resolve-${section.id}`} onClick={() => void onResolve()}>
+            <PortalButton
+              className="min-h-10 py-2 text-sm"
+              busy={busy === `resolve-${section.id}`}
+              onClick={() => void onResolve()}
+            >
               Mark as checked
             </PortalButton>
           )}
-          <PortalButton variant="secondary" className="min-h-10 py-2 text-sm" onClick={() => setMode('edit')}>
+          <PortalButton
+            variant="secondary"
+            className="min-h-10 py-2 text-sm"
+            onClick={() => setMode('edit')}
+          >
             Edit
           </PortalButton>
-          <PortalButton variant="quiet" className="min-h-10 py-2 text-sm" onClick={() => setMode('add')}>
+          <PortalButton
+            variant="quiet"
+            className="min-h-10 py-2 text-sm"
+            onClick={() => setMode('add')}
+          >
             Add section after
           </PortalButton>
-          <PortalButton variant="quiet" className="min-h-10 py-2 text-sm" onClick={() => setMode('remove')}>
+          <PortalButton
+            variant="quiet"
+            className="min-h-10 py-2 text-sm"
+            onClick={() => setMode('remove')}
+          >
             Remove
           </PortalButton>
         </div>
       )}
       {editable && mode === 'remove' && (
         <div className="mt-3 rounded-lg bg-rose-50 p-3">
-          <p className="text-sm text-rose-900">Remove this section and anything inside it from the draft?</p>
+          <p className="text-sm text-rose-900">
+            Remove this section and anything inside it from the draft?
+          </p>
           <div className="mt-2 flex gap-2">
-            <PortalButton className="min-h-10 bg-rose-700 py-2 text-sm text-white" busy={busy === `remove-${section.id}`} onClick={() => void onRemove()}>
+            <PortalButton
+              className="min-h-10 bg-rose-700 py-2 text-sm text-white"
+              busy={busy === `remove-${section.id}`}
+              onClick={() => void onRemove()}
+            >
               Yes, remove
             </PortalButton>
-            <PortalButton variant="secondary" className="min-h-10 py-2 text-sm" onClick={() => setMode('view')}>
+            <PortalButton
+              variant="secondary"
+              className="min-h-10 py-2 text-sm"
+              onClick={() => setMode('view')}
+            >
               Cancel
             </PortalButton>
           </div>
@@ -518,7 +712,12 @@ function SectionItem({
         <div className="mt-3 border-t border-slate-200 pt-3">
           <p className="mb-2 text-sm font-semibold text-slate-900">New section after this one</p>
           <SectionForm
-            initial={{ kind: section.kind === 'part' ? 'clause' : section.kind, number: '', heading: '', body: '' }}
+            initial={{
+              kind: section.kind === 'part' ? 'clause' : section.kind,
+              number: '',
+              heading: '',
+              body: '',
+            }}
             submitLabel="Add section"
             busy={busy === `add-${section.id}`}
             onCancel={() => setMode('view')}
@@ -542,7 +741,12 @@ function SectionForm({
   initial: { kind: string; number: string | null; heading: string | null; body: string };
   submitLabel: string;
   busy: boolean;
-  onSubmit: (value: { kind: string; number: string; heading: string; body: string }) => Promise<void>;
+  onSubmit: (value: {
+    kind: string;
+    number: string;
+    heading: string;
+    body: string;
+  }) => Promise<void>;
   onCancel: () => void;
 }) {
   const [kind, setKind] = useState(initial.kind);
@@ -571,22 +775,43 @@ function SectionForm({
         </label>
         <label className="block text-sm font-medium text-slate-900">
           Number
-          <input value={number} onChange={(event) => setNumber(event.target.value)} maxLength={40} className={FIELD} />
+          <input
+            value={number}
+            onChange={(event) => setNumber(event.target.value)}
+            maxLength={40}
+            className={FIELD}
+          />
         </label>
         <label className="block text-sm font-medium text-slate-900">
           Heading
-          <input value={heading} onChange={(event) => setHeading(event.target.value)} maxLength={500} className={FIELD} />
+          <input
+            value={heading}
+            onChange={(event) => setHeading(event.target.value)}
+            maxLength={500}
+            className={FIELD}
+          />
         </label>
       </div>
       <label className="block text-sm font-medium text-slate-900">
         Text
-        <textarea value={body} onChange={(event) => setBody(event.target.value)} rows={4} maxLength={50000} className={FIELD} />
+        <textarea
+          value={body}
+          onChange={(event) => setBody(event.target.value)}
+          rows={4}
+          maxLength={50000}
+          className={FIELD}
+        />
       </label>
       <div className="flex gap-2">
         <PortalButton type="submit" className="min-h-10 py-2 text-sm" busy={busy}>
           {submitLabel}
         </PortalButton>
-        <PortalButton type="button" variant="secondary" className="min-h-10 py-2 text-sm" onClick={onCancel}>
+        <PortalButton
+          type="button"
+          variant="secondary"
+          className="min-h-10 py-2 text-sm"
+          onClick={onCancel}
+        >
           Cancel
         </PortalButton>
       </div>

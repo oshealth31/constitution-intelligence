@@ -27,7 +27,9 @@ export function makeSamplePdf(pages: SamplePdfLine[][]): Buffer {
   };
   const catalogId = add('');
   const pagesId = add('');
-  const fontId = add('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+  const fontId = add(
+    '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>',
+  );
   const pageIds: number[] = [];
   for (const lines of pages) {
     let y = 800;
@@ -38,7 +40,9 @@ export function makeSamplePdf(pages: SamplePdfLine[][]): Buffer {
         return `BT /F1 ${size} Tf 56 ${y} Td (${pdfString(line.text)}) Tj ET`;
       })
       .join('\n');
-    const contentId = add(`<< /Length ${Buffer.byteLength(commands, 'latin1')} >>\nstream\n${commands}\nendstream`);
+    const contentId = add(
+      `<< /Length ${Buffer.byteLength(commands, 'latin1')} >>\nstream\n${commands}\nendstream`,
+    );
     pageIds.push(
       add(
         `<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 595 842] ` +
@@ -89,7 +93,9 @@ export function makeZip(entries: { name: string; content: Buffer | string }[]): 
   const centrals: Buffer[] = [];
   let offset = 0;
   for (const entry of entries) {
-    const data = Buffer.isBuffer(entry.content) ? entry.content : Buffer.from(entry.content, 'utf8');
+    const data = Buffer.isBuffer(entry.content)
+      ? entry.content
+      : Buffer.from(entry.content, 'utf8');
     const compressed = deflateRawSync(data);
     const name = Buffer.from(entry.name, 'utf8');
     const crc = crc32(data);

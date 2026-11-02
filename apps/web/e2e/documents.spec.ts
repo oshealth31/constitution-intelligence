@@ -47,14 +47,26 @@ test('upload, check, approve and publish a document; members only see it once pu
   await expect(form).toBeVisible();
 
   // Wrong kinds of file are refused, in the browser and by the server.
-  await form.getByLabel('Document file').setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('1. Notes') });
+  await form
+    .getByLabel('Document file')
+    .setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('1. Notes') });
   await form.getByRole('button', { name: 'Upload' }).click();
-  await expect(form.getByText('Please choose a PDF (.pdf) or Word (.docx) document.')).toBeVisible();
-  await form.getByLabel('Document file').setInputFiles({ name: 'fake.pdf', mimeType: 'application/pdf', buffer: Buffer.from('<html>not a pdf</html>') });
+  await expect(
+    form.getByText('Please choose a PDF (.pdf) or Word (.docx) document.'),
+  ).toBeVisible();
+  await form
+    .getByLabel('Document file')
+    .setInputFiles({
+      name: 'fake.pdf',
+      mimeType: 'application/pdf',
+      buffer: Buffer.from('<html>not a pdf</html>'),
+    });
   await form.getByRole('button', { name: 'Upload' }).click();
   await expect(form.getByText('The file is named .pdf but is not a PDF document.')).toBeVisible();
 
-  await form.getByLabel('Document file').setInputFiles({ name: 'standing-orders.pdf', mimeType: 'application/pdf', buffer: pdf });
+  await form
+    .getByLabel('Document file')
+    .setInputFiles({ name: 'standing-orders.pdf', mimeType: 'application/pdf', buffer: pdf });
   await form.getByLabel('Name for this version (optional)').fill('First draft');
   await form.getByRole('button', { name: 'Upload' }).click();
 
@@ -80,7 +92,9 @@ test('upload, check, approve and publish a document; members only see it once pu
   await expect(page.getByText('Sent for approval.')).toBeVisible();
   // Reviewers cannot approve.
   await expect(page.getByRole('button', { name: 'Approve' })).toHaveCount(0);
-  await expect(page.getByText('Waiting for an organisation administrator to approve it.')).toBeVisible();
+  await expect(
+    page.getByText('Waiting for an organisation administrator to approve it.'),
+  ).toBeVisible();
   await signOut(page);
 
   // --- Members cannot see it yet --------------------------------------------------------------
@@ -100,7 +114,9 @@ test('upload, check, approve and publish a document; members only see it once pu
   await expect(makeCurrent).toBeDisabled();
   await page.getByLabel('Yes, make this the current constitution.').check();
   await makeCurrent.click();
-  await expect(page.getByText('This is now the current version that members read.').first()).toBeVisible();
+  await expect(
+    page.getByText('This is now the current version that members read.').first(),
+  ).toBeVisible();
   await expect(page.getByText(/Made the current version/)).toBeVisible();
   await signOut(page);
 

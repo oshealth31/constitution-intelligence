@@ -173,7 +173,8 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
   let lastLetter: ParsedSection | null = null;
   let lastLetterValue: number | null = null;
   let level1Roman = false;
-  let current: ParsedSection | null = null;
+  // Assigned inside add(); the type assertion stops TypeScript assuming it is always null.
+  let current = null as ParsedSection | null;
   let title: string | null = null;
   let anyMarker = false;
 

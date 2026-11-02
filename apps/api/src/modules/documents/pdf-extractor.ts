@@ -81,7 +81,9 @@ function loadPdfJs() {
     let standardFontDataUrl: string | undefined;
     try {
       const resolver =
-        typeof require === 'function' ? require : createRequire(path.join(process.cwd(), 'index.js'));
+        typeof require === 'function'
+          ? require
+          : createRequire(path.join(process.cwd(), 'index.js'));
       const entry = resolver.resolve(PDFJS_ENTRY);
       standardFontDataUrl = `${path.join(path.resolve(path.dirname(entry), '..', '..', '..'), 'standard_fonts')}${path.sep}`;
     } catch {

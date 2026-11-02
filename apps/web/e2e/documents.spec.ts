@@ -54,13 +54,11 @@ test('upload, check, approve and publish a document; members only see it once pu
   await expect(
     form.getByText('Please choose a PDF (.pdf) or Word (.docx) document.'),
   ).toBeVisible();
-  await form
-    .getByLabel('Document file')
-    .setInputFiles({
-      name: 'fake.pdf',
-      mimeType: 'application/pdf',
-      buffer: Buffer.from('<html>not a pdf</html>'),
-    });
+  await form.getByLabel('Document file').setInputFiles({
+    name: 'fake.pdf',
+    mimeType: 'application/pdf',
+    buffer: Buffer.from('<html>not a pdf</html>'),
+  });
   await form.getByRole('button', { name: 'Upload' }).click();
   await expect(form.getByText('The file is named .pdf but is not a PDF document.')).toBeVisible();
 

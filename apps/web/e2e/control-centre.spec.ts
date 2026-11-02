@@ -17,14 +17,13 @@ async function signIn(page: Page, email: string) {
   await page.getByRole('button', { name: 'Sign in' }).click();
 }
 
-test.describe.configure({ mode: 'serial' });
-
 test('rejects a wrong password with a clear message', async ({ page }) => {
   await page.goto('/admin/sign-in');
   await page.getByLabel('Email address').fill(SUPER_ADMIN);
   await page.getByLabel('Password').fill('definitely not the password');
   await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page.getByRole('alert')).toContainText('Invalid email or password.');
+  // (Next.js adds its own hidden route announcer with role=alert, so match on the text.)
+  await expect(page.getByRole('alert').filter({ hasText: 'Invalid email or password.' })).toBeVisible();
 });
 
 test('sends signed-out visitors to the sign-in page', async ({ page }) => {

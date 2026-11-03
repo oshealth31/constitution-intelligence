@@ -51,7 +51,9 @@ test('with AI off, finds the matching clauses word for word instead of asking an
   await page.getByLabel('Your question').fill('What is the quorum for a general meeting?');
   await page.getByRole('button', { name: 'Find clauses' }).click();
 
-  await expect(page.getByRole('heading', { name: /matching clauses? from the approved/ })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: /matching clauses? from the approved/ }),
+  ).toBeVisible();
   const clause = page.getByRole('listitem', { name: 'Clause: Clause 7', exact: true });
   await expect(clause).toContainText('Version 1: Registered constitution');
   await expect(clause.getByTestId('clause-text')).toContainText(

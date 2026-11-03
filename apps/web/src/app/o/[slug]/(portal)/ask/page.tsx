@@ -105,11 +105,7 @@ function AskWithAi({ status }: { status: AiStatus }) {
           placeholder="For example: How many members must be present at a general meeting?"
           className="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-lg shadow-sm focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[var(--brand-accent)] focus:outline-none"
         />
-        <PortalButton
-          type="submit"
-          busy={busy}
-          disabled={question.trim().length < 3}
-        >
+        <PortalButton type="submit" busy={busy} disabled={question.trim().length < 3}>
           <ChatIcon className="size-5" />
           {busy ? 'Looking in the constitution…' : 'Ask'}
         </PortalButton>
@@ -185,8 +181,8 @@ function ClauseFinder() {
       />
       <Notice tone="info">
         <strong>No AI is used.</strong> The clauses are found by matching your words. They may not
-        fully answer your question, so please read them carefully and ask your committee if you
-        are unsure.
+        fully answer your question, so please read them carefully and ask your committee if you are
+        unsure.
       </Notice>
 
       <form
@@ -267,7 +263,12 @@ function ClauseFinder() {
             </h2>
             <ol className="space-y-3">
               {found.results.map((clause) => (
-                <ClauseCard key={clause.sectionId} clause={clause} terms={found.terms} slug={slug} />
+                <ClauseCard
+                  key={clause.sectionId}
+                  clause={clause}
+                  terms={found.terms}
+                  slug={slug}
+                />
               ))}
             </ol>
           </section>

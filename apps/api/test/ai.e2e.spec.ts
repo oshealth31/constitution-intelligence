@@ -460,8 +460,7 @@ describe.runIf(Boolean(testDatabaseUrl))('AI question answering', () => {
       }[];
     }
     const find = async (agent: TestAgent, org: Org, question: string) =>
-      (await agent.post(url(org, '/ai/find-clauses')).send({ question }).expect(200))
-        .body as Found;
+      (await agent.post(url(org, '/ai/find-clauses')).send({ question }).expect(200)).body as Found;
 
     it('works with the AI switched off, and never calls the AI', async () => {
       provider.available = false;

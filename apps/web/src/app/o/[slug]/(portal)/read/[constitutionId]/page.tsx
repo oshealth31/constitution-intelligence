@@ -151,8 +151,27 @@ function Reader() {
         </h1>
         {version && (
           <p className="mt-1 text-base text-slate-600">
+            {version.status === 'published' && (
+              <span className="mr-2 inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-sm font-semibold text-emerald-800 ring-1 ring-emerald-200 ring-inset">
+                Current approved version
+              </span>
+            )}
             {version.label}
             {version.publishedAt ? ` · published ${formatDate(version.publishedAt)}` : ''}
+          </p>
+        )}
+        {version?.hasOriginal && (
+          <p className="mt-2 text-base">
+            <a
+              href={`/api/v1${api}/versions/${version.id}/source`}
+              className="inline-flex min-h-11 items-center font-medium text-[var(--brand-ink)] underline underline-offset-4"
+            >
+              Download the original document
+            </a>
+            <span className="block text-sm text-slate-600">
+              The original is the official text. If anything here differs from it, the original is
+              correct.
+            </span>
           </p>
         )}
       </header>

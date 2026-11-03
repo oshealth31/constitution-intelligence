@@ -47,6 +47,8 @@ export interface VersionSummary {
   label: string;
   status: string;
   publishedAt: string | null;
+  /** Whether the original uploaded document is available to download. */
+  hasOriginal?: boolean;
 }
 
 export interface ConstitutionDetail {
@@ -94,6 +96,9 @@ export interface ContentStatusConstitution {
     publishedAt: string | null;
     updatedAt: string;
     sectionCount: number;
+    extractionStatus: string;
+    sectionsNeedingReview: number;
+    fileName: string | null;
     latestDecision: {
       decision: 'approved' | 'changes_requested';
       comment: string | null;
@@ -237,3 +242,116 @@ export function fileToBase64(file: Blob): Promise<string> {
 
 export const LOGO_ACCEPT = 'image/png,image/jpeg,image/webp';
 export const LOGO_MAX_BYTES = 512 * 1024;
+
+// ----- Document management (Stage 7) --------------------------------------------------------
+
+export const DOCUMENT_ACCEPT =
+  '.pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+export const DOCUMENT_MAX_BYTES = 10 * 1024 * 1024;
+
+export interface VersionEvent {
+  id: string;
+  event: string;
+  comment: string | null;
+  at: string;
+  by: string | null;
+}
+
+export interface ExtractionIssue {
+  code: string;
+  severity: 'error' | 'warning';
+  message: string;
+  refKey?: string;
+  page?: number;
+}
+
+export interface ReviewSection extends Section {
+  needsReview: boolean;
+  reviewReason: string | null;
+  sourcePage: number | null;
+  editedAt: string | null;
+  reviewedAt: string | null;
+}
+
+export interface VersionReview {
+  id: string;
+  constitution: { id: string; title: string } | null;
+  versionNumber: number;
+  label: string;
+  status: string;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  extraction: {
+    status: 'not_started' | 'succeeded' | 'needs_review' | 'failed';
+    issues: ExtractionIssue[];
+    meta: {
+      format?: 'pdf' | 'docx';
+      pageCount?: number | null;
+      characterCount?: number;
+      sectionCount?: number;
+      flaggedCount?: number;
+      detectedTitle?: string | null;
+    };
+  };
+  source: {
+    id: string;
+    fileName: string;
+    contentType: string;
+    sizeBytes: number;
+    sha256: string;
+    uploadedAt: string;
+    uploadedBy: string | null;
+  } | null;
+  sections: ReviewSection[];
+  sectionsNeedingReview: number;
+  history: VersionEvent[];
+  editable: boolean;
+}
+
+const EVENT_LABELS: Record<string, string> = {
+  submitted: 'Sent for approval',
+  approved: 'Approved',
+  changes_requested: 'Sent back for changes',
+  published: 'Made the current version',
+  superseded: 'Replaced by a newer version',
+  archived: 'Archived',
+};
+
+export function eventLabel(event: string): string {
+  return EVENT_LABELS[event] ?? event.replace(/_/g, ' ');
+}
+
+const EXTRACTION_LABELS: Record<string, string> = {
+  not_started: 'Not read',
+  succeeded: 'Text read',
+  needs_review: 'Needs checking',
+  failed: 'Could not be read',
+};
+
+export function extractionLabel(status: string): string {
+  return EXTRACTION_LABELS[status] ?? status;
+}
+
+/** The four main steps every version goes through, in order. */
+export const WORKFLOW_STEPS = [
+  { status: 'draft', label: 'Draft: check the text' },
+  { status: 'in_review', label: 'Waiting for approval' },
+  { status: 'approved', label: 'Approved' },
+  { status: 'published', label: 'Current version' },
+] as const;
+
+/** Index of the version's step in WORKFLOW_STEPS, or -1 for superseded/archived. */
+export function workflowStep(status: string): number {
+  return WORKFLOW_STEPS.findIndex((step) => step.status === status);
+}
+
+export function documentProblem(file: { name: string; size: number }): string | null {
+  const name = file.name.toLowerCase();
+  if (!name.endsWith('.pdf') && !name.endsWith('.docx')) {
+    return 'Please choose a PDF (.pdf) or Word (.docx) document.';
+  }
+  if (file.size === 0) return 'The file is empty.';
+  if (file.size > DOCUMENT_MAX_BYTES) return 'The file is larger than 10 MB.';
+  return null;
+}

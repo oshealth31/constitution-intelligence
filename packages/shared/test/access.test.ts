@@ -42,13 +42,21 @@ describe('role permissions', () => {
     expect(ROLE_PERMISSIONS.member).toEqual(['organisation.read', 'constitution.read']);
   });
 
-  it('lets the Content Reviewer approve content but not manage people', () => {
-    expect(roleHasPermission('content_reviewer', 'content.approve')).toBe(true);
+  it('lets the Content Reviewer check and correct content, but not approve it or manage people', () => {
+    expect(roleHasPermission('content_reviewer', 'content.review')).toBe(true);
+    expect(roleHasPermission('content_reviewer', 'content.edit')).toBe(true);
+    expect(roleHasPermission('content_reviewer', 'content.approve')).toBe(false);
     expect(roleHasPermission('content_reviewer', 'members.invite')).toBe(false);
   });
 
-  it('does not let an Administrator approve content or change organisation settings', () => {
-    expect(roleHasPermission('admin', 'content.approve')).toBe(false);
+  it('lets Administrators and Owners approve content, but not Members or Auditors', () => {
+    expect(roleHasPermission('admin', 'content.approve')).toBe(true);
+    expect(roleHasPermission('owner', 'content.approve')).toBe(true);
+    expect(roleHasPermission('member', 'content.approve')).toBe(false);
+    expect(roleHasPermission('auditor', 'content.approve')).toBe(false);
+  });
+
+  it('does not let an Administrator change organisation settings', () => {
     expect(roleHasPermission('admin', 'organisation.settings.manage')).toBe(false);
   });
 });

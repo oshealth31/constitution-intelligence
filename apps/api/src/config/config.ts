@@ -74,6 +74,13 @@ export const configSchema = z
     // A cloud object-storage driver is added in the deployment stage.
     STORAGE_DRIVER: z.enum(['local']).default('local'),
     STORAGE_LOCAL_DIR: z.string().min(1).default('.data/storage'),
+    // Largest constitution document (PDF or DOCX) accepted for upload, in bytes. Default 10 MB.
+    DOCUMENT_MAX_BYTES: z.coerce
+      .number()
+      .int()
+      .min(1024)
+      .max(50 * 1024 * 1024)
+      .default(10 * 1024 * 1024),
   })
   .superRefine((config, ctx) => {
     const deployed = config.APP_ENV === 'staging' || config.APP_ENV === 'production';

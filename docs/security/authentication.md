@@ -25,15 +25,20 @@ The single source of truth is `packages/shared/src/access.ts`.
 | organisation.read            | Yes   | Yes   | Yes              | Yes    | Yes     |
 | constitution.read            | Yes   | Yes   | Yes              | Yes    | Yes     |
 | organisation.settings.manage | Yes   | No    | No               | No     | No      |
-| content.edit                 | Yes   | Yes   | No               | No     | No      |
+| content.edit                 | Yes   | Yes   | Yes              | No     | No      |
 | content.review               | Yes   | Yes   | Yes              | No     | No      |
-| content.approve              | Yes   | No    | Yes              | No     | No      |
+| content.approve              | Yes   | Yes   | No               | No     | No      |
 | members.read                 | Yes   | Yes   | No               | No     | Yes     |
 | members.invite               | Yes   | Yes   | No               | No     | No      |
 | members.manage               | Yes   | Yes   | No               | No     | No      |
 | branding.manage              | Yes   | Yes   | No               | No     | No      |
 | billing.read                 | Yes   | No    | No               | No     | Yes     |
 | audit.read                   | Yes   | Yes   | No               | No     | Yes     |
+
+Stage 7 changed the content permissions so that approval is the organisation administrator's
+decision: Content Reviewers check and correct extracted text and send it for approval
+(`content.edit`, `content.review`); Owners and Administrators approve, publish and archive
+(`content.approve`). See [../documents.md](../documents.md).
 
 ### Privilege-escalation rules
 

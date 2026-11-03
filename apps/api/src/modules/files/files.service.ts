@@ -41,9 +41,11 @@ export class FilesService {
     originalFilename: string,
     contentType: string,
     content: Buffer,
+    purpose: StoredFile['purpose'] = 'other',
+    folder = 'files',
   ): Promise<FileSummary> {
     const id = randomUUID();
-    const storageKey = `${tenantPrefix(scope.organisationId)}files/${id}`;
+    const storageKey = `${tenantPrefix(scope.organisationId)}${folder}/${id}`;
     await this.storage.put(scope, storageKey, content);
     const row = await this.tenantDb.run(scope, async (tx) => {
       const [created] = await tx
@@ -57,6 +59,7 @@ export class FilesService {
           sizeBytes: content.length,
           sha256: createHash('sha256').update(content).digest('hex'),
           uploadedByUserId: scope.userId,
+          purpose,
         })
         .returning();
       return created!;

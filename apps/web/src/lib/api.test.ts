@@ -24,6 +24,18 @@ describe('apiFetch', () => {
     expect(init.body).toBe(JSON.stringify({ name: 'X' }));
   });
 
+  it('sends an uploaded file as the body, with its name in a header', async () => {
+    const fetchMock = mockFetch(201, { id: 'v1' });
+    const file = new File(['%PDF-1.4'], 'Our constitution (2026).pdf', { type: 'application/pdf' });
+    await apiFetch('/organisations/o/constitutions/c/versions', { method: 'POST', file });
+    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    const headers = init.headers as Record<string, string>;
+    expect(init.body).toBe(file);
+    expect(headers['Content-Type']).toBe('application/pdf');
+    expect(headers['X-File-Name']).toBe('Our%20constitution%20(2026).pdf');
+    expect(headers['X-Requested-With']).toBe('XMLHttpRequest');
+  });
+
   it('turns API errors into ApiError with the message and details', async () => {
     mockFetch(400, {
       error: {

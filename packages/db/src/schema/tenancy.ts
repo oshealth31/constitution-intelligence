@@ -1,8 +1,10 @@
-// Table definitions matching migrations/0002_multi_tenancy.sql (and 0003_organisation_portals.sql).
+// Table definitions matching migrations/0002_multi_tenancy.sql (with 0003 and 0004 additions).
 // Every table here carries organisation_id; see docs/security/tenant-isolation.md.
 import {
   bigint,
+  boolean,
   integer,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -24,6 +26,16 @@ export const SUBSCRIPTION_STATUSES = [
   'past_due',
   'suspended',
   'cancelled',
+] as const;
+export const FILE_PURPOSES = ['constitution_source', 'branding_logo', 'other'] as const;
+export const EXTRACTION_STATUSES = ['not_started', 'succeeded', 'needs_review', 'failed'] as const;
+export const VERSION_EVENTS = [
+  'submitted',
+  'approved',
+  'changes_requested',
+  'published',
+  'superseded',
+  'archived',
 ] as const;
 export const VERSION_STATUSES = [
   'draft',
@@ -59,6 +71,7 @@ export const files = pgTable('files', {
   uploadedByUserId: uuid('uploaded_by_user_id').references(() => users.id, {
     onDelete: 'set null',
   }),
+  purpose: text('purpose', { enum: FILE_PURPOSES }).notNull().default('other'),
   createdAt,
 });
 
@@ -96,6 +109,11 @@ export const constitutionVersions = pgTable('constitution_versions', {
     onDelete: 'set null',
   }),
   publishedAt: timestamp('published_at', { withTimezone: true }),
+  extractionStatus: text('extraction_status', { enum: EXTRACTION_STATUSES })
+    .notNull()
+    .default('not_started'),
+  extractionIssues: jsonb('extraction_issues').$type<unknown[]>().notNull().default([]),
+  extractionMeta: jsonb('extraction_meta').$type<Record<string, unknown>>().notNull().default({}),
   createdAt,
   updatedAt,
 });
@@ -121,6 +139,15 @@ export const sections = pgTable('sections', {
   heading: text('heading'),
   body: text('body').notNull().default(''),
   position: integer('position').notNull(),
+  needsReview: boolean('needs_review').notNull().default(false),
+  reviewReason: text('review_reason'),
+  sourcePage: integer('source_page'),
+  editedAt: timestamp('edited_at', { withTimezone: true }),
+  editedByUserId: uuid('edited_by_user_id').references(() => users.id, { onDelete: 'set null' }),
+  reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
+  reviewedByUserId: uuid('reviewed_by_user_id').references(() => users.id, {
+    onDelete: 'set null',
+  }),
   createdAt,
 });
 
@@ -139,7 +166,7 @@ export const contentApprovals = pgTable('content_approvals', {
   organisationId: organisationId(),
   versionId: uuid('version_id').notNull(),
   reviewerUserId: uuid('reviewer_user_id').references(() => users.id, { onDelete: 'set null' }),
-  decision: text('decision', { enum: ['approved', 'changes_requested'] }).notNull(),
+  decision: text('decision', { enum: VERSION_EVENTS }).notNull(),
   comment: text('comment'),
   createdAt,
 });

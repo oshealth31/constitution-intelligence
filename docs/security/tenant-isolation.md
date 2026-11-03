@@ -90,6 +90,8 @@ deliberately attempts to:
 
 - read organisation B's records through organisation A's URLs, and through B's URLs as A's owner;
 - write into organisation B (branding, logo, portal address, invitations, AI);
+- upload to, review, correct, approve, publish, archive or download organisation B's documents
+  (`apps/api/test/documents.e2e.spec.ts`);
 - smuggle B's ID in the request body, query string and headers;
 - find B's text through search and AI retrieval;
 - download B's files, and read B's storage keys directly through the storage service;

@@ -22,20 +22,34 @@ interface ErrorBody {
 
 export async function apiFetch<T>(
   path: string,
-  options: { method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'; body?: unknown } = {},
+  options: {
+    method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
+    body?: unknown;
+    /** Sends a file as the request body (used for document uploads). */
+    file?: File;
+  } = {},
 ): Promise<T> {
   const method = options.method ?? 'GET';
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+    // Required by the API's CSRF protection for state-changing requests.
+    'X-Requested-With': 'XMLHttpRequest',
+  };
+  let body: BodyInit | undefined;
+  if (options.file) {
+    headers['Content-Type'] = options.file.type || 'application/octet-stream';
+    headers['X-File-Name'] = encodeURIComponent(options.file.name);
+    body = options.file;
+  } else if (options.body !== undefined) {
+    headers['Content-Type'] = 'application/json';
+    body = JSON.stringify(options.body);
+  }
   const response = await fetch(`/api/v1${path}`, {
     method,
     credentials: 'same-origin',
     cache: 'no-store',
-    headers: {
-      Accept: 'application/json',
-      // Required by the API's CSRF protection for state-changing requests.
-      'X-Requested-With': 'XMLHttpRequest',
-      ...(options.body !== undefined ? { 'Content-Type': 'application/json' } : {}),
-    },
-    body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+    headers,
+    body,
   });
   if (response.status === 204) {
     return undefined as T;

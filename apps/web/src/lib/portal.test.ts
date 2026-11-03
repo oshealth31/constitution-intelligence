@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import {
   buildSectionTree,
   canManage,
+  documentProblem,
+  eventLabel,
+  workflowStep,
   contentsEntries,
   portalPath,
   sectionTitle,
@@ -85,5 +88,22 @@ describe('portal helpers', () => {
 
   it('builds portal addresses', () => {
     expect(portalPath('sample-netball-club', '/search')).toBe('/o/sample-netball-club/search');
+  });
+});
+
+describe('document management helpers', () => {
+  it('checks the chosen file before uploading', () => {
+    expect(documentProblem({ name: 'Constitution.PDF', size: 1000 })).toBeNull();
+    expect(documentProblem({ name: 'c.docx', size: 1000 })).toBeNull();
+    expect(documentProblem({ name: 'c.doc', size: 1000 })).toMatch(/PDF/);
+    expect(documentProblem({ name: 'c.pdf', size: 0 })).toMatch(/empty/);
+    expect(documentProblem({ name: 'c.pdf', size: 11 * 1024 * 1024 })).toMatch(/10 MB/);
+  });
+
+  it('describes workflow steps in plain words', () => {
+    expect(workflowStep('draft')).toBe(0);
+    expect(workflowStep('published')).toBe(3);
+    expect(workflowStep('archived')).toBe(-1);
+    expect(eventLabel('changes_requested')).toBe('Sent back for changes');
   });
 });

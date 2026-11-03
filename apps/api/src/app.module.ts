@@ -13,6 +13,7 @@ import { AiModule } from './modules/ai/ai.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ConstitutionsModule } from './modules/constitutions/constitutions.module';
+import { DocumentsModule } from './modules/documents/documents.module';
 import { FilesModule } from './modules/files/files.module';
 import { MailModule } from './modules/mail/mail.module';
 import { OrganisationsModule } from './modules/organisations/organisations.module';
@@ -47,6 +48,7 @@ export class AppModule {
         ConstitutionsModule,
         AiModule,
         PortalModule,
+        DocumentsModule,
       ],
       providers: [
         { provide: APP_FILTER, useClass: AllExceptionsFilter },

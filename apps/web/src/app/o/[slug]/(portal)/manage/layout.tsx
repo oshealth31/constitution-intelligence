@@ -16,7 +16,9 @@ export default function ManageLayout({ children }: { children: ReactNode }) {
   const { home, slug } = usePortal();
   const pathname = usePathname();
   const sections = visibleSections(home.you.permissions);
-  const current = MANAGE_SECTIONS.find((section) => pathname.endsWith(section.path));
+  const current = MANAGE_SECTIONS.find(
+    (section) => pathname.endsWith(section.path) || pathname.includes(`${section.path}/`),
+  );
 
   if (sections.length === 0 || (current && !sections.includes(current))) {
     return (

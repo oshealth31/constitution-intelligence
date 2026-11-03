@@ -296,7 +296,9 @@ function SubscriptionNotice({
   if (blocked && !onBillingPage) {
     return (
       <div className="max-w-2xl">
-        <h1 className="mb-4 text-2xl font-bold text-slate-900">The portal is not available right now</h1>
+        <h1 className="mb-4 text-2xl font-bold text-slate-900">
+          The portal is not available right now
+        </h1>
         {banner}
         {!canSeeBilling && (
           <p className="text-base text-slate-700">

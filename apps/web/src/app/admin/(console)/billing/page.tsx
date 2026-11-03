@@ -3,7 +3,13 @@
 import Link from 'next/link';
 import { Alert, Card, EmptyState, Loading, PageHeader } from '@/components/ui';
 import { describeError } from '@/lib/api';
-import { ACCESS_STATE_LABELS, formatMoney, PAYMENT_METHOD_LABELS, type AccessState, type PaymentMethod } from '@/lib/billing';
+import {
+  ACCESS_STATE_LABELS,
+  formatMoney,
+  PAYMENT_METHOD_LABELS,
+  type AccessState,
+  type PaymentMethod,
+} from '@/lib/billing';
 import { formatDate } from '@/lib/format';
 import { useApi } from '@/lib/use-api';
 
@@ -67,16 +73,20 @@ export default function BillingAttentionPage() {
         description="No payment provider is connected. Payments are reported by organisations (or recorded here) and count only after a Super Admin has checked that the money arrived."
       />
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card title={`Payments to verify (${pendingPayments.length})`} description="Check each against the bank or mobile-money statement.">
+        <Card
+          title={`Payments to verify (${pendingPayments.length})`}
+          description="Check each against the bank or mobile-money statement."
+        >
           {pendingPayments.length === 0 ? (
             <EmptyState>Nothing to verify.</EmptyState>
           ) : (
             <ul className="divide-y divide-ivory-100 text-sm" aria-label="Payments to verify">
               {pendingPayments.map((payment) => (
                 <li key={payment.id} className="py-2">
-                  {link(payment.organisationId, payment.organisationName)} · {payment.invoiceNumber} ·{' '}
-                  {formatMoney(payment.amountMinor, payment.currency)} · {PAYMENT_METHOD_LABELS[payment.method]} · ref{' '}
-                  {payment.reference} · paid {formatDate(payment.paidOn)}
+                  {link(payment.organisationId, payment.organisationName)} · {payment.invoiceNumber}{' '}
+                  · {formatMoney(payment.amountMinor, payment.currency)} ·{' '}
+                  {PAYMENT_METHOD_LABELS[payment.method]} · ref {payment.reference} · paid{' '}
+                  {formatDate(payment.paidOn)}
                 </li>
               ))}
             </ul>
@@ -90,13 +100,17 @@ export default function BillingAttentionPage() {
               {overdueInvoices.map((invoice) => (
                 <li key={invoice.id} className="py-2">
                   {link(invoice.organisationId, invoice.organisationName)} · {invoice.number} ·{' '}
-                  {formatMoney(invoice.amountMinor, invoice.currency)} · due {formatDate(invoice.dueAt)}
+                  {formatMoney(invoice.amountMinor, invoice.currency)} · due{' '}
+                  {formatDate(invoice.dueAt)}
                 </li>
               ))}
             </ul>
           )}
         </Card>
-        <Card title={`Periods ending in the next 14 days (${renewalsDue.length})`} description="Renew, or let them end. Nothing renews by itself.">
+        <Card
+          title={`Periods ending in the next 14 days (${renewalsDue.length})`}
+          description="Renew, or let them end. Nothing renews by itself."
+        >
           {renewalsDue.length === 0 ? (
             <EmptyState>None.</EmptyState>
           ) : (
@@ -104,7 +118,8 @@ export default function BillingAttentionPage() {
               {renewalsDue.map((item) => (
                 <li key={item.organisationId} className="py-2">
                   {link(item.organisationId, item.organisationName)} · {item.planCode} · ends{' '}
-                  {formatDate(item.currentPeriodEnd)} · {item.autoRenew ? 'set to renew' : 'not renewing'}
+                  {formatDate(item.currentPeriodEnd)} ·{' '}
+                  {item.autoRenew ? 'set to renew' : 'not renewing'}
                 </li>
               ))}
             </ul>
@@ -120,9 +135,14 @@ export default function BillingAttentionPage() {
             <ul className="divide-y divide-ivory-100 text-sm">
               {restricted.map((item) => (
                 <li key={item.organisationId} className="py-2">
-                  {link(item.organisationId, item.organisationName)} · {ACCESS_STATE_LABELS[item.state]}
-                  {item.dataRetainedUntil ? ` · data kept until ${formatDate(item.dataRetainedUntil)}` : ''}
-                  {item.retentionPassed && <strong className="text-rose-800"> · due for deletion review</strong>}
+                  {link(item.organisationId, item.organisationName)} ·{' '}
+                  {ACCESS_STATE_LABELS[item.state]}
+                  {item.dataRetainedUntil
+                    ? ` · data kept until ${formatDate(item.dataRetainedUntil)}`
+                    : ''}
+                  {item.retentionPassed && (
+                    <strong className="text-rose-800"> · due for deletion review</strong>
+                  )}
                 </li>
               ))}
             </ul>

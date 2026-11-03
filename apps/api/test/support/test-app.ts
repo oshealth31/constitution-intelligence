@@ -126,7 +126,10 @@ export async function createOrganisation(
     .insert(organisations)
     .values({ slug, name: `Fictional Organisation ${counter}` })
     .returning();
-  const wanted = options.subscription === undefined ? { planCode: 'premium', status: 'active' as const } : options.subscription;
+  const wanted =
+    options.subscription === undefined
+      ? { planCode: 'premium', status: 'active' as const }
+      : options.subscription;
   if (wanted) {
     const [subscription] = await db
       .insert(subscriptions)

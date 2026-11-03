@@ -87,7 +87,13 @@ export const PAYMENT_STATUS_LABELS: Readonly<Record<PaymentStatus, string>> = {
 };
 
 /** How a payment was made. There is no card option: card details are never taken or stored. */
-export const PAYMENT_METHODS = ['bank_transfer', 'mobile_money', 'cash', 'cheque', 'other'] as const;
+export const PAYMENT_METHODS = [
+  'bank_transfer',
+  'mobile_money',
+  'cash',
+  'cheque',
+  'other',
+] as const;
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
 
 export const PAYMENT_METHOD_LABELS: Readonly<Record<PaymentMethod, string>> = {

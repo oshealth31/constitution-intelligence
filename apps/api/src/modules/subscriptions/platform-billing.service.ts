@@ -104,7 +104,10 @@ export class PlatformBillingService {
   }
 
   async createPlan(code: string, input: PlanInput, actorUserId: string, meta: RequestMeta) {
-    const [existing] = await this.db.select({ code: plans.code }).from(plans).where(eq(plans.code, code));
+    const [existing] = await this.db
+      .select({ code: plans.code })
+      .from(plans)
+      .where(eq(plans.code, code));
     if (existing) throw new ConflictException('A plan with this code already exists.');
     const [created] = await this.db
       .insert(plans)
@@ -133,12 +136,21 @@ export class PlatformBillingService {
 
   async getBilling(organisationId: string) {
     const [organisation] = await this.db
-      .select({ id: organisations.id, name: organisations.name, subscriptionId: organisations.currentSubscriptionId })
+      .select({
+        id: organisations.id,
+        name: organisations.name,
+        subscriptionId: organisations.currentSubscriptionId,
+      })
       .from(organisations)
       .where(eq(organisations.id, organisationId));
     if (!organisation) throw new NotFoundException('Organisation not found.');
     const now = new Date();
-    const access = await loadAccess(this.db, organisationId, now, this.config.SUBSCRIPTION_DATA_RETENTION_DAYS);
+    const access = await loadAccess(
+      this.db,
+      organisationId,
+      now,
+      this.config.SUBSCRIPTION_DATA_RETENTION_DAYS,
+    );
     const usage = await loadUsage(this.db, organisationId, now);
     const subscription = organisation.subscriptionId
       ? ((
@@ -184,8 +196,12 @@ export class PlatformBillingService {
           .filter((payment) => payment.invoiceId === invoice.id)
           .map((payment) => ({
             ...payment,
-            reportedBy: payment.reportedByUserId ? (names.get(payment.reportedByUserId) ?? null) : null,
-            verifiedBy: payment.verifiedByUserId ? (names.get(payment.verifiedByUserId) ?? null) : null,
+            reportedBy: payment.reportedByUserId
+              ? (names.get(payment.reportedByUserId) ?? null)
+              : null,
+            verifiedBy: payment.verifiedByUserId
+              ? (names.get(payment.verifiedByUserId) ?? null)
+              : null,
           })),
       })),
       events: events.map((event) => ({
@@ -263,34 +279,54 @@ export class PlatformBillingService {
           .set({ currentSubscriptionId: id, updatedAt: now })
           .where(eq(organisations.id, organisationId));
       }
-      await this.event(tx, organisationId, id!, 'subscription_updated', describeSubscription(plan.name, values), actorUserId, {
+      await this.event(
+        tx,
+        organisationId,
+        id!,
+        'subscription_updated',
+        describeSubscription(plan.name, values),
+        actorUserId,
+        {
+          from: before
+            ? {
+                planCode: before.planCode,
+                status: before.status,
+                billingInterval: before.billingInterval,
+                currentPeriodEnd: before.currentPeriodEnd,
+                autoRenew: before.autoRenew,
+              }
+            : null,
+          to: { ...values, updatedAt: undefined },
+        },
+      );
+      return id!;
+    });
+    await this.record(
+      'subscription.updated',
+      actorUserId,
+      organisationId,
+      'subscription',
+      subscriptionId,
+      meta,
+      {
         from: before
           ? {
               planCode: before.planCode,
               status: before.status,
-              billingInterval: before.billingInterval,
               currentPeriodEnd: before.currentPeriodEnd,
-              autoRenew: before.autoRenew,
             }
           : null,
-        to: { ...values, updatedAt: undefined },
-      });
-      return id!;
-    });
-    await this.record('subscription.updated', actorUserId, organisationId, 'subscription', subscriptionId, meta, {
-      from: before
-        ? { planCode: before.planCode, status: before.status, currentPeriodEnd: before.currentPeriodEnd }
-        : null,
-      to: {
-        planCode: values.planCode,
-        status: values.status,
-        billingInterval: values.billingInterval,
-        currentPeriodEnd: values.currentPeriodEnd,
-        autoRenew: values.autoRenew,
+        to: {
+          planCode: values.planCode,
+          status: values.status,
+          billingInterval: values.billingInterval,
+          currentPeriodEnd: values.currentPeriodEnd,
+          autoRenew: values.autoRenew,
+        },
+        by: 'platform',
+        paymentProvider: 'none (manual)',
       },
-      by: 'platform',
-      paymentProvider: 'none (manual)',
-    });
+    );
   }
 
   async suspend(organisationId: string, reason: string, actorUserId: string, meta: RequestMeta) {
@@ -299,16 +335,37 @@ export class PlatformBillingService {
     await this.db.transaction(async (tx) => {
       await tx
         .update(subscriptions)
-        .set({ status: 'suspended', suspendedAt: new Date(), suspensionReason: reason, updatedAt: new Date() })
+        .set({
+          status: 'suspended',
+          suspendedAt: new Date(),
+          suspensionReason: reason,
+          updatedAt: new Date(),
+        })
         .where(eq(subscriptions.id, current.id));
-      await this.event(tx, organisationId, current.id, 'suspended', `Suspended: ${reason}`, actorUserId, {
+      await this.event(
+        tx,
+        organisationId,
+        current.id,
+        'suspended',
+        `Suspended: ${reason}`,
+        actorUserId,
+        {
+          previousStatus: current.status,
+        },
+      );
+    });
+    await this.record(
+      'subscription.suspended',
+      actorUserId,
+      organisationId,
+      'subscription',
+      current.id,
+      meta,
+      {
+        reason,
         previousStatus: current.status,
-      });
-    });
-    await this.record('subscription.suspended', actorUserId, organisationId, 'subscription', current.id, meta, {
-      reason,
-      previousStatus: current.status,
-    });
+      },
+    );
   }
 
   /** Suspended or cancelled → back to a pilot (for unbilled subscriptions) or active. */
@@ -331,14 +388,30 @@ export class PlatformBillingService {
           updatedAt: new Date(),
         })
         .where(eq(subscriptions.id, current.id));
-      await this.event(tx, organisationId, current.id, 'reactivated', `Reactivated: ${reason}`, actorUserId, {
+      await this.event(
+        tx,
+        organisationId,
+        current.id,
+        'reactivated',
+        `Reactivated: ${reason}`,
+        actorUserId,
+        {
+          previousStatus: current.status,
+        },
+      );
+    });
+    await this.record(
+      'subscription.reactivated',
+      actorUserId,
+      organisationId,
+      'subscription',
+      current.id,
+      meta,
+      {
+        reason,
         previousStatus: current.status,
-      });
-    });
-    await this.record('subscription.reactivated', actorUserId, organisationId, 'subscription', current.id, meta, {
-      reason,
-      previousStatus: current.status,
-    });
+      },
+    );
   }
 
   /** At the end of the period (access continues until then, plus grace) or straight away. */
@@ -373,15 +446,25 @@ export class PlatformBillingService {
         organisationId,
         current.id,
         'cancelled',
-        when === 'now' ? `Cancelled with immediate effect: ${reason}` : `Cancelled at the end of the period: ${reason}`,
+        when === 'now'
+          ? `Cancelled with immediate effect: ${reason}`
+          : `Cancelled at the end of the period: ${reason}`,
         actorUserId,
         { when, previousStatus: current.status, periodEnd: end },
       );
     });
-    await this.record('subscription.cancelled', actorUserId, organisationId, 'subscription', current.id, meta, {
-      reason,
-      when,
-    });
+    await this.record(
+      'subscription.cancelled',
+      actorUserId,
+      organisationId,
+      'subscription',
+      current.id,
+      meta,
+      {
+        reason,
+        when,
+      },
+    );
   }
 
   /**
@@ -394,7 +477,9 @@ export class PlatformBillingService {
       throw new ConflictException(`This subscription is ${current.status}. Reactivate it first.`);
     }
     if (current.billingInterval === 'none') {
-      throw new ConflictException('A pilot is not renewed. Move the organisation to a paid plan instead.');
+      throw new ConflictException(
+        'A pilot is not renewed. Move the organisation to a paid plan instead.',
+      );
     }
     const [plan] = await this.db.select().from(plans).where(eq(plans.code, current.planCode));
     const now = new Date();
@@ -412,13 +497,20 @@ export class PlatformBillingService {
         .where(eq(subscriptions.id, current.id));
       let number: string | null = null;
       if (price && price > 0) {
-        number = await this.insertInvoice(tx, organisationId, current.id, actorUserId, {
-          description: `${plan!.name} plan, ${current.billingInterval === 'monthly' ? 'monthly' : 'annual'} subscription`,
-          amountMinor: price,
-          dueAt: new Date(Math.max(start.getTime(), now.getTime())),
-          periodStart: start,
-          periodEnd: end,
-        }, plan!.currency);
+        number = await this.insertInvoice(
+          tx,
+          organisationId,
+          current.id,
+          actorUserId,
+          {
+            description: `${plan!.name} plan, ${current.billingInterval === 'monthly' ? 'monthly' : 'annual'} subscription`,
+            amountMinor: price,
+            dueAt: new Date(Math.max(start.getTime(), now.getTime())),
+            periodStart: start,
+            periodEnd: end,
+          },
+          plan!.currency,
+        );
       }
       await this.event(
         tx,
@@ -431,20 +523,40 @@ export class PlatformBillingService {
       );
       return number;
     });
-    await this.record('subscription.renewed', actorUserId, organisationId, 'subscription', current.id, meta, {
-      periodStart: start,
-      periodEnd: end,
-      invoiceNumber,
-    });
+    await this.record(
+      'subscription.renewed',
+      actorUserId,
+      organisationId,
+      'subscription',
+      current.id,
+      meta,
+      {
+        periodStart: start,
+        periodEnd: end,
+        invoiceNumber,
+      },
+    );
   }
 
   // ----- Invoices and payments ----------------------------------------------------------------
 
-  async issueInvoice(organisationId: string, input: InvoiceInput, actorUserId: string, meta: RequestMeta) {
+  async issueInvoice(
+    organisationId: string,
+    input: InvoiceInput,
+    actorUserId: string,
+    meta: RequestMeta,
+  ) {
     const current = await this.requireSubscription(organisationId);
     const [plan] = await this.db.select().from(plans).where(eq(plans.code, current.planCode));
     const number = await this.db.transaction(async (tx) =>
-      this.insertInvoice(tx, organisationId, current.id, actorUserId, input, plan?.currency ?? 'BWP'),
+      this.insertInvoice(
+        tx,
+        organisationId,
+        current.id,
+        actorUserId,
+        input,
+        plan?.currency ?? 'BWP',
+      ),
     );
     await this.record('invoice.issued', actorUserId, organisationId, 'invoice', number, meta, {
       amountMinor: input.amountMinor,
@@ -453,32 +565,58 @@ export class PlatformBillingService {
     return number;
   }
 
-  async voidInvoice(organisationId: string, invoiceId: string, reason: string, actorUserId: string, meta: RequestMeta) {
+  async voidInvoice(
+    organisationId: string,
+    invoiceId: string,
+    reason: string,
+    actorUserId: string,
+    meta: RequestMeta,
+  ) {
     await this.db.transaction(async (tx) => {
       const invoice = await this.lockInvoice(tx, organisationId, invoiceId);
-      if (invoice.status !== 'open') throw new ConflictException(`This invoice is already ${invoice.status}.`);
+      if (invoice.status !== 'open')
+        throw new ConflictException(`This invoice is already ${invoice.status}.`);
       const [verified] = await tx
         .select({ id: payments.id })
         .from(payments)
         .where(and(eq(payments.invoiceId, invoiceId), eq(payments.status, 'verified')));
       if (verified) {
-        throw new ConflictException('A verified payment exists for this invoice, so it cannot be voided.');
+        throw new ConflictException(
+          'A verified payment exists for this invoice, so it cannot be voided.',
+        );
       }
       await tx
         .update(invoices)
         .set({ status: 'void', voidedAt: new Date(), voidReason: reason })
         .where(eq(invoices.id, invoiceId));
-      await this.event(tx, organisationId, invoice.subscriptionId, 'invoice_voided', `Invoice ${invoice.number} voided: ${reason}`, actorUserId, {});
+      await this.event(
+        tx,
+        organisationId,
+        invoice.subscriptionId,
+        'invoice_voided',
+        `Invoice ${invoice.number} voided: ${reason}`,
+        actorUserId,
+        {},
+      );
     });
-    await this.record('invoice.voided', actorUserId, organisationId, 'invoice', invoiceId, meta, { reason });
+    await this.record('invoice.voided', actorUserId, organisationId, 'invoice', invoiceId, meta, {
+      reason,
+    });
   }
 
   /** A Super Admin records a payment they were told about (for example by phone). Still needs verifying. */
-  async recordPayment(organisationId: string, invoiceId: string, input: PaymentInput, actorUserId: string, meta: RequestMeta) {
+  async recordPayment(
+    organisationId: string,
+    invoiceId: string,
+    input: PaymentInput,
+    actorUserId: string,
+    meta: RequestMeta,
+  ) {
     refuseCardNumbers(input.reference, input.notes);
     const paymentId = await this.db.transaction(async (tx) => {
       const invoice = await this.lockInvoice(tx, organisationId, invoiceId);
-      if (invoice.status !== 'open') throw new ConflictException(`This invoice is ${invoice.status}.`);
+      if (invoice.status !== 'open')
+        throw new ConflictException(`This invoice is ${invoice.status}.`);
       const [created] = await tx
         .insert(payments)
         .values({
@@ -493,7 +631,15 @@ export class PlatformBillingService {
           reportedByUserId: actorUserId,
         })
         .returning({ id: payments.id });
-      await this.event(tx, organisationId, invoice.subscriptionId, 'payment_recorded', `Payment of ${formatMoney(input.amountMinor, invoice.currency)} recorded for invoice ${invoice.number}, waiting for verification.`, actorUserId, {});
+      await this.event(
+        tx,
+        organisationId,
+        invoice.subscriptionId,
+        'payment_recorded',
+        `Payment of ${formatMoney(input.amountMinor, invoice.currency)} recorded for invoice ${invoice.number}, waiting for verification.`,
+        actorUserId,
+        {},
+      );
       return created!.id;
     });
     await this.record('payment.reported', actorUserId, organisationId, 'payment', paymentId, meta, {
@@ -509,7 +655,13 @@ export class PlatformBillingService {
    * mobile-money statement). Only then does the payment count, a receipt number is given, and the
    * invoice is marked paid once verified payments cover it.
    */
-  async verifyPayment(organisationId: string, paymentId: string, note: string | null, actorUserId: string, meta: RequestMeta) {
+  async verifyPayment(
+    organisationId: string,
+    paymentId: string,
+    note: string | null,
+    actorUserId: string,
+    meta: RequestMeta,
+  ) {
     const result = await this.db.transaction(async (tx) => {
       const [payment] = await tx
         .select()
@@ -524,7 +676,9 @@ export class PlatformBillingService {
       if (invoice.status === 'void') throw new ConflictException('The invoice has been voided.');
       const now = new Date();
       const [{ receipt }] = (
-        await tx.execute(sql`SELECT 'RCP-' || to_char(now(), 'YYYY') || '-' || lpad(nextval('receipt_number_seq')::text, 4, '0') AS receipt`)
+        await tx.execute(
+          sql`SELECT 'RCP-' || to_char(now(), 'YYYY') || '-' || lpad(nextval('receipt_number_seq')::text, 4, '0') AS receipt`,
+        )
       ).rows as { receipt: string }[];
       await tx
         .update(payments)
@@ -542,7 +696,10 @@ export class PlatformBillingService {
       ).rows as { total: number }[];
       const paid = Number(total) >= invoice.amountMinor;
       if (paid && invoice.status === 'open') {
-        await tx.update(invoices).set({ status: 'paid', paidAt: now }).where(eq(invoices.id, invoice.id));
+        await tx
+          .update(invoices)
+          .set({ status: 'paid', paidAt: now })
+          .where(eq(invoices.id, invoice.id));
       }
       await this.event(
         tx,
@@ -562,7 +719,13 @@ export class PlatformBillingService {
     return result;
   }
 
-  async rejectPayment(organisationId: string, paymentId: string, reason: string, actorUserId: string, meta: RequestMeta) {
+  async rejectPayment(
+    organisationId: string,
+    paymentId: string,
+    reason: string,
+    actorUserId: string,
+    meta: RequestMeta,
+  ) {
     await this.db.transaction(async (tx) => {
       const [payment] = await tx
         .select()
@@ -578,9 +741,19 @@ export class PlatformBillingService {
         .set({ status: 'rejected', rejectionReason: reason })
         .where(eq(payments.id, paymentId));
       const invoice = await this.lockInvoice(tx, organisationId, payment.invoiceId);
-      await this.event(tx, organisationId, invoice.subscriptionId, 'payment_rejected', `Reported payment for invoice ${invoice.number} could not be verified: ${reason}`, actorUserId, {});
+      await this.event(
+        tx,
+        organisationId,
+        invoice.subscriptionId,
+        'payment_rejected',
+        `Reported payment for invoice ${invoice.number} could not be verified: ${reason}`,
+        actorUserId,
+        {},
+      );
     });
-    await this.record('payment.rejected', actorUserId, organisationId, 'payment', paymentId, meta, { reason });
+    await this.record('payment.rejected', actorUserId, organisationId, 'payment', paymentId, meta, {
+      reason,
+    });
   }
 
   // ----- Across organisations ------------------------------------------------------------------
@@ -618,23 +791,48 @@ export class PlatformBillingService {
           AND s.current_period_end < ${new Date(now.getTime() + 14 * DAY)}
         ORDER BY s.current_period_end`)
     ).rows;
-    const all = (await this.db.execute(sql`SELECT id, name FROM organisations WHERE status <> 'archived' ORDER BY name`))
-      .rows as { id: string; name: string }[];
-    const restricted: { organisationId: string; organisationName: string; state: string; restrictedSince: string | null; dataRetainedUntil: string | null; retentionPassed: boolean }[] = [];
+    const all = (
+      await this.db.execute(
+        sql`SELECT id, name FROM organisations WHERE status <> 'archived' ORDER BY name`,
+      )
+    ).rows as { id: string; name: string }[];
+    const restricted: {
+      organisationId: string;
+      organisationName: string;
+      state: string;
+      restrictedSince: string | null;
+      dataRetainedUntil: string | null;
+      retentionPassed: boolean;
+    }[] = [];
     for (const organisation of all) {
-      const access = await loadAccess(this.db, organisation.id, now, this.config.SUBSCRIPTION_DATA_RETENTION_DAYS);
-      if (access.state === 'restricted' || access.state === 'suspended' || access.state === 'none') {
+      const access = await loadAccess(
+        this.db,
+        organisation.id,
+        now,
+        this.config.SUBSCRIPTION_DATA_RETENTION_DAYS,
+      );
+      if (
+        access.state === 'restricted' ||
+        access.state === 'suspended' ||
+        access.state === 'none'
+      ) {
         restricted.push({
           organisationId: organisation.id,
           organisationName: organisation.name,
           state: access.state,
           restrictedSince: access.restrictedSince,
           dataRetainedUntil: access.dataRetainedUntil,
-          retentionPassed: access.dataRetainedUntil !== null && new Date(access.dataRetainedUntil) < now,
+          retentionPassed:
+            access.dataRetainedUntil !== null && new Date(access.dataRetainedUntil) < now,
         });
       }
     }
-    return { pendingPayments: pending, overdueInvoices: overdue, renewalsDue: renewals, restricted };
+    return {
+      pendingPayments: pending,
+      overdueInvoices: overdue,
+      renewalsDue: renewals,
+      restricted,
+    };
   }
 
   // ----- Helpers ------------------------------------------------------------------------------
@@ -649,7 +847,12 @@ export class PlatformBillingService {
     const [subscription] = await this.db
       .select()
       .from(subscriptions)
-      .where(and(eq(subscriptions.id, organisation.subscriptionId), eq(subscriptions.organisationId, organisationId)));
+      .where(
+        and(
+          eq(subscriptions.id, organisation.subscriptionId),
+          eq(subscriptions.organisationId, organisationId),
+        ),
+      );
     return subscription ?? null;
   }
 
@@ -678,7 +881,9 @@ export class PlatformBillingService {
     currency: string,
   ): Promise<string> {
     const [{ number }] = (
-      await tx.execute(sql`SELECT 'INV-' || to_char(now(), 'YYYY') || '-' || lpad(nextval('invoice_number_seq')::text, 4, '0') AS number`)
+      await tx.execute(
+        sql`SELECT 'INV-' || to_char(now(), 'YYYY') || '-' || lpad(nextval('invoice_number_seq')::text, 4, '0') AS number`,
+      )
     ).rows as { number: string }[];
     await tx.insert(invoices).values({
       organisationId,
@@ -692,7 +897,15 @@ export class PlatformBillingService {
       dueAt: input.dueAt,
       createdByUserId: actorUserId,
     });
-    await this.event(tx, organisationId, subscriptionId, 'invoice_issued', `Invoice ${number} issued for ${formatMoney(input.amountMinor, currency)}, due ${input.dueAt.toISOString().slice(0, 10)}.`, actorUserId, {});
+    await this.event(
+      tx,
+      organisationId,
+      subscriptionId,
+      'invoice_issued',
+      `Invoice ${number} issued for ${formatMoney(input.amountMinor, currency)}, due ${input.dueAt.toISOString().slice(0, 10)}.`,
+      actorUserId,
+      {},
+    );
     return number;
   }
 
@@ -749,11 +962,19 @@ export class PlatformBillingService {
 
 function describeSubscription(
   planName: string,
-  values: { status: string; billingInterval: string; currentPeriodEnd: Date | null; autoRenew: boolean },
+  values: {
+    status: string;
+    billingInterval: string;
+    currentPeriodEnd: Date | null;
+    autoRenew: boolean;
+  },
 ): string {
   const kind = values.status === 'trialing' ? 'Pilot' : 'Active';
-  const until = values.currentPeriodEnd ? ` until ${values.currentPeriodEnd.toISOString().slice(0, 10)}` : '';
-  const billing = values.billingInterval === 'none' ? 'not billed' : `billed ${values.billingInterval}`;
+  const until = values.currentPeriodEnd
+    ? ` until ${values.currentPeriodEnd.toISOString().slice(0, 10)}`
+    : '';
+  const billing =
+    values.billingInterval === 'none' ? 'not billed' : `billed ${values.billingInterval}`;
   return `${kind} on the ${planName} plan${until}, ${billing}${values.billingInterval === 'none' ? '' : values.autoRenew ? ', renews' : ', does not renew'}.`;
 }
 

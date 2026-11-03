@@ -62,16 +62,27 @@ export default function PlansPage() {
           >
             <ul className="space-y-1 text-sm" aria-label={`Plan ${plan.code}`}>
               <li>
-                Monthly: {plan.monthlyPriceMinor === null ? 'not set' : formatMoney(plan.monthlyPriceMinor, plan.currency)} · Annual:{' '}
-                {plan.annualPriceMinor === null ? 'not set' : formatMoney(plan.annualPriceMinor, plan.currency)}
+                Monthly:{' '}
+                {plan.monthlyPriceMinor === null
+                  ? 'not set'
+                  : formatMoney(plan.monthlyPriceMinor, plan.currency)}{' '}
+                · Annual:{' '}
+                {plan.annualPriceMinor === null
+                  ? 'not set'
+                  : formatMoney(plan.annualPriceMinor, plan.currency)}
               </li>
               <li>Grace period: {plan.graceDays} days</li>
               <li>
-                Features: {plan.features.length === 0 ? 'reading and search only' : plan.features.map((feature) => FEATURE_LABELS[feature]).join(', ')}
+                Features:{' '}
+                {plan.features.length === 0
+                  ? 'reading and search only'
+                  : plan.features.map((feature) => FEATURE_LABELS[feature]).join(', ')}
               </li>
               <li>
-                Limits: members {limitText(plan.maxMembers)}, documents {limitText(plan.maxConstitutions)}, AI questions a month{' '}
-                {limitText(plan.maxAiQuestionsPerMonth)}, storage {plan.maxStorageMb === null ? 'no limit' : `${plan.maxStorageMb} MB`}
+                Limits: members {limitText(plan.maxMembers)}, documents{' '}
+                {limitText(plan.maxConstitutions)}, AI questions a month{' '}
+                {limitText(plan.maxAiQuestionsPerMonth)}, storage{' '}
+                {plan.maxStorageMb === null ? 'no limit' : `${plan.maxStorageMb} MB`}
               </li>
             </ul>
           </Card>
@@ -105,7 +116,10 @@ function PlanForm({ plan, onDone }: { plan: Plan | null; onDone: () => Promise<v
     const price = (text: string) => (text.trim() === '' ? null : parseAmount(text));
     const monthlyPriceMinor = price(monthly);
     const annualPriceMinor = price(annual);
-    if ((monthly.trim() && monthlyPriceMinor === null) || (annual.trim() && annualPriceMinor === null)) {
+    if (
+      (monthly.trim() && monthlyPriceMinor === null) ||
+      (annual.trim() && annualPriceMinor === null)
+    ) {
       setError('Enter prices like 250.00, or leave them empty.');
       return;
     }
@@ -142,14 +156,43 @@ function PlanForm({ plan, onDone }: { plan: Plan | null; onDone: () => Promise<v
   return (
     <Card title={plan ? `Edit ${plan.name}` : 'New plan'}>
       <form onSubmit={submit} aria-label="Plan" className="grid gap-4 sm:grid-cols-2">
-        {!plan && <TextField label="Code" value={code} onChange={(e) => setCode(e.target.value)} hint="Lower-case, e.g. church-basic" required />}
+        {!plan && (
+          <TextField
+            label="Code"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            hint="Lower-case, e.g. church-basic"
+            required
+          />
+        )}
         <TextField label="Name" value={name} onChange={(e) => setName(e.target.value)} required />
         <div className="sm:col-span-2">
-          <TextField label="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
+          <TextField
+            label="Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
         </div>
-        <TextField label="Monthly price (BWP)" value={monthly} onChange={(e) => setMonthly(e.target.value)} hint="Empty = not offered monthly" />
-        <TextField label="Annual price (BWP)" value={annual} onChange={(e) => setAnnual(e.target.value)} hint="Empty = not offered annually" />
-        <TextField label="Grace period (days)" type="number" min={0} max={90} value={graceDays} onChange={(e) => setGraceDays(e.target.value)} />
+        <TextField
+          label="Monthly price (BWP)"
+          value={monthly}
+          onChange={(e) => setMonthly(e.target.value)}
+          hint="Empty = not offered monthly"
+        />
+        <TextField
+          label="Annual price (BWP)"
+          value={annual}
+          onChange={(e) => setAnnual(e.target.value)}
+          hint="Empty = not offered annually"
+        />
+        <TextField
+          label="Grace period (days)"
+          type="number"
+          min={0}
+          max={90}
+          value={graceDays}
+          onChange={(e) => setGraceDays(e.target.value)}
+        />
         <fieldset className="text-sm sm:col-span-2">
           <legend className="font-medium text-navy-900">Features</legend>
           {PLAN_FEATURES.map((feature) => (
@@ -158,22 +201,56 @@ function PlanForm({ plan, onDone }: { plan: Plan | null; onDone: () => Promise<v
                 type="checkbox"
                 checked={features.includes(feature)}
                 onChange={(e) =>
-                  setFeatures(e.target.checked ? [...features, feature] : features.filter((item) => item !== feature))
+                  setFeatures(
+                    e.target.checked
+                      ? [...features, feature]
+                      : features.filter((item) => item !== feature),
+                  )
                 }
               />
               {FEATURE_LABELS[feature]}
             </label>
           ))}
         </fieldset>
-        <TextField label="Members limit" type="number" min={1} value={limits.maxMembers} onChange={(e) => setLimits({ ...limits, maxMembers: e.target.value })} hint="Empty = no limit" />
-        <TextField label="Documents limit" type="number" min={1} value={limits.maxConstitutions} onChange={(e) => setLimits({ ...limits, maxConstitutions: e.target.value })} hint="Empty = no limit" />
-        <TextField label="AI questions a month" type="number" min={0} value={limits.maxAiQuestionsPerMonth} onChange={(e) => setLimits({ ...limits, maxAiQuestionsPerMonth: e.target.value })} hint="Empty = no limit" />
-        <TextField label="Storage limit (MB)" type="number" min={1} value={limits.maxStorageMb} onChange={(e) => setLimits({ ...limits, maxStorageMb: e.target.value })} hint="Empty = no limit" />
+        <TextField
+          label="Members limit"
+          type="number"
+          min={1}
+          value={limits.maxMembers}
+          onChange={(e) => setLimits({ ...limits, maxMembers: e.target.value })}
+          hint="Empty = no limit"
+        />
+        <TextField
+          label="Documents limit"
+          type="number"
+          min={1}
+          value={limits.maxConstitutions}
+          onChange={(e) => setLimits({ ...limits, maxConstitutions: e.target.value })}
+          hint="Empty = no limit"
+        />
+        <TextField
+          label="AI questions a month"
+          type="number"
+          min={0}
+          value={limits.maxAiQuestionsPerMonth}
+          onChange={(e) => setLimits({ ...limits, maxAiQuestionsPerMonth: e.target.value })}
+          hint="Empty = no limit"
+        />
+        <TextField
+          label="Storage limit (MB)"
+          type="number"
+          min={1}
+          value={limits.maxStorageMb}
+          onChange={(e) => setLimits({ ...limits, maxStorageMb: e.target.value })}
+          hint="Empty = no limit"
+        />
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={isPilot} onChange={(e) => setIsPilot(e.target.checked)} /> Pilot plan (not billed)
+          <input type="checkbox" checked={isPilot} onChange={(e) => setIsPilot(e.target.checked)} />{' '}
+          Pilot plan (not billed)
         </label>
         <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} /> Offered to new subscriptions
+          <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} />{' '}
+          Offered to new subscriptions
         </label>
         {error && (
           <div className="sm:col-span-2">

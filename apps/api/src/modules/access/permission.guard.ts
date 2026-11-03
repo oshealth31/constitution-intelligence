@@ -151,10 +151,7 @@ export class PermissionGuard implements CanActivate {
             meta: requestMeta(request),
           });
           throw access.readOnly
-            ? subscriptionRefusal(
-                'SUBSCRIPTION_READ_ONLY',
-                access.message,
-              )
+            ? subscriptionRefusal('SUBSCRIPTION_READ_ONLY', access.message)
             : subscriptionRefusal('SUBSCRIPTION_INACTIVE', access.message);
         }
       }

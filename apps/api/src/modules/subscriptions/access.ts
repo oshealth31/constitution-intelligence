@@ -153,7 +153,11 @@ export function computeAccess(input: {
     // checked that the money arrived, the invoice is unpaid.
     if (invoice.status === 'open' && invoice.dueAt <= now) lapses.push(invoice.dueAt);
   }
-  if (subscription.status === 'cancelled' && !subscription.currentPeriodEnd && subscription.cancelledAt) {
+  if (
+    subscription.status === 'cancelled' &&
+    !subscription.currentPeriodEnd &&
+    subscription.cancelledAt
+  ) {
     lapses.push(subscription.cancelledAt);
   }
 
@@ -228,7 +232,10 @@ const toDate = (value: Date | string | null) => (value === null ? null : new Dat
 function parseArray(value: string[] | string | null): string[] {
   if (Array.isArray(value)) return value;
   if (!value) return [];
-  return value.replace(/^\{|\}$/g, '').split(',').filter(Boolean);
+  return value
+    .replace(/^\{|\}$/g, '')
+    .split(',')
+    .filter(Boolean);
 }
 
 /** Loads the facts for one organisation and works out its access. */

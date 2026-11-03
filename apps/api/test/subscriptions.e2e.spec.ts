@@ -31,7 +31,10 @@ describe.runIf(Boolean(testDatabaseUrl))('Subscriptions and entitlements', () =>
 
   beforeAll(async () => {
     context = await startTestApp();
-    const admin = await createUser(context.db, { email: 'billing-super@example.test', superAdmin: true });
+    const admin = await createUser(context.db, {
+      email: 'billing-super@example.test',
+      superAdmin: true,
+    });
     superAgent = await signIn(context, admin.email);
   });
 
@@ -39,8 +42,13 @@ describe.runIf(Boolean(testDatabaseUrl))('Subscriptions and entitlements', () =>
     await context?.close();
   });
 
-  async function makeOrg(planCode = 'premium', status: 'trialing' | 'active' = 'active'): Promise<Org> {
-    const organisation = await createOrganisation(context.db, undefined, { subscription: { planCode, status } });
+  async function makeOrg(
+    planCode = 'premium',
+    status: 'trialing' | 'active' = 'active',
+  ): Promise<Org> {
+    const organisation = await createOrganisation(context.db, undefined, {
+      subscription: { planCode, status },
+    });
     return {
       id: organisation.id,
       owner: (await signedInMember(context, organisation.id, 'owner')).agent,
@@ -107,7 +115,10 @@ describe.runIf(Boolean(testDatabaseUrl))('Subscriptions and entitlements', () =>
       expect(blocked.body.error.reason).toBe('SUBSCRIPTION_READ_ONLY');
       await org.admin.get(url(org, '/library')).expect(200);
       await org.owner.get(url(org, '/library')).expect(200);
-      const write = await org.admin.post(url(org, '/constitutions')).send({ title: 'Rules' }).expect(403);
+      const write = await org.admin
+        .post(url(org, '/constitutions'))
+        .send({ title: 'Rules' })
+        .expect(403);
       expect(write.body.error.reason).toBe('SUBSCRIPTION_READ_ONLY');
       await org.owner
         .post(url(org, '/invitations'))
@@ -146,7 +157,9 @@ describe.runIf(Boolean(testDatabaseUrl))('Subscriptions and entitlements', () =>
     it('an organisation without a subscription has no access', async () => {
       const organisation = await createOrganisation(context.db, undefined, { subscription: null });
       const member = (await signedInMember(context, organisation.id, 'member')).agent;
-      const refused = await member.get(`/api/v1/organisations/${organisation.id}/library`).expect(403);
+      const refused = await member
+        .get(`/api/v1/organisations/${organisation.id}/library`)
+        .expect(403);
       expect(refused.body.error.reason).toBe('SUBSCRIPTION_INACTIVE');
     });
 
@@ -174,7 +187,10 @@ describe.runIf(Boolean(testDatabaseUrl))('Subscriptions and entitlements', () =>
   describe('plan features', () => {
     it('features not in the plan are refused by the server, not just hidden', async () => {
       const org = await makeOrg('standard'); // no AI answers
-      const ai = await org.member.post(url(org, '/ai/ask')).send({ question: 'What is the quorum?' }).expect(403);
+      const ai = await org.member
+        .post(url(org, '/ai/ask'))
+        .send({ question: 'What is the quorum?' })
+        .expect(403);
       expect(ai.body.error.reason).toBe('FEATURE_NOT_IN_PLAN');
       expect((await org.member.get(url(org, '/ai/status')).expect(200)).body).toMatchObject({
         available: false,
@@ -188,7 +204,9 @@ describe.runIf(Boolean(testDatabaseUrl))('Subscriptions and entitlements', () =>
       try {
         const answers = await org.member.get(url(org, '/answers')).expect(403);
         expect(answers.body.error.reason).toBe('FEATURE_NOT_IN_PLAN');
-        await org.member.get(url(org, '/simple-words?versionId=00000000-0000-4000-8000-000000000000')).expect(403);
+        await org.member
+          .get(url(org, '/simple-words?versionId=00000000-0000-4000-8000-000000000000'))
+          .expect(403);
         await org.admin.patch(url(org, '/branding')).send({ tagline: 'New' }).expect(403);
       } finally {
         await context.db
@@ -203,7 +221,13 @@ describe.runIf(Boolean(testDatabaseUrl))('Subscriptions and entitlements', () =>
     it('refuses going over the members and documents limits', async () => {
       await context.db
         .insert(plans)
-        .values({ code: 'tiny-test', name: 'Tiny (test)', features: [], maxMembers: 3, maxConstitutions: 1 })
+        .values({
+          code: 'tiny-test',
+          name: 'Tiny (test)',
+          features: [],
+          maxMembers: 3,
+          maxConstitutions: 1,
+        })
         .onConflictDoNothing();
       const org = await makeOrg('tiny-test'); // owner, admin, member = 3 members
       const full = await org.owner
@@ -214,19 +238,30 @@ describe.runIf(Boolean(testDatabaseUrl))('Subscriptions and entitlements', () =>
       expect(full.body.error.message).toContain('up to 3 members');
 
       await org.admin.post(url(org, '/constitutions')).send({ title: 'First' }).expect(201);
-      const second = await org.admin.post(url(org, '/constitutions')).send({ title: 'Second' }).expect(403);
+      const second = await org.admin
+        .post(url(org, '/constitutions'))
+        .send({ title: 'Second' })
+        .expect(403);
       expect(second.body.error.reason).toBe('PLAN_LIMIT_REACHED');
     });
 
     it('refuses AI questions once the monthly allowance is used', async () => {
       await context.db
         .insert(plans)
-        .values({ code: 'ai-test', name: 'AI (test)', features: ['ai_answers'], maxAiQuestionsPerMonth: 1 })
+        .values({
+          code: 'ai-test',
+          name: 'AI (test)',
+          features: ['ai_answers'],
+          maxAiQuestionsPerMonth: 1,
+        })
         .onConflictDoNothing();
       const org = await makeOrg('ai-test');
       await context.db.execute(sql`INSERT INTO usage_records (organisation_id, metric, quantity)
                                    VALUES (${org.id}, 'ai.questions', 1)`);
-      const refused = await org.member.post(url(org, '/ai/ask')).send({ question: 'What is the quorum?' }).expect(403);
+      const refused = await org.member
+        .post(url(org, '/ai/ask'))
+        .send({ question: 'What is the quorum?' })
+        .expect(403);
       expect(refused.body.error.reason).toBe('PLAN_LIMIT_REACHED');
     });
   });
@@ -250,11 +285,21 @@ describe.runIf(Boolean(testDatabaseUrl))('Subscriptions and entitlements', () =>
       // Only owners can report a payment.
       await org.admin
         .post(url(org, `/billing/invoices/${invoice.id}/payments`))
-        .send({ amountMinor: 50_000, method: 'bank_transfer', reference: 'EFT RBPC NOV', paidOn: '2026-11-02' })
+        .send({
+          amountMinor: 50_000,
+          method: 'bank_transfer',
+          reference: 'EFT RBPC NOV',
+          paidOn: '2026-11-02',
+        })
         .expect(403);
       const reported = await org.owner
         .post(url(org, `/billing/invoices/${invoice.id}/payments`))
-        .send({ amountMinor: 50_000, method: 'bank_transfer', reference: 'EFT RBPC NOV', paidOn: '2026-11-02' })
+        .send({
+          amountMinor: 50_000,
+          method: 'bank_transfer',
+          reference: 'EFT RBPC NOV',
+          paidOn: '2026-11-02',
+        })
         .expect(201);
       const payment = reported.body.invoices[0].payments[0];
       expect(payment).toMatchObject({ status: 'pending_verification', receiptNumber: null });
@@ -269,14 +314,20 @@ describe.runIf(Boolean(testDatabaseUrl))('Subscriptions and entitlements', () =>
         .expect(409);
 
       // Verification needs an explicit confirmation from a Super Admin.
-      await superAgent.post(platform(org, `/payments/${payment.id}/verify`)).send({}).expect(400);
+      await superAgent
+        .post(platform(org, `/payments/${payment.id}/verify`))
+        .send({})
+        .expect(400);
       const verified = await superAgent
         .post(platform(org, `/payments/${payment.id}/verify`))
         .send({ confirmed: true, note: 'Seen on the statement (test)' })
         .expect(200);
       expect(verified.body.invoices[0].status).toBe('paid');
       expect(verified.body.invoices[0].payments[0].receiptNumber).toMatch(/^RCP-\d{4}-\d{4,}$/);
-      await superAgent.post(platform(org, `/payments/${payment.id}/verify`)).send({ confirmed: true }).expect(409);
+      await superAgent
+        .post(platform(org, `/payments/${payment.id}/verify`))
+        .send({ confirmed: true })
+        .expect(409);
 
       const billing = (await org.owner.get(url(org, '/billing')).expect(200)).body;
       expect(billing.access.paymentStatus).toBe('paid');
@@ -293,12 +344,21 @@ describe.runIf(Boolean(testDatabaseUrl))('Subscriptions and entitlements', () =>
       const org = await makeOrg();
       const issued = await superAgent
         .post(platform(org, '/invoices'))
-        .send({ description: 'Overdue (test)', amountMinor: 1_000, dueAt: new Date(Date.now() + DAY).toISOString() })
+        .send({
+          description: 'Overdue (test)',
+          amountMinor: 1_000,
+          dueAt: new Date(Date.now() + DAY).toISOString(),
+        })
         .expect(201);
       const invoiceId = issued.body.invoices[0].id as string;
       const reported = await org.owner
         .post(url(org, `/billing/invoices/${invoiceId}/payments`))
-        .send({ amountMinor: 1_000, method: 'mobile_money', reference: 'OM 777', paidOn: '2026-11-01' })
+        .send({
+          amountMinor: 1_000,
+          method: 'mobile_money',
+          reference: 'OM 777',
+          paidOn: '2026-11-01',
+        })
         .expect(201);
       await superAgent
         .post(platform(org, `/payments/${reported.body.invoices[0].payments[0].id}/reject`))
@@ -306,7 +366,10 @@ describe.runIf(Boolean(testDatabaseUrl))('Subscriptions and entitlements', () =>
         .expect(200);
       const after = (await org.owner.get(url(org, '/billing')).expect(200)).body;
       expect(after.invoices[0].status).toBe('open');
-      expect(after.invoices[0].payments[0]).toMatchObject({ status: 'rejected', receiptNumber: null });
+      expect(after.invoices[0].payments[0]).toMatchObject({
+        status: 'rejected',
+        receiptNumber: null,
+      });
 
       await context.db
         .update(invoices)
@@ -320,12 +383,21 @@ describe.runIf(Boolean(testDatabaseUrl))('Subscriptions and entitlements', () =>
       const org = await makeOrg();
       const issued = await superAgent
         .post(platform(org, '/invoices'))
-        .send({ description: 'Card test', amountMinor: 1_000, dueAt: new Date(Date.now() + DAY).toISOString() })
+        .send({
+          description: 'Card test',
+          amountMinor: 1_000,
+          dueAt: new Date(Date.now() + DAY).toISOString(),
+        })
         .expect(201);
       const invoiceId = issued.body.invoices[0].id as string;
       const refused = await org.owner
         .post(url(org, `/billing/invoices/${invoiceId}/payments`))
-        .send({ amountMinor: 1_000, method: 'other', reference: '4111 1111 1111 1111', paidOn: '2026-11-01' })
+        .send({
+          amountMinor: 1_000,
+          method: 'other',
+          reference: '4111 1111 1111 1111',
+          paidOn: '2026-11-01',
+        })
         .expect(400);
       expect(refused.body.error.message).toContain('card');
       await org.owner
@@ -353,7 +425,11 @@ describe.runIf(Boolean(testDatabaseUrl))('Subscriptions and entitlements', () =>
       const b = await makeOrg();
       const issued = await superAgent
         .post(platform(b, '/invoices'))
-        .send({ description: 'B only', amountMinor: 1_000, dueAt: new Date(Date.now() + DAY).toISOString() })
+        .send({
+          description: 'B only',
+          amountMinor: 1_000,
+          dueAt: new Date(Date.now() + DAY).toISOString(),
+        })
         .expect(201);
       const bInvoice = issued.body.invoices[0].id as string;
       await a.owner
@@ -361,7 +437,9 @@ describe.runIf(Boolean(testDatabaseUrl))('Subscriptions and entitlements', () =>
         .send({ amountMinor: 1_000, method: 'cash', reference: 'Sneaky', paidOn: '2026-11-01' })
         .expect(404);
       await a.owner.get(url(b, '/billing')).expect(404);
-      expect(JSON.stringify((await a.owner.get(url(a, '/billing')).expect(200)).body)).not.toContain('B only');
+      expect(
+        JSON.stringify((await a.owner.get(url(a, '/billing')).expect(200)).body),
+      ).not.toContain('B only');
     });
   });
 
@@ -384,7 +462,12 @@ describe.runIf(Boolean(testDatabaseUrl))('Subscriptions and entitlements', () =>
     it('renewing extends the period and issues the invoice when the plan has a price', async () => {
       await context.db
         .insert(plans)
-        .values({ code: 'priced-test', name: 'Priced (test)', monthlyPriceMinor: 25_000, features: [] })
+        .values({
+          code: 'priced-test',
+          name: 'Priced (test)',
+          monthlyPriceMinor: 25_000,
+          features: [],
+        })
         .onConflictDoNothing();
       const org = await makeOrg('priced-test');
       const end = new Date(Date.now() + 3 * DAY);
@@ -414,7 +497,12 @@ describe.runIf(Boolean(testDatabaseUrl))('Subscriptions and entitlements', () =>
         .expect(400); // pilots are not billed
       const updated = await superAgent
         .put(platform(org, '/subscription'))
-        .send({ planCode: 'standard', status: 'active', billingInterval: 'annual', autoRenew: false })
+        .send({
+          planCode: 'standard',
+          status: 'active',
+          billingInterval: 'annual',
+          autoRenew: false,
+        })
         .expect(200);
       expect(updated.body.subscription).toMatchObject({
         planCode: 'standard',
@@ -424,12 +512,23 @@ describe.runIf(Boolean(testDatabaseUrl))('Subscriptions and entitlements', () =>
 
       const created = await superAgent
         .post('/api/v1/platform/plans')
-        .send({ code: 'church-test', name: 'Church (test)', monthlyPriceMinor: 15_000, features: ['simple_words'], maxMembers: 0 })
+        .send({
+          code: 'church-test',
+          name: 'Church (test)',
+          monthlyPriceMinor: 15_000,
+          features: ['simple_words'],
+          maxMembers: 0,
+        })
         .expect(400); // a members limit of 0 makes no sense
       expect(created.body.error.code).toBe('BAD_REQUEST');
       await superAgent
         .post('/api/v1/platform/plans')
-        .send({ code: 'church-test', name: 'Church (test)', monthlyPriceMinor: 15_000, features: ['simple_words'] })
+        .send({
+          code: 'church-test',
+          name: 'Church (test)',
+          monthlyPriceMinor: 15_000,
+          features: ['simple_words'],
+        })
         .expect(201);
       const events = await auditEventsFor(context.db, 'plan.created');
       expect(events.some((event) => event.targetId === 'church-test')).toBe(true);
@@ -438,11 +537,17 @@ describe.runIf(Boolean(testDatabaseUrl))('Subscriptions and entitlements', () =>
     it('lists what needs attention, including organisations whose retention period has passed', async () => {
       const org = await makeOrg();
       await setPeriod(org, new Date(Date.now() - 400 * DAY), new Date(Date.now() - 300 * DAY));
-      const attention = (await superAgent.get('/api/v1/platform/billing/attention').expect(200)).body;
-      const entry = attention.restricted.find((item: { organisationId: string }) => item.organisationId === org.id);
+      const attention = (await superAgent.get('/api/v1/platform/billing/attention').expect(200))
+        .body;
+      const entry = attention.restricted.find(
+        (item: { organisationId: string }) => item.organisationId === org.id,
+      );
       expect(entry).toMatchObject({ state: 'restricted', retentionPassed: true });
       // Nothing is deleted automatically.
-      const [stillThere] = await context.db.select().from(organisations).where(eq(organisations.id, org.id));
+      const [stillThere] = await context.db
+        .select()
+        .from(organisations)
+        .where(eq(organisations.id, org.id));
       expect(stillThere).toBeDefined();
     });
   });

@@ -8,13 +8,15 @@ import type { TenantScope } from '../tenancy/tenant-scope';
 import { loadAccess, loadUsage } from './access';
 
 const WHAT: Record<PlanLimit, (limit: number) => string> = {
-  members: (limit) => `Your plan allows up to ${limit} members (including invitations not yet accepted).`,
+  members: (limit) =>
+    `Your plan allows up to ${limit} members (including invitations not yet accepted).`,
   constitutions: (limit) => `Your plan allows up to ${limit} documents.`,
   aiQuestionsPerMonth: (limit) =>
     limit === 0
       ? 'Your plan does not include AI questions.'
       : `Your organisation has used all ${limit} AI questions included in its plan this month.`,
-  storageMb: (limit) => `Your plan includes ${limit} MB of file storage, and this would go over it.`,
+  storageMb: (limit) =>
+    `Your plan includes ${limit} MB of file storage, and this would go over it.`,
 };
 
 /** Usage limits from the organisation's plan, checked on the server before the action. */

@@ -87,7 +87,9 @@ export function BillingCard({
             <p className="mt-1 text-sm text-rose-800">Suspended: {subscription.suspensionReason}</p>
           )}
           {subscription?.cancellationReason && (
-            <p className="mt-1 text-sm text-rose-800">Cancelled: {subscription.cancellationReason}</p>
+            <p className="mt-1 text-sm text-rose-800">
+              Cancelled: {subscription.cancellationReason}
+            </p>
           )}
         </div>
 
@@ -103,7 +105,14 @@ export function BillingCard({
           ))}
         </dl>
 
-        {subscription && <SubscriptionActions status={subscription.status} interval={subscription.billingInterval} busy={busy} run={run} />}
+        {subscription && (
+          <SubscriptionActions
+            status={subscription.status}
+            interval={subscription.billingInterval}
+            busy={busy}
+            run={run}
+          />
+        )}
 
         {subscription && <IssueInvoice busy={busy} run={run} />}
 
@@ -247,9 +256,7 @@ function IssueInvoice({ busy, run }: { busy: string | null; run: Run }) {
   const [open, setOpen] = useState(false);
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
-  const [due, setDue] = useState(
-    new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10),
-  );
+  const [due, setDue] = useState(new Date(Date.now() + 14 * 86_400_000).toISOString().slice(0, 10));
   const [error, setError] = useState<string | null>(null);
 
   if (!open) {
@@ -283,10 +290,28 @@ function IssueInvoice({ busy, run }: { busy: string | null; run: Run }) {
         ).then((ok) => ok && setOpen(false));
       }}
     >
-      <TextField label="Description" value={description} onChange={(e) => setDescription(e.target.value)} required minLength={3} />
+      <TextField
+        label="Description"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        required
+        minLength={3}
+      />
       <div className="grid gap-3 sm:grid-cols-2">
-        <TextField label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" required />
-        <TextField label="Due date" type="date" value={due} onChange={(e) => setDue(e.target.value)} required />
+        <TextField
+          label="Amount"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          inputMode="decimal"
+          required
+        />
+        <TextField
+          label="Due date"
+          type="date"
+          value={due}
+          onChange={(e) => setDue(e.target.value)}
+          required
+        />
       </div>
       {error && <Alert>{error}</Alert>}
       <div className="flex gap-2">
@@ -301,14 +326,41 @@ function IssueInvoice({ busy, run }: { busy: string | null; run: Run }) {
   );
 }
 
-function InvoiceRow({ invoice, busy, run }: { invoice: InvoiceRecord; busy: string | null; run: Run }) {
+function InvoiceRow({
+  invoice,
+  busy,
+  run,
+}: {
+  invoice: InvoiceRecord;
+  busy: string | null;
+  run: Run;
+}) {
   const [recording, setRecording] = useState(false);
   return (
-    <li aria-label={`Invoice ${invoice.number}`} className="rounded-lg border border-ivory-100 p-3 text-sm">
+    <li
+      aria-label={`Invoice ${invoice.number}`}
+      className="rounded-lg border border-ivory-100 p-3 text-sm"
+    >
       <div className="flex flex-wrap items-center gap-2">
         <span className="font-semibold text-navy-900">{invoice.number}</span>
-        <Badge tone={invoice.status === 'paid' ? 'good' : invoice.status === 'void' ? 'neutral' : new Date(invoice.dueAt) < new Date() ? 'critical' : 'warning'}>
-          {invoice.status === 'open' ? (new Date(invoice.dueAt) < new Date() ? 'Overdue' : 'Open') : invoice.status === 'paid' ? 'Paid' : 'Void'}
+        <Badge
+          tone={
+            invoice.status === 'paid'
+              ? 'good'
+              : invoice.status === 'void'
+                ? 'neutral'
+                : new Date(invoice.dueAt) < new Date()
+                  ? 'critical'
+                  : 'warning'
+          }
+        >
+          {invoice.status === 'open'
+            ? new Date(invoice.dueAt) < new Date()
+              ? 'Overdue'
+              : 'Open'
+            : invoice.status === 'paid'
+              ? 'Paid'
+              : 'Void'}
         </Badge>
         <span>
           {formatMoney(invoice.amountMinor, invoice.currency)} · due {formatDate(invoice.dueAt)}
@@ -333,8 +385,16 @@ function InvoiceRow({ invoice, busy, run }: { invoice: InvoiceRecord; busy: stri
             variant="secondary"
             busy={busy === `void-${invoice.id}`}
             onClick={() => {
-              const reason = window.prompt('Why is this invoice being voided? (at least 10 characters)');
-              if (reason) void run(`void-${invoice.id}`, `/invoices/${invoice.id}/void`, { reason }, 'Invoice voided.');
+              const reason = window.prompt(
+                'Why is this invoice being voided? (at least 10 characters)',
+              );
+              if (reason)
+                void run(
+                  `void-${invoice.id}`,
+                  `/invoices/${invoice.id}/void`,
+                  { reason },
+                  'Invoice voided.',
+                );
             }}
           >
             Void
@@ -348,15 +408,24 @@ function InvoiceRow({ invoice, busy, run }: { invoice: InvoiceRecord; busy: stri
   );
 }
 
-function PaymentRow({ payment, busy, run }: { payment: PaymentRecord; busy: string | null; run: Run }) {
+function PaymentRow({
+  payment,
+  busy,
+  run,
+}: {
+  payment: PaymentRecord;
+  busy: string | null;
+  run: Run;
+}) {
   const [confirmed, setConfirmed] = useState(false);
   const [reason, setReason] = useState('');
   return (
     <li aria-label={`Payment ${payment.reference}`} className="rounded-md bg-ivory-50 p-2">
       <p>
-        {formatMoney(payment.amountMinor, payment.currency)} · {PAYMENT_METHOD_LABELS[payment.method]} · ref{' '}
-        <strong>{payment.reference}</strong> · paid {formatDate(payment.paidOn)} · reported by{' '}
-        {payment.reportedBy ?? 'a former member'} — <strong>{PAYMENT_RECORD_LABELS[payment.status]}</strong>
+        {formatMoney(payment.amountMinor, payment.currency)} ·{' '}
+        {PAYMENT_METHOD_LABELS[payment.method]} · ref <strong>{payment.reference}</strong> · paid{' '}
+        {formatDate(payment.paidOn)} · reported by {payment.reportedBy ?? 'a former member'} —{' '}
+        <strong>{PAYMENT_RECORD_LABELS[payment.status]}</strong>
         {payment.receiptNumber ? ` · receipt ${payment.receiptNumber}` : ''}
         {payment.verifiedBy ? ` · verified by ${payment.verifiedBy}` : ''}
       </p>
@@ -368,7 +437,12 @@ function PaymentRow({ payment, busy, run }: { payment: PaymentRecord; busy: stri
             Manual verification — no payment provider is connected
           </p>
           <label className="flex items-start gap-2">
-            <input type="checkbox" checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)} className="mt-0.5" />
+            <input
+              type="checkbox"
+              checked={confirmed}
+              onChange={(e) => setConfirmed(e.target.checked)}
+              className="mt-0.5"
+            />
             <span>
               I have checked the bank or mobile-money statement and this payment has arrived.
             </span>
@@ -378,19 +452,35 @@ function PaymentRow({ payment, busy, run }: { payment: PaymentRecord; busy: stri
               disabled={!confirmed}
               busy={busy === `verify-${payment.id}`}
               onClick={() =>
-                void run(`verify-${payment.id}`, `/payments/${payment.id}/verify`, { confirmed: true }, 'Payment verified and receipt issued.')
+                void run(
+                  `verify-${payment.id}`,
+                  `/payments/${payment.id}/verify`,
+                  { confirmed: true },
+                  'Payment verified and receipt issued.',
+                )
               }
             >
               Verify payment
             </Button>
             <div className="min-w-48 flex-1">
-              <TextField label="Reason if it has not arrived" value={reason} onChange={(e) => setReason(e.target.value)} />
+              <TextField
+                label="Reason if it has not arrived"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+              />
             </div>
             <Button
               variant="secondary"
               disabled={reason.trim().length < 10}
               busy={busy === `reject-${payment.id}`}
-              onClick={() => void run(`reject-${payment.id}`, `/payments/${payment.id}/reject`, { reason }, 'Payment marked as not verified.')}
+              onClick={() =>
+                void run(
+                  `reject-${payment.id}`,
+                  `/payments/${payment.id}/reject`,
+                  { reason },
+                  'Payment marked as not verified.',
+                )
+              }
             >
               Not verified
             </Button>
@@ -430,15 +520,31 @@ function RecordPayment({
         ).then((ok) => ok && onDone());
       }}
     >
-      <TextField label="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} required />
+      <TextField
+        label="Amount"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+        required
+      />
       <SelectField
         label="Method"
         value={method}
         onChange={(e) => setMethod(e.target.value as PaymentMethod)}
         options={Object.entries(PAYMENT_METHOD_LABELS).map(([value, label]) => ({ value, label }))}
       />
-      <TextField label="Reference" value={reference} onChange={(e) => setReference(e.target.value)} required />
-      <TextField label="Date paid" type="date" value={paidOn} onChange={(e) => setPaidOn(e.target.value)} required />
+      <TextField
+        label="Reference"
+        value={reference}
+        onChange={(e) => setReference(e.target.value)}
+        required
+      />
+      <TextField
+        label="Date paid"
+        type="date"
+        value={paidOn}
+        onChange={(e) => setPaidOn(e.target.value)}
+        required
+      />
       <div className="flex gap-2 sm:col-span-2">
         <Button type="submit" busy={busy === `record-${invoice.id}`}>
           Record payment

@@ -34,7 +34,6 @@ import { useApi } from '@/lib/use-api';
 
 type Notice = { tone: 'good' | 'critical'; text: string } | null;
 
-
 /** Runs a change against the API and refreshes the page data from the response. */
 function useAction(
   organisationId: string,
@@ -124,7 +123,12 @@ export default function OrganisationDetailPage() {
         <div className="space-y-6 xl:col-span-2">
           <DetailsCard data={data} busy={busy} run={run} />
           <AdministratorsCard data={data} busy={busy} run={run} reload={detail.reload} />
-          <SubscriptionCard key={data.subscription?.id ?? 'none'} data={data} busy={busy} run={run} />
+          <SubscriptionCard
+            key={data.subscription?.id ?? 'none'}
+            data={data}
+            busy={busy}
+            run={run}
+          />
           <BillingCard organisationId={organisationId} onChanged={detail.reload} />
           <BrandingCard data={data} busy={busy} run={run} />
           <SupportAccessCard organisationId={organisationId} />
@@ -467,7 +471,10 @@ function SubscriptionCard({ data, busy, run }: SectionProps) {
     >
       {blocked && (
         <div className="mb-4">
-          <Alert tone="info">This subscription is {data.subscription?.status}. Reactivate it under Billing before changing it.</Alert>
+          <Alert tone="info">
+            This subscription is {data.subscription?.status}. Reactivate it under Billing before
+            changing it.
+          </Alert>
         </div>
       )}
       <form
@@ -482,7 +489,8 @@ function SubscriptionCard({ data, busy, run }: SectionProps) {
             {
               planCode,
               status,
-              billingInterval: status === 'trialing' ? 'none' : billing === 'none' ? 'monthly' : billing,
+              billingInterval:
+                status === 'trialing' ? 'none' : billing === 'none' ? 'monthly' : billing,
               autoRenew,
               currentPeriodEnd: periodEnd ? new Date(`${periodEnd}T23:59:59Z`).toISOString() : null,
             },
@@ -538,7 +546,12 @@ function SubscriptionCard({ data, busy, run }: SectionProps) {
           Renews at the end of the period
         </label>
         <div className="sm:col-span-3">
-          <Button type="submit" variant="secondary" busy={busy === 'subscription'} disabled={blocked}>
+          <Button
+            type="submit"
+            variant="secondary"
+            busy={busy === 'subscription'}
+            disabled={blocked}
+          >
             Save subscription
           </Button>
         </div>

@@ -6,11 +6,7 @@
 // Labels kept in step with packages/shared/src/subscriptions.ts (which the API uses).
 export type AccessState = 'pilot' | 'active' | 'grace' | 'restricted' | 'suspended' | 'none';
 export type PaymentStatus =
-  | 'not_required'
-  | 'paid'
-  | 'awaiting_payment'
-  | 'awaiting_verification'
-  | 'overdue';
+  'not_required' | 'paid' | 'awaiting_payment' | 'awaiting_verification' | 'overdue';
 export type PlanFeature = 'ai_answers' | 'approved_answers' | 'simple_words' | 'custom_branding';
 export type PlanLimit = 'members' | 'constitutions' | 'aiQuestionsPerMonth' | 'storageMb';
 export type PaymentMethod = 'bank_transfer' | 'mobile_money' | 'cash' | 'cheque' | 'other';
@@ -27,7 +23,12 @@ export const FEATURE_LABELS: Record<PlanFeature, string> = {
   simple_words: 'Simple words for clauses',
   custom_branding: 'Custom branding (logo, colours, welcome message)',
 };
-export const PLAN_LIMITS: PlanLimit[] = ['members', 'constitutions', 'aiQuestionsPerMonth', 'storageMb'];
+export const PLAN_LIMITS: PlanLimit[] = [
+  'members',
+  'constitutions',
+  'aiQuestionsPerMonth',
+  'storageMb',
+];
 export const LIMIT_LABELS: Record<PlanLimit, string> = {
   members: 'Members (including invitations not yet accepted)',
   constitutions: 'Documents (constitutions)',

@@ -15,14 +15,14 @@ that needs approval first.
 
 Configured by Platform Super Admins in the control centre (**Plans**). Each plan has:
 
-| Setting                 | Meaning                                                                              |
-| ----------------------- | ------------------------------------------------------------------------------------ |
-| Monthly / annual price  | In BWP. Empty = not offered (or not decided yet).                                    |
-| Grace period            | Days of full access after a period ends or an invoice falls due (0–90).              |
-| Features                | AI answers, approved answers, simple words, custom branding. Reading, search and "find relevant clauses" are always included. |
-| Limits                  | Members (incl. pending invitations), documents, AI questions per month, storage. Empty = no limit. |
-| Pilot                   | A pilot plan is not billed.                                                          |
-| Offered                 | Inactive plans stay valid for existing subscriptions but cannot be chosen for new ones. |
+| Setting                | Meaning                                                                                                                       |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Monthly / annual price | In BWP. Empty = not offered (or not decided yet).                                                                             |
+| Grace period           | Days of full access after a period ends or an invoice falls due (0–90).                                                       |
+| Features               | AI answers, approved answers, simple words, custom branding. Reading, search and "find relevant clauses" are always included. |
+| Limits                 | Members (incl. pending invitations), documents, AI questions per month, storage. Empty = no limit.                            |
+| Pilot                  | A pilot plan is not billed.                                                                                                   |
+| Offered                | Inactive plans stay valid for existing subscriptions but cannot be chosen for new ones.                                       |
 
 Migration `0008_subscriptions.sql` creates three starting plans — **Pilot** (`trial`), **Standard**
 and **Premium** — **without prices**: prices are a business decision to be entered in the control
@@ -34,14 +34,14 @@ every feature.
 Worked out on every request from the subscription, its plan, its invoices and the date
 (`apps/api/src/modules/subscriptions/access.ts`). There is no background job that could fall behind.
 
-| State          | When                                                                 | Who can do what                                                        |
-| -------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| **Pilot**      | Status "trialing", period not ended                                  | Everything in the plan                                                 |
-| **Active**     | Paid plan, period not ended, no overdue invoice                      | Everything in the plan                                                 |
-| **Grace**      | The period ended, or an invoice is past due, but the grace period has not run out | Everything in the plan, with a warning                     |
-| **Restricted** | The grace period has run out                                         | Owners and administrators can **read** (content and billing); nothing can be changed; other roles are refused |
-| **Suspended**  | Suspended by a Super Admin (with a reason)                           | Only the billing page (Owners, Administrators, Auditors) and the portal's notice |
-| **None**       | No subscription                                                      | As suspended                                                           |
+| State          | When                                                                              | Who can do what                                                                                               |
+| -------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Pilot**      | Status "trialing", period not ended                                               | Everything in the plan                                                                                        |
+| **Active**     | Paid plan, period not ended, no overdue invoice                                   | Everything in the plan                                                                                        |
+| **Grace**      | The period ended, or an invoice is past due, but the grace period has not run out | Everything in the plan, with a warning                                                                        |
+| **Restricted** | The grace period has run out                                                      | Owners and administrators can **read** (content and billing); nothing can be changed; other roles are refused |
+| **Suspended**  | Suspended by a Super Admin (with a reason)                                        | Only the billing page (Owners, Administrators, Auditors) and the portal's notice                              |
+| **None**       | No subscription                                                                   | As suspended                                                                                                  |
 
 - A subscription **lapses** at the earliest of: the end of its period, the due date of its oldest
   unpaid invoice, or (for a cancellation with no period end) the cancellation time.
@@ -65,21 +65,21 @@ Worked out on every request from the subscription, its plan, its invoices and th
 
 ## Billing: invoices, payments and receipts
 
-| Step | Who | What happens |
-| ---- | --- | ------------ |
-| Issue an invoice | Super Admin | Invoice `INV-YYYY-NNNN` with amount, due date and description. **Renewing** a subscription issues the invoice for the new period automatically when the plan has a price for that interval. |
-| Report a payment | Organisation **Owner** (Manage → Subscription) | Amount, method (bank transfer, mobile money, cash, cheque, other), reference and date. Status: *waiting for verification*. The invoice stays unpaid. |
-| Record a payment | Super Admin | Same, for a payment they were told about. Still needs verifying. |
-| **Verify** | Super Admin | Must tick *"I have checked the bank or mobile-money statement and this payment has arrived."* The payment gets a receipt number `RCP-YYYY-NNNN`; the invoice is marked paid once verified payments cover it. |
-| Not verified | Super Admin | With a reason. The invoice stays unpaid. |
-| Void | Super Admin | With a reason; not possible once a payment on it has been verified. |
+| Step             | Who                                            | What happens                                                                                                                                                                                                 |
+| ---------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Issue an invoice | Super Admin                                    | Invoice `INV-YYYY-NNNN` with amount, due date and description. **Renewing** a subscription issues the invoice for the new period automatically when the plan has a price for that interval.                  |
+| Report a payment | Organisation **Owner** (Manage → Subscription) | Amount, method (bank transfer, mobile money, cash, cheque, other), reference and date. Status: _waiting for verification_. The invoice stays unpaid.                                                         |
+| Record a payment | Super Admin                                    | Same, for a payment they were told about. Still needs verifying.                                                                                                                                             |
+| **Verify**       | Super Admin                                    | Must tick _"I have checked the bank or mobile-money statement and this payment has arrived."_ The payment gets a receipt number `RCP-YYYY-NNNN`; the invoice is marked paid once verified payments cover it. |
+| Not verified     | Super Admin                                    | With a reason. The invoice stays unpaid.                                                                                                                                                                     |
+| Void             | Super Admin                                    | With a reason; not possible once a payment on it has been verified.                                                                                                                                          |
 
 Safeguards:
 
 - Text that looks like a payment card number (13–19 digits passing the Luhn check) is refused in
   payment references and notes, in the browser and on the server.
 - The organisation's database role can only insert a payment report's own fields: it cannot set
-  the status, the verifier or the receipt number. A database check also requires every *verified*
+  the status, the verifier or the receipt number. A database check also requires every _verified_
   payment to have a verifier, a verification time and a receipt number.
 - Invoices, payments and the billing history are tenant tables with Row-Level Security; an
   organisation can only read its own.
@@ -123,11 +123,11 @@ period, how long financial records must be kept, and how a data copy is provided
 
 Organisations (`/api/v1/organisations/:id`):
 
-| Method & path                                  | Permission     | Notes |
-| ---------------------------------------------- | -------------- | ----- |
-| `GET /billing`                                 | `billing.read` (Owner, Administrator, Auditor) | Access state, plan, usage, invoices with payments and receipts, billing history, payment instructions, retention policy |
-| `POST /billing/invoices/:invoiceId/payments`   | `billing.manage` (Owner) | Report a payment. 409 if one is already waiting |
-| `GET /portal`                                  | `organisation.read` | Now includes `subscription` (state, message, features) |
+| Method & path                                | Permission                                     | Notes                                                                                                                   |
+| -------------------------------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `GET /billing`                               | `billing.read` (Owner, Administrator, Auditor) | Access state, plan, usage, invoices with payments and receipts, billing history, payment instructions, retention policy |
+| `POST /billing/invoices/:invoiceId/payments` | `billing.manage` (Owner)                       | Report a payment. 409 if one is already waiting                                                                         |
+| `GET /portal`                                | `organisation.read`                            | Now includes `subscription` (state, message, features)                                                                  |
 
 Platform (`/api/v1/platform`, Super Admins only): `GET/POST /plans`, `PATCH /plans/:code`,
 `GET /billing/attention`, `GET /organisations/:id/billing`, `PUT /organisations/:id/subscription`,

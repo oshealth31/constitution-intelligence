@@ -37,7 +37,9 @@ async function openOrganisation(page: Page, name: string) {
   await expect(page.getByRole('heading', { name: 'Billing' })).toBeVisible();
 }
 
-test('invoice → owner reports payment → Super Admin verifies by hand → receipt', async ({ browser }) => {
+test('invoice → owner reports payment → Super Admin verifies by hand → receipt', async ({
+  browser,
+}) => {
   const admin = await superAdminPage(browser);
   await openOrganisation(admin, 'Sample Community Choir (fictional)');
   await admin.getByRole('button', { name: 'Issue an invoice', exact: true }).click();
@@ -80,10 +82,14 @@ test('invoice → owner reports payment → Super Admin verifies by hand → rec
   await expect(paid).toContainText('Paid');
 });
 
-test('members of a suspended organisation are told the portal is unavailable', async ({ browser }) => {
+test('members of a suspended organisation are told the portal is unavailable', async ({
+  browser,
+}) => {
   const admin = await superAdminPage(browser);
   await openOrganisation(admin, 'Sample Netball Club (fictional)');
-  const billing = admin.locator('section', { has: admin.getByRole('heading', { name: 'Billing', exact: true }) });
+  const billing = admin.locator('section', {
+    has: admin.getByRole('heading', { name: 'Billing', exact: true }),
+  });
   await billing.getByRole('button', { name: 'Suspend', exact: true }).click();
   const form = billing.getByRole('form', { name: 'Suspend subscription' });
   await form.getByLabel(/Reason/).fill('Browser test of suspension');
@@ -116,6 +122,9 @@ test('members of a suspended organisation are told the portal is unavailable', a
 
 async function organisationId(page: Page): Promise<string> {
   const me = await page.request.get('/api/v1/auth/me');
-  const body = (await me.json()) as { memberships: { organisationSlug: string; organisationId: string }[] };
-  return body.memberships.find((item) => item.organisationSlug === 'sample-netball-club')!.organisationId;
+  const body = (await me.json()) as {
+    memberships: { organisationSlug: string; organisationId: string }[];
+  };
+  return body.memberships.find((item) => item.organisationSlug === 'sample-netball-club')!
+    .organisationId;
 }

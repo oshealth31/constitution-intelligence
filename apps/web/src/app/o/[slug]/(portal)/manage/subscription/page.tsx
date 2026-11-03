@@ -69,13 +69,18 @@ export default function SubscriptionPage() {
             <Fact label="Price">
               {subscription.billingInterval === 'monthly' && subscription.monthlyPriceMinor !== null
                 ? `${formatMoney(subscription.monthlyPriceMinor, subscription.currency)} a month`
-                : subscription.billingInterval === 'annual' && subscription.annualPriceMinor !== null
+                : subscription.billingInterval === 'annual' &&
+                    subscription.annualPriceMinor !== null
                   ? `${formatMoney(subscription.annualPriceMinor, subscription.currency)} a year`
                   : 'As agreed with Constitution Intelligence'}
             </Fact>
             <Fact label="Started">{formatDate(subscription.currentPeriodStart)}</Fact>
-            <Fact label={subscription.billingInterval === 'none' ? 'Pilot ends' : 'Current period ends'}>
-              {subscription.currentPeriodEnd ? formatDate(subscription.currentPeriodEnd) : 'No end date'}
+            <Fact
+              label={subscription.billingInterval === 'none' ? 'Pilot ends' : 'Current period ends'}
+            >
+              {subscription.currentPeriodEnd
+                ? formatDate(subscription.currentPeriodEnd)
+                : 'No end date'}
             </Fact>
             <Fact label="Renewal">
               {access.renewal === 'renews'
@@ -101,7 +106,9 @@ export default function SubscriptionPage() {
                 className={access.features.includes(feature) ? 'text-slate-900' : 'text-slate-500'}
               >
                 {access.features.includes(feature) ? '✓' : '✗'} {FEATURE_LABELS[feature]}
-                {!access.features.includes(feature) && <span className="sr-only"> (not included)</span>}
+                {!access.features.includes(feature) && (
+                  <span className="sr-only"> (not included)</span>
+                )}
               </li>
             ))}
           </ul>
@@ -226,13 +233,28 @@ function InvoiceItem({
       <div className="flex flex-wrap items-center gap-2">
         <p className="font-semibold text-slate-900">{invoice.number}</p>
         <Badge
-          tone={invoice.status === 'paid' ? 'good' : invoice.status === 'void' ? 'neutral' : overdue ? 'critical' : 'warning'}
+          tone={
+            invoice.status === 'paid'
+              ? 'good'
+              : invoice.status === 'void'
+                ? 'neutral'
+                : overdue
+                  ? 'critical'
+                  : 'warning'
+          }
         >
-          {invoice.status === 'paid' ? 'Paid' : invoice.status === 'void' ? 'Cancelled' : overdue ? 'Overdue' : 'Due'}
+          {invoice.status === 'paid'
+            ? 'Paid'
+            : invoice.status === 'void'
+              ? 'Cancelled'
+              : overdue
+                ? 'Overdue'
+                : 'Due'}
         </Badge>
       </div>
       <p className="mt-1 text-base text-slate-800">
-        {invoice.description} · <strong>{formatMoney(invoice.amountMinor, invoice.currency)}</strong>
+        {invoice.description} ·{' '}
+        <strong>{formatMoney(invoice.amountMinor, invoice.currency)}</strong>
       </p>
       <p className="text-sm text-slate-600">
         Issued {formatDate(invoice.issuedAt)} · due {formatDate(invoice.dueAt)}
@@ -262,7 +284,9 @@ function InvoiceItem({
         <ReportPayment invoice={invoice} onChanged={onChanged} />
       )}
       {invoice.status === 'open' && !canPay && (
-        <p className="mt-2 text-sm text-slate-600">Only the organisation’s owner can report a payment.</p>
+        <p className="mt-2 text-sm text-slate-600">
+          Only the organisation’s owner can report a payment.
+        </p>
       )}
     </li>
   );
@@ -293,7 +317,9 @@ function ReportPayment({
       return;
     }
     if (containsCardNumber(reference) || containsCardNumber(notes)) {
-      setError('This looks like a card number. Never enter card details — only the payment reference.');
+      setError(
+        'This looks like a card number. Never enter card details — only the payment reference.',
+      );
       return;
     }
     setBusy(true);
@@ -319,20 +345,34 @@ function ReportPayment({
     );
   }
   return (
-    <form onSubmit={submit} aria-label={`Report a payment for ${invoice.number}`} className="mt-3 space-y-3">
+    <form
+      onSubmit={submit}
+      aria-label={`Report a payment for ${invoice.number}`}
+      className="mt-3 space-y-3"
+    >
       <Notice tone="warning">
         Do not enter card details. Give the reference from your bank transfer or mobile-money
-        payment. The invoice is marked as paid only after Constitution Intelligence has checked
-        that the money arrived.
+        payment. The invoice is marked as paid only after Constitution Intelligence has checked that
+        the money arrived.
       </Notice>
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="block text-base font-medium text-slate-900">
           Amount paid ({invoice.currency})
-          <input value={amount} onChange={(event) => setAmount(event.target.value)} inputMode="decimal" required className={FIELD} />
+          <input
+            value={amount}
+            onChange={(event) => setAmount(event.target.value)}
+            inputMode="decimal"
+            required
+            className={FIELD}
+          />
         </label>
         <label className="block text-base font-medium text-slate-900">
           How you paid
-          <select value={method} onChange={(event) => setMethod(event.target.value as PaymentMethod)} className={FIELD}>
+          <select
+            value={method}
+            onChange={(event) => setMethod(event.target.value as PaymentMethod)}
+            className={FIELD}
+          >
             {Object.entries(PAYMENT_METHOD_LABELS).map(([value, label]) => (
               <option key={value} value={value}>
                 {label}
@@ -342,16 +382,34 @@ function ReportPayment({
         </label>
         <label className="block text-base font-medium text-slate-900">
           Payment reference
-          <input value={reference} onChange={(event) => setReference(event.target.value)} maxLength={100} required className={FIELD} />
+          <input
+            value={reference}
+            onChange={(event) => setReference(event.target.value)}
+            maxLength={100}
+            required
+            className={FIELD}
+          />
         </label>
         <label className="block text-base font-medium text-slate-900">
           Date paid
-          <input type="date" value={paidOn} onChange={(event) => setPaidOn(event.target.value)} required className={FIELD} />
+          <input
+            type="date"
+            value={paidOn}
+            onChange={(event) => setPaidOn(event.target.value)}
+            required
+            className={FIELD}
+          />
         </label>
       </div>
       <label className="block text-base font-medium text-slate-900">
         Notes (optional)
-        <textarea value={notes} onChange={(event) => setNotes(event.target.value)} maxLength={500} rows={2} className={FIELD} />
+        <textarea
+          value={notes}
+          onChange={(event) => setNotes(event.target.value)}
+          maxLength={500}
+          rows={2}
+          className={FIELD}
+        />
       </label>
       {error && <Notice tone="error">{error}</Notice>}
       <div className="flex flex-wrap gap-3">

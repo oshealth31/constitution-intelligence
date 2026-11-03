@@ -37,14 +37,21 @@ const access = (
 describe('computeAccess', () => {
   it('an active subscription in its period has full access to its plan only', () => {
     const result = access(subscription());
-    expect(result).toMatchObject({ state: 'active', fullAccess: true, readOnly: false, renewal: 'renews' });
+    expect(result).toMatchObject({
+      state: 'active',
+      fullAccess: true,
+      readOnly: false,
+      renewal: 'renews',
+    });
     expect(result.features).toEqual(['approved_answers', 'simple_words']);
     expect(result.limits.members).toBe(50);
     expect(result.paymentStatus).toBe('not_required');
   });
 
   it('a pilot is a pilot, not billed', () => {
-    const result = access(subscription({ status: 'trialing', billingInterval: 'none', currentPeriodEnd: at(5) }));
+    const result = access(
+      subscription({ status: 'trialing', billingInterval: 'none', currentPeriodEnd: at(5) }),
+    );
     expect(result).toMatchObject({ state: 'pilot', fullAccess: true, renewal: 'not_applicable' });
     expect(result.message).toContain('Pilot subscription until');
   });
@@ -79,7 +86,9 @@ describe('computeAccess', () => {
   });
 
   it('an open invoice not yet due is awaiting payment, with full access', () => {
-    const result = access(subscription(), [{ status: 'open', dueAt: at(5), hasPendingPayment: false }]);
+    const result = access(subscription(), [
+      { status: 'open', dueAt: at(5), hasPendingPayment: false },
+    ]);
     expect(result).toMatchObject({ state: 'active', paymentStatus: 'awaiting_payment' });
   });
 
@@ -101,7 +110,9 @@ describe('computeAccess', () => {
   });
 
   it('a subscription cancelled with no end date lapses from the cancellation', () => {
-    const result = access(subscription({ status: 'cancelled', cancelledAt: at(-20), currentPeriodEnd: null }));
+    const result = access(
+      subscription({ status: 'cancelled', cancelledAt: at(-20), currentPeriodEnd: null }),
+    );
     expect(result.state).toBe('restricted');
   });
 });

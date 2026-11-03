@@ -52,7 +52,13 @@ export const SECTION_KINDS = ['part', 'chapter', 'section', 'clause', 'subclause
 export const SUBSCRIPTION_BILLING_INTERVALS = ['monthly', 'annual', 'none'] as const;
 export const INVOICE_STATUSES = ['open', 'paid', 'void'] as const;
 export const PAYMENT_RECORD_STATUSES = ['pending_verification', 'verified', 'rejected'] as const;
-export const PAYMENT_RECORD_METHODS = ['bank_transfer', 'mobile_money', 'cash', 'cheque', 'other'] as const;
+export const PAYMENT_RECORD_METHODS = [
+  'bank_transfer',
+  'mobile_money',
+  'cash',
+  'cheque',
+  'other',
+] as const;
 
 /** Global (not organisation data): the product's plans, configured by Platform Super Admins. */
 export const plans = pgTable('plans', {
@@ -83,7 +89,9 @@ export const subscriptions = pgTable('subscriptions', {
     .notNull()
     .defaultNow(),
   currentPeriodEnd: timestamp('current_period_end', { withTimezone: true }),
-  billingInterval: text('billing_interval', { enum: SUBSCRIPTION_BILLING_INTERVALS }).notNull().default('monthly'),
+  billingInterval: text('billing_interval', { enum: SUBSCRIPTION_BILLING_INTERVALS })
+    .notNull()
+    .default('monthly'),
   autoRenew: boolean('auto_renew').notNull().default(true),
   suspendedAt: timestamp('suspended_at', { withTimezone: true }),
   suspensionReason: text('suspension_reason'),
@@ -123,10 +131,16 @@ export const payments = pgTable('payments', {
   reference: text('reference').notNull(),
   paidOn: date('paid_on', { mode: 'string' }).notNull(),
   notes: text('notes'),
-  status: text('status', { enum: PAYMENT_RECORD_STATUSES }).notNull().default('pending_verification'),
-  reportedByUserId: uuid('reported_by_user_id').references(() => users.id, { onDelete: 'set null' }),
+  status: text('status', { enum: PAYMENT_RECORD_STATUSES })
+    .notNull()
+    .default('pending_verification'),
+  reportedByUserId: uuid('reported_by_user_id').references(() => users.id, {
+    onDelete: 'set null',
+  }),
   reportedAt: timestamp('reported_at', { withTimezone: true }).notNull().defaultNow(),
-  verifiedByUserId: uuid('verified_by_user_id').references(() => users.id, { onDelete: 'set null' }),
+  verifiedByUserId: uuid('verified_by_user_id').references(() => users.id, {
+    onDelete: 'set null',
+  }),
   verifiedAt: timestamp('verified_at', { withTimezone: true }),
   verificationNote: text('verification_note'),
   rejectionReason: text('rejection_reason'),

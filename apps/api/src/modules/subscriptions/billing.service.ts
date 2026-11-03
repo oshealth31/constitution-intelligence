@@ -169,7 +169,12 @@ export class BillingService {
       organisationId: scope.organisationId,
       targetType: 'payment',
       targetId: paymentId,
-      metadata: { invoiceId, amountMinor: report.amountMinor, method: report.method, by: 'organisation' },
+      metadata: {
+        invoiceId,
+        amountMinor: report.amountMinor,
+        method: report.method,
+        by: 'organisation',
+      },
       meta,
     });
     return this.overview(scope);
@@ -228,7 +233,9 @@ export class BillingService {
           reference: payment.reference,
           paidOn: payment.paidOn,
           status: payment.status,
-          reportedBy: payment.reportedByUserId ? (names.get(payment.reportedByUserId) ?? null) : null,
+          reportedBy: payment.reportedByUserId
+            ? (names.get(payment.reportedByUserId) ?? null)
+            : null,
           reportedAt: payment.reportedAt,
           verifiedAt: payment.verifiedAt,
           rejectionReason: payment.rejectionReason,

@@ -25,13 +25,11 @@ async function saveForOffline(page: Page) {
   await page.evaluate(async () => {
     await navigator.serviceWorker.ready;
   });
-  const card = page
-    .getByRole('region', { name: 'Read without internet' })
-    .or(
-      page.locator('section', {
-        has: page.getByRole('heading', { name: 'Read without internet' }),
-      }),
-    );
+  const card = page.getByRole('region', { name: 'Read without internet' }).or(
+    page.locator('section', {
+      has: page.getByRole('heading', { name: 'Read without internet' }),
+    }),
+  );
   await card.getByRole('button', { name: 'Save for offline reading' }).click();
   await expect(
     card.getByText('Saved. You can now read the constitution without the internet.'),

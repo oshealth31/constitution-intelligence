@@ -146,20 +146,16 @@ export class BillingService {
           'A payment for this invoice is already waiting for verification.',
         );
       }
-      const [created] = await tx
-        .insert(payments)
-        .values({
-          organisationId: scope.organisationId,
-          invoiceId,
-          amountMinor: report.amountMinor,
-          currency: invoice.currency,
-          method: report.method,
-          reference: report.reference,
-          paidOn: report.paidOn,
-          notes: report.notes,
-          reportedByUserId: scope.userId,
-        })
-        .returning({ id: payments.id });
+      // Only the fields an organisation may fill in (the database role cannot write the rest).
+      const created = (
+        await tx.execute(sql`
+          INSERT INTO payments (organisation_id, invoice_id, amount_minor, currency, method,
+                                reference, paid_on, notes, reported_by_user_id)
+          VALUES (${scope.organisationId}, ${invoiceId}, ${report.amountMinor}, ${invoice.currency},
+                  ${report.method}, ${report.reference}, ${report.paidOn}, ${report.notes},
+                  ${scope.userId})
+          RETURNING id`)
+      ).rows[0] as { id: string } | undefined;
       return created!.id;
     });
     await this.audit.record({

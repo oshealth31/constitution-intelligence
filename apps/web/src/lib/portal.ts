@@ -423,7 +423,7 @@ export interface AiStatus {
 export interface ClauseMatch {
   sectionId: string;
   refKey: string;
-  kind: string;
+  kind: Section['kind'];
   number: string | null;
   heading: string | null;
   reference: string | null;

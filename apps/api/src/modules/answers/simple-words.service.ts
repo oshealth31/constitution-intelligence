@@ -160,7 +160,13 @@ export class SimpleWordsService {
           });
           continue;
         }
-        await this.upsert(tx, scope, section.id, item.text, item.draftedBy === 'ai' ? 'ai' : 'import');
+        await this.upsert(
+          tx,
+          scope,
+          section.id,
+          item.text,
+          item.draftedBy === 'ai' ? 'ai' : 'import',
+        );
         saved.push({ clause: item.clause, sectionId: section.id });
       }
       return { saved, skipped };

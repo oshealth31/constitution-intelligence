@@ -57,10 +57,10 @@ export default function SimpleWordsPage() {
   return (
     <div className="space-y-5">
       <p className="max-w-3xl text-base text-slate-600">
-        Write each clause again in simple, everyday words for members who find legal wording
-        hard. Members see simple words under the original clause — never instead of it — once an
-        owner or administrator has <strong>approved</strong> them. Only the current published
-        version can have simple words.
+        Write each clause again in simple, everyday words for members who find legal wording hard.
+        Members see simple words under the original clause — never instead of it — once an owner or
+        administrator has <strong>approved</strong> them. Only the current published version can
+        have simple words.
       </p>
       <p className="text-base text-slate-800">
         {counts.approved} of {all.length} clauses have approved simple words
@@ -167,7 +167,9 @@ function ClauseEditor({
           <span className="text-sm text-slate-600">{clause.referenceLabel}</span>
         )}
         {simple ? (
-          <Badge tone={SIMPLE_STATUS[simple.status].tone}>{SIMPLE_STATUS[simple.status].label}</Badge>
+          <Badge tone={SIMPLE_STATUS[simple.status].tone}>
+            {SIMPLE_STATUS[simple.status].label}
+          </Badge>
         ) : (
           <Badge tone="neutral">No simple words yet</Badge>
         )}
@@ -213,8 +215,8 @@ function ClauseEditor({
               className={FIELD}
             />
             <span className="mt-1 block text-sm font-normal text-slate-600">
-              Short sentences and everyday words. Say only what the clause says — add nothing,
-              leave out nothing important.
+              Short sentences and everyday words. Say only what the clause says — add nothing, leave
+              out nothing important.
             </span>
           </label>
           <div className="flex flex-wrap gap-3">
@@ -237,7 +239,10 @@ function ClauseEditor({
         simple && (
           <div className="mt-3 rounded-xl bg-[var(--brand-secondary)]/40 p-3">
             <p className="text-sm font-semibold text-slate-700">Simple words</p>
-            <p data-testid="simple-text" className="mt-1 text-base whitespace-pre-line text-slate-900">
+            <p
+              data-testid="simple-text"
+              className="mt-1 text-base whitespace-pre-line text-slate-900"
+            >
               {simple.text}
             </p>
             <p className="mt-1 text-sm text-slate-600">
@@ -264,28 +269,32 @@ function ClauseEditor({
         </ul>
       )}
 
-      {simple && !editing && simple.status !== 'approved' && canApprove && simple.readyToApprove && (
-        <div className="mt-3 space-y-2">
-          {simple.source === 'ai' && (
-            <Notice tone="warning">
-              Written by AI. AI can misread or invent things: check every sentence against the
-              original above.
-            </Notice>
-          )}
-          <label className="flex items-start gap-3 text-base text-slate-900">
-            <input
-              type="checkbox"
-              checked={confirmed}
-              onChange={(event) => setConfirmed(event.target.checked)}
-              className="mt-1 size-5"
-            />
-            <span>
-              I have read these simple words against the original clause. They say nothing the
-              clause does not say.
-            </span>
-          </label>
-        </div>
-      )}
+      {simple &&
+        !editing &&
+        simple.status !== 'approved' &&
+        canApprove &&
+        simple.readyToApprove && (
+          <div className="mt-3 space-y-2">
+            {simple.source === 'ai' && (
+              <Notice tone="warning">
+                Written by AI. AI can misread or invent things: check every sentence against the
+                original above.
+              </Notice>
+            )}
+            <label className="flex items-start gap-3 text-base text-slate-900">
+              <input
+                type="checkbox"
+                checked={confirmed}
+                onChange={(event) => setConfirmed(event.target.checked)}
+                className="mt-1 size-5"
+              />
+              <span>
+                I have read these simple words against the original clause. They say nothing the
+                clause does not say.
+              </span>
+            </label>
+          </div>
+        )}
       {simple && !editing && simple.status !== 'approved' && !canApprove && (
         <p className="mt-3 text-sm text-slate-600">
           An owner or administrator needs to approve these simple words before members see them.

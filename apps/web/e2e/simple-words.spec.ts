@@ -8,7 +8,8 @@ const accounts = JSON.parse(
   readFileSync(path.join(__dirname, '.auth', 'accounts.json'), 'utf8'),
 ) as Record<string, string>;
 const CHOIR = '/o/sample-community-choir';
-const SIMPLE = 'Every member gets one vote. Most decisions need more than half of the members who are there.';
+const SIMPLE =
+  'Every member gets one vote. Most decisions need more than half of the members who are there.';
 
 async function signIn(page: Page, email: string) {
   await page.goto(`${CHOIR}/sign-in`);
@@ -46,7 +47,10 @@ test('write, study and approve simple words; members see them under the original
   await member.goto(`${CHOIR}/search`);
   await member.getByLabel('What are you looking for?').fill('voting');
   await member.getByRole('button', { name: 'Search', exact: true }).click();
-  await member.getByRole('link', { name: /8\. Voting/ }).first().click();
+  await member
+    .getByRole('link', { name: /8\. Voting/ })
+    .first()
+    .click();
   const toggle = member.getByRole('button', { name: 'Simple words', exact: true });
   await expect(toggle).toHaveAttribute('aria-pressed', 'false');
   await expect(member.getByLabel('Simple words for Clause 8', { exact: true })).toHaveCount(0);
@@ -57,6 +61,8 @@ test('write, study and approve simple words; members see them under the original
   await expect(box).toContainText('the original wording above is what counts');
   await expect(member.getByRole('note').filter({ hasText: 'not legal advice' })).toBeVisible();
   // The original wording is still there.
-  await expect(member.locator('p', { hasText: 'Each member has one vote. Decisions are made' }).first()).toBeVisible();
+  await expect(
+    member.locator('p', { hasText: 'Each member has one vote. Decisions are made' }).first(),
+  ).toBeVisible();
   await memberContext.close();
 });

@@ -199,7 +199,9 @@ describe('approved answer import files', () => {
 describe('simple words import files', () => {
   it('reads items with clause numbers as text or numbers', () => {
     expect(
-      parseSimpleImport('{"items":[{"clause":7,"text":"Plain words.","draftedBy":"ai"},{"clause":" 7(a) ","text":"More."}]}'),
+      parseSimpleImport(
+        '{"items":[{"clause":7,"text":"Plain words.","draftedBy":"ai"},{"clause":" 7(a) ","text":"More."}]}',
+      ),
     ).toEqual({
       rows: [
         { clause: '7', text: 'Plain words.', draftedBy: 'ai' },

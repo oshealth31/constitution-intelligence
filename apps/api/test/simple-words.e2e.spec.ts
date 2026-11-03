@@ -109,9 +109,10 @@ describe.runIf(Boolean(testDatabaseUrl))('Simple words', () => {
   }
 
   async function memberView(org: Org, versionId: string, agent: TestAgent = org.member) {
-    return (
-      await agent.get(url(org, `/simple-words?versionId=${versionId}`)).expect(200)
-    ).body as { disclaimer: string; items: { sectionId: string; text: string }[] };
+    return (await agent.get(url(org, `/simple-words?versionId=${versionId}`)).expect(200)).body as {
+      disclaimer: string;
+      items: { sectionId: string; text: string }[];
+    };
   }
 
   beforeAll(async () => {
@@ -217,7 +218,10 @@ describe.runIf(Boolean(testDatabaseUrl))('Simple words', () => {
         expect.objectContaining({ sectionId: id, text: expect.stringContaining('two-thirds') }),
       ]);
 
-      const events = await context.db.select().from(auditEvents).where(eq(auditEvents.targetId, id));
+      const events = await context.db
+        .select()
+        .from(auditEvents)
+        .where(eq(auditEvents.targetId, id));
       expect(events.map((event) => event.action)).toEqual(
         expect.arrayContaining(['simple_words.saved', 'simple_words.approved']),
       );
@@ -316,9 +320,17 @@ describe.runIf(Boolean(testDatabaseUrl))('Simple words', () => {
     it('keeps approved simple words for unchanged clauses, and holds back changed ones', async () => {
       const clause10 = await clauseId(b, '10');
       const clause6 = await clauseId(b, '6');
-      await save(b, clause10, 'You can change the constitution if two-thirds of members at a general meeting agree.');
+      await save(
+        b,
+        clause10,
+        'You can change the constitution if two-thirds of members at a general meeting agree.',
+      );
       await approve(b, clause10);
-      await save(b, clause6, 'There must be an annual general meeting every year, with 21 days’ written notice.');
+      await save(
+        b,
+        clause6,
+        'There must be an annual general meeting every year, with 21 days’ written notice.',
+      );
       await approve(b, clause6);
       const text10 = (await overview(b)).constitutions[0]!.clauses.find(
         (item) => item.clause.reference === '10',
@@ -343,15 +355,28 @@ describe.runIf(Boolean(testDatabaseUrl))('Simple words', () => {
       for (const flagged of upload.body.sections.filter(
         (section: { needsReview: boolean }) => section.needsReview,
       )) {
-        await b.admin.post(url(b, `/versions/${versionId}/sections/${flagged.id}/resolve`)).expect(200);
+        await b.admin
+          .post(url(b, `/versions/${versionId}/sections/${flagged.id}/resolve`))
+          .expect(200);
       }
-      await b.admin.post(url(b, `/versions/${versionId}/submit`)).send({ confirmed: true }).expect(200);
-      await b.admin.post(url(b, `/versions/${versionId}/approve`)).send({}).expect(200);
-      await b.admin.post(url(b, `/versions/${versionId}/publish`)).send({ confirmed: true }).expect(200);
+      await b.admin
+        .post(url(b, `/versions/${versionId}/submit`))
+        .send({ confirmed: true })
+        .expect(200);
+      await b.admin
+        .post(url(b, `/versions/${versionId}/approve`))
+        .send({})
+        .expect(200);
+      await b.admin
+        .post(url(b, `/versions/${versionId}/publish`))
+        .send({ confirmed: true })
+        .expect(200);
 
       const after = await overview(b);
       expect(after.constitutions[0]!.versionId).toBe(versionId);
-      const byRef = new Map(after.constitutions[0]!.clauses.map((item) => [item.clause.reference, item]));
+      const byRef = new Map(
+        after.constitutions[0]!.clauses.map((item) => [item.clause.reference, item]),
+      );
       expect(byRef.get('10')!.simple).toMatchObject({ status: 'approved' });
       expect(byRef.get('6')!.simple).toMatchObject({ status: 'needs_review', approvedAt: null });
       expect(byRef.get('6')!.simple!.reviewReason).toContain('Clause 6');
@@ -363,7 +388,11 @@ describe.runIf(Boolean(testDatabaseUrl))('Simple words', () => {
       expect((await memberView(b, b.ids.publishedVersionId)).items).toHaveLength(0);
 
       // An administrator checks the copied words against the new wording and approves them.
-      await save(b, byRef.get('6')!.clause.sectionId, 'There must be an annual general meeting every year, with 14 days’ written notice.');
+      await save(
+        b,
+        byRef.get('6')!.clause.sectionId,
+        'There must be an annual general meeting every year, with 14 days’ written notice.',
+      );
       await approve(b, byRef.get('6')!.clause.sectionId);
       expect((await memberView(b, versionId)).items.map((item) => item.sectionId)).toContain(
         byRef.get('6')!.clause.sectionId,

@@ -6,7 +6,7 @@ everyday words**. Members switch on **Simple words** in the reader and see the s
 
 Simple words are **not legal advice**, and **the original wording is what counts**. The reader
 says so above the text whenever simple words are switched on, and each simple-words box is
-labelled *"Simple words · the original wording above is what counts"*.
+labelled _"Simple words · the original wording above is what counts"_.
 
 ## Who can do what
 
@@ -28,8 +28,8 @@ with filters: all, no simple words yet, waiting for approval, approved.
 - The same **automatic checks** as approved answers run against the one clause: mentioning
   another clause number blocks approval; an amount not in the clause ("half", "14 days") is a
   warning. They cannot judge whether the words are a fair rewording — the approver does.
-- An owner or administrator ticks *"I have read these simple words against the original clause.
-  They say nothing the clause does not say."* and approves. AI drafts carry an extra warning.
+- An owner or administrator ticks _"I have read these simple words against the original clause.
+  They say nothing the clause does not say."_ and approves. AI drafts carry an extra warning.
 - **Editing** approved simple words makes them a draft again (hidden until re-approved).
 - **Withdraw** turns approved simple words back into a draft. Approved ones must be withdrawn
   before they can be deleted.
@@ -51,7 +51,7 @@ shown simple words for the current published version.
 
 ## Importing
 
-Manage → Simple words → *Import simple words from a file*. A `.json` file, at most 500 items:
+Manage → Simple words → _Import simple words from a file_. A `.json` file, at most 500 items:
 
 ```json
 {
@@ -76,15 +76,15 @@ outside Botswana.
 
 ## API
 
-| Method & path (under `/api/v1/organisations/:id`)           | Permission        | Notes                                                           |
-| ----------------------------------------------------------- | ----------------- | --------------------------------------------------------------- |
-| `GET /simple-words?versionId=`                               | `constitution.read` | `{ disclaimer, items[] }` — approved only, published versions only |
-| `GET /manage/simple-words`                                   | `content.edit`    | Every clause of the published versions with its simple words   |
-| `PUT /manage/simple-words/sections/:sectionId` `{ text }`    | `content.edit`    | Creates or replaces; always a draft afterwards                 |
-| `DELETE /manage/simple-words/sections/:sectionId`            | `content.edit`    | Not for approved ones (withdraw first)                         |
-| `POST /manage/simple-words/sections/:sectionId/approve` `{ confirmed }` | `content.approve` | 409 while a blocking check fails                  |
-| `POST /manage/simple-words/sections/:sectionId/withdraw`     | `content.approve` | Approved → draft                                               |
-| `POST /manage/simple-words/import` `{ items[] }`             | `content.edit`    | Returns `saved[]` and `skipped[]` with reasons                 |
+| Method & path (under `/api/v1/organisations/:id`)                       | Permission          | Notes                                                              |
+| ----------------------------------------------------------------------- | ------------------- | ------------------------------------------------------------------ |
+| `GET /simple-words?versionId=`                                          | `constitution.read` | `{ disclaimer, items[] }` — approved only, published versions only |
+| `GET /manage/simple-words`                                              | `content.edit`      | Every clause of the published versions with its simple words       |
+| `PUT /manage/simple-words/sections/:sectionId` `{ text }`               | `content.edit`      | Creates or replaces; always a draft afterwards                     |
+| `DELETE /manage/simple-words/sections/:sectionId`                       | `content.edit`      | Not for approved ones (withdraw first)                             |
+| `POST /manage/simple-words/sections/:sectionId/approve` `{ confirmed }` | `content.approve`   | 409 while a blocking check fails                                   |
+| `POST /manage/simple-words/sections/:sectionId/withdraw`                | `content.approve`   | Approved → draft                                                   |
+| `POST /manage/simple-words/import` `{ items[] }`                        | `content.edit`      | Returns `saved[]` and `skipped[]` with reasons                     |
 
 Audit events: `simple_words.saved`, `.imported`, `.approved`, `.withdrawn`, `.deleted` — ids and
 counts only, never the text.

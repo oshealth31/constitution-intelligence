@@ -183,7 +183,6 @@ export function sectionAnchor(refKey: string): string {
   return `section-${refKey}`;
 }
 
-
 function escapeRegExp(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

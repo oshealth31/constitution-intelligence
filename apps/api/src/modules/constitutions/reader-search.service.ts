@@ -115,7 +115,10 @@ export class ReaderSearchService {
                  s.source_page AS "sourcePage"
           FROM sections s
           WHERE s.organisation_id = ${scope.organisationId}
-            AND s.version_id IN (${sql.join(versionIds.map((id) => sql`${id}`), sql`, `)})
+            AND s.version_id IN (${sql.join(
+              versionIds.map((id) => sql`${id}`),
+              sql`, `,
+            )})
           ORDER BY s.version_id, s.position`)
       ).rows as unknown as SectionRow[];
       const byId = new Map(sections.map((section) => [section.id, section]));
@@ -123,13 +126,15 @@ export class ReaderSearchService {
 
       const ordered: { section: SectionRow; matchedBy: MatchedBy }[] = [];
       const add = (section: SectionRow, matchedBy: MatchedBy) => {
-        if (!ordered.some((item) => item.section.id === section.id)) ordered.push({ section, matchedBy });
+        if (!ordered.some((item) => item.section.id === section.id))
+          ordered.push({ section, matchedBy });
       };
 
       // 1. Clause or part number.
       if (referenceQuery) {
         for (const section of sections) {
-          if (matchesReference(referenceQuery, section, references.get(section.id))) add(section, 'reference');
+          if (matchesReference(referenceQuery, section, references.get(section.id)))
+            add(section, 'reference');
         }
       }
       // 2. Section titles: exact title first, then titles containing the query.
@@ -138,7 +143,8 @@ export class ReaderSearchService {
         if (section.heading?.trim().toLowerCase() === needle) add(section, 'title');
       }
       for (const section of sections) {
-        if (needle.length >= 3 && section.heading?.toLowerCase().includes(needle)) add(section, 'title');
+        if (needle.length >= 3 && section.heading?.toLowerCase().includes(needle))
+          add(section, 'title');
       }
       // 3. Keywords anywhere in the number, heading or text.
       const keyword = (
@@ -147,7 +153,10 @@ export class ReaderSearchService {
           FROM sections s
           CROSS JOIN websearch_to_tsquery('simple', ${query}) AS q
           WHERE s.organisation_id = ${scope.organisationId}
-            AND s.version_id IN (${sql.join(versionIds.map((id) => sql`${id}`), sql`, `)})
+            AND s.version_id IN (${sql.join(
+              versionIds.map((id) => sql`${id}`),
+              sql`, `,
+            )})
             AND s.search_vector @@ q
           ORDER BY rank DESC, s.position ASC
           LIMIT 100`)
@@ -157,32 +166,34 @@ export class ReaderSearchService {
         if (section) add(section, 'text');
       }
 
-      const results = ordered.slice(0, MAX_RESULTS).map(({ section, matchedBy }): ReaderSearchResult => {
-        const reference = references.get(section.id);
-        const version = versionById.get(section.versionId)!;
-        return {
-          sectionId: section.id,
-          refKey: section.refKey,
-          kind: section.kind,
-          number: section.number,
-          heading: section.heading,
-          reference: reference?.reference ?? null,
-          referenceLabel: reference?.referenceLabel ?? null,
-          path: (reference?.ancestorIds ?? [])
-            .map((id) => byId.get(id))
-            .filter((item): item is SectionRow => item !== undefined)
-            .map((item) => ({ refKey: item.refKey, number: item.number, heading: item.heading })),
-          excerpt: excerpt(section.body, terms),
-          matchedBy,
-          sourcePage: section.sourcePage,
-          constitutionId: version.constitutionId,
-          constitutionTitle: version.title,
-          versionId: version.versionId,
-          versionNumber: Number(version.versionNumber),
-          versionLabel: version.label,
-          publishedAt: version.publishedAt ? new Date(version.publishedAt).toISOString() : null,
-        };
-      });
+      const results = ordered
+        .slice(0, MAX_RESULTS)
+        .map(({ section, matchedBy }): ReaderSearchResult => {
+          const reference = references.get(section.id);
+          const version = versionById.get(section.versionId)!;
+          return {
+            sectionId: section.id,
+            refKey: section.refKey,
+            kind: section.kind,
+            number: section.number,
+            heading: section.heading,
+            reference: reference?.reference ?? null,
+            referenceLabel: reference?.referenceLabel ?? null,
+            path: (reference?.ancestorIds ?? [])
+              .map((id) => byId.get(id))
+              .filter((item): item is SectionRow => item !== undefined)
+              .map((item) => ({ refKey: item.refKey, number: item.number, heading: item.heading })),
+            excerpt: excerpt(section.body, terms),
+            matchedBy,
+            sourcePage: section.sourcePage,
+            constitutionId: version.constitutionId,
+            constitutionTitle: version.title,
+            versionId: version.versionId,
+            versionNumber: Number(version.versionNumber),
+            versionLabel: version.label,
+            publishedAt: version.publishedAt ? new Date(version.publishedAt).toISOString() : null,
+          };
+        });
 
       let suggestions: string[] = [];
       if (results.length === 0 && !referenceQuery && needle.length >= 3) {
@@ -194,7 +205,10 @@ export class ReaderSearchService {
                                               word_similarity(${needle}, lower(s.heading)))) AS score
               FROM sections s
               WHERE s.organisation_id = ${scope.organisationId}
-                AND s.version_id IN (${sql.join(versionIds.map((id) => sql`${id}`), sql`, `)})
+                AND s.version_id IN (${sql.join(
+                  versionIds.map((id) => sql`${id}`),
+                  sql`, `,
+                )})
                 AND s.heading IS NOT NULL
               GROUP BY s.heading
               HAVING max(greatest(similarity(lower(s.heading), ${needle}),
@@ -209,7 +223,9 @@ export class ReaderSearchService {
   }
 }
 
-function interpreted(query: ReturnType<typeof parseReferenceQuery>): ReaderSearchResponse['interpretedAs'] {
+function interpreted(
+  query: ReturnType<typeof parseReferenceQuery>,
+): ReaderSearchResponse['interpretedAs'] {
   if (!query) return null;
   return query.type === 'division'
     ? { type: query.kind, display: query.display }

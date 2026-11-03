@@ -46,7 +46,11 @@ describe.runIf(Boolean(testDatabaseUrl))('search and constitution reader', () =>
   let a: Org;
   let b: Org;
 
-  async function createOrg(variant: 'choir' | 'netball', name: string, uniqueWord: string): Promise<Org> {
+  async function createOrg(
+    variant: 'choir' | 'netball',
+    name: string,
+    uniqueWord: string,
+  ): Promise<Org> {
     const organisation = await createOrganisation(context.db);
     const owner = await signedInMember(context, organisation.id, 'owner');
     const ids = await createSampleTenantContent(
@@ -111,7 +115,11 @@ describe.runIf(Boolean(testDatabaseUrl))('search and constitution reader', () =>
 
     it('finds words anywhere in the text', async () => {
       const { results, terms } = await search(a.member, a, 'two-thirds majority');
-      expect(results[0]).toMatchObject({ refKey: 'amendments', reference: '10', matchedBy: 'text' });
+      expect(results[0]).toMatchObject({
+        refKey: 'amendments',
+        reference: '10',
+        matchedBy: 'text',
+      });
       expect(terms).toEqual(['two-thirds', 'majority']);
       expect(results[0]!.excerpt).toContain('two-thirds majority');
     });
@@ -138,7 +146,10 @@ describe.runIf(Boolean(testDatabaseUrl))('search and constitution reader', () =>
           referenceLabel: 'Clause 2(a)',
           matchedBy: 'reference',
         });
-        expect(results[0]!.path.map((item) => item.refKey), query).toEqual(['part-1', 'objectives']);
+        expect(
+          results[0]!.path.map((item) => item.refKey),
+          query,
+        ).toEqual(['part-1', 'objectives']);
       }
       for (const query of ['Part 3', 'part III', 'part three']) {
         const { results } = await search(a.member, a, query);
@@ -148,7 +159,11 @@ describe.runIf(Boolean(testDatabaseUrl))('search and constitution reader', () =>
 
     it('puts section titles before passing mentions in the text', async () => {
       const { results } = await search(a.member, a, 'general meeting');
-      expect(results[0]).toMatchObject({ refKey: 'agm', heading: 'Annual general meeting', matchedBy: 'title' });
+      expect(results[0]).toMatchObject({
+        refKey: 'agm',
+        heading: 'Annual general meeting',
+        matchedBy: 'title',
+      });
       expect(results.map((result) => result.refKey)).toContain('s2'); // "...for a general meeting..."
     });
 
@@ -170,8 +185,9 @@ describe.runIf(Boolean(testDatabaseUrl))('search and constitution reader', () =>
     it('returns the stored wording unchanged: excerpts are exact slices of the text', async () => {
       const { results } = await search(a.member, a, 'members');
       expect(results.length).toBeGreaterThan(2);
-      const sections = (await a.member.get(url(a, `/versions/${a.ids.publishedVersionId}/sections`)).expect(200))
-        .body as (Result & { id: string; body: string })[];
+      const sections = (
+        await a.member.get(url(a, `/versions/${a.ids.publishedVersionId}/sections`)).expect(200)
+      ).body as (Result & { id: string; body: string })[];
       for (const result of results) {
         const section = sections.find((item) => item.id === result.sectionId)!;
         expect(result.number).toBe(section.number);
@@ -181,12 +197,21 @@ describe.runIf(Boolean(testDatabaseUrl))('search and constitution reader', () =>
     });
 
     it('gives every section in the reader its reference, taken only from stored numbers', async () => {
-      const sections = (await a.member.get(url(a, `/versions/${a.ids.publishedVersionId}/sections`)).expect(200))
-        .body as { refKey: string; reference: string | null; referenceLabel: string | null; sourcePage: number | null }[];
+      const sections = (
+        await a.member.get(url(a, `/versions/${a.ids.publishedVersionId}/sections`)).expect(200)
+      ).body as {
+        refKey: string;
+        reference: string | null;
+        referenceLabel: string | null;
+        sourcePage: number | null;
+      }[];
       const byKey = Object.fromEntries(sections.map((section) => [section.refKey, section]));
       expect(byKey['part-2']).toMatchObject({ reference: 'Part 2', referenceLabel: 'Part 2' });
       expect(byKey['s3']).toMatchObject({ reference: '3', referenceLabel: 'Clause 3' });
-      expect(byKey['objectives-c']).toMatchObject({ reference: '2(c)', referenceLabel: 'Clause 2(c)' });
+      expect(byKey['objectives-c']).toMatchObject({
+        reference: '2(c)',
+        referenceLabel: 'Clause 2(c)',
+      });
       expect(sections.every((section) => 'sourcePage' in section)).toBe(true);
     });
   });
@@ -211,10 +236,20 @@ describe.runIf(Boolean(testDatabaseUrl))('search and constitution reader', () =>
       for (const query of ['clause 7', 'quorum', 'Part 3', 'members']) {
         const { results } = await search(a.member, a, query);
         expect(results.length, query).toBeGreaterThan(0);
-        expect(results.every((result) => result.versionId === a.ids.publishedVersionId), query).toBe(true);
+        expect(
+          results.every((result) => result.versionId === a.ids.publishedVersionId),
+          query,
+        ).toBe(true);
       }
-      await a.member.get(url(a, `/search?q=quorum&constitutionId=${b.ids.constitutionId}`)).expect(404);
-      const filtered = await search(a.member, a, 'quorum', `&constitutionId=${a.ids.constitutionId}`);
+      await a.member
+        .get(url(a, `/search?q=quorum&constitutionId=${b.ids.constitutionId}`))
+        .expect(404);
+      const filtered = await search(
+        a.member,
+        a,
+        'quorum',
+        `&constitutionId=${a.ids.constitutionId}`,
+      );
       expect(filtered.results.length).toBeGreaterThan(0);
     });
   });
@@ -222,7 +257,12 @@ describe.runIf(Boolean(testDatabaseUrl))('search and constitution reader', () =>
   describe('version correctness', () => {
     async function upload(agent: TestAgent, org: Org, lines: string[]) {
       const response = await agent
-        .post(url(org, `/constitutions/${org.ids.constitutionId}/versions?label=${encodeURIComponent('Amended 2026')}`))
+        .post(
+          url(
+            org,
+            `/constitutions/${org.ids.constitutionId}/versions?label=${encodeURIComponent('Amended 2026')}`,
+          ),
+        )
         .set('Content-Type', 'application/pdf')
         .set('X-File-Name', 'amended.pdf')
         .send(makeSamplePdf([lines.map((text) => ({ text }))]))
@@ -231,15 +271,28 @@ describe.runIf(Boolean(testDatabaseUrl))('search and constitution reader', () =>
     }
 
     it('never searches drafts, versions in review or approved-but-unpublished versions', async () => {
-      const draftId = await upload(a.admin, a, [...sampleConstitutionLines('Riverside Choir'), '5. Draft rule', 'Proposed wording (pelicandraft).']);
+      const draftId = await upload(a.admin, a, [
+        ...sampleConstitutionLines('Riverside Choir'),
+        '5. Draft rule',
+        'Proposed wording (pelicandraft).',
+      ]);
       for (const agent of [a.member, a.reviewer, a.owner]) {
         expect((await search(agent, a, 'pelicandraft')).results).toEqual([]);
       }
-      await a.admin.post(url(a, `/versions/${draftId}/submit`)).send({ confirmed: true }).expect(200);
+      await a.admin
+        .post(url(a, `/versions/${draftId}/submit`))
+        .send({ confirmed: true })
+        .expect(200);
       expect((await search(a.owner, a, 'pelicandraft')).results).toEqual([]);
-      await a.admin.post(url(a, `/versions/${draftId}/approve`)).send({}).expect(200);
+      await a.admin
+        .post(url(a, `/versions/${draftId}/approve`))
+        .send({})
+        .expect(200);
       expect((await search(a.owner, a, 'pelicandraft')).results).toEqual([]);
-      await a.admin.post(url(a, `/versions/${draftId}/archive`)).send({ comment: 'Not adopted after all.' }).expect(200);
+      await a.admin
+        .post(url(a, `/versions/${draftId}/archive`))
+        .send({ comment: 'Not adopted after all.' })
+        .expect(200);
     });
 
     it('switches to the new wording, numbers and version as soon as a new version is published', async () => {
@@ -248,9 +301,18 @@ describe.runIf(Boolean(testDatabaseUrl))('search and constitution reader', () =>
         '5. Dissolution',
         'Remaining money goes to a similar charity (osprey).',
       ]);
-      await a.admin.post(url(a, `/versions/${newId}/submit`)).send({ confirmed: true }).expect(200);
-      await a.admin.post(url(a, `/versions/${newId}/approve`)).send({}).expect(200);
-      await a.admin.post(url(a, `/versions/${newId}/publish`)).send({ confirmed: true }).expect(200);
+      await a.admin
+        .post(url(a, `/versions/${newId}/submit`))
+        .send({ confirmed: true })
+        .expect(200);
+      await a.admin
+        .post(url(a, `/versions/${newId}/approve`))
+        .send({})
+        .expect(200);
+      await a.admin
+        .post(url(a, `/versions/${newId}/publish`))
+        .send({ confirmed: true })
+        .expect(200);
 
       const quorum = await search(a.member, a, 'quorum');
       expect(quorum.results.length).toBeGreaterThan(0);
@@ -264,7 +326,10 @@ describe.runIf(Boolean(testDatabaseUrl))('search and constitution reader', () =>
       // Clause 7 existed only in the old (now superseded) version.
       expect((await search(a.member, a, 'clause 7')).results).toEqual([]);
       expect((await search(a.member, a, 'heron')).results).toEqual([]);
-      expect((await search(a.member, a, 'osprey')).results[0]).toMatchObject({ reference: '5', heading: 'Dissolution' });
+      expect((await search(a.member, a, 'osprey')).results[0]).toMatchObject({
+        reference: '5',
+        heading: 'Dissolution',
+      });
     });
   });
 });

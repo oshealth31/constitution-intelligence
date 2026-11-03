@@ -128,7 +128,13 @@ function Search() {
         {!loading && results.length > 0 && (
           <ul className="space-y-3">
             {results.map((result) => (
-              <ResultCard key={result.sectionId} result={result} terms={response?.terms ?? []} query={query} slug={slug} />
+              <ResultCard
+                key={result.sectionId}
+                result={result}
+                terms={response?.terms ?? []}
+                query={query}
+                slug={slug}
+              />
             ))}
           </ul>
         )}
@@ -196,7 +202,9 @@ function ResultCard({
             </span>
           )}
           {result.sourcePage && (
-            <span className="mt-1 block text-sm text-slate-500">Page {result.sourcePage} of the original document</span>
+            <span className="mt-1 block text-sm text-slate-500">
+              Page {result.sourcePage} of the original document
+            </span>
           )}
         </span>
         <ChevronRightIcon className="mt-6 size-6 shrink-0 text-slate-400 group-hover:text-[var(--brand-ink)]" />
@@ -219,7 +227,10 @@ function NoResults({
       <Notice>
         {response.interpretedAs ? (
           <>
-            <strong>There is no {response.interpretedAs.display.toLowerCase()} in the current constitution.</strong>{' '}
+            <strong>
+              There is no {response.interpretedAs.display.toLowerCase()} in the current
+              constitution.
+            </strong>{' '}
             Check the number in the Contents list of the document, or search for a word instead.
           </>
         ) : (
@@ -255,7 +266,10 @@ function NoResults({
           <li>To find a clause by number, type “clause” and the number, for example “clause 7”.</li>
           <li>
             Or browse the whole document:{' '}
-            <Link href={portalPath(slug, '/library')} className="font-medium text-[var(--brand-ink)] underline underline-offset-4">
+            <Link
+              href={portalPath(slug, '/library')}
+              className="font-medium text-[var(--brand-ink)] underline underline-offset-4"
+            >
               open Read
             </Link>
             .

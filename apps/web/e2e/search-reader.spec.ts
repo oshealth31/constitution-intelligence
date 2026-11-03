@@ -23,7 +23,9 @@ async function search(page: Page, query: string) {
   await page.getByRole('button', { name: 'Search', exact: true }).click();
 }
 
-test('finds a clause by number and shows its reference, version and neighbours', async ({ page }) => {
+test('finds a clause by number and shows its reference, version and neighbours', async ({
+  page,
+}) => {
   await signIn(page);
   await search(page, 'clause 2');
   await expect(page.getByText(/looking for Clause 2/)).toBeVisible();
@@ -52,8 +54,13 @@ test('finds a clause by number and shows its reference, version and neighbours',
 test('finds lettered sub-clauses by reference', async ({ page }) => {
   await signIn(page);
   await search(page, '2(a)');
-  await page.getByRole('link', { name: /Clause 2\(a\)/ }).first().click();
-  await expect(page.getByRole('note', { name: 'Reference for this section' })).toContainText('Clause 2(a)');
+  await page
+    .getByRole('link', { name: /Clause 2\(a\)/ })
+    .first()
+    .click();
+  await expect(page.getByRole('note', { name: 'Reference for this section' })).toContainText(
+    'Clause 2(a)',
+  );
 });
 
 test('gives helpful messages when nothing is found', async ({ page }) => {
@@ -79,7 +86,9 @@ test.describe('on a phone', () => {
     const navigation = page.getByRole('navigation', { name: 'Section navigation' });
     await expect(navigation.getByRole('button', { name: /^Previous section/ })).toBeVisible();
     await expect(navigation.getByRole('button', { name: /^Next section/ })).toBeVisible();
-    await expect(page.getByRole('note', { name: 'Reference for this section' })).toContainText('Clause 8');
+    await expect(page.getByRole('note', { name: 'Reference for this section' })).toContainText(
+      'Clause 8',
+    );
     const hasHorizontalScroll = await page.evaluate(
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
     );

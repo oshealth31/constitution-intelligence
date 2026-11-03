@@ -26,8 +26,21 @@ export interface SectionReference {
 }
 
 const WORD_NUMBERS: Record<string, number> = {
-  one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
-  eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15,
+  one: 1,
+  two: 2,
+  three: 3,
+  four: 4,
+  five: 5,
+  six: 6,
+  seven: 7,
+  eight: 8,
+  nine: 9,
+  ten: 10,
+  eleven: 11,
+  twelve: 12,
+  thirteen: 13,
+  fourteen: 14,
+  fifteen: 15,
 };
 
 function romanValue(text: string): number {
@@ -111,7 +124,8 @@ export type ReferenceQuery =
   | { type: 'division'; kind: 'part' | 'chapter'; value: number; display: string }
   | { type: 'clause'; reference: string; display: string };
 
-const CLAUSE_PREFIX = /^(?:clauses?|cl\.?|sections?|sec\.?|s\.|articles?|art\.?|rules?|paragraphs?|para\.?|§)\s*/;
+const CLAUSE_PREFIX =
+  /^(?:clauses?|cl\.?|sections?|sec\.?|s\.|articles?|art\.?|rules?|paragraphs?|para\.?|§)\s*/;
 
 /**
  * Recognises queries such as "7", "clause 7", "Clause 7(a)", "7 (a)", "2a", "s. 4.2",
@@ -132,7 +146,9 @@ export function parseReferenceQuery(query: string): ReferenceQuery | null {
     };
   }
   const withoutPrefix = text.replace(CLAUSE_PREFIX, '');
-  const clause = /^(\d{1,3}(?:\.\d{1,3}){0,3})\s*((?:\(?[a-z]{1,4}\)?\s*){0,3})$/.exec(withoutPrefix);
+  const clause = /^(\d{1,3}(?:\.\d{1,3}){0,3})\s*((?:\(?[a-z]{1,4}\)?\s*){0,3})$/.exec(
+    withoutPrefix,
+  );
   if (!clause) return null;
   const suffix = [...(clause[2] ?? '').matchAll(/\(?([a-z]{1,4})\)?/g)].map((match) => match[1]!);
   // Each part of the suffix must look like a list label: a letter (or two) or a roman numeral.

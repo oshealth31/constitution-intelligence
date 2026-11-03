@@ -27,7 +27,9 @@ const section = (overrides: Partial<Section> & Pick<Section, 'id' | 'position'>)
 
 describe('search term highlighting', () => {
   it('marks whole-word starts of each term, ignoring case', () => {
-    expect(highlightTerms('The quorum for a General meeting and subquorum.', ['quorum', 'general'])).toEqual([
+    expect(
+      highlightTerms('The quorum for a General meeting and subquorum.', ['quorum', 'general']),
+    ).toEqual([
       { text: 'The ', highlight: false },
       { text: 'quorum', highlight: true },
       { text: ' for a ', highlight: false },
@@ -41,7 +43,11 @@ describe('search term highlighting', () => {
     const parts = highlightTerms(text, ['two-thirds', '.*', 'majority']);
     expect(parts.map((part) => part.text).join('')).toBe(text);
     expect(parts[0]).toEqual({ text: '<img src=x onerror=alert(1)> ', highlight: false });
-    expect(parts.filter((part) => part.highlight).map((part) => part.text)).toEqual(['two-thirds', 'majority', '.*']);
+    expect(parts.filter((part) => part.highlight).map((part) => part.text)).toEqual([
+      'two-thirds',
+      'majority',
+      '.*',
+    ]);
   });
 
   it('handles no terms and empty text', () => {
@@ -55,12 +61,16 @@ describe('search term highlighting', () => {
 
   it('writes a citation from stored numbers', () => {
     expect(
-      citation('Constitution of X', { label: 'Registered constitution', versionNumber: 1 }, {
-        kind: 'subclause',
-        number: '(a)',
-        heading: null,
-        referenceLabel: 'Clause 7(a)',
-      }),
+      citation(
+        'Constitution of X',
+        { label: 'Registered constitution', versionNumber: 1 },
+        {
+          kind: 'subclause',
+          number: '(a)',
+          heading: null,
+          referenceLabel: 'Clause 7(a)',
+        },
+      ),
     ).toBe('Constitution of X, Registered constitution (version 1), Clause 7(a)');
   });
 });

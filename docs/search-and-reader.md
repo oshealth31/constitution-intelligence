@@ -5,12 +5,12 @@ Members find rules in three ways from **Search** (`/o/<address>/search`) and rea
 
 ## What can be searched
 
-| Type of search  | Examples                                                       | How it works                                                                                                                                  |
-| --------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Clause number   | `7`, `clause 7`, `section 7`, `cl. 7`, `§7`, `7(a)`, `2a`, `4.2`, `7(a)(i)` | The query is read as a reference and compared with each section's reference (below). Shown first.                                             |
-| Part or chapter | `Part 3`, `part III`, `part three`, `Chapter 2`                 | Compared with the stored part/chapter number.                                                                                                |
-| Section title   | `Quorum`, `general meeting`                                     | An exact title comes first, then titles containing the words.                                                                                 |
-| Keyword         | `one third`, `two-thirds majority`, `"general meeting" -fees`   | PostgreSQL full-text search over the number, heading and text (quotes, `OR` and `-word` work).                                                 |
+| Type of search  | Examples                                                                    | How it works                                                                                      |
+| --------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Clause number   | `7`, `clause 7`, `section 7`, `cl. 7`, `§7`, `7(a)`, `2a`, `4.2`, `7(a)(i)` | The query is read as a reference and compared with each section's reference (below). Shown first. |
+| Part or chapter | `Part 3`, `part III`, `part three`, `Chapter 2`                             | Compared with the stored part/chapter number.                                                     |
+| Section title   | `Quorum`, `general meeting`                                                 | An exact title comes first, then titles containing the words.                                     |
+| Keyword         | `one third`, `two-thirds majority`, `"general meeting" -fees`               | PostgreSQL full-text search over the number, heading and text (quotes, `OR` and `-word` work).    |
 
 Results are listed in that order, without duplicates (up to 30). Each result shows:
 
@@ -29,7 +29,7 @@ When nothing is found, the page explains why:
 
 ## Rules
 
-- **Only approved, current content:** search covers only the *published* version of each
+- **Only approved, current content:** search covers only the _published_ version of each
   document, whatever the person's role. Drafts, versions in review, approved but not yet published
   versions, and superseded or archived versions are never searched. Reviewers open drafts from
   Manage → Documents, not through search.
@@ -89,7 +89,7 @@ When nothing is found, the page explains why:
 ## Tests
 
 - `apps/api/src/modules/constitutions/references.spec.ts`: references from stored numbers, query
-  parsing (clause, sub-clause, part; what is *not* a reference), terms, and that excerpts are exact
+  parsing (clause, sub-clause, part; what is _not_ a reference), terms, and that excerpts are exact
   slices.
 - `apps/api/test/search.e2e.spec.ts`:
   - search accuracy by title, keyword, clause number in many spellings, sub-clause and part;

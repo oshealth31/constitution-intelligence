@@ -143,7 +143,11 @@ function Reader() {
     setContentsOpen(false);
     setHighlighted(id);
     setCurrentKey(refKey);
-    window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#${id}`);
+    window.history.replaceState(
+      null,
+      '',
+      `${window.location.pathname}${window.location.search}#${id}`,
+    );
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, []);
 
@@ -236,7 +240,9 @@ function Reader() {
           <select
             value={version?.id}
             onChange={(event) =>
-              router.replace(portalPath(slug, `/read/${constitutionId}?version=${event.target.value}`))
+              router.replace(
+                portalPath(slug, `/read/${constitutionId}?version=${event.target.value}`),
+              )
             }
             className="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-base"
           >
@@ -264,7 +270,10 @@ function Reader() {
             Words from your search “<strong>{query}</strong>” are highlighted.
           </span>
           <Link
-            href={portalPath(slug, `/read/${constitutionId}${version ? `?version=${version.id}` : ''}`)}
+            href={portalPath(
+              slug,
+              `/read/${constitutionId}${version ? `?version=${version.id}` : ''}`,
+            )}
             className="font-medium text-[var(--brand-ink)] underline underline-offset-4"
           >
             Clear highlighting
@@ -307,23 +316,36 @@ function Reader() {
             </div>
           </div>
           {contents.length > 0 && (
-            <nav aria-label="Section navigation" className="mt-2 flex items-center gap-2 border-t border-slate-100 pt-2">
+            <nav
+              aria-label="Section navigation"
+              className="mt-2 flex items-center gap-2 border-t border-slate-100 pt-2"
+            >
               <PortalButton
                 variant="secondary"
                 className="min-h-11 shrink-0 px-3 py-2 text-sm"
                 disabled={!previous}
                 onClick={() => previous && goTo(previous.refKey)}
-                aria-label={previous ? `Previous section: ${sectionTitle(previous)}` : 'Previous section'}
+                aria-label={
+                  previous ? `Previous section: ${sectionTitle(previous)}` : 'Previous section'
+                }
               >
                 <ChevronRightIcon className="size-5 rotate-180" />
                 <span className="hidden sm:inline">Previous</span>
               </PortalButton>
-              <p className="min-w-0 flex-1 truncate text-center text-sm text-slate-700" aria-live="polite">
+              <p
+                className="min-w-0 flex-1 truncate text-center text-sm text-slate-700"
+                aria-live="polite"
+              >
                 {current ? (
                   <>
-                    <span className="font-semibold">{current.referenceLabel ?? sectionTitle(current)}</span>
+                    <span className="font-semibold">
+                      {current.referenceLabel ?? sectionTitle(current)}
+                    </span>
                     {current.referenceLabel && current.heading ? ` · ${current.heading}` : ''}
-                    <span className="text-slate-500"> ({position + 1} of {contents.length})</span>
+                    <span className="text-slate-500">
+                      {' '}
+                      ({position + 1} of {contents.length})
+                    </span>
                   </>
                 ) : (
                   `${contents.length} sections`
@@ -345,7 +367,9 @@ function Reader() {
       )}
 
       {sections.loading && <PortalLoading label="Loading the document…" />}
-      {sections.error !== undefined && <Notice tone="error">{describeError(sections.error)}</Notice>}
+      {sections.error !== undefined && (
+        <Notice tone="error">{describeError(sections.error)}</Notice>
+      )}
 
       {sections.data && version && (
         <div className="lg:grid lg:grid-cols-[18rem_1fr] lg:gap-8">
@@ -353,7 +377,9 @@ function Reader() {
             aria-label="Contents"
             className="hidden lg:sticky lg:top-48 lg:block lg:max-h-[calc(100dvh-13rem)] lg:overflow-y-auto"
           >
-            <p className="px-3 text-sm font-semibold tracking-wide text-slate-500 uppercase">Contents</p>
+            <p className="px-3 text-sm font-semibold tracking-wide text-slate-500 uppercase">
+              Contents
+            </p>
             {contentsList}
           </nav>
           <article
@@ -371,14 +397,19 @@ function Reader() {
                     <ReferenceCard
                       section={highlightedNode}
                       text={citation(constitution.data!.title, version, highlightedNode)}
-                      originalUrl={version.hasOriginal ? `/api/v1${api}/versions/${version.id}/source` : null}
+                      originalUrl={
+                        version.hasOriginal ? `/api/v1${api}/versions/${version.id}/source` : null
+                      }
                     />
                   ) : null
                 }
               />
             ))}
             <p className="mt-10 border-t border-slate-200 pt-4 text-base">
-              <a href="#main" className="font-medium text-[var(--brand-ink)] underline underline-offset-4">
+              <a
+                href="#main"
+                className="font-medium text-[var(--brand-ink)] underline underline-offset-4"
+              >
                 Back to top
               </a>
             </p>
@@ -387,7 +418,12 @@ function Reader() {
       )}
 
       {contentsOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true" aria-label="Contents">
+        <div
+          className="fixed inset-0 z-40 lg:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Contents"
+        >
           <button
             type="button"
             aria-label="Close contents"
@@ -444,13 +480,22 @@ function ReferenceCard({
         <span className="font-semibold text-slate-900">Reference: </span>
         {text}
       </p>
-      {section.sourcePage ? <p className="mt-1">Starts on page {section.sourcePage} of the original document.</p> : null}
+      {section.sourcePage ? (
+        <p className="mt-1">Starts on page {section.sourcePage} of the original document.</p>
+      ) : null}
       <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
-        <button type="button" onClick={() => void copy()} className="min-h-10 font-medium text-[var(--brand-ink)] underline underline-offset-4">
+        <button
+          type="button"
+          onClick={() => void copy()}
+          className="min-h-10 font-medium text-[var(--brand-ink)] underline underline-offset-4"
+        >
           {copied ? 'Reference copied' : 'Copy reference'}
         </button>
         {originalUrl && (
-          <a href={originalUrl} className="inline-flex min-h-10 items-center font-medium text-[var(--brand-ink)] underline underline-offset-4">
+          <a
+            href={originalUrl}
+            className="inline-flex min-h-10 items-center font-medium text-[var(--brand-ink)] underline underline-offset-4"
+          >
             Open the original document
           </a>
         )}
@@ -473,9 +518,17 @@ function SectionBlock({
 }) {
   const id = sectionAnchor(node.refKey);
   const isHighlighted = highlighted === id;
-  const ring = isHighlighted ? 'ring-2 ring-[var(--brand-accent)] bg-[var(--brand-secondary)]/40' : '';
+  const ring = isHighlighted
+    ? 'ring-2 ring-[var(--brand-accent)] bg-[var(--brand-secondary)]/40'
+    : '';
   const children = node.children.map((child) => (
-    <SectionBlock key={child.id} node={child} highlighted={highlighted} terms={terms} referenceCard={referenceCard} />
+    <SectionBlock
+      key={child.id}
+      node={child}
+      highlighted={highlighted}
+      terms={terms}
+      referenceCard={referenceCard}
+    />
   ));
 
   if (node.kind === 'part' || node.kind === 'chapter') {

@@ -34,8 +34,14 @@ describe('clause references', () => {
   it('builds references from stored numbers and parents only', () => {
     expect(references.get('p3')).toMatchObject({ reference: 'Part 3', referenceLabel: 'Part 3' });
     expect(references.get('c7')).toMatchObject({ reference: '7', referenceLabel: 'Clause 7' });
-    expect(references.get('c7a')).toMatchObject({ reference: '7(a)', referenceLabel: 'Clause 7(a)' });
-    expect(references.get('c7ai')).toMatchObject({ reference: '7(a)(i)', ancestorIds: ['p3', 'c7', 'c7a'] });
+    expect(references.get('c7a')).toMatchObject({
+      reference: '7(a)',
+      referenceLabel: 'Clause 7(a)',
+    });
+    expect(references.get('c7ai')).toMatchObject({
+      reference: '7(a)(i)',
+      ancestorIds: ['p3', 'c7', 'c7a'],
+    });
     expect(references.get('c5')?.reference).toBe('5'); // trailing "." is not part of the number
     expect(references.get('c51')?.reference).toBe('5.1');
   });
@@ -46,7 +52,10 @@ describe('clause references', () => {
   });
 
   it('survives broken parent links', () => {
-    const loop = computeReferences([node('x', 'y', 'clause', '1', null, 0), node('y', 'x', 'subclause', '(a)', null, 1)]);
+    const loop = computeReferences([
+      node('x', 'y', 'clause', '1', null, 0),
+      node('y', 'x', 'subclause', '(a)', null, 1),
+    ]);
     expect(loop.get('x')?.reference).toBe('1');
   });
 });
@@ -76,21 +85,35 @@ describe('reading a query as a reference', () => {
     expect(parseReferenceQuery(query)).toMatchObject({ type: 'division', kind, value });
   });
 
-  it.each(['quorum', '7 members', '1 me', '2026', '(a)', 'general meeting'])('%s is not a reference', (query) => {
-    expect(parseReferenceQuery(query)).toBeNull();
-  });
+  it.each(['quorum', '7 members', '1 me', '2026', '(a)', 'general meeting'])(
+    '%s is not a reference',
+    (query) => {
+      expect(parseReferenceQuery(query)).toBeNull();
+    },
+  );
 
   it('matches sections by reference, never parts by clause number', () => {
     const references = computeReferences(nodes);
-    expect(matchesReference(parseReferenceQuery('7(a)')!, nodes[2]!, references.get('c7a'))).toBe(true);
-    expect(matchesReference(parseReferenceQuery('3')!, nodes[0]!, references.get('p3'))).toBe(false);
-    expect(matchesReference(parseReferenceQuery('part iii')!, nodes[0]!, references.get('p3'))).toBe(true);
+    expect(matchesReference(parseReferenceQuery('7(a)')!, nodes[2]!, references.get('c7a'))).toBe(
+      true,
+    );
+    expect(matchesReference(parseReferenceQuery('3')!, nodes[0]!, references.get('p3'))).toBe(
+      false,
+    );
+    expect(
+      matchesReference(parseReferenceQuery('part iii')!, nodes[0]!, references.get('p3')),
+    ).toBe(true);
   });
 });
 
 describe('terms and excerpts', () => {
   it('extracts the words to highlight', () => {
-    expect(searchTerms('The quorum OR "general meeting" -fees')).toEqual(['quorum', 'general', 'meeting', 'fees']);
+    expect(searchTerms('The quorum OR "general meeting" -fees')).toEqual([
+      'quorum',
+      'general',
+      'meeting',
+      'fees',
+    ]);
   });
 
   it('keeps the original wording: an excerpt is an exact slice with "…" for left-out text', () => {

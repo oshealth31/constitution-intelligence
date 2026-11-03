@@ -23,6 +23,8 @@ const apiEnv: Record<string, string> = {
   LOGIN_MAX_ATTEMPTS_PER_EMAIL: '100',
   // Every browser test signs in from the same address.
   LOGIN_MAX_ATTEMPTS_PER_IP: '1000',
+  // No AI account in CI: the offline mode quotes the best passage instead of asking a model.
+  AI_PROVIDER: 'offline',
 };
 
 export default defineConfig({

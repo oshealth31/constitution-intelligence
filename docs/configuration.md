@@ -39,6 +39,11 @@ and refuses to start if anything is missing or unsafe, listing the problem setti
 | `MAIL_TRANSPORT`                                                     | No                            | `log`                    | `log` (local/test only) or `disabled`. A real provider comes later.           |
 | `STORAGE_DRIVER`, `STORAGE_LOCAL_DIR`                                | No                            | `local`, `.data/storage` | Where uploaded files are kept (private; never served directly).               |
 | `DOCUMENT_MAX_BYTES`                                                 | No                            | `10485760` (10 MB)       | Largest constitution document (PDF or DOCX) accepted for upload. Up to 50 MB. |
+| `AI_PROVIDER` | No | `disabled` | `disabled`, `anthropic`, or `offline` (local/test only: no AI model, quotes the best passage). |
+| `ANTHROPIC_API_KEY` | When `AI_PROVIDER=anthropic` | — | Secret. Used only by the API server; never sent to browsers or logged. |
+| `AI_MODEL` | No | `claude-sonnet-5-5` | Model used for answers. |
+| `AI_TIMEOUT_MS` | No | `30000` | How long to wait for the AI provider. |
+| `AI_MAX_QUESTIONS_PER_USER_PER_HOUR` | No | `30` | Per-person limit on questions. |
 | `TEST_DATABASE_URL`                                                  | For database tests            | —                        | Separate database used only by automated tests.                               |
 | `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_PORT` | Local Docker only             | —                        | Used by `infra/docker-compose.yml` to create the local database.              |
 

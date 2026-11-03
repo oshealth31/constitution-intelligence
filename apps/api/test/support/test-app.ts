@@ -20,6 +20,7 @@ import { configureApp } from '../../src/app.factory';
 import { AppModule } from '../../src/app.module';
 import { loadConfig } from '../../src/config/config';
 import { DRIZZLE } from '../../src/database/database.constants';
+import { AI_PROVIDER, type AiProvider } from '../../src/modules/ai/ai-provider';
 import { MailService } from '../../src/modules/mail/mail.service';
 import { createTestDatabase, type TestDatabase } from './test-database';
 
@@ -34,7 +35,10 @@ export interface TestContext {
   close(): Promise<void>;
 }
 
-export async function startTestApp(overrides: Record<string, string> = {}): Promise<TestContext> {
+export async function startTestApp(
+  overrides: Record<string, string> = {},
+  options: { aiProvider?: AiProvider } = {},
+): Promise<TestContext> {
   const database = await createTestDatabase();
   const storageDir = mkdtempSync(path.join(tmpdir(), 'ci-storage-'));
   const config = loadConfig({
@@ -49,9 +53,11 @@ export async function startTestApp(overrides: Record<string, string> = {}): Prom
     STORAGE_LOCAL_DIR: storageDir,
     ...overrides,
   });
-  const moduleRef = await Test.createTestingModule({
-    imports: [AppModule.register(config)],
-  }).compile();
+  let builder = Test.createTestingModule({ imports: [AppModule.register(config)] });
+  if (options.aiProvider) {
+    builder = builder.overrideProvider(AI_PROVIDER).useValue(options.aiProvider);
+  }
+  const moduleRef = await builder.compile();
   const app = moduleRef.createNestApplication<NestExpressApplication>({ bufferLogs: true });
   configureApp(app, config);
   await app.init();

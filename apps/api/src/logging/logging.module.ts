@@ -42,6 +42,8 @@ export function createLoggingModule(config: AppConfig): DynamicModule {
           '*.password',
           '*.token',
           '*.secret',
+          '*.apiKey',
+          '*["x-api-key"]',
         ],
         censor: '[REDACTED]',
       },

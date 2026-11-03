@@ -27,6 +27,7 @@ export const SUBSCRIPTION_STATUSES = [
   'suspended',
   'cancelled',
 ] as const;
+export const AI_ANSWER_STATUSES = ['answered', 'insufficient', 'unavailable'] as const;
 export const FILE_PURPOSES = ['constitution_source', 'branding_logo', 'other'] as const;
 export const EXTRACTION_STATUSES = ['not_started', 'succeeded', 'needs_review', 'failed'] as const;
 export const VERSION_EVENTS = [
@@ -189,6 +190,7 @@ export const aiMessages = pgTable('ai_messages', {
   conversationId: uuid('conversation_id').notNull(),
   role: text('role', { enum: ['user', 'assistant'] }).notNull(),
   content: text('content').notNull(),
+  status: text('status', { enum: AI_ANSWER_STATUSES }),
   createdAt,
 });
 
@@ -197,6 +199,20 @@ export const aiCitations = pgTable('ai_citations', {
   organisationId: organisationId(),
   messageId: uuid('message_id').notNull(),
   sectionId: uuid('section_id').notNull(),
+  quote: text('quote'),
+  position: integer('position').notNull().default(0),
+  createdAt,
+});
+
+export const aiFeedback = pgTable('ai_feedback', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organisationId: organisationId(),
+  messageId: uuid('message_id').notNull(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  helpful: boolean('helpful').notNull(),
+  comment: text('comment'),
   createdAt,
 });
 

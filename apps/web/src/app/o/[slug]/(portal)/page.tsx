@@ -3,6 +3,7 @@
 import {
   ActionTile,
   BookIcon,
+  ChatIcon,
   PortalLink,
   SearchIcon,
   SettingsIcon,
@@ -68,6 +69,12 @@ export default function PortalHomePage() {
           icon={<SearchIcon className="size-6" />}
           title="Search"
           description="Type a word like “meeting” or “fees” to find the right rule."
+        />
+        <ActionTile
+          href={portalPath(slug, '/ask')}
+          icon={<ChatIcon className="size-6" />}
+          title="Ask a question"
+          description="Ask in your own words and see the clauses the answer comes from."
         />
         {canManage(home.you.permissions) && (
           <ActionTile

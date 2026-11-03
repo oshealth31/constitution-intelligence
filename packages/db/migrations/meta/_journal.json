@@ -36,6 +36,13 @@
       "when": 1793810000000,
       "tag": "0004_document_management",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793820000000,
+      "tag": "0005_ai_answers",
+      "breakpoints": true
     }
   ]
 }

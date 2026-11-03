@@ -27,6 +27,12 @@ export const MANAGE_SECTIONS = [
     permission: 'content.edit',
   },
   {
+    path: '/manage/simple-words',
+    title: 'Simple words',
+    description: 'Plain-language versions of each clause, checked and approved for members.',
+    permission: 'content.edit',
+  },
+  {
     path: '/manage/address',
     title: 'Portal address',
     description: 'The web address members use to reach this portal.',

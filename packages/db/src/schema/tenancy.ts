@@ -255,6 +255,26 @@ export const approvedAnswerSections = pgTable('approved_answer_sections', {
   position: integer('position').notNull().default(0),
 });
 
+export const SIMPLIFIED_STATUSES = ['draft', 'approved', 'needs_review'] as const;
+
+export const simplifiedSections = pgTable('simplified_sections', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organisationId: organisationId(),
+  sectionId: uuid('section_id').notNull(),
+  text: text('text').notNull(),
+  status: text('status', { enum: SIMPLIFIED_STATUSES }).notNull().default('draft'),
+  source: text('source', { enum: APPROVED_ANSWER_SOURCES }).notNull().default('manual'),
+  reviewReason: text('review_reason'),
+  createdByUserId: uuid('created_by_user_id').references(() => users.id, { onDelete: 'set null' }),
+  updatedByUserId: uuid('updated_by_user_id').references(() => users.id, { onDelete: 'set null' }),
+  approvedByUserId: uuid('approved_by_user_id').references(() => users.id, {
+    onDelete: 'set null',
+  }),
+  approvedAt: timestamp('approved_at', { withTimezone: true }),
+  createdAt,
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
 export type Subscription = typeof subscriptions.$inferSelect;
 export type StoredFile = typeof files.$inferSelect;
 export type Constitution = typeof constitutions.$inferSelect;

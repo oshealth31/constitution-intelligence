@@ -91,7 +91,7 @@ export interface ImportReport {
   created: { id: string; question: string; unresolved: string[] }[];
 }
 
-interface SectionRow {
+export interface SectionRow {
   id: string;
   versionId: string;
   parentSectionId: string | null;
@@ -104,7 +104,7 @@ interface SectionRow {
   sourcePage: number | null;
 }
 
-interface VersionRow {
+export interface VersionRow {
   versionId: string;
   versionNumber: number;
   label: string;
@@ -115,7 +115,7 @@ interface VersionRow {
 }
 
 /** Sections of some versions, with references worked out from stored numbers only. */
-interface Loaded {
+export interface Loaded {
   versions: Map<string, VersionRow>;
   sections: Map<string, SectionRow>;
   references: Map<string, SectionReference>;
@@ -728,11 +728,11 @@ export async function carryOverAnswers(
   };
 }
 
-function normaliseWording(text: string): string {
+export function normaliseWording(text: string): string {
   return text.normalize('NFKC').replace(/\s+/g, ' ').trim();
 }
 
-async function loadSections(
+export async function loadSections(
   tx: TenantTransaction,
   organisationId: string,
   which: { published: true } | { versionIds: string[] },
@@ -777,7 +777,7 @@ async function loadSections(
   };
 }
 
-function clauseView(loaded: Loaded, sectionId: string): LinkedClauseView | null {
+export function clauseView(loaded: Loaded, sectionId: string): LinkedClauseView | null {
   const section = loaded.sections.get(sectionId);
   if (!section) return null;
   const version = loaded.versions.get(section.versionId)!;

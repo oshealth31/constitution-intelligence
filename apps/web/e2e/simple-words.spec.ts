@@ -28,7 +28,7 @@ test('write, study and approve simple words; members see them under the original
   const clause = page.getByRole('listitem', { name: 'Simple words for Clause 8', exact: true });
   await expect(clause.locator('blockquote')).toContainText('Each member has one vote');
   await clause.getByRole('button', { name: 'Write simple words' }).click();
-  await clause.getByLabel('Simple words').fill(SIMPLE);
+  await clause.getByRole('textbox', { name: /^Simple words/ }).fill(SIMPLE);
   await clause.getByRole('button', { name: 'Save as draft' }).click();
   await expect(clause.getByText('Draft', { exact: true })).toBeVisible();
   // "more than half" is not written that way in the clause: a warning for the approver.

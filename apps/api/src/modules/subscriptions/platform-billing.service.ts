@@ -675,7 +675,7 @@ export class PlatformBillingService {
       const invoice = await this.lockInvoice(tx, organisationId, payment.invoiceId);
       if (invoice.status === 'void') throw new ConflictException('The invoice has been voided.');
       const now = new Date();
-      const [{ receipt }] = (
+      const receiptRow = (
         await tx.execute(
           sql`SELECT 'RCP-' || to_char(now(), 'YYYY') || '-' || lpad(nextval('receipt_number_seq')::text, 4, '0') AS receipt`,
         )
@@ -690,10 +690,11 @@ export class PlatformBillingService {
           receiptNumber: receipt,
         })
         .where(eq(payments.id, paymentId));
-      const [{ total }] = (
+      const totalRow = (
         await tx.execute(sql`SELECT coalesce(sum(amount_minor), 0)::int AS total FROM payments
                              WHERE invoice_id = ${invoice.id} AND status = 'verified'`)
-      ).rows as { total: number }[];
+      ).rows[0] as { total: number };
+      const total = totalRow.total;
       const paid = Number(total) >= invoice.amountMinor;
       if (paid && invoice.status === 'open') {
         await tx
@@ -880,7 +881,7 @@ export class PlatformBillingService {
     input: InvoiceInput,
     currency: string,
   ): Promise<string> {
-    const [{ number }] = (
+    const numberRow = (
       await tx.execute(
         sql`SELECT 'INV-' || to_char(now(), 'YYYY') || '-' || lpad(nextval('invoice_number_seq')::text, 4, '0') AS number`,
       )

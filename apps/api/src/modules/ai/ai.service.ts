@@ -124,9 +124,10 @@ export class AiService {
     private readonly rateLimits: RateLimitService,
   ) {}
 
-  status() {
+  status(includedInPlan = true) {
     return {
-      available: this.provider.available,
+      available: this.provider.available && includedInPlan,
+      includedInPlan,
       mode: this.provider.name,
       disclaimer: DISCLAIMER,
       unsupportedMessage: UNSUPPORTED_MESSAGE,

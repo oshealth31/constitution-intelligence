@@ -45,6 +45,7 @@ export const ORGANISATION_PERMISSIONS = [
   'members.manage',
   'branding.manage',
   'billing.read',
+  'billing.manage',
   'audit.read',
 ] as const;
 export type OrganisationPermission = (typeof ORGANISATION_PERMISSIONS)[number];
@@ -56,6 +57,7 @@ export const ROLE_PERMISSIONS: Readonly<
 > = {
   owner: ORGANISATION_PERMISSIONS,
   // Administrators give the organisation's final approval to constitution versions (Stage 7).
+  // They can see the subscription; only Owners report payments (billing.manage).
   admin: [
     ...READ_BASICS,
     'content.edit',
@@ -65,6 +67,7 @@ export const ROLE_PERMISSIONS: Readonly<
     'members.invite',
     'members.manage',
     'branding.manage',
+    'billing.read',
     'audit.read',
   ],
   // Reviewers check and correct extracted text and send it for approval; they do not approve.

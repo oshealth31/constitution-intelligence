@@ -3,8 +3,9 @@ import { z } from 'zod';
 import { parseId } from '../../common/ids';
 import { requestMeta, type AppRequest } from '../../common/request-context';
 import { parseInput } from '../../common/validation';
-import { RequireOrgPermission, Tenant } from '../access/decorators';
+import { RequireFeature, RequireOrgPermission, Tenant } from '../access/decorators';
 import type { TenantScope } from '../tenancy/tenant-scope';
+import { LimitsService } from '../subscriptions/limits.service';
 import { AiService } from './ai.service';
 
 // eslint-disable-next-line no-control-regex -- refusing control characters is the point
@@ -34,21 +35,27 @@ const feedbackSchema = z.object({
 /** Base path: /api/v1/organisations/:organisationId/ai */
 @Controller('organisations/:organisationId/ai')
 export class AiController {
-  constructor(private readonly ai: AiService) {}
+  constructor(
+    private readonly ai: AiService,
+    private readonly limits: LimitsService,
+  ) {}
 
   /** Whether answers are available, and the wording shown with every answer. */
   @Get('status')
   @RequireOrgPermission('constitution.read')
-  status() {
-    return this.ai.status();
+  status(@Req() request: AppRequest) {
+    // AI answers are only "available" when the plan includes them (enforced again on /ask).
+    return this.ai.status(request.subscriptionAccess?.features.includes('ai_answers') ?? false);
   }
 
   /** Ask a question about the organisation's approved constitution. */
   @Post('ask')
   @RequireOrgPermission('constitution.read')
+  @RequireFeature('ai_answers')
   @HttpCode(HttpStatus.OK)
-  ask(@Tenant() tenant: TenantScope, @Body() body: unknown, @Req() request: AppRequest) {
+  async ask(@Tenant() tenant: TenantScope, @Body() body: unknown, @Req() request: AppRequest) {
     const { question } = parseInput(questionSchema, body);
+    await this.limits.assertWithinLimit(tenant, 'aiQuestionsPerMonth');
     return this.ai.ask(tenant, question.replace(/\s+/g, ' '), requestMeta(request));
   }
 

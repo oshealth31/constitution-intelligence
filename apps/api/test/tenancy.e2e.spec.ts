@@ -412,6 +412,8 @@ describe.runIf(Boolean(testDatabaseUrl))('tenant isolation', () => {
         'sessions',
         'password_reset_tokens',
         'auth_rate_limits',
+        // The product's plans (names, prices, features): the same for everyone, no organisation data.
+        'plans',
       ];
       const result = await context.db.execute(sql`
         SELECT c.relname AS name,

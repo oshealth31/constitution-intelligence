@@ -9,8 +9,16 @@ export interface ErrorResponseBody {
     code: string;
     message: string;
     details?: string[];
+    /** A machine-readable reason for some refusals, e.g. SUBSCRIPTION_INACTIVE. */
+    reason?: string;
     requestId?: string;
   };
+}
+
+function extractReason(response: string | object): string | undefined {
+  if (typeof response !== 'object') return undefined;
+  const reason = (response as { reason?: unknown }).reason;
+  return typeof reason === 'string' && /^[A-Z][A-Z_]{2,40}$/.test(reason) ? reason : undefined;
 }
 
 const GENERIC_SERVER_ERROR = 'An unexpected error occurred. Please try again later.';
@@ -62,12 +70,14 @@ export class AllExceptionsFilter implements ExceptionFilter {
     let status: number = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = GENERIC_SERVER_ERROR;
     let details: string[] | undefined;
+    let reason: string | undefined;
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const body = exception.getResponse();
       message = extractMessage(body, exception.message);
       details = status < 500 ? extractDetails(body) : undefined;
+      reason = status < 500 ? extractReason(body) : undefined;
       if (details) {
         message = 'The request is invalid.';
       }
@@ -95,6 +105,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         code: toErrorCode(status),
         message,
         ...(details ? { details } : {}),
+        ...(reason ? { reason } : {}),
         ...(requestId ? { requestId } : {}),
       },
     };

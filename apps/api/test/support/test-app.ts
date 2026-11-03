@@ -8,6 +8,7 @@ import {
   auditEvents,
   memberships,
   organisations,
+  subscriptions,
   users,
   type AuditEvent,
   type Database,
@@ -111,11 +112,40 @@ export async function createUser(
   return user!;
 }
 
-export async function createOrganisation(db: Database, slug = `org-${Date.now()}-${++counter}`) {
+/**
+ * A fictional organisation with an active subscription to the "premium" plan (every feature,
+ * generous limits), so tests about other things are not affected by subscription rules.
+ * Pass `subscription: null` for an organisation with no subscription at all.
+ */
+export async function createOrganisation(
+  db: Database,
+  slug = `org-${Date.now()}-${++counter}`,
+  options: { subscription?: { planCode: string; status: 'trialing' | 'active' } | null } = {},
+) {
   const [organisation] = await db
     .insert(organisations)
     .values({ slug, name: `Fictional Organisation ${counter}` })
     .returning();
+  const wanted =
+    options.subscription === undefined
+      ? { planCode: 'premium', status: 'active' as const }
+      : options.subscription;
+  if (wanted) {
+    const [subscription] = await db
+      .insert(subscriptions)
+      .values({
+        organisationId: organisation!.id,
+        planCode: wanted.planCode,
+        status: wanted.status,
+        billingInterval: wanted.status === 'trialing' ? 'none' : 'monthly',
+      })
+      .returning({ id: subscriptions.id });
+    await db
+      .update(organisations)
+      .set({ currentSubscriptionId: subscription!.id })
+      .where(eq(organisations.id, organisation!.id));
+    return { ...organisation!, currentSubscriptionId: subscription!.id };
+  }
   return organisation!;
 }
 

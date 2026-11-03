@@ -27,13 +27,21 @@ import {
 } from '../../common/request-context';
 import { emailSchema, parseInput } from '../../common/validation';
 import { DRIZZLE } from '../../database/database.constants';
-import { CurrentAuth, CurrentMembership, RequireOrgPermission, Tenant } from '../access/decorators';
+import {
+  AllowInactiveSubscription,
+  CurrentAuth,
+  CurrentMembership,
+  RequireFeature,
+  RequireOrgPermission,
+  Tenant,
+} from '../access/decorators';
 import type { TenantScope } from '../tenancy/tenant-scope';
 import { AuditService } from '../audit/audit.service';
 import { InvitationsService } from './invitations.service';
 import { MembershipsService } from './memberships.service';
 import { brandingChangeSchema, logoUploadSchema, slugSchema } from './branding-input';
 import { OrganisationProfileService } from './organisation-profile.service';
+import { LimitsService } from '../subscriptions/limits.service';
 
 const inviteSchema = z.object({ email: emailSchema, role: z.enum(ORGANISATION_ROLES) });
 const updateMemberSchema = z
@@ -60,6 +68,7 @@ export class OrganisationsController {
     private readonly invitations: InvitationsService,
     private readonly audit: AuditService,
     private readonly profile: OrganisationProfileService,
+    private readonly limits: LimitsService,
   ) {}
 
   @Get()
@@ -128,13 +137,14 @@ export class OrganisationsController {
   @Post('invitations')
   @RequireOrgPermission('members.invite')
   @HttpCode(HttpStatus.CREATED)
-  createInvitation(
+  async createInvitation(
     @CurrentAuth() auth: AuthContext,
     @CurrentMembership() membership: MembershipContext,
     @Body() body: unknown,
     @Req() request: AppRequest,
   ) {
     const { email, role } = parseInput(inviteSchema, body);
+    await this.limits.assertWithinLimit(membership.tenant, 'members');
     return this.invitations.create(
       membership.organisationId,
       { kind: 'member', userId: auth.userId, role: membership.role },
@@ -179,6 +189,7 @@ export class OrganisationsController {
 
   @Patch('branding')
   @RequireOrgPermission('branding.manage')
+  @RequireFeature('custom_branding')
   updateBranding(@Tenant() tenant: TenantScope, @Body() body: unknown, @Req() request: AppRequest) {
     const change = parseInput(brandingChangeSchema, body);
     return this.profile.updateBranding(tenant, change, requestMeta(request));
@@ -187,6 +198,7 @@ export class OrganisationsController {
   /** Body: { fileName, dataBase64 }. The image type is worked out from the bytes themselves. */
   @Put('branding/logo')
   @RequireOrgPermission('branding.manage')
+  @RequireFeature('custom_branding')
   uploadLogo(@Tenant() tenant: TenantScope, @Body() body: unknown, @Req() request: AppRequest) {
     const { fileName, dataBase64 } = parseInput(logoUploadSchema, body);
     return this.profile.setLogo(
@@ -213,12 +225,14 @@ export class OrganisationsController {
 
   @Get('subscription')
   @RequireOrgPermission('billing.read')
+  @AllowInactiveSubscription()
   getSubscription(@Tenant() tenant: TenantScope) {
     return this.profile.getSubscription(tenant);
   }
 
   @Get('usage')
   @RequireOrgPermission('billing.read')
+  @AllowInactiveSubscription()
   getUsage(@Tenant() tenant: TenantScope) {
     return this.profile.usageSummary(tenant);
   }

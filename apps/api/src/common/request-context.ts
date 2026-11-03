@@ -1,5 +1,6 @@
 import type { OrganisationRole } from '@constitution/shared';
 import type { Request } from 'express';
+import type { Access } from '../modules/subscriptions/access';
 import type { TenantScope } from '../modules/tenancy/tenant-scope';
 
 /** Who is making the request (set by AuthGuard from a valid session). */
@@ -24,6 +25,8 @@ export type AppRequest = Request & {
   id?: unknown;
   auth?: AuthContext;
   membership?: MembershipContext;
+  /** The organisation's subscription access, worked out by PermissionGuard. */
+  subscriptionAccess?: Access;
 };
 
 /** Facts about the request recorded with security events. */

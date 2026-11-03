@@ -15,7 +15,7 @@ import { z } from 'zod';
 import { parseId } from '../../common/ids';
 import { requestMeta, type AppRequest } from '../../common/request-context';
 import { parseInput } from '../../common/validation';
-import { RequireOrgPermission, Tenant } from '../access/decorators';
+import { RequireFeature, RequireOrgPermission, Tenant } from '../access/decorators';
 import type { TenantScope } from '../tenancy/tenant-scope';
 import { SIMPLE_WORDS_DISCLAIMER, SimpleWordsService } from './simple-words.service';
 
@@ -49,6 +49,7 @@ const versionSchema = z.object({ versionId: z.string() });
 
 /** Members: approved simple words for a published version. */
 @Controller('organisations/:organisationId/simple-words')
+@RequireFeature('simple_words')
 export class SimpleWordsController {
   constructor(private readonly simple: SimpleWordsService) {}
 
@@ -68,6 +69,7 @@ export class SimpleWordsController {
  * write; only administrators and owners approve or withdraw.
  */
 @Controller('organisations/:organisationId/manage/simple-words')
+@RequireFeature('simple_words')
 export class ManageSimpleWordsController {
   constructor(private readonly simple: SimpleWordsService) {}
 

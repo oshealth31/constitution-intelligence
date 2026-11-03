@@ -60,7 +60,7 @@ test('super admin creates an organisation and manages subscription, branding and
   const subscription = page.getByRole('form', { name: 'Subscription' });
   await subscription.getByLabel('Plan').selectOption('standard');
   await subscription.getByLabel('Status').selectOption('active');
-  await subscription.getByLabel('Paid until / trial ends').fill('2030-12-31');
+  await subscription.getByLabel('Period ends (paid until / pilot ends)').fill('2030-12-31');
   await subscription.getByRole('button', { name: 'Save subscription' }).click();
   await expect(page.getByText('Subscription updated.')).toBeVisible();
 

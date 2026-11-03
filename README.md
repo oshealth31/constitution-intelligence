@@ -97,6 +97,7 @@ in production.
 - [docs/search-and-reader.md](docs/search-and-reader.md) — search by keyword, clause number and title, and the reader
 - [docs/ai.md](docs/ai.md) — AI question answering, its safeguards and privacy
 - [docs/approved-answers.md](docs/approved-answers.md) — answers to common questions, written or imported, checked and approved before members see them
+- [docs/subscriptions.md](docs/subscriptions.md) — plans, subscription states, entitlements, manual payments and data retention
 - [docs/simple-words.md](docs/simple-words.md) — plain-language versions of clauses, approved before members see them in the reader
 - [docs/decisions](docs/decisions) — short records of major technical decisions
 

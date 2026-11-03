@@ -183,6 +183,8 @@ export interface OrganisationDetail {
     status: string;
     currentPeriodStart: string;
     currentPeriodEnd: string | null;
+    billingInterval?: 'monthly' | 'annual' | 'none';
+    autoRenew?: boolean;
   } | null;
   administrators: {
     membershipId: string;

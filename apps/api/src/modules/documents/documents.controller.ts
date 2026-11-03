@@ -25,6 +25,7 @@ import type { AppConfig } from '../../config/config';
 import { APP_CONFIG } from '../../config/config.module';
 import { RequireOrgPermission, Tenant } from '../access/decorators';
 import type { TenantScope } from '../tenancy/tenant-scope';
+import { LimitsService } from '../subscriptions/limits.service';
 import { DocumentsService } from './documents.service';
 
 // eslint-disable-next-line no-control-regex -- refusing control characters is the point
@@ -128,17 +129,19 @@ export class DocumentsController {
   constructor(
     @Inject(APP_CONFIG) private readonly config: AppConfig,
     private readonly documents: DocumentsService,
+    private readonly limits: LimitsService,
   ) {}
 
   @Post('constitutions')
   @RequireOrgPermission('content.edit')
   @HttpCode(HttpStatus.CREATED)
-  createConstitution(
+  async createConstitution(
     @Tenant() tenant: TenantScope,
     @Body() body: unknown,
     @Req() request: AppRequest,
   ) {
     const { title } = parseInput(createConstitutionSchema, body);
+    await this.limits.assertWithinLimit(tenant, 'constitutions');
     return this.documents.createConstitution(tenant, title, requestMeta(request));
   }
 
@@ -167,6 +170,7 @@ export class DocumentsController {
       throw new BadRequestException('The file name is missing (X-File-Name header).');
     }
     const content = await readRawBody(request, this.config.DOCUMENT_MAX_BYTES);
+    await this.limits.assertWithinLimit(tenant, 'storageMb', content.length);
     return this.documents.uploadVersion(
       tenant,
       id,

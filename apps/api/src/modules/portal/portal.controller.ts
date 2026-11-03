@@ -1,6 +1,12 @@
-import { Controller, Get, Param, Res } from '@nestjs/common';
+import { Controller, Get, Param, Req, Res } from '@nestjs/common';
 import type { Response } from 'express';
-import { Public, RequireOrgPermission, Tenant } from '../access/decorators';
+import type { AppRequest } from '../../common/request-context';
+import {
+  AllowInactiveSubscription,
+  Public,
+  RequireOrgPermission,
+  Tenant,
+} from '../access/decorators';
 import type { TenantScope } from '../tenancy/tenant-scope';
 import { PortalService } from './portal.service';
 
@@ -43,9 +49,26 @@ export class PublicPortalController {
 export class PortalController {
   constructor(private readonly portal: PortalService) {}
 
+  /**
+   * Works even when the subscription is inactive, so members are told why the portal is not
+   * available instead of seeing errors. Everything else refuses them (PermissionGuard).
+   */
   @Get()
   @RequireOrgPermission('organisation.read')
-  home(@Tenant() tenant: TenantScope) {
-    return this.portal.home(tenant);
+  @AllowInactiveSubscription()
+  async home(@Tenant() tenant: TenantScope, @Req() request: AppRequest) {
+    const access = request.subscriptionAccess;
+    return {
+      ...(await this.portal.home(tenant)),
+      subscription: access
+        ? {
+            state: access.state,
+            message: access.message,
+            fullAccess: access.fullAccess,
+            readOnly: access.readOnly,
+            features: access.features,
+          }
+        : null,
+    };
   }
 }

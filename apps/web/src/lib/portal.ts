@@ -39,6 +39,14 @@ export interface PortalHome {
   };
   you: { role: string; roleLabel: string; permissions: string[] };
   library: { constitutions: number; published: number; firstPublished: LibraryItem | null };
+  /** The subscription as the API enforces it (the page only uses it to explain). */
+  subscription?: {
+    state: 'pilot' | 'active' | 'grace' | 'restricted' | 'suspended' | 'none';
+    message: string;
+    fullAccess: boolean;
+    readOnly: boolean;
+    features: string[];
+  } | null;
 }
 
 export interface VersionSummary {

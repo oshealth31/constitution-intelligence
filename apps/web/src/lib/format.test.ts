@@ -10,7 +10,7 @@ import {
 
 describe('format helpers', () => {
   it('labels and colours statuses consistently', () => {
-    expect(statusLabel('trialing')).toBe('Trial');
+    expect(statusLabel('trialing')).toBe('Pilot');
     expect(statusLabel('past_due')).toBe('Past due');
     expect(statusLabel('ok')).toBe('Operational');
     expect(statusTone('suspended')).toBe('critical');
@@ -35,7 +35,7 @@ describe('describeAuditDetails', () => {
         by: 'platform',
         userId: 'hidden',
       }),
-    ).toEqual(['Changed from Trial to Active', 'Reason: Customer paid the annual invoice']);
+    ).toEqual(['Changed from Pilot to Active', 'Reason: Customer paid the annual invoice']);
   });
 
   it('describes field changes, permissions and counts', () => {

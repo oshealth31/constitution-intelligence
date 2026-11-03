@@ -204,7 +204,13 @@ export default function SignedInPortalLayout({ children }: { children: ReactNode
         </header>
 
         <main id="main" className="mx-auto w-full max-w-6xl px-4 pt-6 pb-28 sm:px-6 md:pb-12">
-          {children}
+          <SubscriptionNotice
+            slug={slug}
+            home={home}
+            onBillingPage={pathname.endsWith('/manage/subscription')}
+          >
+            {children}
+          </SubscriptionNotice>
         </main>
 
         <footer className="hidden pb-8 text-center text-xs text-slate-500 md:block">
@@ -242,5 +248,70 @@ export default function SignedInPortalLayout({ children }: { children: ReactNode
         </nav>
       </div>
     </PortalSessionContext.Provider>
+  );
+}
+
+/**
+ * Explains the subscription when it is not simply active. The API refuses whatever the
+ * subscription does not allow; this only saves people from a page of errors.
+ */
+function SubscriptionNotice({
+  slug,
+  home,
+  onBillingPage,
+  children,
+}: {
+  slug: string;
+  home: PortalHome;
+  onBillingPage: boolean;
+  children: ReactNode;
+}) {
+  const subscription = home.subscription;
+  if (!subscription || subscription.state === 'pilot' || subscription.state === 'active') {
+    return <>{children}</>;
+  }
+  const isAdmin = home.you.role === 'owner' || home.you.role === 'admin';
+  const blocked = !subscription.fullAccess && !(subscription.readOnly && isAdmin);
+  const canSeeBilling = home.you.permissions.includes('billing.read');
+  const banner = (
+    <div
+      role="status"
+      className={`mb-5 rounded-xl border px-4 py-3 text-base ${
+        subscription.state === 'grace'
+          ? 'border-amber-300 bg-amber-50 text-amber-950'
+          : 'border-rose-300 bg-rose-50 text-rose-950'
+      }`}
+    >
+      <p data-testid="subscription-notice">{subscription.message}</p>
+      {canSeeBilling && !onBillingPage && (
+        <Link
+          href={portalPath(slug, '/manage/subscription')}
+          className="mt-1 inline-flex min-h-11 items-center font-medium underline underline-offset-4"
+        >
+          See the subscription and invoices
+        </Link>
+      )}
+    </div>
+  );
+  if (blocked && !onBillingPage) {
+    return (
+      <div className="max-w-2xl">
+        <h1 className="mb-4 text-2xl font-bold text-slate-900">
+          The portal is not available right now
+        </h1>
+        {banner}
+        {!canSeeBilling && (
+          <p className="text-base text-slate-700">
+            Please speak to your organisation’s owner or committee.
+          </p>
+        )}
+      </div>
+    );
+  }
+  return (
+    <>
+      {banner}
+      {children}
+    </>
   );
 }

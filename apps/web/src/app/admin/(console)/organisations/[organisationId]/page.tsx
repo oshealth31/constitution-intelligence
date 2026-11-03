@@ -28,23 +28,11 @@ import {
   roleLabel,
   statusLabel,
 } from '@/lib/format';
+import { BillingCard } from '@/components/admin-billing';
+import type { Plan } from '@/lib/billing';
 import { useApi } from '@/lib/use-api';
 
 type Notice = { tone: 'good' | 'critical'; text: string } | null;
-
-const PLANS = [
-  { value: 'trial', label: 'Trial' },
-  { value: 'starter', label: 'Starter' },
-  { value: 'standard', label: 'Standard' },
-  { value: 'premium', label: 'Premium' },
-];
-const SUBSCRIPTION_STATUSES = [
-  { value: 'trialing', label: 'Trial' },
-  { value: 'active', label: 'Active' },
-  { value: 'past_due', label: 'Past due' },
-  { value: 'suspended', label: 'Suspended' },
-  { value: 'cancelled', label: 'Cancelled' },
-];
 
 /** Runs a change against the API and refreshes the page data from the response. */
 function useAction(
@@ -135,7 +123,13 @@ export default function OrganisationDetailPage() {
         <div className="space-y-6 xl:col-span-2">
           <DetailsCard data={data} busy={busy} run={run} />
           <AdministratorsCard data={data} busy={busy} run={run} reload={detail.reload} />
-          <SubscriptionCard data={data} busy={busy} run={run} />
+          <SubscriptionCard
+            key={data.subscription?.id ?? 'none'}
+            data={data}
+            busy={busy}
+            run={run}
+          />
+          <BillingCard organisationId={organisationId} onChanged={detail.reload} />
           <BrandingCard data={data} busy={busy} run={run} />
           <SupportAccessCard organisationId={organisationId} />
         </div>
@@ -453,18 +447,36 @@ function AdministratorsCard({
 }
 
 function SubscriptionCard({ data, busy, run }: SectionProps) {
+  const planList = useApi<Plan[]>('/platform/plans');
   const [planCode, setPlanCode] = useState(data.subscription?.planCode ?? 'trial');
-  const [status, setStatus] = useState(data.subscription?.status ?? 'trialing');
+  const [status, setStatus] = useState(
+    data.subscription?.status === 'trialing' ? 'trialing' : 'active',
+  );
+  const [billing, setBilling] = useState(data.subscription?.billingInterval ?? 'monthly');
+  const [autoRenew, setAutoRenew] = useState(data.subscription?.autoRenew ?? true);
   const [periodEnd, setPeriodEnd] = useState(
     data.subscription?.currentPeriodEnd?.slice(0, 10) ?? '',
   );
+  const plans = (planList.data ?? []).filter(
+    (plan) => plan.active || plan.code === data.subscription?.planCode,
+  );
+  const blocked =
+    data.subscription?.status === 'suspended' || data.subscription?.status === 'cancelled';
 
   return (
     <Card
       title="Subscription"
-      description="Recorded manually. No payment provider is connected yet; payments are confirmed outside the system."
+      description="Plan, billing and dates. Recorded by hand: no payment provider is connected. Suspension, cancellation, renewal, invoices and payments are under Billing below."
       actions={data.subscription ? <StatusBadge status={data.subscription.status} /> : undefined}
     >
+      {blocked && (
+        <div className="mb-4">
+          <Alert tone="info">
+            This subscription is {data.subscription?.status}. Reactivate it under Billing before
+            changing it.
+          </Alert>
+        </div>
+      )}
       <form
         className="grid gap-4 sm:grid-cols-3 sm:items-end"
         aria-label="Subscription"
@@ -477,6 +489,9 @@ function SubscriptionCard({ data, busy, run }: SectionProps) {
             {
               planCode,
               status,
+              billingInterval:
+                status === 'trialing' ? 'none' : billing === 'none' ? 'monthly' : billing,
+              autoRenew,
               currentPeriodEnd: periodEnd ? new Date(`${periodEnd}T23:59:59Z`).toISOString() : null,
             },
             'Subscription updated.',
@@ -487,22 +502,56 @@ function SubscriptionCard({ data, busy, run }: SectionProps) {
           label="Plan"
           value={planCode}
           onChange={(e) => setPlanCode(e.target.value)}
-          options={PLANS}
+          options={plans.map((plan) => ({
+            value: plan.code,
+            label: `${plan.name}${plan.isPilot ? ' (pilot)' : ''}${plan.active ? '' : ' — no longer offered'}`,
+          }))}
         />
         <SelectField
           label="Status"
           value={status}
           onChange={(e) => setStatus(e.target.value)}
-          options={SUBSCRIPTION_STATUSES}
+          options={[
+            { value: 'trialing', label: 'Pilot (not billed)' },
+            { value: 'active', label: 'Active (billed)' },
+          ]}
+        />
+        <SelectField
+          label="Billing"
+          value={status === 'trialing' ? 'none' : billing === 'none' ? 'monthly' : billing}
+          disabled={status === 'trialing'}
+          onChange={(e) => setBilling(e.target.value as 'monthly' | 'annual')}
+          options={
+            status === 'trialing'
+              ? [{ value: 'none', label: 'Not billed' }]
+              : [
+                  { value: 'monthly', label: 'Monthly' },
+                  { value: 'annual', label: 'Annual' },
+                ]
+          }
         />
         <TextField
-          label="Paid until / trial ends"
+          label="Period ends (paid until / pilot ends)"
           type="date"
           value={periodEnd}
           onChange={(e) => setPeriodEnd(e.target.value)}
         />
+        <label className="flex items-center gap-2 text-sm font-medium text-navy-900 sm:col-span-2">
+          <input
+            type="checkbox"
+            checked={autoRenew}
+            onChange={(e) => setAutoRenew(e.target.checked)}
+            disabled={status === 'trialing'}
+          />
+          Renews at the end of the period
+        </label>
         <div className="sm:col-span-3">
-          <Button type="submit" variant="secondary" busy={busy === 'subscription'}>
+          <Button
+            type="submit"
+            variant="secondary"
+            busy={busy === 'subscription'}
+            disabled={blocked}
+          >
             Save subscription
           </Button>
         </div>

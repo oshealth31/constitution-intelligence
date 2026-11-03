@@ -324,13 +324,13 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation portals', () => {
 
     it('links search results to their constitution', async () => {
       const response = await a.member.get(orgUrl(a, '/search?q=quorum')).expect(200);
-      expect(response.body.length).toBeGreaterThan(0);
-      for (const match of response.body) {
+      expect(response.body.results.length).toBeGreaterThan(0);
+      for (const match of response.body.results) {
         expect(match.constitutionId).toBe(a.ids.constitutionId);
         expect(match.constitutionTitle).toContain(SAMPLE_BRANDING.choir.displayName);
       }
       const other = await a.member.get(orgUrl(a, '/search?q=kingfisher')).expect(200);
-      expect(other.body).toEqual([]);
+      expect(other.body.results).toEqual([]);
     });
   });
 

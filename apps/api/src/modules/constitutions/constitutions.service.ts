@@ -9,6 +9,7 @@ import {
 import { roleHasPermission } from '@constitution/shared';
 import { and, asc, desc, eq, sql } from 'drizzle-orm';
 import { TenantDatabase, type TenantTransaction } from '../tenancy/tenant-database.service';
+import { computeReferences } from './references';
 import type { TenantScope } from '../tenancy/tenant-scope';
 
 /** Reviewers and editors may see drafts; everyone else sees published versions only. */
@@ -285,10 +286,14 @@ export class ConstitutionsService {
     });
   }
 
+  /**
+   * The sections of a version in reading order, with references ("Clause 7(a)") worked out
+   * from the stored numbers only. Wording is returned exactly as stored.
+   */
   listSections(scope: TenantScope, versionId: string) {
     return this.tenantDb.run(scope, async (tx) => {
       await this.assertVersionVisible(tx, scope, versionId);
-      return tx
+      const rows = await tx
         .select({
           id: sections.id,
           parentSectionId: sections.parentSectionId,
@@ -298,12 +303,19 @@ export class ConstitutionsService {
           heading: sections.heading,
           body: sections.body,
           position: sections.position,
+          sourcePage: sections.sourcePage,
         })
         .from(sections)
         .where(
           and(eq(sections.versionId, versionId), eq(sections.organisationId, scope.organisationId)),
         )
         .orderBy(asc(sections.position));
+      const references = computeReferences(rows);
+      return rows.map((row) => ({
+        ...row,
+        reference: references.get(row.id)?.reference ?? null,
+        referenceLabel: references.get(row.id)?.referenceLabel ?? null,
+      }));
     });
   }
 

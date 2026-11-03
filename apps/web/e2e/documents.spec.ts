@@ -100,7 +100,7 @@ test('upload, check, approve and publish a document; members only see it once pu
   const me = await (await page.request.get('/api/v1/auth/me')).json();
   const organisationId = me.memberships[0].organisationId as string;
   const before = await page.request.get(`/api/v1/organisations/${organisationId}/search?q=pelican`);
-  expect(await before.json()).toEqual([]);
+  expect((await before.json()).results).toEqual([]);
   await signOut(page);
 
   // --- An administrator approves, then makes it current ---------------------------------------

@@ -18,9 +18,14 @@ async function signIn(page: Page) {
   await expect(page.locator('#welcome-heading')).toBeVisible();
 }
 
-test('asks a question and shows the explanation apart from the original source text', async ({ page }) => {
+test('asks a question and shows the explanation apart from the original source text', async ({
+  page,
+}) => {
   await signIn(page);
-  await page.getByRole('navigation', { name: 'Main', exact: true }).getByRole('link', { name: 'Ask' }).click();
+  await page
+    .getByRole('navigation', { name: 'Main', exact: true })
+    .getByRole('link', { name: 'Ask' })
+    .click();
   await expect(page.getByText(/It is not legal advice/).first()).toBeVisible();
   await expect(page.getByText(/Test mode: no AI model is connected/)).toBeVisible();
 
@@ -29,10 +34,14 @@ test('asks a question and shows the explanation apart from the original source t
 
   await expect(page.getByText('Written by AI · check the original text below')).toBeVisible();
   await expect(page.getByTestId('answer-explanation')).toContainText('Clause 7');
-  await expect(page.getByRole('heading', { name: 'Original text from the approved constitution' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Original text from the approved constitution' }),
+  ).toBeVisible();
   const source = page.getByRole('listitem', { name: 'Source: Clause 7' });
   await expect(source).toContainText('Version 1: Registered constitution');
-  await expect(source.locator('mark')).toContainText('The quorum for a general meeting is one third of members');
+  await expect(source.locator('mark')).toContainText(
+    'The quorum for a general meeting is one third of members',
+  );
 
   await page.getByRole('button', { name: 'No' }).click();
   await page.getByLabel(/What was wrong or missing/).fill('I wanted to know about proxies.');
@@ -41,7 +50,9 @@ test('asks a question and shows the explanation apart from the original source t
 
   await source.getByRole('link', { name: 'Open this section in the constitution' }).click();
   await expect(page).toHaveURL(/#section-s2$/);
-  await expect(page.getByRole('note', { name: 'Reference for this section' })).toContainText('Clause 7');
+  await expect(page.getByRole('note', { name: 'Reference for this section' })).toContainText(
+    'Clause 7',
+  );
 });
 
 test('says clearly when the constitution does not answer the question', async ({ page }) => {
@@ -58,7 +69,9 @@ test('says clearly when the constitution does not answer the question', async ({
 test('offers suggested questions taken from the constitution’s own titles', async ({ page }) => {
   await signIn(page);
   await page.goto(`${CHOIR}/ask`);
-  const suggestion = page.getByRole('button', { name: 'What does the constitution say about quorum?' });
+  const suggestion = page.getByRole('button', {
+    name: 'What does the constitution say about quorum?',
+  });
   await expect(suggestion).toBeVisible();
   await suggestion.click();
   await expect(page.getByRole('listitem', { name: 'Source: Clause 7' })).toBeVisible();

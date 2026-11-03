@@ -452,7 +452,10 @@ export interface AnswerResponse {
 }
 
 /** Splits the original text around the quoted words, so the quote can be marked in place. */
-export function locateQuote(text: string, quote: string): { before: string; quote: string; after: string } | null {
+export function locateQuote(
+  text: string,
+  quote: string,
+): { before: string; quote: string; after: string } | null {
   const index = text.indexOf(quote);
   if (index === -1 || quote.length === 0) return null;
   return { before: text.slice(0, index), quote, after: text.slice(index + quote.length) };

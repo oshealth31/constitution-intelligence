@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { sql } from 'drizzle-orm';
-import { computeReferences, parseReferenceQuery, type ReferenceNode } from '../constitutions/references';
+import {
+  computeReferences,
+  parseReferenceQuery,
+  type ReferenceNode,
+} from '../constitutions/references';
 import { TenantDatabase } from '../tenancy/tenant-database.service';
 import type { TenantScope } from '../tenancy/tenant-scope';
 import type { Passage } from './ai-prompt';
@@ -42,7 +46,9 @@ export function questionReferences(question: string) {
     /\b(clause|section|article|rule|paragraph|part|chapter)s?\s+(\d{1,3}(?:\.\d{1,3})*(?:\s*\([a-z]{1,4}\))*|[ivxlc]{1,7}\b|one|two|three|four|five|six|seven|eight|nine|ten)/gi;
   for (const match of question.matchAll(pattern)) {
     const word = match[1]!.toLowerCase();
-    const parsed = parseReferenceQuery(`${word === 'part' || word === 'chapter' ? word : 'clause'} ${match[2]}`);
+    const parsed = parseReferenceQuery(
+      `${word === 'part' || word === 'chapter' ? word : 'clause'} ${match[2]}`,
+    );
     if (parsed) found.push(parsed);
   }
   return found;
@@ -87,7 +93,10 @@ export class AiRetrievalService {
           WHERE v.organisation_id = ${scope.organisationId} AND v.status = 'published'`)
       ).rows as unknown as VersionRow[];
       if (versions.length === 0) return [];
-      const versionIds = sql.join(versions.map((version) => sql`${version.versionId}`), sql`, `);
+      const versionIds = sql.join(
+        versions.map((version) => sql`${version.versionId}`),
+        sql`, `,
+      );
       const sections = (
         await tx.execute(sql`
           SELECT s.id, s.version_id AS "versionId", s.parent_section_id AS "parentSectionId",
@@ -145,7 +154,9 @@ export class AiRetrievalService {
         .slice(0, 5);
       // A clause that only introduces its sub-items ("The objectives are:") needs them too.
       for (const section of [...chosen]) {
-        for (const child of sections.filter((item) => item.parentSectionId === section.id).slice(0, 6)) {
+        for (const child of sections
+          .filter((item) => item.parentSectionId === section.id)
+          .slice(0, 6)) {
           if (!chosen.includes(child)) chosen.push(child);
         }
       }

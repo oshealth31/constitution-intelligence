@@ -14,8 +14,8 @@ server before anyone sees it.
    never used. Clause numbers in the question ("what does clause 7(a) say?") are matched first,
    then keywords. A passage must share at least a third of the question's meaningful words, or a
    title word. A clause that only introduces its sub-items brings those sub-items with it.
-2. **Nothing relevant → no AI call.** The answer is: *"I could not find sufficient information
-   in the approved constitution to answer this question."*
+2. **Nothing relevant → no AI call.** The answer is: _"I could not find sufficient information
+   in the approved constitution to answer this question."_
 3. **Prompt** (`apps/api/src/modules/ai/ai-prompt.ts`): the rules are in the system message. The
    passages and the question are wrapped in markers carrying a **random boundary** for this request
    and are labelled as data. The model must reply in a fixed JSON shape, with a citation (source id
@@ -44,18 +44,18 @@ really are in the document.
 
 ## The AI rules and how each is enforced
 
-| Rule | Enforcement |
-| ---- | ----------- |
-| 1–2. Never invent clauses or clause numbers | Quotes must match stored text; explanations naming unknown references are rejected; references come only from stored numbers. |
-| 3. Cite the exact source | Each citation is a stored section plus an exact quote, linked to the section, version and original page. |
-| 4. Original text separate from AI explanation | Separate panels with labels; the original is always the stored text. |
-| 5. State when evidence is insufficient | No relevant passages, the model says so, or the checks fail → the fixed message. |
-| 6–7. No legal advice, no binding decisions | System instructions, plus a disclaimer on every answer. |
-| 8. Only approved constitutions | Retrieval reads published versions only (tested). |
-| 9. No other tenant's documents | Retrieval runs under Row-Level Security and filters by organisation (tested). |
-| 10–11. Uploaded content is data; prompt-injection defence | Random boundaries, data-not-instructions rules, fixed JSON output, server-side checks, canary leak detection. No tools, browsing or follow-up actions are given to the model. |
-| 12. Keys server-side | `ANTHROPIC_API_KEY` is read by the API only and sent only in the request header to Anthropic. The browser talks only to our API. Never logged (log redaction) and never put in prompts (tested). |
-| 13. Usage and errors without sensitive content | See below. |
+| Rule                                                      | Enforcement                                                                                                                                                                                      |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1–2. Never invent clauses or clause numbers               | Quotes must match stored text; explanations naming unknown references are rejected; references come only from stored numbers.                                                                    |
+| 3. Cite the exact source                                  | Each citation is a stored section plus an exact quote, linked to the section, version and original page.                                                                                         |
+| 4. Original text separate from AI explanation             | Separate panels with labels; the original is always the stored text.                                                                                                                             |
+| 5. State when evidence is insufficient                    | No relevant passages, the model says so, or the checks fail → the fixed message.                                                                                                                 |
+| 6–7. No legal advice, no binding decisions                | System instructions, plus a disclaimer on every answer.                                                                                                                                          |
+| 8. Only approved constitutions                            | Retrieval reads published versions only (tested).                                                                                                                                                |
+| 9. No other tenant's documents                            | Retrieval runs under Row-Level Security and filters by organisation (tested).                                                                                                                    |
+| 10–11. Uploaded content is data; prompt-injection defence | Random boundaries, data-not-instructions rules, fixed JSON output, server-side checks, canary leak detection. No tools, browsing or follow-up actions are given to the model.                    |
+| 12. Keys server-side                                      | `ANTHROPIC_API_KEY` is read by the API only and sent only in the request header to Anthropic. The browser talks only to our API. Never logged (log redaction) and never put in prompts (tested). |
+| 13. Usage and errors without sensitive content            | See below.                                                                                                                                                                                       |
 
 ## Privacy: what is stored
 
@@ -73,11 +73,11 @@ really are in the document.
 
 ## Providers and configuration
 
-| `AI_PROVIDER` | What happens |
-| ------------- | ------------ |
-| `disabled` (default) | Ask shows "not available right now" and suggests Search. |
-| `anthropic` | Anthropic's Claude (`AI_MODEL`, default `claude-sonnet-5-5`) with temperature 0. Needs `ANTHROPIC_API_KEY`. |
-| `offline` | **Local development and tests only** (refused in staging and production). No AI model: it quotes the best-matching passage and says it is in test mode. |
+| `AI_PROVIDER`        | What happens                                                                                                                                            |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `disabled` (default) | Ask shows "not available right now" and suggests Search.                                                                                                |
+| `anthropic`          | Anthropic's Claude (`AI_MODEL`, default `claude-sonnet-5-5`) with temperature 0. Needs `ANTHROPIC_API_KEY`.                                             |
+| `offline`            | **Local development and tests only** (refused in staging and production). No AI model: it quotes the best-matching passage and says it is in test mode. |
 
 To switch on real answers: set `AI_PROVIDER=anthropic` and `ANTHROPIC_API_KEY=<your key>` in the
 API's secret settings (never in the web app). Anthropic's own data-handling terms apply to the
@@ -85,13 +85,13 @@ passages and questions sent to it.
 
 ## API
 
-| Method & path (under `/api/v1/organisations/:id/ai`) | Notes |
-| ---------------------------------------------------- | ----- |
-| `GET /status` | Whether answers are available, the mode, the disclaimer |
-| `POST /ask` `{ question }` (3–500 characters) | Returns `status` (`answered` / `insufficient` / `unavailable`), `explanation`, `message`, `citations[]` (reference, quote, sourceText, version …), `disclaimer` |
-| `GET /suggested-questions` | Built from current titles |
-| `POST /messages/:messageId/feedback` `{ helpful, comment? }` | Own answers only |
-| `GET /conversations`, `GET /conversations/:id` | Own conversations only |
+| Method & path (under `/api/v1/organisations/:id/ai`)         | Notes                                                                                                                                                           |
+| ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /status`                                                | Whether answers are available, the mode, the disclaimer                                                                                                         |
+| `POST /ask` `{ question }` (3–500 characters)                | Returns `status` (`answered` / `insufficient` / `unavailable`), `explanation`, `message`, `citations[]` (reference, quote, sourceText, version …), `disclaimer` |
+| `GET /suggested-questions`                                   | Built from current titles                                                                                                                                       |
+| `POST /messages/:messageId/feedback` `{ helpful, comment? }` | Own answers only                                                                                                                                                |
+| `GET /conversations`, `GET /conversations/:id`               | Own conversations only                                                                                                                                          |
 
 All require `constitution.read`, which every role has.
 

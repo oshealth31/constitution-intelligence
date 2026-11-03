@@ -139,7 +139,10 @@ export class AiService {
           status = 'unavailable';
           reasons = ['provider_error'];
           this.logger.warn(
-            { provider: this.provider.name, reason: error instanceof AiUnavailableError ? error.reason : 'unexpected' },
+            {
+              provider: this.provider.name,
+              reason: error instanceof AiUnavailableError ? error.reason : 'unexpected',
+            },
             'AI provider call failed',
           );
         }
@@ -147,7 +150,11 @@ export class AiService {
     }
 
     const message =
-      status === 'insufficient' ? UNSUPPORTED_MESSAGE : status === 'unavailable' ? UNAVAILABLE_MESSAGE : null;
+      status === 'insufficient'
+        ? UNSUPPORTED_MESSAGE
+        : status === 'unavailable'
+          ? UNAVAILABLE_MESSAGE
+          : null;
     const stored = await this.tenantDb.run(scope, async (tx) => {
       const [conversation] = await tx
         .insert(aiConversations)
@@ -175,22 +182,40 @@ export class AiService {
         })
         .returning({ id: aiMessages.id });
       if (citations.length > 0) {
-        await tx.insert(aiCitations).values(
-          citations.map((citation, position) => ({
-            organisationId: scope.organisationId,
-            messageId: answer!.id,
-            sectionId: citation.passage.sectionId,
-            quote: citation.quote.slice(0, 2000),
-            position,
-          })),
-        ).onConflictDoNothing();
+        await tx
+          .insert(aiCitations)
+          .values(
+            citations.map((citation, position) => ({
+              organisationId: scope.organisationId,
+              messageId: answer!.id,
+              sectionId: citation.passage.sectionId,
+              quote: citation.quote.slice(0, 2000),
+              position,
+            })),
+          )
+          .onConflictDoNothing();
       }
       await tx.insert(usageRecords).values([
-        { organisationId: scope.organisationId, metric: 'ai.questions', quantity: 1, userId: scope.userId },
+        {
+          organisationId: scope.organisationId,
+          metric: 'ai.questions',
+          quantity: 1,
+          userId: scope.userId,
+        },
         ...(tokens.input + tokens.output > 0
           ? [
-              { organisationId: scope.organisationId, metric: 'ai.tokens_in', quantity: tokens.input, userId: scope.userId },
-              { organisationId: scope.organisationId, metric: 'ai.tokens_out', quantity: tokens.output, userId: scope.userId },
+              {
+                organisationId: scope.organisationId,
+                metric: 'ai.tokens_in',
+                quantity: tokens.input,
+                userId: scope.userId,
+              },
+              {
+                organisationId: scope.organisationId,
+                metric: 'ai.tokens_out',
+                quantity: tokens.output,
+                userId: scope.userId,
+              },
             ]
           : []),
       ]);
@@ -245,7 +270,8 @@ export class AiService {
           ORDER BY v.published_at DESC, s.position ASC
           LIMIT 200`)
       ).rows as { heading: string }[];
-      const preferred = /quorum|member|meeting|vot|fee|elect|amend|financ|committee|officer|dissol|disciplin|term/i;
+      const preferred =
+        /quorum|member|meeting|vot|fee|elect|amend|financ|committee|officer|dissol|disciplin|term/i;
       const headings = [...new Set(rows.map((row) => row.heading.trim()))].filter(
         (heading) => !/^(name|definitions?|interpretation|preamble)$/i.test(heading),
       );
@@ -253,7 +279,9 @@ export class AiService {
         ...headings.filter((heading) => preferred.test(heading)),
         ...headings.filter((heading) => !preferred.test(heading)),
       ];
-      return ordered.slice(0, 6).map((heading) => `What does the constitution say about ${heading.toLowerCase()}?`);
+      return ordered
+        .slice(0, 6)
+        .map((heading) => `What does the constitution say about ${heading.toLowerCase()}?`);
     });
   }
 
@@ -288,7 +316,13 @@ export class AiService {
       if (!own) throw new NotFoundException('Answer not found.');
       await tx
         .insert(aiFeedback)
-        .values({ organisationId: scope.organisationId, messageId, userId: scope.userId, helpful, comment })
+        .values({
+          organisationId: scope.organisationId,
+          messageId,
+          userId: scope.userId,
+          helpful,
+          comment,
+        })
         .onConflictDoUpdate({
           target: [aiFeedback.messageId, aiFeedback.userId],
           set: { helpful, comment, createdAt: new Date() },

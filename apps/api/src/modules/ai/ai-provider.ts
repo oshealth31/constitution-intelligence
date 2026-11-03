@@ -52,7 +52,11 @@ export class AnthropicProvider implements AiProvider {
     private readonly fetchImpl: typeof fetch = fetch,
   ) {}
 
-  async complete(request: { system: string; user: string; maxTokens: number }): Promise<AiCompletion> {
+  async complete(request: {
+    system: string;
+    user: string;
+    maxTokens: number;
+  }): Promise<AiCompletion> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.timeoutMs);
     try {
@@ -120,7 +124,11 @@ export class OfflineProvider implements AiProvider {
     const match = sources[0];
     const label = match?.[2] ?? 'the passage';
     if (!match) {
-      return Promise.resolve({ text: JSON.stringify({ status: 'insufficient' }), inputTokens: 0, outputTokens: 0 });
+      return Promise.resolve({
+        text: JSON.stringify({ status: 'insufficient' }),
+        inputTokens: 0,
+        outputTokens: 0,
+      });
     }
     const text = match[3]!.trim();
     const sentence = (/^[\s\S]{8,300}?[.;:](?=\s|$)/.exec(text)?.[0] ?? text.slice(0, 300)).trim();
@@ -139,7 +147,11 @@ export class OfflineProvider implements AiProvider {
 export function createAiProvider(config: AppConfig): AiProvider {
   switch (config.AI_PROVIDER) {
     case 'anthropic':
-      return new AnthropicProvider(config.ANTHROPIC_API_KEY!, config.AI_MODEL, config.AI_TIMEOUT_MS);
+      return new AnthropicProvider(
+        config.ANTHROPIC_API_KEY!,
+        config.AI_MODEL,
+        config.AI_TIMEOUT_MS,
+      );
     case 'offline':
       return new OfflineProvider();
     default:

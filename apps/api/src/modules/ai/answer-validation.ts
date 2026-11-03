@@ -77,7 +77,9 @@ export function mentionedReferences(text: string): string[] {
   const found: string[] = [];
   for (const match of text.matchAll(REFERENCE_MENTION)) {
     const word = match[1]!.toLowerCase().replace(/s$/, '');
-    const parsed = parseReferenceQuery(`${word === 'part' || word === 'chapter' ? word : 'clause'} ${match[2]}`);
+    const parsed = parseReferenceQuery(
+      `${word === 'part' || word === 'chapter' ? word : 'clause'} ${match[2]}`,
+    );
     if (parsed) found.push(parsed.display);
   }
   return found;
@@ -132,14 +134,18 @@ export function validateAnswer(
       continue;
     }
     // Quote marks the model put around the quote are not part of it.
-    const quote = citation.quote.trim().replace(/^["'\u201C\u201D\u2018\u2019]+|["'\u201C\u201D\u2018\u2019]+$/g, '').trim();
+    const quote = citation.quote
+      .trim()
+      .replace(/^["'\u201C\u201D\u2018\u2019]+|["'\u201C\u201D\u2018\u2019]+$/g, '')
+      .trim();
     const source = normaliseForComparison(`${passage.heading ?? ''}\n${passage.body}`);
     if (quote.length < 3 || !source.includes(normaliseForComparison(quote))) {
       reasons.push('quote_not_in_source');
       continue;
     }
     // Keep the passage's own wording for the quote (never the model's version of it).
-    const exact = exactSlice(passage.body, quote) ?? exactSlice(passage.heading ?? '', quote) ?? quote;
+    const exact =
+      exactSlice(passage.body, quote) ?? exactSlice(passage.heading ?? '', quote) ?? quote;
     if (!citations.some((item) => item.passage.id === passage.id && item.quote === exact)) {
       citations.push({ passage, quote: exact });
     }

@@ -68,7 +68,13 @@ export class AiController {
     @Req() request: AppRequest,
   ): Promise<void> {
     const { helpful, comment } = parseInput(feedbackSchema, body);
-    await this.ai.giveFeedback(tenant, parseId(messageId, 'Answer'), helpful, comment ?? null, requestMeta(request));
+    await this.ai.giveFeedback(
+      tenant,
+      parseId(messageId, 'Answer'),
+      helpful,
+      comment ?? null,
+      requestMeta(request),
+    );
   }
 
   /**

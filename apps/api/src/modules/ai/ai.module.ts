@@ -15,7 +15,11 @@ import { AiService } from './ai.service';
   providers: [
     AiService,
     AiRetrievalService,
-    { provide: AI_PROVIDER, useFactory: (config: AppConfig) => createAiProvider(config), inject: [APP_CONFIG] },
+    {
+      provide: AI_PROVIDER,
+      useFactory: (config: AppConfig) => createAiProvider(config),
+      inject: [APP_CONFIG],
+    },
   ],
 })
 export class AiModule {}

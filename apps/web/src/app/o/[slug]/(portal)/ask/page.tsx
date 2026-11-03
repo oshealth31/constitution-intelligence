@@ -45,7 +45,12 @@ export default function AskPage() {
     setError(null);
     setAnswer(null);
     try {
-      setAnswer(await apiFetch<AnswerResponse>(`${api}/ai/ask`, { method: 'POST', body: { question: trimmed } }));
+      setAnswer(
+        await apiFetch<AnswerResponse>(`${api}/ai/ask`, {
+          method: 'POST',
+          body: { question: trimmed },
+        }),
+      );
     } catch (caught) {
       setError(describeError(caught));
     } finally {
@@ -74,7 +79,10 @@ export default function AskPage() {
       {status.data && !status.data.available && (
         <Notice tone="warning">
           Questions are not available right now. You can still{' '}
-          <Link href={portalPath(slug, '/search')} className="font-medium underline underline-offset-4">
+          <Link
+            href={portalPath(slug, '/search')}
+            className="font-medium underline underline-offset-4"
+          >
             search the constitution
           </Link>
           .
@@ -99,7 +107,11 @@ export default function AskPage() {
           placeholder="For example: How many members must be present at a general meeting?"
           className="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-lg shadow-sm focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[var(--brand-accent)] focus:outline-none"
         />
-        <PortalButton type="submit" busy={busy} disabled={question.trim().length < 3 || status.data?.available === false}>
+        <PortalButton
+          type="submit"
+          busy={busy}
+          disabled={question.trim().length < 3 || status.data?.available === false}
+        >
           <ChatIcon className="size-5" />
           {busy ? 'Looking in the constitution…' : 'Ask'}
         </PortalButton>
@@ -144,7 +156,10 @@ function AnswerView({ answer, slug, api }: { answer: AnswerResponse; slug: strin
           <ul className="mt-3 list-disc space-y-1 pl-5 text-base text-slate-700">
             <li>Try asking in a different way, or about one topic at a time.</li>
             <li>
-              <Link href={portalPath(slug, '/search')} className="font-medium text-[var(--brand-ink)] underline underline-offset-4">
+              <Link
+                href={portalPath(slug, '/search')}
+                className="font-medium text-[var(--brand-ink)] underline underline-offset-4"
+              >
                 Search the constitution
               </Link>{' '}
               for a word or clause number.
@@ -173,7 +188,11 @@ function AnswerView({ answer, slug, api }: { answer: AnswerResponse; slug: strin
         </h2>
         <ol className="space-y-3">
           {answer.citations.map((citation) => (
-            <SourceCard key={`${citation.sectionId}-${citation.quote}`} citation={citation} slug={slug} />
+            <SourceCard
+              key={`${citation.sectionId}-${citation.quote}`}
+              citation={citation}
+              slug={slug}
+            />
           ))}
         </ol>
       </section>
@@ -189,7 +208,10 @@ function SourceCard({ citation, slug }: { citation: AnswerCitation; slug: string
       : sectionTitle(citation);
   const parts = locateQuote(citation.sourceText, citation.quote);
   return (
-    <li className="rounded-2xl border border-slate-200 bg-white p-5" aria-label={`Source: ${citation.referenceLabel ?? title}`}>
+    <li
+      className="rounded-2xl border border-slate-200 bg-white p-5"
+      aria-label={`Source: ${citation.referenceLabel ?? title}`}
+    >
       <p className="text-sm text-slate-500">
         {citation.constitutionTitle} · Version {citation.versionNumber}: {citation.versionLabel}
         {citation.publishedAt ? ` (published ${formatDate(citation.publishedAt)})` : ''}
@@ -208,7 +230,9 @@ function SourceCard({ citation, slug }: { citation: AnswerCitation; slug: string
         {parts ? (
           <>
             {parts.before}
-            <mark className="rounded bg-[var(--brand-accent)] px-0.5 text-[var(--brand-on-accent)]">{parts.quote}</mark>
+            <mark className="rounded bg-[var(--brand-accent)] px-0.5 text-[var(--brand-on-accent)]">
+              {parts.quote}
+            </mark>
             {parts.after}
           </>
         ) : (
@@ -216,10 +240,15 @@ function SourceCard({ citation, slug }: { citation: AnswerCitation; slug: string
         )}
       </blockquote>
       {citation.sourcePage && (
-        <p className="mt-1 text-sm text-slate-500">Page {citation.sourcePage} of the original document</p>
+        <p className="mt-1 text-sm text-slate-500">
+          Page {citation.sourcePage} of the original document
+        </p>
       )}
       <Link
-        href={portalPath(slug, `/read/${citation.constitutionId}?version=${citation.versionId}#${sectionAnchor(citation.refKey)}`)}
+        href={portalPath(
+          slug,
+          `/read/${citation.constitutionId}?version=${citation.versionId}#${sectionAnchor(citation.refKey)}`,
+        )}
         className="mt-2 inline-flex min-h-11 items-center font-medium text-[var(--brand-ink)] underline underline-offset-4"
       >
         Open this section in the constitution
@@ -256,10 +285,18 @@ function Feedback({ api, messageId }: { api: string; messageId: string }) {
         <>
           <p className="text-base font-medium text-slate-900">Was this helpful?</p>
           <div className="mt-2 flex gap-2">
-            <PortalButton variant={helpful === true ? 'primary' : 'secondary'} className="min-h-11 py-2" onClick={() => void send(true)}>
+            <PortalButton
+              variant={helpful === true ? 'primary' : 'secondary'}
+              className="min-h-11 py-2"
+              onClick={() => void send(true)}
+            >
               Yes
             </PortalButton>
-            <PortalButton variant={helpful === false ? 'primary' : 'secondary'} className="min-h-11 py-2" onClick={() => void send(false)}>
+            <PortalButton
+              variant={helpful === false ? 'primary' : 'secondary'}
+              className="min-h-11 py-2"
+              onClick={() => void send(false)}
+            >
               No
             </PortalButton>
           </div>

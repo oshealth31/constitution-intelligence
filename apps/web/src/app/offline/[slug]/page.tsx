@@ -28,7 +28,7 @@ type Update =
   | { kind: 'removed'; reason: string }
   | { kind: 'failed'; message: string };
 
-const anchor = (section: OfflineSection) => `offline-${section.refKey}`;
+const anchor = (section: { refKey: string }) => `offline-${section.refKey}`;
 
 /**
  * The offline reader: the approved constitution saved on this device, readable and searchable
@@ -340,7 +340,7 @@ export default function OfflineReaderPage() {
                           type="button"
                           onClick={() =>
                             document
-                              .getElementById(anchor(node as OfflineSection))
+                              .getElementById(anchor(node))
                               ?.scrollIntoView({ block: 'start' })
                           }
                           className="min-h-11 text-left text-base font-medium text-[var(--brand-ink)] underline-offset-4 hover:underline"
@@ -357,7 +357,7 @@ export default function OfflineReaderPage() {
                                     type="button"
                                     onClick={() =>
                                       document
-                                        .getElementById(anchor(child as OfflineSection))
+                                        .getElementById(anchor(child))
                                         ?.scrollIntoView({ block: 'start' })
                                     }
                                     className="min-h-11 text-left text-base text-[var(--brand-ink)] underline-offset-4 hover:underline"

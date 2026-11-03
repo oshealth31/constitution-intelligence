@@ -125,8 +125,8 @@ export class BillingService {
       const [invoice] = await tx
         .select()
         .from(invoices)
-        .where(and(eq(invoices.id, invoiceId), eq(invoices.organisationId, scope.organisationId)))
-        .for('update');
+        // No row lock: the organisation's database role may read invoices but never change them.
+        .where(and(eq(invoices.id, invoiceId), eq(invoices.organisationId, scope.organisationId)));
       if (!invoice) throw new NotFoundException('Invoice not found.');
       if (invoice.status !== 'open') {
         throw new ConflictException(`This invoice is ${invoice.status}; nothing is due on it.`);

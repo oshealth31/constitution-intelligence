@@ -425,10 +425,12 @@ export class PlatformBillingService {
     const current = await this.requireSubscription(organisationId);
     if (current.status === 'cancelled') throw new ConflictException('Already cancelled.');
     const now = new Date();
-    const end =
-      when === 'now'
-        ? new Date(Math.max(now.getTime(), current.currentPeriodStart.getTime() + 1000))
-        : current.currentPeriodEnd;
+    // "Now" ends the period this moment (the start is moved back if it was only just set).
+    const start =
+      when === 'now' && current.currentPeriodStart.getTime() >= now.getTime()
+        ? new Date(now.getTime() - 1000)
+        : current.currentPeriodStart;
+    const end = when === 'now' ? now : current.currentPeriodEnd;
     await this.db.transaction(async (tx) => {
       await tx
         .update(subscriptions)
@@ -437,6 +439,7 @@ export class PlatformBillingService {
           cancelledAt: now,
           cancellationReason: reason,
           autoRenew: false,
+          currentPeriodStart: start,
           currentPeriodEnd: end,
           updatedAt: now,
         })

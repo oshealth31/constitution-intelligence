@@ -652,10 +652,11 @@ function SectionItem({
         </>
       )}
       {editable && mode === 'view' && (
-        <div className="mt-3 flex flex-wrap gap-2">
+        // Phones: a tidy two-column grid of equal buttons. Wider screens: one row.
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
           {section.needsReview && (
             <PortalButton
-              className="min-h-10 py-2 text-sm"
+              className="col-span-2 min-h-11 px-3 py-2 text-sm"
               busy={busy === `resolve-${section.id}`}
               onClick={() => void onResolve()}
             >
@@ -664,21 +665,21 @@ function SectionItem({
           )}
           <PortalButton
             variant="secondary"
-            className="min-h-10 py-2 text-sm"
+            className="min-h-11 px-3 py-2 text-sm"
             onClick={() => setMode('edit')}
           >
             Edit
           </PortalButton>
           <PortalButton
-            variant="quiet"
-            className="min-h-10 py-2 text-sm"
+            variant="secondary"
+            className="min-h-11 px-3 py-2 text-sm"
             onClick={() => setMode('add')}
           >
-            Add section after
+            Add after
           </PortalButton>
           <PortalButton
-            variant="quiet"
-            className="min-h-10 py-2 text-sm"
+            variant="secondary"
+            className="col-span-2 min-h-11 px-3 py-2 text-sm sm:col-span-1"
             onClick={() => setMode('remove')}
           >
             Remove

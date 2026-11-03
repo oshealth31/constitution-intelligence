@@ -4,6 +4,7 @@ import {
   canManage,
   documentProblem,
   eventLabel,
+  extractionLabel,
   workflowStep,
   contentsEntries,
   portalPath,
@@ -105,5 +106,7 @@ describe('document management helpers', () => {
     expect(workflowStep('published')).toBe(3);
     expect(workflowStep('archived')).toBe(-1);
     expect(eventLabel('changes_requested')).toBe('Sent back for changes');
+    expect(extractionLabel('not_started')).toBe('No file uploaded');
+    expect(extractionLabel('needs_review')).toBe('Needs checking');
   });
 });

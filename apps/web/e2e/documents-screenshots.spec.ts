@@ -13,7 +13,9 @@ const accounts = JSON.parse(
 const CHOIR = '/o/sample-community-choir';
 
 async function signIn(page: Page, email: string) {
-  await page.request.post('/api/v1/auth/logout', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+  await page.request.post('/api/v1/auth/logout', {
+    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+  });
   await page.goto(`${CHOIR}/sign-in`);
   await page.getByLabel('Email address').fill(email);
   await page.getByLabel('Password').fill(accounts[email] ?? '');
@@ -53,12 +55,16 @@ test.describe('desktop', () => {
     await page.getByRole('button', { name: 'Add document' }).click();
     const form = page.getByRole('form', { name: 'Upload a new version of Standing orders' });
     await expect(form).toBeVisible();
-    await form.getByLabel('Document file').setInputFiles({ name: 'agm-notes.txt', mimeType: 'text/plain', buffer: Buffer.from('x') });
+    await form
+      .getByLabel('Document file')
+      .setInputFiles({ name: 'agm-notes.txt', mimeType: 'text/plain', buffer: Buffer.from('x') });
     await form.getByRole('button', { name: 'Upload' }).click();
     await expect(form.getByText(/Please choose a PDF/)).toBeVisible();
     await shot(page, 'desktop-01-documents-list');
 
-    await form.getByLabel('Document file').setInputFiles({ name: 'standing-orders.pdf', mimeType: 'application/pdf', buffer: pdf });
+    await form
+      .getByLabel('Document file')
+      .setInputFiles({ name: 'standing-orders.pdf', mimeType: 'application/pdf', buffer: pdf });
     await form.getByLabel('Name for this version (optional)').fill('Adopted 2026');
     await form.getByRole('button', { name: 'Upload' }).click();
     await expect(page.getByRole('heading', { name: /Version 1: Adopted 2026/ })).toBeVisible();
@@ -98,7 +104,12 @@ test.describe('desktop', () => {
 });
 
 test.describe('phone (Android size)', () => {
-  test.use({ viewport: { width: 412, height: 915 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+  test.use({
+    viewport: { width: 412, height: 915 },
+    isMobile: true,
+    hasTouch: true,
+    deviceScaleFactor: 2,
+  });
 
   test('capture', async ({ page }) => {
     await signIn(page, 'reviewer@sample.test');
@@ -106,11 +117,16 @@ test.describe('phone (Android size)', () => {
     await page.getByLabel('Document title').fill('Code of conduct');
     await page.getByRole('button', { name: 'Add document' }).click();
     const form = page.getByRole('form', { name: 'Upload a new version of Code of conduct' });
-    await form.getByLabel('Document file').setInputFiles({ name: 'code.pdf', mimeType: 'application/pdf', buffer: pdf });
+    await form
+      .getByLabel('Document file')
+      .setInputFiles({ name: 'code.pdf', mimeType: 'application/pdf', buffer: pdf });
     await form.getByRole('button', { name: 'Upload' }).click();
     await expect(page.getByRole('heading', { name: /Version 1/ })).toBeVisible();
     await shot(page, 'phone-01-review-top', false);
-    await page.getByText(/Check this:/).first().scrollIntoViewIfNeeded();
+    await page
+      .getByText(/Check this:/)
+      .first()
+      .scrollIntoViewIfNeeded();
     await shot(page, 'phone-02-flagged-section', false);
   });
 });

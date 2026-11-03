@@ -21,6 +21,7 @@ import type { AppConfig } from '../../config/config';
 import { APP_CONFIG } from '../../config/config.module';
 import { AuditService } from '../audit/audit.service';
 import { carryOverAnswers } from '../answers/approved-answers.service';
+import { carryOverSimpleWords } from '../answers/simple-words.service';
 import { canSeeUnpublished } from '../constitutions/constitutions.service';
 import { StorageService, tenantPrefix } from '../files/storage.service';
 import { TenantDatabase, type TenantTransaction } from '../tenancy/tenant-database.service';
@@ -546,12 +547,21 @@ export class DocumentsService {
         previous.map((row) => row.id),
         versionId,
       );
-      return { ids: previous.map((row) => row.id), answers };
+      // Simple words: copied to the new clauses; changed wording means "needs review".
+      const simpleWords = await carryOverSimpleWords(
+        tx,
+        scope.organisationId,
+        previous.map((row) => row.id),
+        versionId,
+      );
+      return { ids: previous.map((row) => row.id), answers, simpleWords };
     });
     await this.record(scope, 'version.published', 'version', versionId, meta, {
       replaced: replaced.ids.length > 0 ? replaced.ids : null,
       answersCarriedOver: replaced.answers.carried,
       answersNeedingReview: replaced.answers.needsReview,
+      simpleWordsCarriedOver: replaced.simpleWords.carried,
+      simpleWordsNeedingReview: replaced.simpleWords.needsReview,
     });
     return this.getVersion(scope, versionId);
   }

@@ -62,6 +62,11 @@ export type AuditAction =
   | 'answer.retired'
   | 'answer.restored'
   | 'answer.deleted'
+  | 'simple_words.saved'
+  | 'simple_words.imported'
+  | 'simple_words.approved'
+  | 'simple_words.withdrawn'
+  | 'simple_words.deleted'
   | 'subscription.updated'
   | 'support.content_accessed'
   | 'permission.denied';

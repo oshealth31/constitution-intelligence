@@ -14,6 +14,7 @@ import {
   citation,
   locateQuote,
   parseAnswerImport,
+  parseSimpleImport,
   splitClauseReferences,
   type Section,
 } from './portal';
@@ -191,6 +192,29 @@ describe('approved answer import files', () => {
     });
     expect(parseAnswerImport('[{"question":"Q?","answer":"A"}]')).toEqual({
       error: expect.stringContaining('at least one clause'),
+    });
+  });
+});
+
+describe('simple words import files', () => {
+  it('reads items with clause numbers as text or numbers', () => {
+    expect(
+      parseSimpleImport(
+        '{"items":[{"clause":7,"text":"Plain words.","draftedBy":"ai"},{"clause":" 7(a) ","text":"More."}]}',
+      ),
+    ).toEqual({
+      rows: [
+        { clause: '7', text: 'Plain words.', draftedBy: 'ai' },
+        { clause: '7(a)', text: 'More.' },
+      ],
+    });
+  });
+
+  it('explains what is wrong with a bad file', () => {
+    expect(parseSimpleImport('{')).toEqual({ error: expect.stringContaining('not valid JSON') });
+    expect(parseSimpleImport('[]')).toEqual({ error: 'The file has no items.' });
+    expect(parseSimpleImport('[{"text":"x"}]')).toEqual({
+      error: 'Item 1 needs a "clause" and a "text".',
     });
   });
 });

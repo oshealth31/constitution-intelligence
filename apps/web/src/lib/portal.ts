@@ -633,3 +633,89 @@ export function parseAnswerImport(text: string): { rows: AnswerImportRow[] } | {
   }
   return { rows };
 }
+
+// ----- Simple words -----------------------------------------------------------------------------
+
+export type SimpleStatus = 'draft' | 'approved' | 'needs_review';
+
+export interface ManagedSimple {
+  id: string;
+  text: string;
+  status: SimpleStatus;
+  source: 'manual' | 'import' | 'ai';
+  reviewReason: string | null;
+  createdBy: string | null;
+  updatedBy: string | null;
+  approvedBy: string | null;
+  approvedAt: string | null;
+  updatedAt: string;
+  issues: AnswerIssue[];
+  readyToApprove: boolean;
+}
+
+export interface SimpleOverview {
+  constitutions: {
+    constitutionId: string;
+    title: string;
+    versionId: string;
+    versionNumber: number;
+    versionLabel: string;
+    clauses: { clause: LinkedClause; simple: ManagedSimple | null }[];
+  }[];
+}
+
+export interface SimpleWordsForVersion {
+  disclaimer: string;
+  items: { sectionId: string; text: string; approvedAt: string | null }[];
+}
+
+export const SIMPLE_STATUS: Record<
+  SimpleStatus,
+  { label: string; tone: 'good' | 'warning' | 'info' }
+> = {
+  draft: { label: 'Draft', tone: 'info' },
+  approved: { label: 'Approved', tone: 'good' },
+  needs_review: { label: 'Needs review', tone: 'warning' },
+};
+
+export interface SimpleImportRow {
+  clause: string;
+  text: string;
+  draftedBy?: 'ai' | 'person';
+}
+
+/** Reads a simple-words import file: `{ "items": [ { "clause": "7", "text": "..." } ] }` or a list. */
+export function parseSimpleImport(text: string): { rows: SimpleImportRow[] } | { error: string } {
+  let data: unknown;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    return { error: 'The file is not valid JSON. See the example format below.' };
+  }
+  const list = Array.isArray(data)
+    ? data
+    : data && typeof data === 'object' && Array.isArray((data as { items?: unknown }).items)
+      ? (data as { items: unknown[] }).items
+      : null;
+  if (!list) return { error: 'The file must contain a list of items.' };
+  if (list.length === 0) return { error: 'The file has no items.' };
+  const rows: SimpleImportRow[] = [];
+  for (const [index, item] of list.entries()) {
+    const record = (item ?? {}) as Record<string, unknown>;
+    const clause =
+      typeof record.clause === 'string' || typeof record.clause === 'number'
+        ? String(record.clause).trim()
+        : '';
+    if (clause === '' || typeof record.text !== 'string') {
+      return { error: `Item ${index + 1} needs a "clause" and a "text".` };
+    }
+    rows.push({
+      clause,
+      text: record.text,
+      ...(record.draftedBy === 'ai' || record.draftedBy === 'person'
+        ? { draftedBy: record.draftedBy }
+        : {}),
+    });
+  }
+  return { rows };
+}

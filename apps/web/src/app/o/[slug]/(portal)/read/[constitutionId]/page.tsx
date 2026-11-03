@@ -26,12 +26,14 @@ import {
   type ConstitutionDetail,
   type Section,
   type SectionNode,
+  type SimpleWordsForVersion,
 } from '@/lib/portal';
 import { useApi } from '@/lib/use-api';
 import { usePortal } from '../../portal-context';
 
 const TEXT_SIZES = ['text-base', 'text-lg', 'text-xl', 'text-2xl'] as const;
 const SIZE_KEY = 'ci-reading-text-size';
+const SIMPLE_KEY = 'ci-reading-simple-words';
 
 export default function ReadPage() {
   return (
@@ -62,6 +64,15 @@ function Reader() {
     versions[0];
   const sections = useApi<Section[]>(version ? `${api}/versions/${version.id}/sections` : null);
   const tree = useMemo(() => buildSectionTree(sections.data ?? []), [sections.data]);
+  // Approved simple words exist only for the current published version.
+  const simpleWords = useApi<SimpleWordsForVersion>(
+    version?.status === 'published' ? `${api}/simple-words?versionId=${version.id}` : null,
+  );
+  const simpleText = useMemo(
+    () => new Map((simpleWords.data?.items ?? []).map((item) => [item.sectionId, item.text])),
+    [simpleWords.data],
+  );
+  const [showSimple, setShowSimple] = useState(false);
   const contents = useMemo(() => contentsEntries(tree), [tree]);
 
   const [size, setSize] = useState(1);
@@ -81,6 +92,24 @@ function Reader() {
       // Storage can be unavailable (private browsing); the default size is fine.
     }
   }, []);
+
+  useEffect(() => {
+    try {
+      if (window.localStorage.getItem(SIMPLE_KEY) === '1') setShowSimple(true);
+    } catch {
+      // Storage can be unavailable; simple words start hidden.
+    }
+  }, []);
+
+  function toggleSimple() {
+    const next = !showSimple;
+    setShowSimple(next);
+    try {
+      window.localStorage.setItem(SIMPLE_KEY, next ? '1' : '0');
+    } catch {
+      // Not saved; it still applies now.
+    }
+  }
 
   function changeSize(next: number) {
     const clamped = Math.max(0, Math.min(TEXT_SIZES.length - 1, next));
@@ -293,6 +322,16 @@ function Reader() {
               <ListIcon className="size-5" />
               Contents
             </PortalButton>
+            {simpleText.size > 0 && (
+              <PortalButton
+                variant={showSimple ? 'primary' : 'secondary'}
+                className="px-3"
+                aria-pressed={showSimple}
+                onClick={toggleSimple}
+              >
+                Simple words
+              </PortalButton>
+            )}
             <span className="hidden text-base font-medium text-slate-700 lg:inline">Text size</span>
             <div className="ml-auto flex items-center gap-2 lg:ml-2">
               <PortalButton
@@ -386,12 +425,22 @@ function Reader() {
             className={`min-w-0 rounded-2xl border border-slate-200 bg-white p-5 leading-relaxed text-slate-900 sm:p-8 ${TEXT_SIZES[size]}`}
           >
             {tree.length === 0 && <p>This version has no sections yet.</p>}
+            {showSimple && simpleText.size > 0 && (
+              <p
+                role="note"
+                className="mb-6 rounded-xl bg-amber-50 px-4 py-3 text-base text-amber-950 ring-1 ring-amber-200 ring-inset"
+              >
+                <strong>Simple words are shown under the original clauses.</strong>{' '}
+                {simpleWords.data?.disclaimer}
+              </p>
+            )}
             {tree.map((node) => (
               <SectionBlock
                 key={node.id}
                 node={node}
                 highlighted={highlighted}
                 terms={terms}
+                simple={showSimple ? simpleText : null}
                 referenceCard={
                   highlightedNode ? (
                     <ReferenceCard
@@ -509,13 +558,28 @@ function SectionBlock({
   node,
   highlighted,
   terms,
+  simple,
   referenceCard,
 }: {
   node: SectionNode;
   highlighted: string | null;
   terms: string[];
+  /** Approved simple words by section id, when the reader has switched them on. */
+  simple: Map<string, string> | null;
   referenceCard: ReactNode;
 }) {
+  const simpleWords = simple?.get(node.id);
+  const simpleBox = simpleWords ? (
+    <div
+      aria-label={`Simple words for ${node.referenceLabel ?? sectionTitle(node)}`}
+      className="mt-2 rounded-xl border-l-4 border-[var(--brand-accent)] bg-[var(--brand-secondary)]/40 px-4 py-3"
+    >
+      <p className="text-[0.8em] font-semibold tracking-wide text-slate-600 uppercase">
+        Simple words · the original wording above is what counts
+      </p>
+      <p className="mt-1 whitespace-pre-line">{simpleWords}</p>
+    </div>
+  ) : null;
   const id = sectionAnchor(node.refKey);
   const isHighlighted = highlighted === id;
   const ring = isHighlighted
@@ -527,6 +591,7 @@ function SectionBlock({
       node={child}
       highlighted={highlighted}
       terms={terms}
+      simple={simple}
       referenceCard={referenceCard}
     />
   ));
@@ -548,6 +613,7 @@ function SectionBlock({
             <Highlighted text={node.body} terms={terms} />
           </p>
         )}
+        {simpleBox}
         {children}
       </section>
     );
@@ -566,6 +632,7 @@ function SectionBlock({
             <Highlighted text={node.body} terms={terms} />
           </p>
         </div>
+        {simpleBox}
         {isHighlighted && referenceCard}
         {children}
       </div>
@@ -582,6 +649,7 @@ function SectionBlock({
           <Highlighted text={node.body} terms={terms} />
         </p>
       )}
+      {simpleBox}
       {children}
     </div>
   );

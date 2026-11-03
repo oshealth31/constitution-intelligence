@@ -68,7 +68,10 @@ export async function syncOfflineCopy(
   } catch (error) {
     if (error instanceof ApiError) {
       if (error.status === 401) return { kind: 'signed_out' };
-      if (error.status === 404 || (error.status === 403 && error.reason && REMOVE_REASONS.has(error.reason))) {
+      if (
+        error.status === 404 ||
+        (error.status === 403 && error.reason && REMOVE_REASONS.has(error.reason))
+      ) {
         await deleteCopy(slug);
         return {
           kind: 'removed',

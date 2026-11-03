@@ -86,10 +86,15 @@ export function OfflineSyncer({
   return null;
 }
 
-function resultMessage(result: SyncResult): { tone: 'success' | 'warning' | 'error'; text: string } | null {
+function resultMessage(
+  result: SyncResult,
+): { tone: 'success' | 'warning' | 'error'; text: string } | null {
   switch (result.kind) {
     case 'updated':
-      return { tone: 'success', text: 'Saved. You can now read the constitution without the internet.' };
+      return {
+        tone: 'success',
+        text: 'Saved. You can now read the constitution without the internet.',
+      };
     case 'current':
       return { tone: 'success', text: 'Your saved copy is up to date.' };
     case 'removed':
@@ -150,9 +155,9 @@ export function OfflineCard({
         {!copy ? (
           <>
             <p className="text-base text-slate-700">
-              Only the current approved constitution is saved (and its approved simple words) —
-              no names, contact details, questions or drafts. Do not save it on a shared or
-              public computer. Signing out removes it.
+              Only the current approved constitution is saved (and its approved simple words) — no
+              names, contact details, questions or drafts. Do not save it on a shared or public
+              computer. Signing out removes it.
             </p>
             <PortalButton busy={busy === 'save'} disabled={!online} onClick={() => void save(true)}>
               Save for offline reading
@@ -198,7 +203,11 @@ export function OfflineCard({
               </PortalButton>
               {confirmRemove ? (
                 <>
-                  <PortalButton variant="secondary" busy={busy === 'remove'} onClick={() => void remove()}>
+                  <PortalButton
+                    variant="secondary"
+                    busy={busy === 'remove'}
+                    onClick={() => void remove()}
+                  >
                     Yes, remove it
                   </PortalButton>
                   <PortalButton variant="quiet" onClick={() => setConfirmRemove(false)}>

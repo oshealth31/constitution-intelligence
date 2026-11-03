@@ -96,7 +96,10 @@ export default function OfflineReaderPage() {
   function goTo(constitutionId: string, section: OfflineSection) {
     const index = copy?.bundle.constitutions.findIndex((item) => item.id === constitutionId) ?? 0;
     setSelected(Math.max(0, index));
-    setTimeout(() => document.getElementById(anchor(section))?.scrollIntoView({ block: 'start' }), 0);
+    setTimeout(
+      () => document.getElementById(anchor(section))?.scrollIntoView({ block: 'start' }),
+      0,
+    );
   }
 
   const connection = (
@@ -106,7 +109,10 @@ export default function OfflineReaderPage() {
         online ? 'bg-emerald-50 text-emerald-900' : 'bg-amber-100 text-amber-950'
       }`}
     >
-      <span aria-hidden="true" className={`size-2 rounded-full ${online ? 'bg-emerald-600' : 'bg-amber-600'}`} />
+      <span
+        aria-hidden="true"
+        className={`size-2 rounded-full ${online ? 'bg-emerald-600' : 'bg-amber-600'}`}
+      />
       {online ? 'Online' : 'Offline'}
     </p>
   );
@@ -135,7 +141,10 @@ export default function OfflineReaderPage() {
           </p>
         )}
         {online && (
-          <a href={`/o/${slug}`} className="inline-flex min-h-12 items-center font-medium text-[var(--brand-ink)] underline underline-offset-4">
+          <a
+            href={`/o/${slug}`}
+            className="inline-flex min-h-12 items-center font-medium text-[var(--brand-ink)] underline underline-offset-4"
+          >
             Go to the portal
           </a>
         )}
@@ -164,7 +173,10 @@ export default function OfflineReaderPage() {
       </header>
 
       <main id="main" className="mx-auto max-w-4xl space-y-5 px-4 py-6">
-        <section aria-label="About this copy" className="space-y-3 rounded-2xl border border-slate-200 bg-white p-5">
+        <section
+          aria-label="About this copy"
+          className="space-y-3 rounded-2xl border border-slate-200 bg-white p-5"
+        >
           <p data-testid="last-sync" className="text-base text-slate-800">
             Last synchronised: <strong>{formatDateTime(load.copy.syncedAt)}</strong>
           </p>
@@ -174,19 +186,31 @@ export default function OfflineReaderPage() {
               will be checked and updated automatically when the connection returns.
             </Notice>
           )}
-          {online && update.kind === 'checking' && <Notice tone="info">Checking for a newer version…</Notice>}
-          {online && update.kind === 'updated' && (
-            <Notice tone="success">A newer version was downloaded. You are reading the latest content.</Notice>
+          {online && update.kind === 'checking' && (
+            <Notice tone="info">Checking for a newer version…</Notice>
           )}
-          {online && update.kind === 'current' && <Notice tone="success">The saved copy is up to date.</Notice>}
+          {online && update.kind === 'updated' && (
+            <Notice tone="success">
+              A newer version was downloaded. You are reading the latest content.
+            </Notice>
+          )}
+          {online && update.kind === 'current' && (
+            <Notice tone="success">The saved copy is up to date.</Notice>
+          )}
           {online && update.kind === 'signed_out' && (
             <Notice tone="warning">
-              You are online but signed out, so the saved copy could not be checked. It may be out of
-              date. <a href={`/o/${slug}/sign-in`} className="font-medium underline underline-offset-4">Sign in to update it</a>.
+              You are online but signed out, so the saved copy could not be checked. It may be out
+              of date.{' '}
+              <a href={`/o/${slug}/sign-in`} className="font-medium underline underline-offset-4">
+                Sign in to update it
+              </a>
+              .
             </Notice>
           )}
           {online && update.kind === 'failed' && (
-            <Notice tone="warning">The saved copy could not be checked ({update.message}). It may be out of date.</Notice>
+            <Notice tone="warning">
+              The saved copy could not be checked ({update.message}). It may be out of date.
+            </Notice>
           )}
           {state.kind === 'stale' && (
             <Notice tone="warning">
@@ -195,8 +219,8 @@ export default function OfflineReaderPage() {
             </Notice>
           )}
           <Notice tone="info">
-            Questions answered by AI need an internet connection and are not available here. Use
-            the search below to find clauses in the saved copy. The original document is what counts.
+            Questions answered by AI need an internet connection and are not available here. Use the
+            search below to find clauses in the saved copy. The original document is what counts.
           </Notice>
         </section>
 
@@ -264,7 +288,9 @@ export default function OfflineReaderPage() {
                       >
                         <span className="block font-semibold text-[var(--brand-ink)]">
                           {hit.section.referenceLabel ?? sectionTitle(hit.section)}
-                          {hit.section.heading && hit.section.referenceLabel ? ` · ${hit.section.heading}` : ''}
+                          {hit.section.heading && hit.section.referenceLabel
+                            ? ` · ${hit.section.heading}`
+                            : ''}
                         </span>
                         <span className="block text-base text-slate-800">
                           <Highlighted text={hit.excerpt} terms={results.terms} />
@@ -277,11 +303,16 @@ export default function OfflineReaderPage() {
             )}
 
             {constitution && (
-              <article aria-label={constitution.title} className="rounded-2xl border border-slate-200 bg-white p-5 leading-relaxed sm:p-8">
+              <article
+                aria-label={constitution.title}
+                className="rounded-2xl border border-slate-200 bg-white p-5 leading-relaxed sm:p-8"
+              >
                 <h1 className="text-2xl font-bold text-slate-900">{constitution.title}</h1>
                 <p data-testid="offline-version" className="mt-1 text-base text-slate-700">
                   Version {constitution.version.versionNumber}: {constitution.version.label}
-                  {constitution.version.publishedAt ? ` · published ${formatDate(constitution.version.publishedAt)}` : ''}
+                  {constitution.version.publishedAt
+                    ? ` · published ${formatDate(constitution.version.publishedAt)}`
+                    : ''}
                 </p>
                 {hasSimple && (
                   <PortalButton
@@ -294,16 +325,24 @@ export default function OfflineReaderPage() {
                   </PortalButton>
                 )}
                 {showSimple && bundle.simpleWordsDisclaimer && (
-                  <p className="mt-3 rounded-xl bg-amber-50 px-4 py-3 text-base text-amber-950">{bundle.simpleWordsDisclaimer}</p>
+                  <p className="mt-3 rounded-xl bg-amber-50 px-4 py-3 text-base text-amber-950">
+                    {bundle.simpleWordsDisclaimer}
+                  </p>
                 )}
                 <nav aria-label="Contents" className="mt-5 rounded-xl bg-slate-50 p-4">
-                  <p className="text-sm font-semibold tracking-wide text-slate-500 uppercase">Contents</p>
+                  <p className="text-sm font-semibold tracking-wide text-slate-500 uppercase">
+                    Contents
+                  </p>
                   <ul className="mt-2 space-y-1">
                     {tree.map((node) => (
                       <li key={node.id}>
                         <button
                           type="button"
-                          onClick={() => document.getElementById(anchor(node as OfflineSection))?.scrollIntoView({ block: 'start' })}
+                          onClick={() =>
+                            document
+                              .getElementById(anchor(node as OfflineSection))
+                              ?.scrollIntoView({ block: 'start' })
+                          }
                           className="min-h-11 text-left text-base font-medium text-[var(--brand-ink)] underline-offset-4 hover:underline"
                         >
                           {sectionTitle(node)}
@@ -316,7 +355,11 @@ export default function OfflineReaderPage() {
                                 <li key={child.id}>
                                   <button
                                     type="button"
-                                    onClick={() => document.getElementById(anchor(child as OfflineSection))?.scrollIntoView({ block: 'start' })}
+                                    onClick={() =>
+                                      document
+                                        .getElementById(anchor(child as OfflineSection))
+                                        ?.scrollIntoView({ block: 'start' })
+                                    }
                                     className="min-h-11 text-left text-base text-[var(--brand-ink)] underline-offset-4 hover:underline"
                                   >
                                     {sectionTitle(child)}
@@ -331,7 +374,12 @@ export default function OfflineReaderPage() {
                 </nav>
                 <div className="mt-6">
                   {tree.map((node) => (
-                    <OfflineSectionBlock key={node.id} node={node} terms={results?.terms ?? []} showSimple={showSimple} />
+                    <OfflineSectionBlock
+                      key={node.id}
+                      node={node}
+                      terms={results?.terms ?? []}
+                      showSimple={showSimple}
+                    />
                   ))}
                 </div>
               </article>
@@ -339,7 +387,10 @@ export default function OfflineReaderPage() {
           </>
         )}
 
-        <section aria-label="Remove the saved copy" className="rounded-2xl border border-slate-200 bg-white p-5">
+        <section
+          aria-label="Remove the saved copy"
+          className="rounded-2xl border border-slate-200 bg-white p-5"
+        >
           <p className="text-base text-slate-700">
             The saved copy stays on this device until you remove it, sign out, or it is removed
             because your access has ended.
@@ -360,7 +411,10 @@ export default function OfflineReaderPage() {
               </PortalButton>
             )}
             {online && (
-              <a href={`/o/${slug}`} className="inline-flex min-h-12 items-center px-3 font-medium text-[var(--brand-ink)] underline underline-offset-4">
+              <a
+                href={`/o/${slug}`}
+                className="inline-flex min-h-12 items-center px-3 font-medium text-[var(--brand-ink)] underline underline-offset-4"
+              >
                 Go to the online portal
               </a>
             )}
@@ -382,22 +436,28 @@ function OfflineSectionBlock({
 }) {
   const section = node as unknown as OfflineSection & SectionNode;
   const id = anchor(section);
-  const simple = showSimple && section.simpleWords ? (
-    <div
-      aria-label={`Simple words for ${section.referenceLabel ?? sectionTitle(section)}`}
-      className="mt-2 rounded-xl border-l-4 border-[var(--brand-accent)] bg-[var(--brand-secondary)]/40 px-4 py-3"
-    >
-      <p className="text-sm font-semibold tracking-wide text-slate-600 uppercase">Simple words · the original wording above is what counts</p>
-      <p className="mt-1 whitespace-pre-line">{section.simpleWords}</p>
-    </div>
-  ) : null;
+  const simple =
+    showSimple && section.simpleWords ? (
+      <div
+        aria-label={`Simple words for ${section.referenceLabel ?? sectionTitle(section)}`}
+        className="mt-2 rounded-xl border-l-4 border-[var(--brand-accent)] bg-[var(--brand-secondary)]/40 px-4 py-3"
+      >
+        <p className="text-sm font-semibold tracking-wide text-slate-600 uppercase">
+          Simple words · the original wording above is what counts
+        </p>
+        <p className="mt-1 whitespace-pre-line">{section.simpleWords}</p>
+      </div>
+    ) : null;
   const children = node.children.map((child) => (
     <OfflineSectionBlock key={child.id} node={child} terms={terms} showSimple={showSimple} />
   ));
   if (node.kind === 'part' || node.kind === 'chapter') {
     return (
       <section className="mt-8 first:mt-0">
-        <h2 id={id} className="scroll-mt-4 rounded-xl bg-[var(--brand-secondary)] px-4 py-3 text-xl font-bold text-[var(--brand-on-secondary)]">
+        <h2
+          id={id}
+          className="scroll-mt-4 rounded-xl bg-[var(--brand-secondary)] px-4 py-3 text-xl font-bold text-[var(--brand-on-secondary)]"
+        >
           <Highlighted text={sectionTitle(node)} terms={terms} />
         </h2>
         {node.body && (

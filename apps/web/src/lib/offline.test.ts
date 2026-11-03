@@ -9,7 +9,9 @@ import {
   type OfflineSection,
 } from './offline';
 
-const section = (overrides: Partial<OfflineSection> & Pick<OfflineSection, 'id' | 'position'>): OfflineSection => ({
+const section = (
+  overrides: Partial<OfflineSection> & Pick<OfflineSection, 'id' | 'position'>,
+): OfflineSection => ({
   parentSectionId: null,
   kind: 'clause',
   refKey: overrides.id,
@@ -25,11 +27,41 @@ const section = (overrides: Partial<OfflineSection> & Pick<OfflineSection, 'id' 
 const constitution: OfflineConstitution = {
   id: 'c1',
   title: 'Constitution',
-  version: { id: 'v1', versionNumber: 2, label: 'Amended 2026', publishedAt: '2026-10-01T00:00:00Z' },
+  version: {
+    id: 'v1',
+    versionNumber: 2,
+    label: 'Amended 2026',
+    publishedAt: '2026-10-01T00:00:00Z',
+  },
   sections: [
-    section({ id: 's1', position: 0, number: '7', heading: 'Quorum', reference: '7', referenceLabel: 'Clause 7', body: 'The quorum for a general meeting is one third of members.' }),
-    section({ id: 's2', position: 1, number: '8', heading: 'Voting', reference: '8', referenceLabel: 'Clause 8', body: 'Each member has one vote.', simpleWords: 'Everyone gets a single vote at meetings.' }),
-    section({ id: 's3', position: 2, number: '(a)', kind: 'subclause', reference: '8(a)', referenceLabel: 'Clause 8(a)', body: 'The chairperson has a casting vote.' }),
+    section({
+      id: 's1',
+      position: 0,
+      number: '7',
+      heading: 'Quorum',
+      reference: '7',
+      referenceLabel: 'Clause 7',
+      body: 'The quorum for a general meeting is one third of members.',
+    }),
+    section({
+      id: 's2',
+      position: 1,
+      number: '8',
+      heading: 'Voting',
+      reference: '8',
+      referenceLabel: 'Clause 8',
+      body: 'Each member has one vote.',
+      simpleWords: 'Everyone gets a single vote at meetings.',
+    }),
+    section({
+      id: 's3',
+      position: 2,
+      number: '(a)',
+      kind: 'subclause',
+      reference: '8(a)',
+      referenceLabel: 'Clause 8(a)',
+      body: 'The chairperson has a casting vote.',
+    }),
   ],
 };
 
@@ -39,7 +71,12 @@ const bundle: OfflineBundle = {
   generatedAt: '2026-11-01T00:00:00Z',
   usableUntil: '2026-12-01T00:00:00Z',
   userId: 'u1',
-  organisation: { id: 'o1', slug: 'choir', name: 'Choir', colours: { primary: null, accent: null, secondary: null } },
+  organisation: {
+    id: 'o1',
+    slug: 'choir',
+    name: 'Choir',
+    colours: { primary: null, accent: null, secondary: null },
+  },
   simpleWordsDisclaimer: null,
   constitutions: [constitution],
 };
@@ -57,9 +94,15 @@ describe('isOfflineBundle', () => {
 describe('freshness', () => {
   const now = new Date('2026-11-10T00:00:00Z');
   it('is fresh for a recent sync, stale after a week, and expired after its usable date', () => {
-    expect(freshness({ syncedAt: '2026-11-09T00:00:00Z', usableUntil: '2026-12-01T00:00:00Z' }, now)).toEqual({ kind: 'fresh', days: 1 });
-    expect(freshness({ syncedAt: '2026-11-01T00:00:00Z', usableUntil: '2026-12-01T00:00:00Z' }, now)).toEqual({ kind: 'stale', days: 9 });
-    expect(freshness({ syncedAt: '2026-09-01T00:00:00Z', usableUntil: '2026-10-01T00:00:00Z' }, now)).toEqual({ kind: 'expired' });
+    expect(
+      freshness({ syncedAt: '2026-11-09T00:00:00Z', usableUntil: '2026-12-01T00:00:00Z' }, now),
+    ).toEqual({ kind: 'fresh', days: 1 });
+    expect(
+      freshness({ syncedAt: '2026-11-01T00:00:00Z', usableUntil: '2026-12-01T00:00:00Z' }, now),
+    ).toEqual({ kind: 'stale', days: 9 });
+    expect(
+      freshness({ syncedAt: '2026-09-01T00:00:00Z', usableUntil: '2026-10-01T00:00:00Z' }, now),
+    ).toEqual({ kind: 'expired' });
   });
 });
 
@@ -68,7 +111,9 @@ describe('searchOffline', () => {
     const { hits, terms } = searchOffline([constitution], 'vote');
     expect(terms).toEqual(['vote']);
     expect(hits.map((hit) => hit.section.id)).toEqual(['s2', 's3']);
-    expect(searchOffline([constitution], 'single').hits.map((hit) => hit.section.id)).toEqual(['s2']);
+    expect(searchOffline([constitution], 'single').hits.map((hit) => hit.section.id)).toEqual([
+      's2',
+    ]);
   });
 
   it('needs every word, and finds clause references', () => {

@@ -75,12 +75,13 @@ export function isOfflineBundle(value: unknown): value is OfflineBundle {
 }
 
 export type Freshness =
-  | { kind: 'expired' }
-  | { kind: 'stale'; days: number }
-  | { kind: 'fresh'; days: number };
+  { kind: 'expired' } | { kind: 'stale'; days: number } | { kind: 'fresh'; days: number };
 
 /** How much the saved copy can be trusted to be current. */
-export function freshness(copy: Pick<OfflineCopy, 'syncedAt' | 'usableUntil'>, now = new Date()): Freshness {
+export function freshness(
+  copy: Pick<OfflineCopy, 'syncedAt' | 'usableUntil'>,
+  now = new Date(),
+): Freshness {
   if (now.getTime() > new Date(copy.usableUntil).getTime()) return { kind: 'expired' };
   const days = Math.floor((now.getTime() - new Date(copy.syncedAt).getTime()) / 86_400_000);
   return days >= STALE_AFTER_DAYS ? { kind: 'stale', days } : { kind: 'fresh', days };

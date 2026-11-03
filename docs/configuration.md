@@ -46,7 +46,7 @@ and refuses to start if anything is missing or unsafe, listing the problem setti
 | `AI_MAX_QUESTIONS_PER_USER_PER_HOUR`                                 | No                            | `30`                     | Per-person limit on questions.                                                                      |
 | `SUBSCRIPTION_DATA_RETENTION_DAYS`                                   | No                            | `90`                     | Days an organisation's data is kept after its access becomes restricted. See docs/subscriptions.md. |
 | `BILLING_PAYMENT_INSTRUCTIONS`                                       | No                            | —                        | How to pay (e.g. bank details), shown on organisations' billing page. Not secret.                   |
-| `OFFLINE_COPY_MAX_AGE_DAYS` | No | `30` | How long a device may show its offline copy without synchronising. See docs/offline.md. |
+| `OFFLINE_COPY_MAX_AGE_DAYS`                                          | No                            | `30`                     | How long a device may show its offline copy without synchronising. See docs/offline.md.             |
 | `TEST_DATABASE_URL`                                                  | For database tests            | —                        | Separate database used only by automated tests.                                                     |
 | `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `POSTGRES_PORT` | Local Docker only             | —                        | Used by `infra/docker-compose.yml` to create the local database.                                    |
 

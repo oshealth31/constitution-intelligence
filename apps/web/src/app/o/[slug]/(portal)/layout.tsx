@@ -211,7 +211,11 @@ export default function SignedInPortalLayout({ children }: { children: ReactNode
 
         <main id="main" className="mx-auto w-full max-w-6xl px-4 pt-6 pb-28 sm:px-6 md:pb-12">
           <ServiceWorkerRegistration />
-          <OfflineSyncer slug={slug} organisationId={session.organisationId} userId={session.user.id} />
+          <OfflineSyncer
+            slug={slug}
+            organisationId={session.organisationId}
+            userId={session.user.id}
+          />
           <ConnectionBanner slug={slug} />
           <SubscriptionNotice
             slug={slug}

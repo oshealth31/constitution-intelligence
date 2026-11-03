@@ -7,17 +7,17 @@ service worker that lets the offline reader open without a network.
 
 ## What works where
 
-| | Online | Offline |
-| --- | --- | --- |
-| Signing in, portal access | Yes (checked by the server on every request) | No — the saved copy is opened instead |
-| Current approved constitution | Yes | **The saved copy** (the version current when it was last synchronised) |
-| Navigating sections | Yes | Yes (contents list) |
-| Search | Server search (Stage 8) | **Keyword search on the device**: words and clause numbers |
-| Simple words | Yes | Yes, if they were approved when the copy was saved and the plan includes them |
-| AI answers, "find relevant clauses", approved answers | Yes | **No** — the app says so |
-| Version shown | Yes | Yes ("Version 2: Amended 2026 · published …") |
-| Last synchronisation | — | Always shown |
-| Synchronisation | On opening the portal and when the connection returns | Waits for the connection |
+|                                                       | Online                                                | Offline                                                                       |
+| ----------------------------------------------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Signing in, portal access                             | Yes (checked by the server on every request)          | No — the saved copy is opened instead                                         |
+| Current approved constitution                         | Yes                                                   | **The saved copy** (the version current when it was last synchronised)        |
+| Navigating sections                                   | Yes                                                   | Yes (contents list)                                                           |
+| Search                                                | Server search (Stage 8)                               | **Keyword search on the device**: words and clause numbers                    |
+| Simple words                                          | Yes                                                   | Yes, if they were approved when the copy was saved and the plan includes them |
+| AI answers, "find relevant clauses", approved answers | Yes                                                   | **No** — the app says so                                                      |
+| Version shown                                         | Yes                                                   | Yes ("Version 2: Amended 2026 · published …")                                 |
+| Last synchronisation                                  | —                                                     | Always shown                                                                  |
+| Synchronisation                                       | On opening the portal and when the connection returns | Waits for the connection                                                      |
 
 ## How it works
 
@@ -37,11 +37,11 @@ service worker that lets the offline reader open without a network.
 - On portal pages: a banner **"You are offline"** as soon as the connection drops, with a link to
   the saved copy.
 - In the offline reader: an **Online / Offline** label, **Last synchronised: …**, and:
-  - *"Checking for a newer version…"*, *"A newer version was downloaded"* or *"The saved copy is up
-    to date"* when online;
-  - *"This copy may be out of date"* when it has not been synchronised for **7 days**;
-  - *"You are online but signed out, so the saved copy could not be checked"* when relevant.
-- On the Ask page: *"Live AI answers and 'find relevant clauses' need an internet connection"*.
+  - _"Checking for a newer version…"_, _"A newer version was downloaded"_ or _"The saved copy is up
+    to date"_ when online;
+  - _"This copy may be out of date"_ when it has not been synchronised for **7 days**;
+  - _"You are online but signed out, so the saved copy could not be checked"_ when relevant.
+- On the Ask page: _"Live AI answers and 'find relevant clauses' need an internet connection"_.
 
 ## What is stored on the device — and what is not
 
@@ -94,10 +94,10 @@ pages, or any non-GET request. The browser test checks this.
 
 ## API
 
-| Method & path (under `/api/v1/organisations/:id`) | Permission | Notes |
-| --- | --- | --- |
-| `GET /offline/status` | `constitution.read` | `{ format, contentHash, checkedAt, usableUntil }`. `Cache-Control: no-store` |
-| `GET /offline/bundle` | `constitution.read` | The content described above. `Cache-Control: no-store`. Counted in usage records (`offline.downloads`) |
+| Method & path (under `/api/v1/organisations/:id`) | Permission          | Notes                                                                                                  |
+| ------------------------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------ |
+| `GET /offline/status`                             | `constitution.read` | `{ format, contentHash, checkedAt, usableUntil }`. `Cache-Control: no-store`                           |
+| `GET /offline/bundle`                             | `constitution.read` | The content described above. `Cache-Control: no-store`. Counted in usage records (`offline.downloads`) |
 
 Both follow every online rule (membership, role and subscription, enforced by `PermissionGuard`):
 suspended or restricted organisations' members are refused with `SUBSCRIPTION_INACTIVE` /

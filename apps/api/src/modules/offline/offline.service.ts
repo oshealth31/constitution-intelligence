@@ -60,7 +60,9 @@ export class OfflineService {
         contentHash: hashOf(versions, simple),
         checkedAt: now.toISOString(),
         // A successful check confirms the saved copy is current, so it may be shown for longer.
-        usableUntil: new Date(now.getTime() + this.config.OFFLINE_COPY_MAX_AGE_DAYS * 86_400_000).toISOString(),
+        usableUntil: new Date(
+          now.getTime() + this.config.OFFLINE_COPY_MAX_AGE_DAYS * 86_400_000,
+        ).toISOString(),
       };
     });
   }
@@ -131,7 +133,9 @@ export class OfflineService {
         contentHash: hashOf(versions, simpleStamp),
         generatedAt: now.toISOString(),
         // The device stops showing this copy after this date unless it has synced again.
-        usableUntil: new Date(now.getTime() + this.config.OFFLINE_COPY_MAX_AGE_DAYS * 86_400_000).toISOString(),
+        usableUntil: new Date(
+          now.getTime() + this.config.OFFLINE_COPY_MAX_AGE_DAYS * 86_400_000,
+        ).toISOString(),
         userId: scope.userId,
         organisation: {
           id: organisation!.id,

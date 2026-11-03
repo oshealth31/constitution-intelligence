@@ -25,11 +25,17 @@ async function saveForOffline(page: Page) {
   await page.evaluate(async () => {
     await navigator.serviceWorker.ready;
   });
-  const card = page.getByRole('region', { name: 'Read without internet' }).or(
-    page.locator('section', { has: page.getByRole('heading', { name: 'Read without internet' }) }),
-  );
+  const card = page
+    .getByRole('region', { name: 'Read without internet' })
+    .or(
+      page.locator('section', {
+        has: page.getByRole('heading', { name: 'Read without internet' }),
+      }),
+    );
   await card.getByRole('button', { name: 'Save for offline reading' }).click();
-  await expect(card.getByText('Saved. You can now read the constitution without the internet.')).toBeVisible();
+  await expect(
+    card.getByText('Saved. You can now read the constitution without the internet.'),
+  ).toBeVisible();
   await expect(card.getByTestId('offline-saved')).toContainText('last synchronised');
 }
 
@@ -74,11 +80,19 @@ test('save for offline reading, read and search offline, then sync when back onl
   await expect(page.getByText('You are reading the copy saved on this device.')).toBeVisible();
   await expect(page.getByTestId('last-sync')).toContainText('Last synchronised');
   await expect(page.getByTestId('offline-version')).toContainText('Version 1');
-  await expect(page.getByText(/Questions answered by AI need an internet connection/)).toBeVisible();
+  await expect(
+    page.getByText(/Questions answered by AI need an internet connection/),
+  ).toBeVisible();
 
   // Navigate by the contents.
-  await page.getByRole('navigation', { name: 'Contents' }).getByRole('button', { name: /Quorum/ }).first().click();
-  await expect(page.getByText('The quorum for a general meeting is one third of members').first()).toBeInViewport();
+  await page
+    .getByRole('navigation', { name: 'Contents' })
+    .getByRole('button', { name: /Quorum/ })
+    .first()
+    .click();
+  await expect(
+    page.getByText('The quorum for a general meeting is one third of members').first(),
+  ).toBeInViewport();
 
   // Search on the device.
   await page.getByLabel('Search the saved copy').fill('quorum');
@@ -98,16 +112,23 @@ test('save for offline reading, read and search offline, then sync when back onl
   // Remove it safely.
   await page.getByRole('button', { name: 'Remove the saved copy from this device' }).click();
   await page.getByRole('button', { name: 'Yes, remove it from this device' }).click();
-  await expect(page.getByRole('heading', { name: 'Nothing saved for offline reading' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Nothing saved for offline reading' }),
+  ).toBeVisible();
   expect(await cachedUrls(page)).not.toContain(`/offline/${SLUG}`);
 });
 
 test('the Ask page explains that live AI does not work offline', async ({ page, context }) => {
   await signIn(page);
-  await page.getByRole('navigation', { name: 'Main', exact: true }).getByRole('link', { name: 'Ask' }).click();
+  await page
+    .getByRole('navigation', { name: 'Main', exact: true })
+    .getByRole('link', { name: 'Ask' })
+    .click();
   await expect(page.getByLabel('Your question')).toBeVisible();
   await goOffline(context, page);
-  await expect(page.getByText(/Live AI answers and “find relevant clauses” need an internet connection/)).toBeVisible();
+  await expect(
+    page.getByText(/Live AI answers and “find relevant clauses” need an internet connection/),
+  ).toBeVisible();
   await expect(page.getByLabel('Your question')).toHaveCount(0);
   await context.setOffline(false);
   await expect(page.getByLabel('Your question')).toBeVisible();
@@ -116,9 +137,17 @@ test('the Ask page explains that live AI does not work offline', async ({ page, 
 test('signing out removes the saved copy from the device', async ({ page }) => {
   await signIn(page);
   await saveForOffline(page);
-  await page.getByRole('navigation', { name: 'Main', exact: true }).getByRole('link', { name: 'My profile' }).click();
-  await page.getByRole('button', { name: /^Sign out/ }).first().click();
+  await page
+    .getByRole('navigation', { name: 'Main', exact: true })
+    .getByRole('link', { name: 'My profile' })
+    .click();
+  await page
+    .getByRole('button', { name: /^Sign out/ })
+    .first()
+    .click();
   await expect(page).toHaveURL(new RegExp(`${CHOIR}/sign-in`));
   await page.goto(`/offline/${SLUG}`);
-  await expect(page.getByRole('heading', { name: 'Nothing saved for offline reading' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Nothing saved for offline reading' }),
+  ).toBeVisible();
 });

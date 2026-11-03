@@ -50,7 +50,11 @@ describe.runIf(Boolean(testDatabaseUrl))('Offline reading content', () => {
   let a: Org;
   let b: Org;
 
-  async function createOrg(variant: 'choir' | 'netball', name: string, uniqueWord: string): Promise<Org> {
+  async function createOrg(
+    variant: 'choir' | 'netball',
+    name: string,
+    uniqueWord: string,
+  ): Promise<Org> {
     const organisation = await createOrganisation(context.db);
     const owner = await signedInMember(context, organisation.id, 'owner');
     const ids = await createSampleTenantContent(
@@ -96,7 +100,9 @@ describe.runIf(Boolean(testDatabaseUrl))('Offline reading content', () => {
     expect(bundle.constitutions).toHaveLength(1);
     expect(bundle.constitutions[0]!.version.id).toBe(a.ids.publishedVersionId);
     expect(bundle.constitutions[0]!.sections.length).toBeGreaterThan(5);
-    expect(bundle.constitutions[0]!.sections.some((section) => section.reference === '7')).toBe(true);
+    expect(bundle.constitutions[0]!.sections.some((section) => section.reference === '7')).toBe(
+      true,
+    );
     const usable = new Date(bundle.usableUntil).getTime() - new Date(bundle.generatedAt).getTime();
     expect(Math.round(usable / DAY)).toBe(30);
 
@@ -119,11 +125,14 @@ describe.runIf(Boolean(testDatabaseUrl))('Offline reading content', () => {
     const clauses = overview.constitutions[0]!.clauses;
     const ten = clauses.find((item) => item.clause.reference === '10')!.clause.sectionId;
     const nine = clauses.find((item) => item.clause.reference === '9')!.clause.sectionId;
-    const statusBefore = (await a.member.get(url(a, '/offline/status')).expect(200)).body.contentHash;
+    const statusBefore = (await a.member.get(url(a, '/offline/status')).expect(200)).body
+      .contentHash;
 
     await a.admin
       .put(url(a, `/manage/simple-words/sections/${ten}`))
-      .send({ text: 'The constitution can be changed when two-thirds of the members at a general meeting agree.' })
+      .send({
+        text: 'The constitution can be changed when two-thirds of the members at a general meeting agree.',
+      })
       .expect(200);
     await a.admin
       .post(url(a, `/manage/simple-words/sections/${ten}/approve`))
@@ -155,17 +164,33 @@ describe.runIf(Boolean(testDatabaseUrl))('Offline reading content', () => {
       .send(makeSamplePdf([[{ text: '1. Name' }, { text: 'The club is called Hilltop Netball.' }]]))
       .expect(201);
     const versionId = upload.body.id as string;
-    for (const flagged of upload.body.sections.filter((section: { needsReview: boolean }) => section.needsReview)) {
-      await b.admin.post(url(b, `/versions/${versionId}/sections/${flagged.id}/resolve`)).expect(200);
+    for (const flagged of upload.body.sections.filter(
+      (section: { needsReview: boolean }) => section.needsReview,
+    )) {
+      await b.admin
+        .post(url(b, `/versions/${versionId}/sections/${flagged.id}/resolve`))
+        .expect(200);
     }
-    await b.admin.post(url(b, `/versions/${versionId}/submit`)).send({ confirmed: true }).expect(200);
-    await b.admin.post(url(b, `/versions/${versionId}/approve`)).send({}).expect(200);
-    await b.admin.post(url(b, `/versions/${versionId}/publish`)).send({ confirmed: true }).expect(200);
+    await b.admin
+      .post(url(b, `/versions/${versionId}/submit`))
+      .send({ confirmed: true })
+      .expect(200);
+    await b.admin
+      .post(url(b, `/versions/${versionId}/approve`))
+      .send({})
+      .expect(200);
+    await b.admin
+      .post(url(b, `/versions/${versionId}/publish`))
+      .send({ confirmed: true })
+      .expect(200);
 
     const after = (await b.member.get(url(b, '/offline/status')).expect(200)).body;
     expect(after.contentHash).not.toBe(before.contentHash);
     const bundle = (await b.member.get(url(b, '/offline/bundle')).expect(200)).body as Bundle;
-    expect(bundle.constitutions[0]!.version).toMatchObject({ id: versionId, label: 'Amended 2026' });
+    expect(bundle.constitutions[0]!.version).toMatchObject({
+      id: versionId,
+      label: 'Amended 2026',
+    });
   });
 
   it("refuses other organisations' content and people who are not signed in", async () => {

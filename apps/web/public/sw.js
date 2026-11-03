@@ -67,11 +67,16 @@ async function offlineNavigation(url) {
   if (slug) {
     const page = await caches.open(PAGE_CACHE).then((cache) => cache.match(`/offline/${slug}`));
     if (page) {
-      return url.pathname.startsWith('/offline/') ? page : Response.redirect(`/offline/${slug}`, 302);
+      return url.pathname.startsWith('/offline/')
+        ? page
+        : Response.redirect(`/offline/${slug}`, 302);
     }
   }
   const fallback = await caches.open(STATIC_CACHE).then((cache) => cache.match(FALLBACK));
-  return fallback ?? new Response('You are offline.', { status: 503, headers: { 'Content-Type': 'text/plain' } });
+  return (
+    fallback ??
+    new Response('You are offline.', { status: 503, headers: { 'Content-Type': 'text/plain' } })
+  );
 }
 
 self.addEventListener('fetch', (event) => {
@@ -95,7 +100,11 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('message', (event) => {
   const data = event.data || {};
   const reply = (message) => event.ports && event.ports[0] && event.ports[0].postMessage(message);
-  if (data.type === 'cache-offline-page' && typeof data.slug === 'string' && /^[a-z0-9][a-z0-9-]{1,62}$/.test(data.slug)) {
+  if (
+    data.type === 'cache-offline-page' &&
+    typeof data.slug === 'string' &&
+    /^[a-z0-9][a-z0-9-]{1,62}$/.test(data.slug)
+  ) {
     event.waitUntil(
       (async () => {
         const path = `/offline/${data.slug}`;

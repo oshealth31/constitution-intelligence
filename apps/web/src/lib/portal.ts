@@ -323,7 +323,8 @@ export function eventLabel(event: string): string {
 }
 
 const EXTRACTION_LABELS: Record<string, string> = {
-  not_started: 'Not read',
+  // Only versions created without an uploaded file (for example sample data) have this status.
+  not_started: 'No file uploaded',
   succeeded: 'Text read',
   needs_review: 'Needs checking',
   failed: 'Could not be read',

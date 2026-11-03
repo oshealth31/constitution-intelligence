@@ -2,8 +2,8 @@
 // retrieval, version correctness and sensitive-information leakage.
 // A test provider stands in for the AI model: it records every prompt and returns whatever a
 // test tells it to (including the kind of output a misbehaving or manipulated model could give).
-import { auditEvents } from '@constitution/db';
-import { eq } from 'drizzle-orm';
+import { aiMessages, auditEvents, sections, usageRecords } from '@constitution/db';
+import { and, count, eq } from 'drizzle-orm';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { enrichSampleConstitution } from '../src/dev/sample-branding';
@@ -16,7 +16,11 @@ import {
   type AiCompletion,
   type AiProvider,
 } from '../src/modules/ai/ai-provider';
-import { UNAVAILABLE_MESSAGE } from '../src/modules/ai/ai.service';
+import {
+  CLAUSE_FINDER_LIMIT_PER_HOUR,
+  NO_CLAUSES_MESSAGE,
+  UNAVAILABLE_MESSAGE,
+} from '../src/modules/ai/ai.service';
 import { FilesService } from '../src/modules/files/files.service';
 import { createTenantScope } from '../src/modules/tenancy/tenant-scope';
 import {
@@ -437,6 +441,103 @@ describe.runIf(Boolean(testDatabaseUrl))('AI question answering', () => {
       expect(answer.citations[0]).toMatchObject({ reference: '4', versionLabel: 'Amended 2026' });
       expect(provider.prompts[0]!.user).not.toContain('baobab'); // the old version's wording
       expect(provider.prompts[0]!.user).toContain('Amended 2026');
+    });
+  });
+
+  describe('find relevant clauses (no AI)', () => {
+    interface Found {
+      question: string;
+      terms: string[];
+      message: string | null;
+      notice: string;
+      results: {
+        sectionId: string;
+        reference: string | null;
+        heading: string | null;
+        text: string;
+        versionId: string;
+        constitutionId: string;
+      }[];
+    }
+    const find = async (agent: TestAgent, org: Org, question: string) =>
+      (await agent.post(url(org, '/ai/find-clauses')).send({ question }).expect(200))
+        .body as Found;
+
+    it('works with the AI switched off, and never calls the AI', async () => {
+      provider.available = false;
+      const status = await a.member.get(url(a, '/ai/status')).expect(200);
+      expect(status.body).toMatchObject({ available: false, clauseFinder: true });
+      const found = await find(a.member, a, 'What is the quorum for a general meeting?');
+      expect(found.message).toBeNull();
+      expect(found.terms).toContain('quorum');
+      expect(found.results.length).toBeGreaterThan(0);
+      expect(
+        found.results.some((clause) => /quorum/i.test(`${clause.heading ?? ''} ${clause.text}`)),
+      ).toBe(true);
+      expect(provider.prompts).toHaveLength(0);
+    });
+
+    it('shows the original wording exactly as stored, from the published version only', async () => {
+      const found = await find(a.member, a, 'What is the quorum? Is it half of members?');
+      for (const clause of found.results) {
+        const [stored] = await context.db
+          .select({ body: sections.body, versionId: sections.versionId })
+          .from(sections)
+          .where(eq(sections.id, clause.sectionId));
+        expect(clause.text).toBe(stored!.body);
+        expect(clause.versionId).toBe(stored!.versionId);
+        expect(clause.text).not.toContain('herondraft');
+        expect(clause.text).not.toContain('Draft wording');
+      }
+      expect(provider.prompts).toHaveLength(0);
+    });
+
+    it("never returns another organisation's clauses", async () => {
+      const found = await find(a.member, a, 'What is the baobab rule?');
+      expect(found.results).toHaveLength(0);
+      expect(found.message).toBe(NO_CLAUSES_MESSAGE);
+      const quorum = await find(a.member, a, 'What is the quorum for a general meeting?');
+      expect(JSON.stringify(quorum)).not.toContain('baobab');
+      expect(JSON.stringify(quorum)).not.toContain('Hilltop Netball');
+      await a.member
+        .post(url(b, '/ai/find-clauses'))
+        .send({ question: 'What is the quorum?' })
+        .expect(404);
+    });
+
+    it('does not store the question: only a count is recorded', async () => {
+      const where = eq(aiMessages.organisationId, a.id);
+      const [before] = await context.db.select({ n: count() }).from(aiMessages).where(where);
+      await find(a.member, a, 'What is the quorum for our secret plan zebra?');
+      const [after] = await context.db.select({ n: count() }).from(aiMessages).where(where);
+      expect(after!.n).toBe(before!.n);
+      const usage = await context.db
+        .select()
+        .from(usageRecords)
+        .where(
+          and(eq(usageRecords.organisationId, a.id), eq(usageRecords.metric, 'clauses.searches')),
+        );
+      expect(usage.length).toBeGreaterThan(0);
+      expect(JSON.stringify(usage)).not.toContain('zebra');
+      const audit = await context.db
+        .select()
+        .from(auditEvents)
+        .where(eq(auditEvents.organisationId, a.id));
+      expect(JSON.stringify(audit)).not.toContain('zebra');
+    });
+
+    it('requires a signed-in member, a sensible question, and limits searches per hour', async () => {
+      await request(context.app.getHttpServer())
+        .post(url(a, '/ai/find-clauses'))
+        .set('X-Requested-With', 'XMLHttpRequest')
+        .send({ question: 'What is the quorum?' })
+        .expect(401);
+      await a.member.post(url(a, '/ai/find-clauses')).send({ question: 'x' }).expect(400);
+      const busy = (await signedInMember(context, a.id, 'member')).agent;
+      for (let index = 0; index < CLAUSE_FINDER_LIMIT_PER_HOUR; index += 1) {
+        await busy.post(url(a, '/ai/find-clauses')).send({ question: 'fees' }).expect(200);
+      }
+      await busy.post(url(a, '/ai/find-clauses')).send({ question: 'fees' }).expect(429);
     });
   });
 

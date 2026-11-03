@@ -182,7 +182,9 @@ describe('approved answer import files', () => {
   });
 
   it('explains what is wrong with a bad file', () => {
-    expect(parseAnswerImport('not json')).toEqual({ error: expect.stringContaining('not valid JSON') });
+    expect(parseAnswerImport('not json')).toEqual({
+      error: expect.stringContaining('not valid JSON'),
+    });
     expect(parseAnswerImport('{"answers":[]}')).toEqual({ error: 'The file has no answers.' });
     expect(parseAnswerImport('[{"question":"Q?"}]')).toEqual({
       error: expect.stringContaining('Answer 1 needs'),

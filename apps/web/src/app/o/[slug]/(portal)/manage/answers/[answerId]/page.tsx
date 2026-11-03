@@ -99,7 +99,10 @@ export default function AnswerReviewPage() {
 
       <div className="grid gap-5 lg:grid-cols-2">
         <Panel title="Answer in everyday words">
-          <p data-testid="managed-answer-text" className="text-lg whitespace-pre-line text-slate-900">
+          <p
+            data-testid="managed-answer-text"
+            className="text-lg whitespace-pre-line text-slate-900"
+          >
             {answer.answer}
           </p>
           {answer.status !== 'retired' && (
@@ -163,7 +166,9 @@ export default function AnswerReviewPage() {
         />
       )}
       {!canApprove && answer.status !== 'approved' && answer.status !== 'retired' && (
-        <Notice>An owner or administrator needs to approve this answer before members see it.</Notice>
+        <Notice>
+          An owner or administrator needs to approve this answer before members see it.
+        </Notice>
       )}
 
       <div className="flex flex-wrap gap-3">

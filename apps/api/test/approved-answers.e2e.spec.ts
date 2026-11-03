@@ -149,7 +149,11 @@ describe.runIf(Boolean(testDatabaseUrl))('Approved answers', () => {
     it('refuses clauses that are not in the published constitution', async () => {
       const response = await a.admin
         .post(url(a, '/manage/answers'))
-        .send({ question: 'What is rule 99?', answer: 'Rule 99 says nothing at all.', clauses: ['99'] })
+        .send({
+          question: 'What is rule 99?',
+          answer: 'Rule 99 says nothing at all.',
+          clauses: ['99'],
+        })
         .expect(400);
       expect(JSON.stringify(response.body)).toContain('Clause 99');
       await a.admin
@@ -287,7 +291,8 @@ describe.runIf(Boolean(testDatabaseUrl))('Approved answers', () => {
             answers: [
               {
                 question: 'Who keeps the accounts?',
-                answer: 'The Treasurer keeps the accounts and presents them at every annual general meeting.',
+                answer:
+                  'The Treasurer keeps the accounts and presents them at every annual general meeting.',
                 clauses: ['9'],
                 draftedBy: 'ai',
               },
@@ -303,8 +308,9 @@ describe.runIf(Boolean(testDatabaseUrl))('Approved answers', () => {
       expect(report.created).toHaveLength(2);
       expect(report.created[1]!.unresolved).toEqual(['Clause 42']);
 
-      const first = (await a.admin.get(url(a, `/manage/answers/${report.created[0]!.id}`)).expect(200))
-        .body as Managed;
+      const first = (
+        await a.admin.get(url(a, `/manage/answers/${report.created[0]!.id}`)).expect(200)
+      ).body as Managed;
       expect(first).toMatchObject({ status: 'draft', source: 'ai', readyToApprove: true });
       const second = (
         await a.admin.get(url(a, `/manage/answers/${report.created[1]!.id}`)).expect(200)
@@ -334,7 +340,8 @@ describe.runIf(Boolean(testDatabaseUrl))('Approved answers', () => {
     it("never shows or links another organisation's answers or clauses", async () => {
       const bAnswer = await draft(b, {
         question: 'Who keeps the baobab fund accounts?',
-        answer: 'The Treasurer keeps the accounts, which are shown at every annual general meeting.',
+        answer:
+          'The Treasurer keeps the accounts, which are shown at every annual general meeting.',
         clauses: ['9'],
       });
       await approve(b, bAnswer.id);
@@ -383,7 +390,8 @@ describe.runIf(Boolean(testDatabaseUrl))('Approved answers', () => {
         (
           await draft(b, {
             question: 'How much notice is needed for the annual general meeting?',
-            answer: 'Members must receive at least 21 days’ written notice of the annual general meeting.',
+            answer:
+              'Members must receive at least 21 days’ written notice of the annual general meeting.',
             clauses: ['6'],
           })
         ).id,
@@ -412,9 +420,18 @@ describe.runIf(Boolean(testDatabaseUrl))('Approved answers', () => {
           .post(url(b, `/versions/${versionId}/sections/${flagged.id}/resolve`))
           .expect(200);
       }
-      await b.admin.post(url(b, `/versions/${versionId}/submit`)).send({ confirmed: true }).expect(200);
-      await b.admin.post(url(b, `/versions/${versionId}/approve`)).send({}).expect(200);
-      await b.admin.post(url(b, `/versions/${versionId}/publish`)).send({ confirmed: true }).expect(200);
+      await b.admin
+        .post(url(b, `/versions/${versionId}/submit`))
+        .send({ confirmed: true })
+        .expect(200);
+      await b.admin
+        .post(url(b, `/versions/${versionId}/approve`))
+        .send({})
+        .expect(200);
+      await b.admin
+        .post(url(b, `/versions/${versionId}/publish`))
+        .send({ confirmed: true })
+        .expect(200);
 
       const carried = (await b.admin.get(url(b, `/manage/answers/${unchanged.id}`)).expect(200))
         .body as Managed;
@@ -436,7 +453,8 @@ describe.runIf(Boolean(testDatabaseUrl))('Approved answers', () => {
         await b.admin
           .patch(url(b, `/manage/answers/${changing.id}`))
           .send({
-            answer: 'Members must receive at least 14 days’ written notice of the annual general meeting.',
+            answer:
+              'Members must receive at least 14 days’ written notice of the annual general meeting.',
             clauses: ['6'],
           })
           .expect(200)

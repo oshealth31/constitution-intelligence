@@ -26,15 +26,21 @@ test('an administrator writes, studies and approves an answer; members then see 
   await page.goto(`${CHOIR}/manage/answers`);
   await page.getByRole('button', { name: 'Write a new answer' }).click();
   const form = page.getByRole('form', { name: 'Write a new answer' });
-  await form.getByLabel('Question, as a member would ask it').fill('How many votes does each member have?');
+  await form
+    .getByLabel('Question, as a member would ask it')
+    .fill('How many votes does each member have?');
   await form
     .getByLabel('Answer in everyday words')
-    .fill('Each member has one vote. Most decisions are made by a simple majority of the members present.');
+    .fill(
+      'Each member has one vote. Most decisions are made by a simple majority of the members present.',
+    );
   await form.getByLabel('Clauses it is based on').fill('8');
   await form.getByRole('button', { name: 'Save as draft' }).click();
 
   // The review page: the answer next to the original clause, and the checks.
-  await expect(page.getByRole('heading', { name: 'How many votes does each member have?' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'How many votes does each member have?' }),
+  ).toBeVisible();
   await expect(page.getByText('Draft', { exact: true })).toBeVisible();
   await expect(
     page.locator('section', { has: page.getByRole('heading', { name: 'Original clauses' }) }),
@@ -78,7 +84,8 @@ test('imported AI drafts are labelled and wait for approval', async ({ page, bro
         answers: [
           {
             question: 'Who keeps the choir accounts?',
-            answer: 'The Treasurer keeps the accounts and presents them at every annual general meeting.',
+            answer:
+              'The Treasurer keeps the accounts and presents them at every annual general meeting.',
             clauses: ['9'],
             draftedBy: 'ai',
           },
@@ -86,7 +93,9 @@ test('imported AI drafts are labelled and wait for approval', async ({ page, bro
       }),
     ),
   });
-  await expect(page.getByText(/“drafts.json” has 1 answer, some of them marked as drafted by AI/)).toBeVisible();
+  await expect(
+    page.getByText(/“drafts.json” has 1 answer, some of them marked as drafted by AI/),
+  ).toBeVisible();
   await page.getByRole('button', { name: 'Import as drafts' }).click();
   await expect(page.getByText(/1 draft imported\. Nothing has been approved\./)).toBeVisible();
   const drafts = page.getByRole('list', { name: 'Draft' });
@@ -104,7 +113,9 @@ test('imported AI drafts are labelled and wait for approval', async ({ page, bro
   await member.getByLabel('Your question').fill('Who keeps the choir accounts?');
   await member.getByRole('button', { name: 'Ask', exact: true }).click();
   await expect(member.getByText('Was this helpful?')).toBeVisible();
-  await expect(member.getByRole('article', { name: /Who keeps the choir accounts/ })).toHaveCount(0);
+  await expect(member.getByRole('article', { name: /Who keeps the choir accounts/ })).toHaveCount(
+    0,
+  );
   await memberContext.close();
 });
 

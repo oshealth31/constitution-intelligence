@@ -100,7 +100,9 @@ function AnswerRow({ answer }: { answer: ManagedAnswer }) {
           <Badge tone="critical">{blocking === 1 ? '1 problem' : `${blocking} problems`}</Badge>
         )}
         {answer.status !== 'retired' && warnings > 0 && (
-          <Badge tone="warning">{warnings === 1 ? '1 thing to check' : `${warnings} to check`}</Badge>
+          <Badge tone="warning">
+            {warnings === 1 ? '1 thing to check' : `${warnings} to check`}
+          </Badge>
         )}
       </div>
       <p className="mt-1 text-sm text-slate-600">

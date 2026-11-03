@@ -81,7 +81,10 @@ export function ApprovedAnswerCard({
         Approved by {organisationName}
       </p>
       <Heading className="mt-2 text-lg font-semibold text-slate-900">{answer.question}</Heading>
-      <p data-testid="approved-answer-text" className="mt-2 text-lg whitespace-pre-line text-slate-900">
+      <p
+        data-testid="approved-answer-text"
+        className="mt-2 text-lg whitespace-pre-line text-slate-900"
+      >
         {answer.answer}
       </p>
       <p className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900 ring-1 ring-amber-200 ring-inset">

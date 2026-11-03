@@ -14,9 +14,9 @@ const quorum: LinkedClause = {
 
 describe('amountsIn', () => {
   it('reads numbers written as digits, words and fractions the same way', () => {
-    expect([...amountsIn('14 days, fourteen days, two-thirds, 2/3, half, 50%, 1,000 pula')]).toEqual(
-      expect.arrayContaining(['14', '2/3', '1/2', '1000']),
-    );
+    expect([
+      ...amountsIn('14 days, fourteen days, two-thirds, 2/3, half, 50%, 1,000 pula'),
+    ]).toEqual(expect.arrayContaining(['14', '2/3', '1/2', '1000']));
     expect(amountsIn('one third of members')).toEqual(new Set(['1/3']));
   });
 
@@ -38,7 +38,9 @@ describe('checkAnswer', () => {
 
   it('blocks mentions of clauses that are not linked, but allows the parent of a sub-clause', () => {
     const issues = checkAnswer('Clause 9 says one third.', [quorum]);
-    expect(issues).toEqual([expect.objectContaining({ code: 'unknown_reference', blocking: true })]);
+    expect(issues).toEqual([
+      expect.objectContaining({ code: 'unknown_reference', blocking: true }),
+    ]);
     const sub = { ...quorum, reference: '7(a)', referenceLabel: 'Clause 7(a)', number: '(a)' };
     expect(checkAnswer('Clause 7(a), part of Clause 7, says one third.', [sub])).toEqual([]);
   });

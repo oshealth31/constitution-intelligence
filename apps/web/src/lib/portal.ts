@@ -594,9 +594,7 @@ export interface AnswerImportRow {
  * question, an answer and its clauses (a list, or text like "7, 7(a)"). The server checks
  * everything again.
  */
-export function parseAnswerImport(
-  text: string,
-): { rows: AnswerImportRow[] } | { error: string } {
+export function parseAnswerImport(text: string): { rows: AnswerImportRow[] } | { error: string } {
   let data: unknown;
   try {
     data = JSON.parse(text);

@@ -381,7 +381,10 @@ export class ApprovedAnswersService {
   // ----- Helpers ------------------------------------------------------------------------------
 
   private match(scope: TenantScope, id: string) {
-    return and(eq(approvedAnswers.id, id), eq(approvedAnswers.organisationId, scope.organisationId));
+    return and(
+      eq(approvedAnswers.id, id),
+      eq(approvedAnswers.organisationId, scope.organisationId),
+    );
   }
 
   private async find(tx: TenantTransaction, scope: TenantScope, id: string, lock = false) {
@@ -603,7 +606,9 @@ export class ApprovedAnswersService {
         question: row.question,
         answer: row.answer,
         approvedAt: row.approvedAt?.toISOString() ?? null,
-        clauses: linked.map(({ versionStatus: _status, published: _published, ...clause }) => clause),
+        clauses: linked.map(
+          ({ versionStatus: _status, published: _published, ...clause }) => clause,
+        ),
       });
     }
     return visible;
@@ -711,7 +716,9 @@ export async function carryOverAnswers(
         reviewReason: reason.slice(0, 500),
         updatedAt: new Date(),
       })
-      .where(and(eq(approvedAnswers.id, answerId), eq(approvedAnswers.organisationId, organisationId)))
+      .where(
+        and(eq(approvedAnswers.id, answerId), eq(approvedAnswers.organisationId, organisationId)),
+      )
       .returning({ status: approvedAnswers.status });
     if (updated[0]?.status === 'needs_review') needsReview += 1;
   }

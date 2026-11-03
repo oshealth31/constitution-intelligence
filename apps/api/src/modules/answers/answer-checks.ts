@@ -22,10 +22,7 @@ export interface LinkedClause {
 }
 
 export type CheckCode =
-  | 'no_clauses'
-  | 'clause_not_published'
-  | 'unknown_reference'
-  | 'number_not_in_clauses';
+  'no_clauses' | 'clause_not_published' | 'unknown_reference' | 'number_not_in_clauses';
 
 export interface CheckIssue {
   code: CheckCode;

@@ -42,18 +42,18 @@ approver also wrote it.
 
 Run every time an answer is shown to someone managing it, and again on approval:
 
-| Check                                              | Effect                     |
-| -------------------------------------------------- | -------------------------- |
-| No clause linked                                   | Blocks approval            |
-| A linked clause is not in the current published version | Blocks approval       |
-| The answer mentions a clause number that is not linked (e.g. "Clause 12") | Blocks approval |
+| Check                                                                                     | Effect                   |
+| ----------------------------------------------------------------------------------------- | ------------------------ |
+| No clause linked                                                                          | Blocks approval          |
+| A linked clause is not in the current published version                                   | Blocks approval          |
+| The answer mentions a clause number that is not linked (e.g. "Clause 12")                 | Blocks approval          |
 | The answer contains an amount not in the linked clauses ("14 days", "half", "two-thirds") | Warning for the approver |
 
 Amounts are compared in one form: "fourteen" and "14", "two thirds" and "2/3", "half" and "50%"
 count as the same. The checks catch mechanical mistakes only; **they cannot tell whether an answer
 is a fair reading of the clauses**. That is what the person approving it is for, which is why they
-must tick: *"I have read this answer against the original clauses. It says nothing the clauses do
-not say, and it is not legal advice."*
+must tick: _"I have read this answer against the original clauses. It says nothing the clauses do
+not say, and it is not legal advice."_
 
 ### When a new version is published
 
@@ -69,7 +69,7 @@ over and how many need review.
 
 ## Importing drafts
 
-Manage → Approved answers → *Import drafts from a file*. A `.json` file, at most 200 answers:
+Manage → Approved answers → _Import drafts from a file_. A `.json` file, at most 200 answers:
 
 ```json
 {
@@ -88,8 +88,8 @@ Manage → Approved answers → *Import drafts from a file*. A `.json` file, at 
   They are matched to the **current published** constitution. A reference that cannot be found
   (or appears in more than one published document) is listed on the draft, which then cannot be
   approved until it is fixed.
-- `"draftedBy": "ai"` labels the draft *"Drafted by AI – check every word against the original"*;
-  the review page also shows a warning. Anything else is labelled *Imported*.
+- `"draftedBy": "ai"` labels the draft _"Drafted by AI – check every word against the original"_;
+  the review page also shows a warning. Anything else is labelled _Imported_.
 - Importing never approves anything.
 
 **Data protection:** if drafts are prepared with an AI service outside Botswana, the text given to
@@ -101,8 +101,8 @@ the data protection note in [ai.md](ai.md).
 
 On **Ask** (or **Find clauses** when AI is off):
 
-- when they type a question, matching approved answers come first, under *"Answered by
-  [organisation]"* — each with the label *"Approved by [organisation]"*, the answer, the
+- when they type a question, matching approved answers come first, under _"Answered by
+  [organisation]"_ — each with the label _"Approved by [organisation]"_, the answer, the
   not-legal-advice note, the original clauses word for word, and links to read them in the
   constitution;
 - before they type anything, a **Common questions** list of every approved answer.
@@ -115,23 +115,23 @@ that exists; the clause search or AI answer is still shown underneath.
 
 Members (`constitution.read`), under `/api/v1/organisations/:id`:
 
-| Method & path                     | Notes                                                       |
-| --------------------------------- | ----------------------------------------------------------- |
-| `GET /answers`                    | `{ disclaimer, answers[] }` — approved and current only     |
-| `GET /answers/match?question=...` | Up to 3 matching approved answers                           |
+| Method & path                     | Notes                                                   |
+| --------------------------------- | ------------------------------------------------------- |
+| `GET /answers`                    | `{ disclaimer, answers[] }` — approved and current only |
+| `GET /answers/match?question=...` | Up to 3 matching approved answers                       |
 
 Managing, under `/api/v1/organisations/:id/manage/answers`:
 
-| Method & path                         | Permission        | Notes                                                    |
-| ------------------------------------- | ----------------- | -------------------------------------------------------- |
-| `GET /`                               | `content.edit`    | All answers with linked clauses, check results, status   |
-| `POST /` `{ question, answer, clauses[] }` | `content.edit` | Creates a draft; unknown clauses are refused (400)     |
-| `POST /import` `{ answers[] }`        | `content.edit`    | Creates drafts; returns unresolved references per row    |
-| `GET /:id`, `PATCH /:id`              | `content.edit`    | Editing returns the answer to draft                      |
-| `DELETE /:id`                         | `content.edit`    | Not for approved answers (retire first)                  |
-| `POST /:id/approve` `{ confirmed }`   | `content.approve` | 409 while a blocking check fails; 400 without confirmation |
-| `POST /:id/retire`                    | `content.approve` |                                                          |
-| `POST /:id/restore`                   | `content.edit`    | Retired → draft                                          |
+| Method & path                              | Permission        | Notes                                                      |
+| ------------------------------------------ | ----------------- | ---------------------------------------------------------- |
+| `GET /`                                    | `content.edit`    | All answers with linked clauses, check results, status     |
+| `POST /` `{ question, answer, clauses[] }` | `content.edit`    | Creates a draft; unknown clauses are refused (400)         |
+| `POST /import` `{ answers[] }`             | `content.edit`    | Creates drafts; returns unresolved references per row      |
+| `GET /:id`, `PATCH /:id`                   | `content.edit`    | Editing returns the answer to draft                        |
+| `DELETE /:id`                              | `content.edit`    | Not for approved answers (retire first)                    |
+| `POST /:id/approve` `{ confirmed }`        | `content.approve` | 409 while a blocking check fails; 400 without confirmation |
+| `POST /:id/retire`                         | `content.approve` |                                                            |
+| `POST /:id/restore`                        | `content.edit`    | Retired → draft                                            |
 
 Every change is recorded in the audit log (`answer.created`, `answer.updated`, `answer.imported`,
 `answer.approved`, `answer.retired`, `answer.restored`, `answer.deleted`) with ids and counts only,

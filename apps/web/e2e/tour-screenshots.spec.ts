@@ -273,7 +273,7 @@ test('system tour', async ({ browser }) => {
 
   await a.goto(`${CHOIR}/manage/answers`);
   await expect(
-    a.getByText('How much notice is needed for the annual general meeting?'),
+    a.getByText('How much notice is needed for the annual general meeting?').first(),
   ).toBeVisible();
   await shot(a, '15-approved-answers-list', true);
   await a.getByRole('link', { name: 'Who keeps the choir accounts?' }).first().click();

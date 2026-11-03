@@ -81,8 +81,25 @@ export const configSchema = z
       .min(1024)
       .max(50 * 1024 * 1024)
       .default(10 * 1024 * 1024),
+
+    // AI question answering.
+    //   disabled  - no answers (the page says the service is not available)
+    //   anthropic - Anthropic's Claude models; needs ANTHROPIC_API_KEY (kept on the server only)
+    //   offline   - local development and tests only: no AI model; quotes the best-matching passage
+    AI_PROVIDER: z.enum(['disabled', 'anthropic', 'offline']).default('disabled'),
+    ANTHROPIC_API_KEY: z.string().min(20).optional(),
+    AI_MODEL: z.string().min(3).max(100).default('claude-sonnet-5-5'),
+    AI_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(120_000).default(30_000),
+    AI_MAX_QUESTIONS_PER_USER_PER_HOUR: z.coerce.number().int().min(1).max(1_000).default(30),
   })
   .superRefine((config, ctx) => {
+    if (config.AI_PROVIDER === 'anthropic' && !config.ANTHROPIC_API_KEY) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['ANTHROPIC_API_KEY'],
+        message: 'is required when AI_PROVIDER is "anthropic"',
+      });
+    }
     const deployed = config.APP_ENV === 'staging' || config.APP_ENV === 'production';
 
     if (config.APP_ENV === 'production' && config.NODE_ENV !== 'production') {
@@ -114,6 +131,13 @@ export const configSchema = z
         code: 'custom',
         path: ['CORS_ORIGINS'],
         message: 'must list the allowed web origins in staging and production',
+      });
+    }
+    if (config.AI_PROVIDER === 'offline') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['AI_PROVIDER'],
+        message: 'must not be "offline" in staging and production (it is not a real AI model)',
       });
     }
     if (config.MAIL_TRANSPORT === 'log') {

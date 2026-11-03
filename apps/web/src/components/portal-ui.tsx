@@ -49,6 +49,12 @@ export const SearchIcon = (props: SVGProps<SVGSVGElement>) => (
     <path d="m20.5 20.5-4.5-4.5" />
   </Icon>
 );
+export const ChatIcon = (props: SVGProps<SVGSVGElement>) => (
+  <Icon {...props}>
+    <path d="M4 5h16v11H9l-5 4z" />
+    <path d="M8 9h8M8 12h5" />
+  </Icon>
+);
 export const UserIcon = (props: SVGProps<SVGSVGElement>) => (
   <Icon {...props}>
     <circle cx="12" cy="8" r="4" />

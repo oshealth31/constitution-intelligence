@@ -53,6 +53,8 @@ export type AuditAction =
   | 'version.changes_requested'
   | 'version.published'
   | 'version.archived'
+  | 'ai.question_answered'
+  | 'ai.feedback_given'
   | 'subscription.updated'
   | 'support.content_accessed'
   | 'permission.denied';

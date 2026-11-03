@@ -407,3 +407,56 @@ export function documentProblem(file: { name: string; size: number }): string | 
   if (file.size > DOCUMENT_MAX_BYTES) return 'The file is larger than 10 MB.';
   return null;
 }
+
+// ----- AI questions (Stage 9) -----------------------------------------------------------------
+
+export interface AiStatus {
+  available: boolean;
+  mode: string;
+  disclaimer: string;
+  unsupportedMessage: string;
+}
+
+export interface AnswerCitation {
+  sectionId: string;
+  refKey: string;
+  kind: Section['kind'];
+  number: string | null;
+  heading: string | null;
+  reference: string | null;
+  referenceLabel: string | null;
+  location: string;
+  /** Exact words from the original text. */
+  quote: string;
+  /** The whole original text of the section, exactly as stored. */
+  sourceText: string;
+  sourcePage: number | null;
+  constitutionId: string;
+  constitutionTitle: string;
+  versionId: string;
+  versionNumber: number;
+  versionLabel: string;
+  publishedAt: string | null;
+}
+
+export interface AnswerResponse {
+  messageId: string;
+  conversationId: string;
+  question: string;
+  status: 'answered' | 'insufficient' | 'unavailable';
+  explanation: string | null;
+  message: string | null;
+  citations: AnswerCitation[];
+  disclaimer: string;
+  mode: string;
+}
+
+/** Splits the original text around the quoted words, so the quote can be marked in place. */
+export function locateQuote(
+  text: string,
+  quote: string,
+): { before: string; quote: string; after: string } | null {
+  const index = text.indexOf(quote);
+  if (index === -1 || quote.length === 0) return null;
+  return { before: text.slice(0, index), quote, after: text.slice(index + quote.length) };
+}

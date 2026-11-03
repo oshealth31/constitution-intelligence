@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import {
   BookIcon,
+  ChatIcon,
   HomeIcon,
   OrganisationLogo,
   PortalButton,
@@ -124,6 +125,7 @@ export default function SignedInPortalLayout({ children }: { children: ReactNode
     { href: portalPath(slug), label: 'Home', short: 'Home', icon: HomeIcon, exact: true },
     { href: portalPath(slug, '/library'), label: 'Read', short: 'Read', icon: BookIcon },
     { href: portalPath(slug, '/search'), label: 'Search', short: 'Search', icon: SearchIcon },
+    { href: portalPath(slug, '/ask'), label: 'Ask', short: 'Ask', icon: ChatIcon },
     ...(canManage(home.you.permissions)
       ? [
           {

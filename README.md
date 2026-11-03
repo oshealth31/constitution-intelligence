@@ -5,11 +5,11 @@ constitutions easy to access, search, understand and use.
 
 > _Empowering Your Governance, Safeguarding Your Future._
 
-**Status:** Stage 8 — search and constitution reader. Members search by keyword, clause
-number or title and read the current approved constitution with references and section
-navigation, on top of document management (Stage 7), branded portals (Stage 6), the control
-centre (Stage 5), tenant isolation (Stage 4) and sign-in and roles (Stage 3).
-It is **not production-ready**.
+**Status:** Stage 9 — AI question answering. Members ask questions in their own words and get
+a plain-language explanation with exact citations from their organisation's approved
+constitution, on top of search and the reader (Stage 8), document management (Stage 7), branded
+portals (Stage 6), the control centre (Stage 5), tenant isolation (Stage 4) and sign-in and roles
+(Stage 3). It is **not production-ready**.
 
 ## What is in this repository
 
@@ -95,6 +95,7 @@ in production.
 - [docs/portals.md](docs/portals.md) — organisation portals, branding and their safety rules
 - [docs/documents.md](docs/documents.md) — document upload, text extraction, review and the version workflow
 - [docs/search-and-reader.md](docs/search-and-reader.md) — search by keyword, clause number and title, and the reader
+- [docs/ai.md](docs/ai.md) — AI question answering, its safeguards and privacy
 - [docs/decisions](docs/decisions) — short records of major technical decisions
 
 ## Ownership

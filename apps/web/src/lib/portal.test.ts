@@ -12,6 +12,7 @@ import {
   highlightTerms,
   queryTerms,
   citation,
+  locateQuote,
   type Section,
 } from './portal';
 
@@ -138,5 +139,16 @@ describe('document management helpers', () => {
     expect(eventLabel('changes_requested')).toBe('Sent back for changes');
     expect(extractionLabel('not_started')).toBe('No file uploaded');
     expect(extractionLabel('needs_review')).toBe('Needs checking');
+  });
+});
+
+describe('answer quotes', () => {
+  it('marks the quote inside the original text without changing it', () => {
+    expect(locateQuote('The quorum is one third of members.', 'one third')).toEqual({
+      before: 'The quorum is ',
+      quote: 'one third',
+      after: ' of members.',
+    });
+    expect(locateQuote('The quorum.', 'not there')).toBeNull();
   });
 });

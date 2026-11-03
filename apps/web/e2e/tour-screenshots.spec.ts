@@ -6,6 +6,7 @@ import { expect, test, type Browser, type BrowserContext, type Page } from '@pla
 
 test.skip(!process.env.CAPTURE_SCREENSHOTS, 'Screenshots are only captured on request.');
 test.setTimeout(300_000);
+test.describe.configure({ retries: 0 });
 
 const accounts = JSON.parse(
   readFileSync(path.join(__dirname, '.auth', 'accounts.json'), 'utf8'),
@@ -275,7 +276,7 @@ test('system tour', async ({ browser }) => {
     a.getByText('How much notice is needed for the annual general meeting?'),
   ).toBeVisible();
   await shot(a, '15-approved-answers-list', true);
-  await a.getByRole('link', { name: 'Who keeps the choir accounts?' }).click();
+  await a.getByRole('link', { name: 'Who keeps the choir accounts?' }).first().click();
   await expect(a.getByText('This draft was written by AI.')).toBeVisible();
   await shot(a, '16-answer-review', true);
 

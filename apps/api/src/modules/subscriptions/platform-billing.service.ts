@@ -679,7 +679,8 @@ export class PlatformBillingService {
         await tx.execute(
           sql`SELECT 'RCP-' || to_char(now(), 'YYYY') || '-' || lpad(nextval('receipt_number_seq')::text, 4, '0') AS receipt`,
         )
-      ).rows as { receipt: string }[];
+      ).rows[0] as { receipt: string };
+      const receipt = receiptRow.receipt;
       await tx
         .update(payments)
         .set({
@@ -885,7 +886,8 @@ export class PlatformBillingService {
       await tx.execute(
         sql`SELECT 'INV-' || to_char(now(), 'YYYY') || '-' || lpad(nextval('invoice_number_seq')::text, 4, '0') AS number`,
       )
-    ).rows as { number: string }[];
+    ).rows[0] as { number: string };
+    const number = numberRow.number;
     await tx.insert(invoices).values({
       organisationId,
       subscriptionId,

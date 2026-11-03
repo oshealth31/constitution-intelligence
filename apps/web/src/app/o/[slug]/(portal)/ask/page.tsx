@@ -28,6 +28,7 @@ import {
   type MemberAnswers,
 } from '@/lib/portal';
 import { useApi } from '@/lib/use-api';
+import { useOnline } from '@/lib/use-online';
 import { usePortal } from '../portal-context';
 
 /**
@@ -36,11 +37,33 @@ import { usePortal } from '../portal-context';
  * With AI switched off, the page finds the matching clauses instead and shows them word for word.
  */
 export default function AskPage() {
-  const { api } = usePortal();
+  const { api, slug } = usePortal();
+  const online = useOnline();
   const status = useApi<AiStatus>(`${api}/ai/status`);
+  if (!online) return <OfflineAsk slug={slug} />;
   if (status.loading && !status.data) return <PortalLoading label="Loading…" />;
   if (!status.data?.available) return <ClauseFinder />;
   return <AskWithAi status={status.data} />;
+}
+
+/** Live answers need the server: say so plainly, and point to the saved copy's search. */
+function OfflineAsk({ slug }: { slug: string }) {
+  return (
+    <div className="max-w-3xl space-y-5">
+      <PortalHeading icon={<ChatIcon className="size-6" />} title="Ask a question" />
+      <Notice tone="warning">
+        <strong>You are offline.</strong> Live AI answers and “find relevant clauses” need an
+        internet connection, so they do not work offline. You can still search the copy of the
+        constitution saved on this device, if you saved one.
+      </Notice>
+      <a
+        href={`/offline/${slug}`}
+        className="inline-flex min-h-12 items-center rounded-xl bg-[var(--brand-primary)] px-5 py-3 text-base font-semibold text-[var(--brand-on-primary)]"
+      >
+        Search the saved copy
+      </a>
+    </div>
+  );
 }
 
 function AskWithAi({ status }: { status: AiStatus }) {

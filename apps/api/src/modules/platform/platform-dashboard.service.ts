@@ -13,7 +13,6 @@ import {
   organisationBranding,
   organisations,
   pingDatabase,
-  subscriptions,
   type Database,
 } from '@constitution/db';
 import { and, eq, ne, sql, type SQL } from 'drizzle-orm';
@@ -43,12 +42,6 @@ export interface AuditFilter {
   outcome?: string;
   before?: Date;
   limit: number;
-}
-
-export interface SubscriptionChange {
-  planCode: string;
-  status: 'trialing' | 'active' | 'past_due' | 'suspended' | 'cancelled';
-  currentPeriodEnd: Date | null;
 }
 
 const BRANDING_DEFAULTS = { primary: '#0B1F3A', accent: '#1BA6A6' };
@@ -211,7 +204,8 @@ export class PlatformDashboardService {
     const [subscription] = rowsOf<Row>(
       await this.db.execute(sql`
         SELECT s.id, s.plan_code AS "planCode", s.status, s.current_period_start AS "currentPeriodStart",
-               s.current_period_end AS "currentPeriodEnd", s.updated_at AS "updatedAt"
+               s.current_period_end AS "currentPeriodEnd", s.billing_interval AS "billingInterval",
+               s.auto_renew AS "autoRenew", s.updated_at AS "updatedAt"
         FROM organisations o
         JOIN subscriptions s ON s.id = o.current_subscription_id AND s.organisation_id = o.id
         WHERE o.id = ${organisationId}`),
@@ -398,93 +392,6 @@ export class PlatformDashboardService {
       targetType: 'organisation',
       targetId: organisationId,
       metadata: { fields: Object.keys(change), by: 'platform' },
-      meta,
-    });
-    return this.getOrganisation(organisationId);
-  }
-
-  /** Records a subscription change made by the platform owner. No payment provider is involved yet. */
-  async setSubscription(
-    organisationId: string,
-    change: SubscriptionChange,
-    actorUserId: string,
-    meta: RequestMeta,
-  ) {
-    const [organisation] = await this.db
-      .select({ currentSubscriptionId: organisations.currentSubscriptionId })
-      .from(organisations)
-      .where(eq(organisations.id, organisationId))
-      .limit(1);
-    if (!organisation) {
-      throw new NotFoundException('Organisation not found.');
-    }
-    const now = new Date();
-    if (change.currentPeriodEnd && change.currentPeriodEnd <= now) {
-      throw new BadRequestException('The period end date must be in the future.');
-    }
-
-    const before = organisation.currentSubscriptionId
-      ? (
-          await this.db
-            .select()
-            .from(subscriptions)
-            .where(
-              and(
-                eq(subscriptions.id, organisation.currentSubscriptionId),
-                eq(subscriptions.organisationId, organisationId),
-              ),
-            )
-            .limit(1)
-        )[0]
-      : undefined;
-
-    await this.db.transaction(async (tx) => {
-      if (before) {
-        await tx
-          .update(subscriptions)
-          .set({
-            planCode: change.planCode,
-            status: change.status,
-            currentPeriodEnd: change.currentPeriodEnd,
-            updatedAt: now,
-          })
-          .where(eq(subscriptions.id, before.id));
-      } else {
-        const [created] = await tx
-          .insert(subscriptions)
-          .values({
-            organisationId,
-            planCode: change.planCode,
-            status: change.status,
-            currentPeriodEnd: change.currentPeriodEnd,
-          })
-          .returning({ id: subscriptions.id });
-        await tx
-          .update(organisations)
-          .set({ currentSubscriptionId: created!.id, updatedAt: now })
-          .where(eq(organisations.id, organisationId));
-      }
-    });
-
-    await this.audit.record({
-      action: 'subscription.updated',
-      outcome: 'success',
-      actorUserId,
-      organisationId,
-      targetType: 'subscription',
-      targetId: before?.id,
-      metadata: {
-        from: before
-          ? {
-              planCode: before.planCode,
-              status: before.status,
-              currentPeriodEnd: before.currentPeriodEnd,
-            }
-          : null,
-        to: change,
-        by: 'platform',
-        paymentProvider: 'none (manual)',
-      },
       meta,
     });
     return this.getOrganisation(organisationId);

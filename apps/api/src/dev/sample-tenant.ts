@@ -59,7 +59,7 @@ export async function createSampleTenantContent(
 
   const [subscription] = await db
     .insert(subscriptions)
-    .values({ organisationId, planCode: 'trial', status: 'trialing' })
+    .values({ organisationId, planCode: 'trial', status: 'trialing', billingInterval: 'none' })
     .returning({ id: subscriptions.id });
   await db
     .update(organisations)

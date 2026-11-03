@@ -1,11 +1,13 @@
 import { createParamDecorator, ExecutionContext, SetMetadata } from '@nestjs/common';
-import type { OrganisationPermission } from '@constitution/shared';
+import type { OrganisationPermission, PlanFeature } from '@constitution/shared';
 import type { AppRequest, AuthContext, MembershipContext } from '../../common/request-context';
 import type { TenantScope } from '../tenancy/tenant-scope';
 
 export const IS_PUBLIC = 'access:isPublic';
 export const REQUIRED_ORG_PERMISSION = 'access:orgPermission';
 export const REQUIRES_SUPER_ADMIN = 'access:superAdmin';
+export const REQUIRED_FEATURE = 'access:planFeature';
+export const ALLOW_INACTIVE_SUBSCRIPTION = 'access:allowInactiveSubscription';
 
 /**
  * Marks a route as reachable without signing in.
@@ -19,6 +21,19 @@ export const Public = () => SetMetadata(IS_PUBLIC, true);
  */
 export const RequireOrgPermission = (permission: OrganisationPermission) =>
   SetMetadata(REQUIRED_ORG_PERMISSION, permission);
+
+/**
+ * Requires the organisation's plan to include `feature` (checked on the server together with
+ * the permission). Without it the request is refused with reason FEATURE_NOT_IN_PLAN.
+ */
+export const RequireFeature = (feature: PlanFeature) => SetMetadata(REQUIRED_FEATURE, feature);
+
+/**
+ * Lets a route work even when the organisation's subscription is suspended, missing or
+ * restricted — for the billing page (so an owner can see what is due and report a payment) and
+ * the portal home page (so members see why the portal is unavailable). Use sparingly.
+ */
+export const AllowInactiveSubscription = () => SetMetadata(ALLOW_INACTIVE_SUBSCRIPTION, true);
 
 /** Requires the signed-in user to be a Platform Super Admin. */
 export const RequireSuperAdmin = () => SetMetadata(REQUIRES_SUPER_ADMIN, true);

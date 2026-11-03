@@ -3,6 +3,7 @@
 import {
   bigint,
   boolean,
+  date,
   integer,
   jsonb,
   pgTable,
@@ -48,6 +49,31 @@ export const VERSION_STATUSES = [
 ] as const;
 export const SECTION_KINDS = ['part', 'chapter', 'section', 'clause', 'subclause'] as const;
 
+export const SUBSCRIPTION_BILLING_INTERVALS = ['monthly', 'annual', 'none'] as const;
+export const INVOICE_STATUSES = ['open', 'paid', 'void'] as const;
+export const PAYMENT_RECORD_STATUSES = ['pending_verification', 'verified', 'rejected'] as const;
+export const PAYMENT_RECORD_METHODS = ['bank_transfer', 'mobile_money', 'cash', 'cheque', 'other'] as const;
+
+/** Global (not organisation data): the product's plans, configured by Platform Super Admins. */
+export const plans = pgTable('plans', {
+  code: text('code').primaryKey(),
+  name: text('name').notNull(),
+  description: text('description'),
+  isPilot: boolean('is_pilot').notNull().default(false),
+  active: boolean('active').notNull().default(true),
+  currency: text('currency').notNull().default('BWP'),
+  monthlyPriceMinor: integer('monthly_price_minor'),
+  annualPriceMinor: integer('annual_price_minor'),
+  graceDays: integer('grace_days').notNull().default(14),
+  features: text('features').array().notNull().default([]),
+  maxMembers: integer('max_members'),
+  maxConstitutions: integer('max_constitutions'),
+  maxAiQuestionsPerMonth: integer('max_ai_questions_per_month'),
+  maxStorageMb: integer('max_storage_mb'),
+  createdAt,
+  updatedAt,
+});
+
 export const subscriptions = pgTable('subscriptions', {
   id: uuid('id').primaryKey().defaultRandom(),
   organisationId: organisationId(),
@@ -57,8 +83,65 @@ export const subscriptions = pgTable('subscriptions', {
     .notNull()
     .defaultNow(),
   currentPeriodEnd: timestamp('current_period_end', { withTimezone: true }),
+  billingInterval: text('billing_interval', { enum: SUBSCRIPTION_BILLING_INTERVALS }).notNull().default('monthly'),
+  autoRenew: boolean('auto_renew').notNull().default(true),
+  suspendedAt: timestamp('suspended_at', { withTimezone: true }),
+  suspensionReason: text('suspension_reason'),
+  cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
+  cancellationReason: text('cancellation_reason'),
   createdAt,
   updatedAt,
+});
+
+export const invoices = pgTable('invoices', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organisationId: organisationId(),
+  subscriptionId: uuid('subscription_id').notNull(),
+  number: text('number').notNull(),
+  description: text('description').notNull(),
+  periodStart: timestamp('period_start', { withTimezone: true }),
+  periodEnd: timestamp('period_end', { withTimezone: true }),
+  amountMinor: integer('amount_minor').notNull(),
+  currency: text('currency').notNull(),
+  status: text('status', { enum: INVOICE_STATUSES }).notNull().default('open'),
+  issuedAt: timestamp('issued_at', { withTimezone: true }).notNull().defaultNow(),
+  dueAt: timestamp('due_at', { withTimezone: true }).notNull(),
+  paidAt: timestamp('paid_at', { withTimezone: true }),
+  voidedAt: timestamp('voided_at', { withTimezone: true }),
+  voidReason: text('void_reason'),
+  createdByUserId: uuid('created_by_user_id').references(() => users.id, { onDelete: 'set null' }),
+});
+
+/** A record that someone says money was paid. Counts only once verified. No card fields. */
+export const payments = pgTable('payments', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organisationId: organisationId(),
+  invoiceId: uuid('invoice_id').notNull(),
+  amountMinor: integer('amount_minor').notNull(),
+  currency: text('currency').notNull(),
+  method: text('method', { enum: PAYMENT_RECORD_METHODS }).notNull(),
+  reference: text('reference').notNull(),
+  paidOn: date('paid_on', { mode: 'string' }).notNull(),
+  notes: text('notes'),
+  status: text('status', { enum: PAYMENT_RECORD_STATUSES }).notNull().default('pending_verification'),
+  reportedByUserId: uuid('reported_by_user_id').references(() => users.id, { onDelete: 'set null' }),
+  reportedAt: timestamp('reported_at', { withTimezone: true }).notNull().defaultNow(),
+  verifiedByUserId: uuid('verified_by_user_id').references(() => users.id, { onDelete: 'set null' }),
+  verifiedAt: timestamp('verified_at', { withTimezone: true }),
+  verificationNote: text('verification_note'),
+  rejectionReason: text('rejection_reason'),
+  receiptNumber: text('receipt_number'),
+});
+
+export const subscriptionEvents = pgTable('subscription_events', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organisationId: organisationId(),
+  subscriptionId: uuid('subscription_id'),
+  kind: text('kind').notNull(),
+  summary: text('summary').notNull(),
+  detail: jsonb('detail').$type<Record<string, unknown>>().notNull().default({}),
+  actorUserId: uuid('actor_user_id').references(() => users.id, { onDelete: 'set null' }),
+  createdAt,
 });
 
 export const files = pgTable('files', {

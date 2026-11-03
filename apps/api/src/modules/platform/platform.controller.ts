@@ -12,7 +12,8 @@ import {
   Query,
   Req,
 } from '@nestjs/common';
-import { ORGANISATION_STATUSES, SUBSCRIPTION_STATUSES, USER_STATUSES } from '@constitution/db';
+import { ORGANISATION_STATUSES, USER_STATUSES } from '@constitution/db';
+import { BILLING_INTERVALS } from '@constitution/shared';
 import { z } from 'zod';
 import { parseId } from '../../common/ids';
 import { requestMeta, type AppRequest, type AuthContext } from '../../common/request-context';
@@ -22,6 +23,7 @@ import { brandingChangeSchema, slugSchema } from '../organisations/branding-inpu
 import { InvitationsService } from '../organisations/invitations.service';
 import { PlatformDashboardService } from './platform-dashboard.service';
 import { PlatformService } from './platform.service';
+import { PlatformBillingService } from '../subscriptions/platform-billing.service';
 
 const nameSchema = z.string().trim().min(2).max(200);
 const createOrganisationSchema = z.object({ name: nameSchema, slug: slugSchema });
@@ -45,7 +47,17 @@ const subscriptionSchema = z.object({
     .trim()
     .toLowerCase()
     .regex(/^[a-z0-9_-]{2,40}$/, { error: 'must be 2-40 lower-case letters, numbers, - or _' }),
-  status: z.enum(SUBSCRIPTION_STATUSES),
+  // Suspension and cancellation have their own steps (with a reason): see PlatformBillingController.
+  status: z.enum(['trialing', 'active'], {
+    error: 'must be "trialing" (pilot) or "active"; use suspend or cancel for those changes',
+  }),
+  billingInterval: z.enum(BILLING_INTERVALS).optional(),
+  autoRenew: z.boolean().optional(),
+  currentPeriodStart: z.iso
+    .datetime({ offset: true, error: 'must be a date and time' })
+    .nullable()
+    .optional()
+    .transform((value) => (value ? new Date(value) : null)),
   currentPeriodEnd: z.iso
     .datetime({ offset: true, error: 'must be a date and time' })
     .nullable()
@@ -87,6 +99,7 @@ export class PlatformController {
     private readonly platform: PlatformService,
     private readonly dashboard: PlatformDashboardService,
     private readonly invitations: InvitationsService,
+    private readonly billing: PlatformBillingService,
   ) {}
 
   @Get('overview')
@@ -172,23 +185,28 @@ export class PlatformController {
 
   /** Manual subscription management. No payment provider is connected yet. */
   @Put('organisations/:organisationId/subscription')
-  setSubscription(
+  async setSubscription(
     @CurrentAuth() auth: AuthContext,
     @Param('organisationId') organisationId: string,
     @Body() body: unknown,
     @Req() request: AppRequest,
   ) {
     const change = parseInput(subscriptionSchema, body);
-    return this.dashboard.setSubscription(
-      parseId(organisationId, 'Organisation'),
+    const id = parseId(organisationId, 'Organisation');
+    await this.billing.updateSubscription(
+      id,
       {
         planCode: change.planCode,
         status: change.status,
-        currentPeriodEnd: change.currentPeriodEnd,
+        billingInterval: change.billingInterval,
+        autoRenew: change.autoRenew,
+        currentPeriodStart: change.currentPeriodStart,
+        currentPeriodEnd: change.currentPeriodEnd ?? null,
       },
       auth.userId,
       requestMeta(request),
     );
+    return this.dashboard.getOrganisation(id);
   }
 
   /** Invites the first (or an additional) Organisation Owner. */

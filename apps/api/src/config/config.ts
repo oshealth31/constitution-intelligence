@@ -91,6 +91,12 @@ export const configSchema = z
     AI_MODEL: z.string().min(3).max(100).default('claude-sonnet-5-5'),
     AI_TIMEOUT_MS: z.coerce.number().int().min(1_000).max(120_000).default(30_000),
     AI_MAX_QUESTIONS_PER_USER_PER_HOUR: z.coerce.number().int().min(1).max(1_000).default(30),
+    // Days an organisation's data is kept, untouched, after its access becomes restricted
+    // (subscription lapsed or cancelled and the grace period over). See docs/subscriptions.md.
+    SUBSCRIPTION_DATA_RETENTION_DAYS: z.coerce.number().int().min(30).max(3_650).default(90),
+    // How organisations should pay (for example bank details), shown on their billing page.
+    // Not secret. When not set, the page says that Constitution Intelligence will send details.
+    BILLING_PAYMENT_INSTRUCTIONS: z.string().trim().min(10).max(1_000).optional(),
   })
   .superRefine((config, ctx) => {
     if (config.AI_PROVIDER === 'anthropic' && !config.ANTHROPIC_API_KEY) {

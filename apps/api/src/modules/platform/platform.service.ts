@@ -53,6 +53,7 @@ export class PlatformService {
           organisationId: organisation.id,
           planCode: 'trial',
           status: 'trialing',
+          billingInterval: 'none',
           currentPeriodEnd: new Date(Date.now() + TRIAL_DAYS * 86_400_000),
         })
         .returning({ id: subscriptions.id });

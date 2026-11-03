@@ -15,7 +15,7 @@ import { z } from 'zod';
 import { parseId } from '../../common/ids';
 import { requestMeta, type AppRequest } from '../../common/request-context';
 import { parseInput } from '../../common/validation';
-import { RequireOrgPermission, Tenant } from '../access/decorators';
+import { RequireFeature, RequireOrgPermission, Tenant } from '../access/decorators';
 import type { TenantScope } from '../tenancy/tenant-scope';
 import { APPROVED_ANSWER_DISCLAIMER, ApprovedAnswersService } from './approved-answers.service';
 
@@ -65,6 +65,7 @@ const matchSchema = z.object({ question: z.string().trim().min(3).max(500) });
 
 /** Members: approved answers. Base path: /api/v1/organisations/:organisationId/answers */
 @Controller('organisations/:organisationId/answers')
+@RequireFeature('approved_answers')
 export class ApprovedAnswersController {
   constructor(private readonly answers: ApprovedAnswersService) {}
 
@@ -94,6 +95,7 @@ export class ApprovedAnswersController {
  * Base path: /api/v1/organisations/:organisationId/manage/answers
  */
 @Controller('organisations/:organisationId/manage/answers')
+@RequireFeature('approved_answers')
 export class ManageAnswersController {
   constructor(private readonly answers: ApprovedAnswersService) {}
 

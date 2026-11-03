@@ -11,6 +11,8 @@ import { ConsoleUserContext, type ConsoleUser } from './console-context';
 const NAVIGATION = [
   { href: '/admin', label: 'Overview' },
   { href: '/admin/organisations', label: 'Organisations' },
+  { href: '/admin/billing', label: 'Billing' },
+  { href: '/admin/plans', label: 'Plans' },
   { href: '/admin/support', label: 'Support' },
   { href: '/admin/audit', label: 'Audit log' },
   { href: '/admin/health', label: 'System health' },

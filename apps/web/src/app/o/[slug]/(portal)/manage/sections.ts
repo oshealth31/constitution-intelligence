@@ -33,6 +33,12 @@ export const MANAGE_SECTIONS = [
     permission: 'content.edit',
   },
   {
+    path: '/manage/subscription',
+    title: 'Subscription',
+    description: 'Plan, renewal, invoices, payments and receipts.',
+    permission: 'billing.read',
+  },
+  {
     path: '/manage/address',
     title: 'Portal address',
     description: 'The web address members use to reach this portal.',

@@ -3,7 +3,7 @@ const STATUS_LABELS: Record<string, string> = {
   suspended: 'Suspended',
   archived: 'Archived',
   deactivated: 'Deactivated',
-  trialing: 'Trial',
+  trialing: 'Pilot',
   past_due: 'Past due',
   cancelled: 'Cancelled',
   draft: 'Draft',

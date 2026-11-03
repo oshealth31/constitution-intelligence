@@ -68,6 +68,17 @@ export type AuditAction =
   | 'simple_words.withdrawn'
   | 'simple_words.deleted'
   | 'subscription.updated'
+  | 'subscription.suspended'
+  | 'subscription.reactivated'
+  | 'subscription.cancelled'
+  | 'subscription.renewed'
+  | 'plan.created'
+  | 'plan.updated'
+  | 'invoice.issued'
+  | 'invoice.voided'
+  | 'payment.reported'
+  | 'payment.verified'
+  | 'payment.rejected'
   | 'support.content_accessed'
   | 'permission.denied';
 

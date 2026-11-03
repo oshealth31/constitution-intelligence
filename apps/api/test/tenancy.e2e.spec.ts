@@ -192,23 +192,23 @@ describe.runIf(Boolean(testDatabaseUrl))('tenant isolation', () => {
     it('returns only the caller organisation’s published sections', async () => {
       const base = `/api/v1/organisations/${a.ids.organisationId}`;
       const shared = await memberA.get(`${base}/search?q=quorum`).expect(200);
-      expect(shared.body.length).toBeGreaterThan(0);
+      expect(shared.body.results.length).toBeGreaterThan(0);
       expect(
-        shared.body.every(
+        shared.body.results.every(
           (match: { versionId: string }) => match.versionId === a.ids.publishedVersionId,
         ),
       ).toBe(true);
 
       const theirWord = await memberA.get(`${base}/search?q=${b.uniqueWord}`).expect(200);
-      expect(theirWord.body).toEqual([]);
+      expect(theirWord.body.results).toEqual([]);
 
       const ownWord = await memberA.get(`${base}/search?q=${a.uniqueWord}`).expect(200);
-      expect(ownWord.body.map((match: { sectionId: string }) => match.sectionId)).toEqual([
+      expect(ownWord.body.results.map((match: { sectionId: string }) => match.sectionId)).toEqual([
         a.ids.quorumSectionId,
       ]);
 
       const draftWording = await reviewerA.get(`${base}/search?q=${a.uniqueWord}draft`).expect(200);
-      expect(draftWording.body).toEqual([]);
+      expect(draftWording.body.results).toEqual([]);
     });
 
     it('never gives the AI another organisation’s text', async () => {

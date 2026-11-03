@@ -66,6 +66,11 @@ export interface Section {
   heading: string | null;
   body: string;
   position: number;
+  /** Worked out by the server from stored numbers, e.g. "7(a)" / "Clause 7(a)". */
+  reference?: string | null;
+  referenceLabel?: string | null;
+  /** Page of the original document this section starts on, when known. */
+  sourcePage?: number | null;
 }
 
 export interface SectionNode extends Section {
@@ -73,16 +78,34 @@ export interface SectionNode extends Section {
   children: SectionNode[];
 }
 
-export interface SearchMatch {
+/** One search result: stored wording and numbers only, with references worked out from them. */
+export interface SearchResult {
   sectionId: string;
-  versionId: string;
-  constitutionId: string;
-  constitutionTitle: string;
   refKey: string;
+  kind: Section['kind'];
   number: string | null;
   heading: string | null;
-  snippet: string;
-  rank: number;
+  reference: string | null;
+  referenceLabel: string | null;
+  path: { refKey: string; number: string | null; heading: string | null }[];
+  /** An exact slice of the original wording; "…" marks left-out text. */
+  excerpt: string;
+  matchedBy: 'reference' | 'title' | 'text';
+  sourcePage: number | null;
+  constitutionId: string;
+  constitutionTitle: string;
+  versionId: string;
+  versionNumber: number;
+  versionLabel: string;
+  publishedAt: string | null;
+}
+
+export interface SearchResponse {
+  query: string;
+  interpretedAs: { type: 'clause' | 'part' | 'chapter'; display: string } | null;
+  terms: string[];
+  results: SearchResult[];
+  suggestions: string[];
 }
 
 export interface ContentStatusConstitution {
@@ -160,22 +183,51 @@ export function sectionAnchor(refKey: string): string {
   return `section-${refKey}`;
 }
 
+
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 /**
- * Splits a search snippet into plain and highlighted parts. The API marks matches as
- * [[like this]]; everything is returned as text for React to display safely (never as HTML).
+ * Splits text into plain and highlighted parts for the given search terms (matched at the start
+ * of words, ignoring case). The text itself is never changed; React shows every part as text.
  */
-export function splitHighlights(snippet: string): { text: string; highlight: boolean }[] {
+export function highlightTerms(
+  text: string,
+  terms: readonly string[],
+): { text: string; highlight: boolean }[] {
+  const usable = [...new Set(terms.map((term) => term.trim()).filter((term) => term.length > 0))]
+    .sort((a, b) => b.length - a.length)
+    .map(escapeRegExp);
+  if (usable.length === 0 || text.length === 0) return text ? [{ text, highlight: false }] : [];
+  const pattern = new RegExp(`(?<![\\p{L}\\p{N}])(${usable.join('|')})`, 'giu');
   const parts: { text: string; highlight: boolean }[] = [];
-  const pattern = /\[\[(.*?)\]\]/g;
   let last = 0;
-  for (let match = pattern.exec(snippet); match; match = pattern.exec(snippet)) {
-    if (match.index > last)
-      parts.push({ text: snippet.slice(last, match.index), highlight: false });
-    if (match[1]) parts.push({ text: match[1], highlight: true });
-    last = match.index + match[0].length;
+  for (const match of text.matchAll(pattern)) {
+    const start = match.index ?? 0;
+    if (start > last) parts.push({ text: text.slice(last, start), highlight: false });
+    parts.push({ text: match[0], highlight: true });
+    last = start + match[0].length;
   }
-  if (last < snippet.length) parts.push({ text: snippet.slice(last), highlight: false });
+  if (last < text.length) parts.push({ text: text.slice(last), highlight: false });
   return parts;
+}
+
+/** The same words a search used, taken from the query (operators and very common words left out). */
+export function queryTerms(query: string): string[] {
+  const ignored = new Set(['or', 'and', 'the', 'of', 'a', 'an', 'to', 'in']);
+  const words = query.toLowerCase().match(/[\p{L}\p{N}][\p{L}\p{N}'’-]*/gu) ?? [];
+  return [...new Set(words.filter((word) => !ignored.has(word)))].slice(0, 10);
+}
+
+/** A citation people can copy: "Constitution of X, Registered constitution (version 1), Clause 7(a)". */
+export function citation(
+  constitutionTitle: string,
+  version: { label: string; versionNumber: number },
+  section: Pick<Section, 'kind' | 'number' | 'heading' | 'referenceLabel'>,
+): string {
+  const where = section.referenceLabel ?? sectionTitle(section);
+  return `${constitutionTitle}, ${version.label} (version ${version.versionNumber}), ${where}`;
 }
 
 /** Arranges sections (already in reading order) into parts, clauses and sub-clauses. */

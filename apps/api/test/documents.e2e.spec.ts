@@ -430,7 +430,7 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
       expect(library.body[0].published.versionId).toBe(versionId);
       const search = await a.member.get(url(a, '/search?q=heron')).expect(200);
       expect(
-        search.body.some((match: { versionId: string }) => match.versionId === versionId),
+        search.body.results.some((match: { versionId: string }) => match.versionId === versionId),
       ).toBe(true);
 
       const old = await a.reviewer

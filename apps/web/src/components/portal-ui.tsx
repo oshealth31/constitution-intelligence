@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode, SVGProps } from 'react';
 import { initials } from '@/lib/branding';
+import { highlightTerms } from '@/lib/portal';
 
 /**
  * Building blocks for organisation portals. Colours come from the CSS variables set by
@@ -293,5 +294,28 @@ export function PortalLoading({ label = 'Loading…' }: { label?: string }) {
       <span className="size-6 animate-spin rounded-full border-[3px] border-[var(--brand-accent)] border-t-transparent" />
       {label}
     </div>
+  );
+}
+
+/**
+ * Shows text with search terms marked. The words are exactly as stored; only <mark> tags are
+ * added around matches, and everything is rendered as text (never as HTML).
+ */
+export function Highlighted({ text, terms }: { text: string; terms: readonly string[] }) {
+  return (
+    <>
+      {highlightTerms(text, terms).map((part, index) =>
+        part.highlight ? (
+          <mark
+            key={index}
+            className="rounded bg-[var(--brand-accent)] px-0.5 text-[var(--brand-on-accent)]"
+          >
+            {part.text}
+          </mark>
+        ) : (
+          <span key={index}>{part.text}</span>
+        ),
+      )}
+    </>
   );
 }

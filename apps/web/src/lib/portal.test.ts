@@ -9,7 +9,9 @@ import {
   contentsEntries,
   portalPath,
   sectionTitle,
-  splitHighlights,
+  highlightTerms,
+  queryTerms,
+  citation,
   type Section,
 } from './portal';
 
@@ -23,25 +25,43 @@ const section = (overrides: Partial<Section> & Pick<Section, 'id' | 'position'>)
   ...overrides,
 });
 
-describe('search highlights', () => {
-  it('splits marked matches into highlighted text parts', () => {
-    expect(splitHighlights('The [[quorum]] is one third of [[members]].')).toEqual([
+describe('search term highlighting', () => {
+  it('marks whole-word starts of each term, ignoring case', () => {
+    expect(highlightTerms('The quorum for a General meeting and subquorum.', ['quorum', 'general'])).toEqual([
       { text: 'The ', highlight: false },
       { text: 'quorum', highlight: true },
-      { text: ' is one third of ', highlight: false },
-      { text: 'members', highlight: true },
-      { text: '.', highlight: false },
+      { text: ' for a ', highlight: false },
+      { text: 'General', highlight: true },
+      { text: ' meeting and subquorum.', highlight: false },
     ]);
   });
 
-  it('keeps HTML in a snippet as plain text', () => {
-    const parts = splitHighlights('<img src=x onerror=alert(1)> [[quorum]]');
+  it('never changes the text and keeps HTML as plain text', () => {
+    const text = '<img src=x onerror=alert(1)> two-thirds majority (.*)';
+    const parts = highlightTerms(text, ['two-thirds', '.*', 'majority']);
+    expect(parts.map((part) => part.text).join('')).toBe(text);
     expect(parts[0]).toEqual({ text: '<img src=x onerror=alert(1)> ', highlight: false });
+    expect(parts.filter((part) => part.highlight).map((part) => part.text)).toEqual(['two-thirds', 'majority', '.*']);
   });
 
-  it('handles snippets without matches', () => {
-    expect(splitHighlights('plain')).toEqual([{ text: 'plain', highlight: false }]);
-    expect(splitHighlights('')).toEqual([]);
+  it('handles no terms and empty text', () => {
+    expect(highlightTerms('plain', [])).toEqual([{ text: 'plain', highlight: false }]);
+    expect(highlightTerms('', ['x'])).toEqual([]);
+  });
+
+  it('takes the words from a query', () => {
+    expect(queryTerms('The quorum OR "general meeting"')).toEqual(['quorum', 'general', 'meeting']);
+  });
+
+  it('writes a citation from stored numbers', () => {
+    expect(
+      citation('Constitution of X', { label: 'Registered constitution', versionNumber: 1 }, {
+        kind: 'subclause',
+        number: '(a)',
+        heading: null,
+        referenceLabel: 'Clause 7(a)',
+      }),
+    ).toBe('Constitution of X, Registered constitution (version 1), Clause 7(a)');
   });
 });
 

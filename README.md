@@ -5,10 +5,11 @@ constitutions easy to access, search, understand and use.
 
 > _Empowering Your Governance, Safeguarding Your Future._
 
-**Status:** Stage 7 — constitution document management. Organisations upload PDF or Word
-constitutions, check and correct the extracted text, and approve and publish versions, inside
-their branded portals (Stage 6), on top of the control centre (Stage 5), tenant isolation (Stage 4)
-and sign-in and roles (Stage 3). It is **not production-ready**.
+**Status:** Stage 8 — search and constitution reader. Members search by keyword, clause
+number or title and read the current approved constitution with references and section
+navigation, on top of document management (Stage 7), branded portals (Stage 6), the control
+centre (Stage 5), tenant isolation (Stage 4) and sign-in and roles (Stage 3).
+It is **not production-ready**.
 
 ## What is in this repository
 
@@ -93,6 +94,7 @@ in production.
 - [docs/control-centre.md](docs/control-centre.md) — the Platform Super Admin control centre
 - [docs/portals.md](docs/portals.md) — organisation portals, branding and their safety rules
 - [docs/documents.md](docs/documents.md) — document upload, text extraction, review and the version workflow
+- [docs/search-and-reader.md](docs/search-and-reader.md) — search by keyword, clause number and title, and the reader
 - [docs/decisions](docs/decisions) — short records of major technical decisions
 
 ## Ownership

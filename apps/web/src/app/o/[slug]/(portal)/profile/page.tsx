@@ -3,7 +3,9 @@
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { Notice, Panel, PortalButton, PortalHeading, UserIcon } from '@/components/portal-ui';
+import { OfflineCard } from '@/components/offline-ui';
 import { apiFetch, describeError } from '@/lib/api';
+import { clearAllOfflineData } from '@/lib/offline-store';
 import { portalPath } from '@/lib/portal';
 import { usePortal } from '../portal-context';
 
@@ -72,6 +74,7 @@ export default function ProfilePage() {
     setSigningOut(scope);
     try {
       await apiFetch(scope === 'here' ? '/auth/logout' : '/auth/logout-all', { method: 'POST' });
+      await clearAllOfflineData();
     } finally {
       router.replace(portalPath(slug, '/sign-in'));
     }
@@ -80,6 +83,8 @@ export default function ProfilePage() {
   return (
     <div className="max-w-2xl space-y-5">
       <PortalHeading icon={<UserIcon className="size-6" />} title="My profile" />
+
+      <OfflineCard slug={slug} organisationId={home.organisation.id} userId={user.id} />
 
       <Panel title="Your details">
         <dl className="grid gap-3 text-base sm:grid-cols-[10rem_1fr]">

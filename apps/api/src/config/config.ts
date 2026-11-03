@@ -97,6 +97,9 @@ export const configSchema = z
     // How organisations should pay (for example bank details), shown on their billing page.
     // Not secret. When not set, the page says that Constitution Intelligence will send details.
     BILLING_PAYMENT_INSTRUCTIONS: z.string().trim().min(10).max(1_000).optional(),
+    // How long a copy downloaded for offline reading may be shown without being refreshed.
+    // After this the device hides it until it can sync again (see docs/offline.md).
+    OFFLINE_COPY_MAX_AGE_DAYS: z.coerce.number().int().min(1).max(90).default(30),
   })
   .superRefine((config, ctx) => {
     if (config.AI_PROVIDER === 'anthropic' && !config.ANTHROPIC_API_KEY) {

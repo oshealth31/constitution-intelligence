@@ -18,6 +18,14 @@ import { ApiError, apiFetch, type CurrentUser } from '@/lib/api';
 import { brand } from '@/lib/brand';
 import { brandStyle } from '@/lib/branding';
 import { canManage, portalPath, type AiStatus, type PortalHome } from '@/lib/portal';
+import {
+  ConnectionBanner,
+  OfflineSyncer,
+  ServiceWorkerRegistration,
+  useOfflineCopy,
+} from '@/components/offline-ui';
+import { formatDate } from '@/lib/format';
+import { clearAllOfflineData } from '@/lib/offline-store';
 import { usePublicPortal } from '../public-portal-context';
 import { PortalSessionContext, type PortalSession } from './portal-context';
 
@@ -91,6 +99,8 @@ export default function SignedInPortalLayout({ children }: { children: ReactNode
     setSigningOut(true);
     try {
       await apiFetch('/auth/logout', { method: 'POST' });
+      // Signing out also removes anything saved on this device for offline reading.
+      await clearAllOfflineData();
     } finally {
       router.replace(portalPath(slug, '/sign-in'));
     }
@@ -104,11 +114,7 @@ export default function SignedInPortalLayout({ children }: { children: ReactNode
     );
   }
   if (gate.kind === 'error') {
-    return (
-      <div className="flex min-h-dvh items-center justify-center p-6 text-center text-base text-slate-600">
-        The portal could not be reached. Please check your connection and refresh the page.
-      </div>
-    );
+    return <Unreachable slug={slug} />;
   }
   if (gate.kind === 'no-access') {
     return (
@@ -204,6 +210,9 @@ export default function SignedInPortalLayout({ children }: { children: ReactNode
         </header>
 
         <main id="main" className="mx-auto w-full max-w-6xl px-4 pt-6 pb-28 sm:px-6 md:pb-12">
+          <ServiceWorkerRegistration />
+          <OfflineSyncer slug={slug} organisationId={session.organisationId} userId={session.user.id} />
+          <ConnectionBanner slug={slug} />
           <SubscriptionNotice
             slug={slug}
             home={home}
@@ -313,5 +322,23 @@ function SubscriptionNotice({
       {banner}
       {children}
     </>
+  );
+}
+
+/** The portal could not be loaded (usually no connection): offer this device's saved copy. */
+function Unreachable({ slug }: { slug: string }) {
+  const { copy } = useOfflineCopy(slug);
+  return (
+    <div className="flex min-h-dvh flex-col items-center justify-center gap-4 p-6 text-center text-base text-slate-600">
+      <p>The portal could not be reached. Please check your connection and refresh the page.</p>
+      {copy && (
+        <a
+          href={`/offline/${slug}`}
+          className="inline-flex min-h-12 items-center rounded-xl bg-[#0b1f3a] px-5 py-3 font-semibold text-white"
+        >
+          Read the copy saved on {formatDate(copy.syncedAt)}
+        </a>
+      )}
+    </div>
   );
 }

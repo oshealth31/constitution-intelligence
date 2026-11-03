@@ -21,7 +21,11 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   async headers() {
-    return [{ source: '/:path*', headers: securityHeaders }];
+    return [
+      { source: '/:path*', headers: securityHeaders },
+      // The service worker must always be checked for updates.
+      { source: '/sw.js', headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }] },
+    ];
   },
   async rewrites() {
     return [{ source: '/api/v1/:path*', destination: `${apiInternalUrl}/api/v1/:path*` }];

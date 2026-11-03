@@ -11,6 +11,7 @@ import { CsrfGuard } from './modules/access/csrf.guard';
 import { PermissionGuard } from './modules/access/permission.guard';
 import { AiModule } from './modules/ai/ai.module';
 import { ApprovedAnswersModule } from './modules/answers/approved-answers.module';
+import { OfflineModule } from './modules/offline/offline.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -53,6 +54,7 @@ export class AppModule {
         DocumentsModule,
         ApprovedAnswersModule,
         SubscriptionsModule,
+        OfflineModule,
       ],
       providers: [
         { provide: APP_FILTER, useClass: AllExceptionsFilter },

@@ -11,6 +11,7 @@ import {
 } from '@/components/portal-ui';
 import { formatDate } from '@/lib/format';
 import { canManage, portalPath } from '@/lib/portal';
+import { OfflineCard } from '@/components/offline-ui';
 import { usePortal } from './portal-context';
 
 /** Organisation home page: welcome message and the main things people come to do. */
@@ -52,6 +53,10 @@ export default function PortalHomePage() {
           )}
         </div>
       </section>
+
+      {library.published > 0 && (
+        <OfflineCard slug={slug} organisationId={organisation.id} userId={user.id} />
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <ActionTile

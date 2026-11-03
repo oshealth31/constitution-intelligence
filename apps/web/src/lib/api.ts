@@ -10,6 +10,8 @@ export class ApiError extends Error {
     message: string,
     public readonly details: string[] = [],
     public readonly requestId?: string,
+    /** Machine-readable reason for some refusals, e.g. SUBSCRIPTION_INACTIVE. */
+    public readonly reason?: string,
   ) {
     super(message);
     this.name = 'ApiError';
@@ -17,7 +19,7 @@ export class ApiError extends Error {
 }
 
 interface ErrorBody {
-  error?: { message?: string; details?: string[]; requestId?: string };
+  error?: { message?: string; details?: string[]; requestId?: string; reason?: string };
 }
 
 export async function apiFetch<T>(
@@ -63,6 +65,7 @@ export async function apiFetch<T>(
       error?.message ?? `Request failed (${response.status}).`,
       error?.details ?? [],
       error?.requestId,
+      error?.reason,
     );
   }
   return data as T;

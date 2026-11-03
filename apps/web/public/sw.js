@@ -1,3 +1,4 @@
+/* global self, caches */
 /* Constitution Intelligence service worker (offline reading).
  *
  * What it caches — and nothing else:

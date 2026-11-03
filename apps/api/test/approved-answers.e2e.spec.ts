@@ -176,7 +176,7 @@ describe.runIf(Boolean(testDatabaseUrl))('Approved answers', () => {
         .post(url(a, `/manage/answers/${created.id}/approve`))
         .send({ confirmed: true })
         .expect(409);
-      expect(refused.body.message).toContain('Clause 12');
+      expect(refused.body.error.message).toContain('Clause 12');
     });
 
     it('warns (without blocking) about numbers that are not in the linked clauses', async () => {
@@ -404,7 +404,9 @@ describe.runIf(Boolean(testDatabaseUrl))('Approved answers', () => {
         '6. Annual general meeting',
         'An annual general meeting must be held every year. Members must receive at least 14 days written notice.',
         '10. Changing this constitution',
-        clause10,
+        // The sample PDF writer cuts very long lines, so the wording goes over two lines.
+        clause10.slice(0, clause10.indexOf(' ', 60)),
+        clause10.slice(clause10.indexOf(' ', 60) + 1),
       ];
       const upload = await b.admin
         .post(url(b, `/constitutions/${b.ids.constitutionId}/versions?label=Amended%202026`))

@@ -93,12 +93,12 @@ test('save for offline reading, read and search offline, then sync when back onl
   ).toBeInViewport();
 
   // Search on the device.
-  await page.getByLabel('Search the saved copy').fill('quorum');
+  await page.getByRole('textbox', { name: 'Search the saved copy' }).fill('quorum');
   await page.getByRole('button', { name: 'Search', exact: true }).click();
   const results = page.getByRole('region', { name: 'Search results' });
   await expect(results).toContainText(/match/);
   await expect(results.getByRole('button').first()).toContainText('Clause 7');
-  await page.getByLabel('Search the saved copy').fill('zebra helicopter');
+  await page.getByRole('textbox', { name: 'Search the saved copy' }).fill('zebra helicopter');
   await page.getByRole('button', { name: 'Search', exact: true }).click();
   await expect(results).toContainText('Nothing in the saved copy matches');
 

@@ -45,18 +45,29 @@ async function adminSignIn(page: Page) {
   await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible();
 }
 
-async function api<T>(page: Page, method: 'GET' | 'POST' | 'PUT', url: string, data?: unknown): Promise<T> {
+async function api<T>(
+  page: Page,
+  method: 'GET' | 'POST' | 'PUT',
+  url: string,
+  data?: unknown,
+): Promise<T> {
   const response = await page.request.fetch(`/api/v1${url}`, {
     method,
     data,
     headers: { 'X-Requested-With': 'XMLHttpRequest' },
   });
-  expect(response.ok(), `${method} ${url} → ${response.status()} ${await response.text()}`).toBe(true);
+  expect(response.ok(), `${method} ${url} → ${response.status()} ${await response.text()}`).toBe(
+    true,
+  );
   return (await response.json().catch(() => undefined)) as T;
 }
 
 async function organisationId(page: Page): Promise<string> {
-  const me = await api<{ memberships: { organisationSlug: string; organisationId: string }[] }>(page, 'GET', '/auth/me');
+  const me = await api<{ memberships: { organisationSlug: string; organisationId: string }[] }>(
+    page,
+    'GET',
+    '/auth/me',
+  );
   return me.memberships.find((item) => item.organisationSlug === SLUG)!.organisationId;
 }
 
@@ -65,28 +76,54 @@ test('system tour', async ({ browser }) => {
   const admin = await newPage(browser);
   await portalSignIn(admin.page, 'admin@sample.test');
   const orgId = await organisationId(admin.page);
-  const overview = await api<{ constitutions: { clauses: { clause: { sectionId: string; reference: string | null } }[] }[] }>(
-    admin.page, 'GET', `/organisations/${orgId}/manage/simple-words`);
+  const overview = await api<{
+    constitutions: { clauses: { clause: { sectionId: string; reference: string | null } }[] }[];
+  }>(admin.page, 'GET', `/organisations/${orgId}/manage/simple-words`);
   const clauseId = (reference: string) =>
-    overview.constitutions[0]!.clauses.find((item) => item.clause.reference === reference)!.clause.sectionId;
+    overview.constitutions[0]!.clauses.find((item) => item.clause.reference === reference)!.clause
+      .sectionId;
   for (const [reference, text] of [
-    ['8', 'Every member gets one vote. Most decisions need more than half of the members who are there to agree.'],
-    ['6', 'There must be an annual general meeting every year. Members must be told about it in writing at least 21 days before.'],
+    [
+      '8',
+      'Every member gets one vote. Most decisions need more than half of the members who are there to agree.',
+    ],
+    [
+      '6',
+      'There must be an annual general meeting every year. Members must be told about it in writing at least 21 days before.',
+    ],
   ] as const) {
-    await api(admin.page, 'PUT', `/organisations/${orgId}/manage/simple-words/sections/${clauseId(reference)}`, { text });
-    await api(admin.page, 'POST', `/organisations/${orgId}/manage/simple-words/sections/${clauseId(reference)}/approve`, { confirmed: true });
+    await api(
+      admin.page,
+      'PUT',
+      `/organisations/${orgId}/manage/simple-words/sections/${clauseId(reference)}`,
+      { text },
+    );
+    await api(
+      admin.page,
+      'POST',
+      `/organisations/${orgId}/manage/simple-words/sections/${clauseId(reference)}/approve`,
+      { confirmed: true },
+    );
   }
-  const answer = await api<{ id: string }>(admin.page, 'POST', `/organisations/${orgId}/manage/answers`, {
-    question: 'How much notice is needed for the annual general meeting?',
-    answer: 'Members must get at least 21 days’ written notice of the annual general meeting.',
-    clauses: ['6'],
+  const answer = await api<{ id: string }>(
+    admin.page,
+    'POST',
+    `/organisations/${orgId}/manage/answers`,
+    {
+      question: 'How much notice is needed for the annual general meeting?',
+      answer: 'Members must get at least 21 days’ written notice of the annual general meeting.',
+      clauses: ['6'],
+    },
+  );
+  await api(admin.page, 'POST', `/organisations/${orgId}/manage/answers/${answer.id}/approve`, {
+    confirmed: true,
   });
-  await api(admin.page, 'POST', `/organisations/${orgId}/manage/answers/${answer.id}/approve`, { confirmed: true });
   await api(admin.page, 'POST', `/organisations/${orgId}/manage/answers/import`, {
     answers: [
       {
         question: 'Who keeps the choir accounts?',
-        answer: 'The Treasurer keeps the accounts and presents them at every annual general meeting.',
+        answer:
+          'The Treasurer keeps the accounts and presents them at every annual general meeting.',
         clauses: ['9'],
         draftedBy: 'ai',
       },
@@ -103,13 +140,22 @@ test('system tour', async ({ browser }) => {
 
   const owner = await newPage(browser);
   await portalSignIn(owner.page, 'owner@sample.test');
-  const billing = await api<{ invoices: { id: string; number: string }[] }>(owner.page, 'GET', `/organisations/${orgId}/billing`);
-  await api(owner.page, 'POST', `/organisations/${orgId}/billing/invoices/${billing.invoices[0]!.id}/payments`, {
-    amountMinor: 150_000,
-    method: 'bank_transfer',
-    reference: 'FNB EFT CHOIR NOV',
-    paidOn: new Date().toISOString().slice(0, 10),
-  });
+  const billing = await api<{ invoices: { id: string; number: string }[] }>(
+    owner.page,
+    'GET',
+    `/organisations/${orgId}/billing`,
+  );
+  await api(
+    owner.page,
+    'POST',
+    `/organisations/${orgId}/billing/invoices/${billing.invoices[0]!.id}/payments`,
+    {
+      amountMinor: 150_000,
+      method: 'bank_transfer',
+      reference: 'FNB EFT CHOIR NOV',
+      paidOn: new Date().toISOString().slice(0, 10),
+    },
+  );
 
   // ---------- 1. A member's experience ----------
   const member = await newPage(browser);
@@ -131,7 +177,10 @@ test('system tour', async ({ browser }) => {
 
   await page.getByLabel('What are you looking for?').fill('voting');
   await page.getByRole('button', { name: 'Search', exact: true }).click();
-  await page.getByRole('link', { name: /8\. Voting/ }).first().click();
+  await page
+    .getByRole('link', { name: /8\. Voting/ })
+    .first()
+    .click();
   await expect(page.getByRole('note', { name: 'Reference for this section' })).toBeVisible();
   await shot(page, '04-reader');
   await page.getByRole('button', { name: 'Simple words', exact: true }).click();
@@ -141,14 +190,25 @@ test('system tour', async ({ browser }) => {
 
   await page.goto(`${CHOIR}/ask`);
   await expect(page.getByRole('heading', { name: 'Common questions' })).toBeVisible();
-  await page.getByLabel('Your question').fill('How much notice is needed for the annual general meeting?');
+  await page
+    .getByLabel('Your question')
+    .fill('How much notice is needed for the annual general meeting?');
   await page.getByRole('button', { name: 'Ask', exact: true }).click();
   await expect(page.getByText('Was this helpful?').first()).toBeVisible();
   await shot(page, '06-ask-approved-and-ai', true);
 
   const clauses = await newPage(browser);
   await clauses.page.route('**/organisations/*/ai/status', (route) =>
-    route.fulfill({ json: { available: false, mode: 'disabled', includedInPlan: false, disclaimer: 'Not legal advice.', unsupportedMessage: '', clauseFinder: true } }),
+    route.fulfill({
+      json: {
+        available: false,
+        mode: 'disabled',
+        includedInPlan: false,
+        disclaimer: 'Not legal advice.',
+        unsupportedMessage: '',
+        clauseFinder: true,
+      },
+    }),
   );
   await clauses.page.goto(`${CHOIR}/sign-in`);
   await clauses.page.getByLabel('Email address').fill('member@sample.test');
@@ -156,9 +216,13 @@ test('system tour', async ({ browser }) => {
   await clauses.page.getByRole('button', { name: 'Sign in' }).click();
   await expect(clauses.page.locator('#welcome-heading')).toBeVisible();
   await clauses.page.goto(`${CHOIR}/ask`);
-  await clauses.page.getByLabel('Your question').fill('How many members must be present for a quorum?');
+  await clauses.page
+    .getByLabel('Your question')
+    .fill('How many members must be present for a quorum?');
   await clauses.page.getByRole('button', { name: 'Find clauses' }).click();
-  await expect(clauses.page.getByRole('heading', { name: /matching clauses? from the approved/ })).toBeVisible();
+  await expect(
+    clauses.page.getByRole('heading', { name: /matching clauses? from the approved/ }),
+  ).toBeVisible();
   await shot(clauses.page, '07-find-clauses-no-ai');
 
   // Offline
@@ -167,7 +231,9 @@ test('system tour', async ({ browser }) => {
     await navigator.serviceWorker.ready;
   });
   await page.getByRole('button', { name: 'Save for offline reading' }).click();
-  await expect(page.getByText('Saved. You can now read the constitution without the internet.')).toBeVisible();
+  await expect(
+    page.getByText('Saved. You can now read the constitution without the internet.'),
+  ).toBeVisible();
   await page.getByText('Read without internet').scrollIntoViewIfNeeded();
   await shot(page, '08-saved-for-offline');
   await member.context.setOffline(true);
@@ -197,19 +263,26 @@ test('system tour', async ({ browser }) => {
   await a.goto(`${CHOIR}/manage/content`);
   await expect(a.getByText(/Every version goes through these steps/)).toBeVisible();
   await shot(a, '13-manage-documents', true);
-  await a.getByRole('link', { name: /Review details|Check and correct/ }).first().click();
+  await a
+    .getByRole('link', { name: /Review details|Check and correct/ })
+    .first()
+    .click();
   await expect(a.getByText(/Version/).first()).toBeVisible();
   await shot(a, '14-version-review');
 
   await a.goto(`${CHOIR}/manage/answers`);
-  await expect(a.getByText('How much notice is needed for the annual general meeting?')).toBeVisible();
+  await expect(
+    a.getByText('How much notice is needed for the annual general meeting?'),
+  ).toBeVisible();
   await shot(a, '15-approved-answers-list', true);
   await a.getByRole('link', { name: 'Who keeps the choir accounts?' }).click();
   await expect(a.getByText('This draft was written by AI.')).toBeVisible();
   await shot(a, '16-answer-review', true);
 
   await a.goto(`${CHOIR}/manage/simple-words`);
-  await expect(a.getByRole('listitem', { name: 'Simple words for Clause 8', exact: true })).toBeVisible();
+  await expect(
+    a.getByRole('listitem', { name: 'Simple words for Clause 8', exact: true }),
+  ).toBeVisible();
   await shot(a, '17-simple-words-manage');
 
   await owner.page.goto(`${CHOIR}/manage/subscription`);
@@ -222,7 +295,10 @@ test('system tour', async ({ browser }) => {
   await expect(s.getByRole('heading', { name: 'Overview' })).toBeVisible();
   await shot(s, '19-control-centre-overview', true);
   await s.goto('/admin/organisations');
-  await s.getByRole('link', { name: 'Sample Community Choir (fictional)', exact: true }).first().click();
+  await s
+    .getByRole('link', { name: 'Sample Community Choir (fictional)', exact: true })
+    .first()
+    .click();
   await expect(s.getByRole('heading', { name: 'Billing' })).toBeVisible();
   await shot(s, '20-organisation-detail', true);
   await s.goto('/admin/billing');
@@ -235,5 +311,6 @@ test('system tour', async ({ browser }) => {
   await expect(s.getByRole('heading', { name: /Audit/ })).toBeVisible();
   await shot(s, '23-audit-log');
 
-  for (const context of [admin, superAdmin, owner, member, clauses, phone]) await context.context.close();
+  for (const context of [admin, superAdmin, owner, member, clauses, phone])
+    await context.context.close();
 });

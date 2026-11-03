@@ -10,6 +10,7 @@ import { AuthGuard } from './modules/access/auth.guard';
 import { CsrfGuard } from './modules/access/csrf.guard';
 import { PermissionGuard } from './modules/access/permission.guard';
 import { AiModule } from './modules/ai/ai.module';
+import { ApprovedAnswersModule } from './modules/answers/approved-answers.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ConstitutionsModule } from './modules/constitutions/constitutions.module';
@@ -49,6 +50,7 @@ export class AppModule {
         AiModule,
         PortalModule,
         DocumentsModule,
+        ApprovedAnswersModule,
       ],
       providers: [
         { provide: APP_FILTER, useClass: AllExceptionsFilter },

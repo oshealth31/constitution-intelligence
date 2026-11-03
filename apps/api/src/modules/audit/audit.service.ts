@@ -55,6 +55,13 @@ export type AuditAction =
   | 'version.archived'
   | 'ai.question_answered'
   | 'ai.feedback_given'
+  | 'answer.created'
+  | 'answer.updated'
+  | 'answer.imported'
+  | 'answer.approved'
+  | 'answer.retired'
+  | 'answer.restored'
+  | 'answer.deleted'
   | 'subscription.updated'
   | 'support.content_accessed'
   | 'permission.denied';

@@ -86,7 +86,9 @@ export function mentionedReferences(text: string): string[] {
 }
 
 /** References a passage makes available: its own and its parents' (all from stored numbers). */
-function allowedReferences(passages: readonly Passage[]): Set<string> {
+export function allowedReferences(
+  passages: readonly Pick<Passage, 'referenceLabel' | 'location' | 'number' | 'reference'>[],
+): Set<string> {
   const allowed = new Set<string>();
   for (const passage of passages) {
     for (const text of [passage.referenceLabel ?? '', passage.location, passage.number ?? '']) {

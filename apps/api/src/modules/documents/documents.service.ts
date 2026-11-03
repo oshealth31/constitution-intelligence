@@ -20,6 +20,7 @@ import type { RequestMeta } from '../../common/request-context';
 import type { AppConfig } from '../../config/config';
 import { APP_CONFIG } from '../../config/config.module';
 import { AuditService } from '../audit/audit.service';
+import { carryOverAnswers } from '../answers/approved-answers.service';
 import { canSeeUnpublished } from '../constitutions/constitutions.service';
 import { StorageService, tenantPrefix } from '../files/storage.service';
 import { TenantDatabase, type TenantTransaction } from '../tenancy/tenant-database.service';
@@ -537,10 +538,20 @@ export class DocumentsService {
           ),
         );
       await this.addEvent(tx, scope, versionId, 'published', null);
-      return previous.map((row) => row.id);
+      // Approved answers linked to the replaced version: carried over where the wording is
+      // unchanged, otherwise hidden from members until reviewed.
+      const answers = await carryOverAnswers(
+        tx,
+        scope.organisationId,
+        previous.map((row) => row.id),
+        versionId,
+      );
+      return { ids: previous.map((row) => row.id), answers };
     });
     await this.record(scope, 'version.published', 'version', versionId, meta, {
-      replaced: replaced.length > 0 ? replaced : null,
+      replaced: replaced.ids.length > 0 ? replaced.ids : null,
+      answersCarriedOver: replaced.answers.carried,
+      answersNeedingReview: replaced.answers.needsReview,
     });
     return this.getVersion(scope, versionId);
   }

@@ -13,6 +13,8 @@ import {
   queryTerms,
   citation,
   locateQuote,
+  parseAnswerImport,
+  splitClauseReferences,
   type Section,
 } from './portal';
 
@@ -150,5 +152,43 @@ describe('answer quotes', () => {
       after: ' of members.',
     });
     expect(locateQuote('The quorum.', 'not there')).toBeNull();
+  });
+});
+
+describe('approved answer import files', () => {
+  it('splits typed clause references', () => {
+    expect(splitClauseReferences(' 7, 7(a); Part 2\n10 ,')).toEqual(['7', '7(a)', 'Part 2', '10']);
+  });
+
+  it('reads a list or an { answers } object, with clauses as a list or as text', () => {
+    expect(
+      parseAnswerImport(
+        JSON.stringify({
+          answers: [
+            { question: 'Q1?', answer: 'A1', clauses: ['7'], draftedBy: 'ai' },
+            { question: 'Q2?', answer: 'A2', clauses: '9, 10', draftedBy: 'robot' },
+          ],
+        }),
+      ),
+    ).toEqual({
+      rows: [
+        { question: 'Q1?', answer: 'A1', clauses: ['7'], draftedBy: 'ai' },
+        { question: 'Q2?', answer: 'A2', clauses: ['9', '10'] },
+      ],
+    });
+    expect(parseAnswerImport('[{"question":"Q?","answer":"A","clauses":["1"]}]')).toEqual({
+      rows: [{ question: 'Q?', answer: 'A', clauses: ['1'] }],
+    });
+  });
+
+  it('explains what is wrong with a bad file', () => {
+    expect(parseAnswerImport('not json')).toEqual({ error: expect.stringContaining('not valid JSON') });
+    expect(parseAnswerImport('{"answers":[]}')).toEqual({ error: 'The file has no answers.' });
+    expect(parseAnswerImport('[{"question":"Q?"}]')).toEqual({
+      error: expect.stringContaining('Answer 1 needs'),
+    });
+    expect(parseAnswerImport('[{"question":"Q?","answer":"A"}]')).toEqual({
+      error: expect.stringContaining('at least one clause'),
+    });
   });
 });

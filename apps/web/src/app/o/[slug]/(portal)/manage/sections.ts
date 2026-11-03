@@ -21,6 +21,12 @@ export const MANAGE_SECTIONS = [
     permission: 'content.review',
   },
   {
+    path: '/manage/answers',
+    title: 'Approved answers',
+    description: 'Common questions answered in everyday words, checked and approved for members.',
+    permission: 'content.edit',
+  },
+  {
     path: '/manage/address',
     title: 'Portal address',
     description: 'The web address members use to reach this portal.',

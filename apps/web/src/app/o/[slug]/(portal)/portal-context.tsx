@@ -13,6 +13,8 @@ export interface PortalSession {
   reload: () => Promise<void>;
   /** The base API path for this organisation: /organisations/<id> */
   api: string;
+  /** Whether AI answers are switched on. When off, the question page finds clauses instead. */
+  aiAvailable: boolean;
 }
 
 export const PortalSessionContext = createContext<PortalSession | null>(null);

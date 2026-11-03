@@ -4,11 +4,13 @@ import Link from 'next/link';
 import { useState, type FormEvent } from 'react';
 import {
   ChatIcon,
+  Highlighted,
   Notice,
   Panel,
   PortalButton,
   PortalHeading,
   PortalLoading,
+  SearchIcon,
 } from '@/components/portal-ui';
 import { apiFetch, describeError } from '@/lib/api';
 import { formatDate } from '@/lib/format';
@@ -20,17 +22,27 @@ import {
   type AiStatus,
   type AnswerCitation,
   type AnswerResponse,
+  type ClauseFinderResponse,
+  type ClauseMatch,
 } from '@/lib/portal';
 import { useApi } from '@/lib/use-api';
 import { usePortal } from '../portal-context';
 
 /**
- * Ask a question about the constitution. The AI explanation is always shown separately from
- * the original text it relies on, with links to each source section.
+ * Ask a question about the constitution. With AI switched on, the AI explanation is always
+ * shown separately from the original text it relies on, with links to each source section.
+ * With AI switched off, the page finds the matching clauses instead and shows them word for word.
  */
 export default function AskPage() {
-  const { api, slug } = usePortal();
+  const { api } = usePortal();
   const status = useApi<AiStatus>(`${api}/ai/status`);
+  if (status.loading && !status.data) return <PortalLoading label="Loading…" />;
+  if (!status.data?.available) return <ClauseFinder />;
+  return <AskWithAi status={status.data} />;
+}
+
+function AskWithAi({ status }: { status: AiStatus }) {
+  const { api, slug } = usePortal();
   const suggestions = useApi<string[]>(`${api}/ai/suggested-questions`);
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState<AnswerResponse | null>(null);
@@ -71,24 +83,10 @@ export default function AskPage() {
         description="Ask in your own words. The answer is based only on your organisation’s approved constitution, and shows the original text it comes from."
       />
 
-      {status.data && (
-        <Notice tone="info">
-          <strong>Please note:</strong> {status.data.disclaimer}
-        </Notice>
-      )}
-      {status.data && !status.data.available && (
-        <Notice tone="warning">
-          Questions are not available right now. You can still{' '}
-          <Link
-            href={portalPath(slug, '/search')}
-            className="font-medium underline underline-offset-4"
-          >
-            search the constitution
-          </Link>
-          .
-        </Notice>
-      )}
-      {status.data?.mode === 'offline' && (
+      <Notice tone="info">
+        <strong>Please note:</strong> {status.disclaimer}
+      </Notice>
+      {status.mode === 'offline' && (
         <Notice tone="warning">
           Test mode: no AI model is connected, so answers only point to the best-matching passage.
         </Notice>
@@ -107,11 +105,7 @@ export default function AskPage() {
           placeholder="For example: How many members must be present at a general meeting?"
           className="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-lg shadow-sm focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[var(--brand-accent)] focus:outline-none"
         />
-        <PortalButton
-          type="submit"
-          busy={busy}
-          disabled={question.trim().length < 3 || status.data?.available === false}
-        >
+        <PortalButton type="submit" busy={busy} disabled={question.trim().length < 3}>
           <ChatIcon className="size-5" />
           {busy ? 'Looking in the constitution…' : 'Ask'}
         </PortalButton>
@@ -142,6 +136,201 @@ export default function AskPage() {
         {answer && <AnswerView answer={answer} slug={slug} api={api} />}
       </div>
     </div>
+  );
+}
+
+/**
+ * "Find relevant clauses" (no AI): type a question in your own words and see the approved
+ * clauses that match it, exactly as written, with the matching words marked.
+ */
+function ClauseFinder() {
+  const { api, slug } = usePortal();
+  const suggestions = useApi<string[]>(`${api}/ai/suggested-questions`);
+  const [question, setQuestion] = useState('');
+  const [found, setFound] = useState<ClauseFinderResponse | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function find(text: string) {
+    const trimmed = text.trim();
+    if (trimmed.length < 3) return;
+    setQuestion(trimmed);
+    setBusy(true);
+    setError(null);
+    setFound(null);
+    try {
+      setFound(
+        await apiFetch<ClauseFinderResponse>(`${api}/ai/find-clauses`, {
+          method: 'POST',
+          body: { question: trimmed },
+        }),
+      );
+    } catch (caught) {
+      setError(describeError(caught));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="max-w-3xl space-y-5">
+      <PortalHeading
+        icon={<ChatIcon className="size-6" />}
+        title="Find relevant clauses"
+        description="Type a question in your own words. You will see the clauses from your organisation’s approved constitution that match it, exactly as written."
+      />
+      <Notice tone="info">
+        <strong>No AI is used.</strong> The clauses are found by matching your words. They may not
+        fully answer your question, so please read them carefully and ask your committee if you are
+        unsure.
+      </Notice>
+
+      <form
+        onSubmit={(event: FormEvent<HTMLFormElement>) => {
+          event.preventDefault();
+          void find(question);
+        }}
+        aria-label="Find relevant clauses"
+        className="space-y-3"
+      >
+        <label htmlFor="clause-question" className="block text-base font-medium text-slate-900">
+          Your question
+        </label>
+        <textarea
+          id="clause-question"
+          value={question}
+          onChange={(event) => setQuestion(event.target.value)}
+          rows={3}
+          maxLength={500}
+          placeholder="For example: How many members must be present at a general meeting?"
+          className="block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-lg shadow-sm focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[var(--brand-accent)] focus:outline-none"
+        />
+        <PortalButton type="submit" busy={busy} disabled={question.trim().length < 3}>
+          <SearchIcon className="size-5" />
+          {busy ? 'Looking in the constitution…' : 'Find clauses'}
+        </PortalButton>
+      </form>
+
+      {!found && !busy && (suggestions.data?.length ?? 0) > 0 && (
+        <div>
+          <p className="text-base text-slate-600">You could try:</p>
+          <ul className="mt-2 flex flex-col gap-2">
+            {suggestions.data!.map((suggestion) => (
+              <li key={suggestion}>
+                <button
+                  type="button"
+                  onClick={() => void find(suggestion)}
+                  className="min-h-11 w-full rounded-xl border border-slate-300 bg-white px-4 py-2 text-left text-base text-slate-800 hover:border-[var(--brand-accent)]"
+                >
+                  {suggestion}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div aria-live="polite">
+        {busy && <PortalLoading label="Looking in the constitution…" />}
+        {error && <Notice tone="error">{error}</Notice>}
+        {found && found.results.length === 0 && (
+          <Panel title="No matching clauses">
+            <p data-testid="clauses-message" className="text-lg text-slate-900">
+              {found.message}
+            </p>
+            <ul className="mt-3 list-disc space-y-1 pl-5 text-base text-slate-700">
+              <li>Try different words, or ask about one topic at a time.</li>
+              <li>
+                <Link
+                  href={portalPath(slug, '/search')}
+                  className="font-medium text-[var(--brand-ink)] underline underline-offset-4"
+                >
+                  Search the constitution
+                </Link>{' '}
+                for a word or clause number.
+              </li>
+              <li>If the constitution does not cover it, ask your organisation’s committee.</li>
+            </ul>
+          </Panel>
+        )}
+        {found && found.results.length > 0 && (
+          <section aria-labelledby="clauses-heading" className="space-y-3">
+            <h2 id="clauses-heading" className="text-lg font-semibold text-slate-900">
+              {found.results.length === 1
+                ? '1 matching clause'
+                : `${found.results.length} matching clauses`}{' '}
+              from the approved constitution
+            </h2>
+            <ol className="space-y-3">
+              {found.results.map((clause) => (
+                <ClauseCard
+                  key={clause.sectionId}
+                  clause={clause}
+                  terms={found.terms}
+                  slug={slug}
+                />
+              ))}
+            </ol>
+          </section>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ClauseCard({
+  clause,
+  terms,
+  slug,
+}: {
+  clause: ClauseMatch;
+  terms: readonly string[];
+  slug: string;
+}) {
+  const title =
+    clause.kind === 'subclause' && !clause.heading && clause.referenceLabel
+      ? clause.referenceLabel
+      : sectionTitle(clause);
+  return (
+    <li
+      className="rounded-2xl border border-slate-200 bg-white p-5"
+      aria-label={`Clause: ${clause.referenceLabel ?? title}`}
+    >
+      <p className="text-sm text-slate-500">
+        {clause.constitutionTitle} · Version {clause.versionNumber}: {clause.versionLabel}
+        {clause.publishedAt ? ` (published ${formatDate(clause.publishedAt)})` : ''}
+      </p>
+      {clause.location && <p className="mt-1 text-sm text-slate-600">{clause.location}</p>}
+      <p className="mt-1 flex flex-wrap items-center gap-2">
+        <span className="text-lg font-semibold text-[var(--brand-ink)]">{title}</span>
+        {clause.referenceLabel && clause.referenceLabel !== title && (
+          <span className="rounded-full bg-[var(--brand-secondary)] px-2.5 py-0.5 text-sm font-medium text-[var(--brand-on-secondary)]">
+            {clause.referenceLabel}
+          </span>
+        )}
+      </p>
+      <blockquote
+        data-testid="clause-text"
+        className="mt-2 border-l-4 border-[var(--brand-accent)] pl-3 text-base whitespace-pre-line text-slate-800"
+      >
+        <span className="sr-only">Original text: </span>
+        <Highlighted text={clause.text} terms={terms} />
+      </blockquote>
+      {clause.sourcePage && (
+        <p className="mt-1 text-sm text-slate-500">
+          Page {clause.sourcePage} of the original document
+        </p>
+      )}
+      <Link
+        href={portalPath(
+          slug,
+          `/read/${clause.constitutionId}?version=${clause.versionId}#${sectionAnchor(clause.refKey)}`,
+        )}
+        className="mt-2 inline-flex min-h-11 items-center font-medium text-[var(--brand-ink)] underline underline-offset-4"
+      >
+        Open this clause in the constitution
+      </Link>
+    </li>
   );
 }
 

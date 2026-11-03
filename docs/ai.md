@@ -6,6 +6,35 @@ on. **The answers can be wrong.** No AI system is perfectly accurate, which is w
 text and links are always shown next to the explanation, and why every answer is checked on the
 server before anyone sees it.
 
+## Without AI: "Find relevant clauses" (the default)
+
+AI answers are **off by default** (`AI_PROVIDER=disabled`), and the plan is to launch that way
+until an AI model hosted in Botswana is in place (see "Data protection" below). With AI off:
+
+- The **Ask** menu item becomes **Find clauses** and the home tile becomes **Find relevant
+  clauses**. It is the same page (`/o/<address>/ask`).
+- Members type a question in their own words. The API (`POST …/ai/find-clauses`) runs the same
+  retrieval the AI would use — published versions of the member's own organisation only — and
+  returns the matching clauses **exactly as stored**, with the matching words marked and a link to
+  each clause in the reader.
+- **No AI provider is ever called** for this, whatever `AI_PROVIDER` says, and the question is
+  not stored: only a count (`clauses.searches`) goes into the usage records. It is limited to 120
+  searches per person per hour.
+- The page says plainly that no AI is used and that the clauses may not fully answer the
+  question. If nothing matches, it says so ("No matching clauses were found in the approved
+  constitution") and points to Search and the committee.
+
+The menu label is only a display choice: the API decides what is available.
+
+## Data protection (Botswana)
+
+With `AI_PROVIDER=anthropic`, questions and constitution passages are sent to Anthropic in the
+United States. Botswana's Data Protection Act 18 of 2024 restricts transfers of personal data
+outside Botswana, so this mode should not be switched on without legal advice. The intended path
+is a self-hosted open-weight model on servers in Botswana, added as another provider behind the
+same `AiProvider` interface; every server-side check below would still apply. This is not legal
+advice: confirm with a data-protection adviser or the Information and Data Protection Commission.
+
 ## How an answer is produced (retrieval-augmented generation)
 
 1. **Retrieval:** we find up to 8 relevant passages. They come only from the **published**
@@ -75,7 +104,7 @@ really are in the document.
 
 | `AI_PROVIDER`        | What happens                                                                                                                                            |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `disabled` (default) | Ask shows "not available right now" and suggests Search.                                                                                                |
+| `disabled` (default) | No AI. The page offers "Find relevant clauses" instead (see above).                                                                                     |
 | `anthropic`          | Anthropic's Claude (`AI_MODEL`, default `claude-sonnet-5-5`) with temperature 0. Needs `ANTHROPIC_API_KEY`.                                             |
 | `offline`            | **Local development and tests only** (refused in staging and production). No AI model: it quotes the best-matching passage and says it is in test mode. |
 
@@ -89,6 +118,7 @@ passages and questions sent to it.
 | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GET /status`                                                | Whether answers are available, the mode, the disclaimer                                                                                                         |
 | `POST /ask` `{ question }` (3–500 characters)                | Returns `status` (`answered` / `insufficient` / `unavailable`), `explanation`, `message`, `citations[]` (reference, quote, sourceText, version …), `disclaimer` |
+| `POST /find-clauses` `{ question }` (3–500 characters)       | No AI. Returns `terms`, `results[]` (reference, heading, original `text`, version …), `message` when nothing matched, `notice`                                  |
 | `GET /suggested-questions`                                   | Built from current titles                                                                                                                                       |
 | `POST /messages/:messageId/feedback` `{ helpful, comment? }` | Own answers only                                                                                                                                                |
 | `GET /conversations`, `GET /conversations/:id`               | Own conversations only                                                                                                                                          |

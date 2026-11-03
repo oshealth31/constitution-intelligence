@@ -52,6 +52,15 @@ export class AiController {
     return this.ai.ask(tenant, question.replace(/\s+/g, ' '), requestMeta(request));
   }
 
+  /** Find relevant clauses: matching approved clauses, word for word, with no AI. */
+  @Post('find-clauses')
+  @RequireOrgPermission('constitution.read')
+  @HttpCode(HttpStatus.OK)
+  findClauses(@Tenant() tenant: TenantScope, @Body() body: unknown) {
+    const { question } = parseInput(questionSchema, body);
+    return this.ai.findClauses(tenant, question.replace(/\s+/g, ' '));
+  }
+
   @Get('suggested-questions')
   @RequireOrgPermission('constitution.read')
   suggestedQuestions(@Tenant() tenant: TenantScope) {

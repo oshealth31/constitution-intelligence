@@ -15,7 +15,7 @@ import { usePortal } from './portal-context';
 
 /** Organisation home page: welcome message and the main things people come to do. */
 export default function PortalHomePage() {
-  const { home, user, slug } = usePortal();
+  const { home, user, slug, aiAvailable } = usePortal();
   const { organisation, library } = home;
   const first = library.firstPublished;
   const firstName = user.displayName.split(/\s+/)[0] ?? user.displayName;
@@ -73,8 +73,12 @@ export default function PortalHomePage() {
         <ActionTile
           href={portalPath(slug, '/ask')}
           icon={<ChatIcon className="size-6" />}
-          title="Ask a question"
-          description="Ask in your own words and see the clauses the answer comes from."
+          title={aiAvailable ? 'Ask a question' : 'Find relevant clauses'}
+          description={
+            aiAvailable
+              ? 'Ask in your own words and see the clauses the answer comes from.'
+              : 'Type a question in your own words to see the clauses that match it.'
+          }
         />
         {canManage(home.you.permissions) && (
           <ActionTile

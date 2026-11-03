@@ -20,11 +20,50 @@ import { TenantDatabase } from '../tenancy/tenant-database.service';
 import type { TenantScope } from '../tenancy/tenant-scope';
 import { buildPrompt, DISCLAIMER, UNSUPPORTED_MESSAGE, type Passage } from './ai-prompt';
 import { AI_PROVIDER, AiUnavailableError, type AiProvider } from './ai-provider';
-import { AiRetrievalService } from './ai-retrieval.service';
+import { AiRetrievalService, questionTerms } from './ai-retrieval.service';
 import { validateAnswer, type RejectionReason, type ValidCitation } from './answer-validation';
 
 export const UNAVAILABLE_MESSAGE =
   'The question service is not available right now. Please try again later, or use Search to find the rule yourself.';
+
+export const NO_CLAUSES_MESSAGE =
+  'No matching clauses were found in the approved constitution. Try different words, or search for a word or clause number.';
+
+export const CLAUSE_FINDER_NOTICE =
+  'These are the clauses from your organisation’s approved constitution that best match your words, shown exactly as written. No AI is used. They may not fully answer your question, so please read them carefully and ask your committee if you are unsure.';
+
+/** Clause-finder searches allowed per person per hour (it is cheap, but still protects the database). */
+export const CLAUSE_FINDER_LIMIT_PER_HOUR = 120;
+
+/** One clause found by the clause finder: the original wording, exactly as stored. */
+export interface ClauseMatch {
+  sectionId: string;
+  refKey: string;
+  kind: string;
+  number: string | null;
+  heading: string | null;
+  reference: string | null;
+  referenceLabel: string | null;
+  location: string;
+  text: string;
+  sourcePage: number | null;
+  constitutionId: string;
+  constitutionTitle: string;
+  versionId: string;
+  versionNumber: number;
+  versionLabel: string;
+  publishedAt: string | null;
+}
+
+export interface ClauseFinderResponse {
+  question: string;
+  /** The words used to look for clauses (for highlighting). */
+  terms: string[];
+  results: ClauseMatch[];
+  /** Fixed wording when nothing matched. */
+  message: string | null;
+  notice: string;
+}
 
 export type AnswerStatus = 'answered' | 'insufficient' | 'unavailable';
 
@@ -91,6 +130,39 @@ export class AiService {
       mode: this.provider.name,
       disclaimer: DISCLAIMER,
       unsupportedMessage: UNSUPPORTED_MESSAGE,
+      /** The no-AI "find relevant clauses" mode works whatever the AI setting. */
+      clauseFinder: true,
+    };
+  }
+
+  /**
+   * "Find relevant clauses": the same retrieval the AI uses (published versions of this
+   * organisation only), returned word for word. No AI provider is called, whatever the setting,
+   * and the question is not stored: only a count goes into the usage records.
+   */
+  async findClauses(scope: TenantScope, question: string): Promise<ClauseFinderResponse> {
+    const attempts = await this.rateLimits.hit(`clauses:user:${scope.userId}`, 3600);
+    if (attempts > CLAUSE_FINDER_LIMIT_PER_HOUR) {
+      throw new HttpException(
+        'You have searched a lot in the last hour. Please wait a while and try again.',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+    const passages = await this.retrieval.retrieve(scope, question);
+    await this.tenantDb.run(scope, (tx) =>
+      tx.insert(usageRecords).values({
+        organisationId: scope.organisationId,
+        metric: 'clauses.searches',
+        quantity: 1,
+        userId: scope.userId,
+      }),
+    );
+    return {
+      question,
+      terms: questionTerms(question),
+      results: passages.map(toClauseMatch),
+      message: passages.length === 0 ? NO_CLAUSES_MESSAGE : null,
+      notice: CLAUSE_FINDER_NOTICE,
     };
   }
 
@@ -449,6 +521,27 @@ function toCitation({ passage, quote }: ValidCitation): AnswerCitation {
     location: passage.location,
     quote,
     sourceText: passage.body,
+    sourcePage: passage.sourcePage,
+    constitutionId: passage.constitutionId,
+    constitutionTitle: passage.constitutionTitle,
+    versionId: passage.versionId,
+    versionNumber: passage.versionNumber,
+    versionLabel: passage.versionLabel,
+    publishedAt: passage.publishedAt,
+  };
+}
+
+function toClauseMatch(passage: Passage): ClauseMatch {
+  return {
+    sectionId: passage.sectionId,
+    refKey: passage.refKey,
+    kind: passage.kind,
+    number: passage.number,
+    heading: passage.heading,
+    reference: passage.reference,
+    referenceLabel: passage.referenceLabel,
+    location: passage.location,
+    text: passage.body,
     sourcePage: passage.sourcePage,
     constitutionId: passage.constitutionId,
     constitutionTitle: passage.constitutionTitle,

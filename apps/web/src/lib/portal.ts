@@ -415,6 +415,36 @@ export interface AiStatus {
   mode: string;
   disclaimer: string;
   unsupportedMessage: string;
+  /** The no-AI "find relevant clauses" mode is available. */
+  clauseFinder?: boolean;
+}
+
+/** A clause found by "find relevant clauses": the original wording, exactly as stored. */
+export interface ClauseMatch {
+  sectionId: string;
+  refKey: string;
+  kind: Section['kind'];
+  number: string | null;
+  heading: string | null;
+  reference: string | null;
+  referenceLabel: string | null;
+  location: string;
+  text: string;
+  sourcePage: number | null;
+  constitutionId: string;
+  constitutionTitle: string;
+  versionId: string;
+  versionNumber: number;
+  versionLabel: string;
+  publishedAt: string | null;
+}
+
+export interface ClauseFinderResponse {
+  question: string;
+  terms: string[];
+  results: ClauseMatch[];
+  message: string | null;
+  notice: string;
 }
 
 export interface AnswerCitation {

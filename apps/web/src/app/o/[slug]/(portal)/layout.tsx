@@ -17,7 +17,7 @@ import {
 import { ApiError, apiFetch, type CurrentUser } from '@/lib/api';
 import { brand } from '@/lib/brand';
 import { brandStyle } from '@/lib/branding';
-import { canManage, portalPath, type PortalHome } from '@/lib/portal';
+import { canManage, portalPath, type AiStatus, type PortalHome } from '@/lib/portal';
 import { usePublicPortal } from '../public-portal-context';
 import { PortalSessionContext, type PortalSession } from './portal-context';
 
@@ -53,10 +53,24 @@ export default function SignedInPortalLayout({ children }: { children: ReactNode
         return;
       }
       const api = `/organisations/${membership.organisationId}`;
-      const home = await apiFetch<PortalHome>(`${api}/portal`);
+      const [home, aiAvailable] = await Promise.all([
+        apiFetch<PortalHome>(`${api}/portal`),
+        // Only decides which version of the question page to offer; the API enforces the rest.
+        apiFetch<AiStatus>(`${api}/ai/status`).then(
+          (status) => status.available,
+          () => false,
+        ),
+      ]);
       setGate({
         kind: 'ready',
-        session: { slug, organisationId: membership.organisationId, home, user: me.user, api },
+        session: {
+          slug,
+          organisationId: membership.organisationId,
+          home,
+          user: me.user,
+          api,
+          aiAvailable,
+        },
       });
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
@@ -125,7 +139,10 @@ export default function SignedInPortalLayout({ children }: { children: ReactNode
     { href: portalPath(slug), label: 'Home', short: 'Home', icon: HomeIcon, exact: true },
     { href: portalPath(slug, '/library'), label: 'Read', short: 'Read', icon: BookIcon },
     { href: portalPath(slug, '/search'), label: 'Search', short: 'Search', icon: SearchIcon },
-    { href: portalPath(slug, '/ask'), label: 'Ask', short: 'Ask', icon: ChatIcon },
+    // With AI switched off, the same page finds matching clauses instead of answering.
+    session.aiAvailable
+      ? { href: portalPath(slug, '/ask'), label: 'Ask', short: 'Ask', icon: ChatIcon }
+      : { href: portalPath(slug, '/ask'), label: 'Find clauses', short: 'Clauses', icon: ChatIcon },
     ...(canManage(home.you.permissions)
       ? [
           {

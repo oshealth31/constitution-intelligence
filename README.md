@@ -96,6 +96,7 @@ in production.
 - [docs/documents.md](docs/documents.md) — document upload, text extraction, review and the version workflow
 - [docs/search-and-reader.md](docs/search-and-reader.md) — search by keyword, clause number and title, and the reader
 - [docs/ai.md](docs/ai.md) — AI question answering, its safeguards and privacy
+- [docs/approved-answers.md](docs/approved-answers.md) — answers to common questions, written or imported, checked and approved before members see them
 - [docs/decisions](docs/decisions) — short records of major technical decisions
 
 ## Ownership

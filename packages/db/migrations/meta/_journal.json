@@ -43,6 +43,13 @@
       "when": 1793820000000,
       "tag": "0005_ai_answers",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793830000000,
+      "tag": "0006_approved_answers",
+      "breakpoints": true
     }
   ]
 }

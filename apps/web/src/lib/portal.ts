@@ -490,3 +490,146 @@ export function locateQuote(
   if (index === -1 || quote.length === 0) return null;
   return { before: text.slice(0, index), quote, after: text.slice(index + quote.length) };
 }
+
+// ----- Approved answers -----------------------------------------------------------------------
+
+/** A clause an approved answer relies on, with its original wording exactly as stored. */
+export interface LinkedClause {
+  sectionId: string;
+  refKey: string;
+  kind: Section['kind'];
+  number: string | null;
+  heading: string | null;
+  reference: string | null;
+  referenceLabel: string | null;
+  location: string;
+  text: string;
+  sourcePage: number | null;
+  constitutionId: string;
+  constitutionTitle: string;
+  versionId: string;
+  versionNumber: number;
+  versionLabel: string;
+  publishedAt: string | null;
+  versionStatus?: string;
+  published?: boolean;
+}
+
+export interface AnswerIssue {
+  code: 'no_clauses' | 'clause_not_published' | 'unknown_reference' | 'number_not_in_clauses';
+  blocking: boolean;
+  message: string;
+}
+
+export type ManagedAnswerStatus = 'draft' | 'approved' | 'needs_review' | 'retired';
+
+export interface ManagedAnswer {
+  id: string;
+  question: string;
+  answer: string;
+  status: ManagedAnswerStatus;
+  source: 'manual' | 'import' | 'ai';
+  reviewReason: string | null;
+  createdBy: string | null;
+  updatedBy: string | null;
+  approvedBy: string | null;
+  approvedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  clauses: LinkedClause[];
+  issues: AnswerIssue[];
+  readyToApprove: boolean;
+}
+
+export interface MemberAnswer {
+  id: string;
+  question: string;
+  answer: string;
+  approvedAt: string | null;
+  clauses: LinkedClause[];
+}
+
+export interface MemberAnswers {
+  disclaimer: string;
+  answers: MemberAnswer[];
+}
+
+export const ANSWER_STATUS: Record<
+  ManagedAnswerStatus,
+  { label: string; help: string; tone: 'good' | 'warning' | 'neutral' | 'info' }
+> = {
+  draft: { label: 'Draft', help: 'Members cannot see it until it is approved.', tone: 'info' },
+  approved: { label: 'Approved', help: 'Members can see it.', tone: 'good' },
+  needs_review: {
+    label: 'Needs review',
+    help: 'The constitution changed. Hidden from members until it is checked and approved again.',
+    tone: 'warning',
+  },
+  retired: { label: 'Retired', help: 'No longer shown to members.', tone: 'neutral' },
+};
+
+export function answerSourceLabel(answer: Pick<ManagedAnswer, 'source' | 'createdBy'>): string {
+  if (answer.source === 'ai') return 'Drafted by AI – check every word against the original';
+  if (answer.source === 'import') return 'Imported from a file – check against the original';
+  return `Written by ${answer.createdBy ?? 'a former member'}`;
+}
+
+/** Clause references typed as "7, 7(a); Part 2" → ["7", "7(a)", "Part 2"]. */
+export function splitClauseReferences(text: string): string[] {
+  return text
+    .split(/[,;\n]+/)
+    .map((part) => part.trim())
+    .filter((part) => part !== '');
+}
+
+export interface AnswerImportRow {
+  question: string;
+  answer: string;
+  clauses: string[];
+  draftedBy?: 'ai' | 'person';
+}
+
+/**
+ * Reads an import file: JSON, either `{ "answers": [ ... ] }` or a list. Each item needs a
+ * question, an answer and its clauses (a list, or text like "7, 7(a)"). The server checks
+ * everything again.
+ */
+export function parseAnswerImport(text: string): { rows: AnswerImportRow[] } | { error: string } {
+  let data: unknown;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    return { error: 'The file is not valid JSON. See the example format below.' };
+  }
+  const list = Array.isArray(data)
+    ? data
+    : data && typeof data === 'object' && Array.isArray((data as { answers?: unknown }).answers)
+      ? (data as { answers: unknown[] }).answers
+      : null;
+  if (!list) return { error: 'The file must contain a list of answers.' };
+  if (list.length === 0) return { error: 'The file has no answers.' };
+  const rows: AnswerImportRow[] = [];
+  for (const [index, item] of list.entries()) {
+    const record = (item ?? {}) as Record<string, unknown>;
+    const clauses = Array.isArray(record.clauses)
+      ? record.clauses.map(String)
+      : typeof record.clauses === 'string'
+        ? splitClauseReferences(record.clauses)
+        : [];
+    if (typeof record.question !== 'string' || typeof record.answer !== 'string') {
+      return { error: `Answer ${index + 1} needs a "question" and an "answer".` };
+    }
+    if (clauses.length === 0) {
+      return { error: `Answer ${index + 1} needs at least one clause in "clauses".` };
+    }
+    rows.push({
+      question: record.question,
+      answer: record.answer,
+      clauses,
+      ...(record.draftedBy === 'ai' || record.draftedBy === 'person'
+        ? { draftedBy: record.draftedBy }
+        : {}),
+    });
+  }
+  return { rows };
+}

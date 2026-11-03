@@ -225,6 +225,36 @@ export const usageRecords = pgTable('usage_records', {
   occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const APPROVED_ANSWER_STATUSES = ['draft', 'approved', 'needs_review', 'retired'] as const;
+export const APPROVED_ANSWER_SOURCES = ['manual', 'import', 'ai'] as const;
+
+// The generated "search_vector" column is used through SQL only and is not mapped here.
+export const approvedAnswers = pgTable('approved_answers', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organisationId: organisationId(),
+  question: text('question').notNull(),
+  answer: text('answer').notNull(),
+  status: text('status', { enum: APPROVED_ANSWER_STATUSES }).notNull().default('draft'),
+  source: text('source', { enum: APPROVED_ANSWER_SOURCES }).notNull().default('manual'),
+  reviewReason: text('review_reason'),
+  createdByUserId: uuid('created_by_user_id').references(() => users.id, { onDelete: 'set null' }),
+  updatedByUserId: uuid('updated_by_user_id').references(() => users.id, { onDelete: 'set null' }),
+  approvedByUserId: uuid('approved_by_user_id').references(() => users.id, {
+    onDelete: 'set null',
+  }),
+  approvedAt: timestamp('approved_at', { withTimezone: true }),
+  createdAt,
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const approvedAnswerSections = pgTable('approved_answer_sections', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organisationId: organisationId(),
+  answerId: uuid('answer_id').notNull(),
+  sectionId: uuid('section_id').notNull(),
+  position: integer('position').notNull().default(0),
+});
+
 export type Subscription = typeof subscriptions.$inferSelect;
 export type StoredFile = typeof files.$inferSelect;
 export type Constitution = typeof constitutions.$inferSelect;

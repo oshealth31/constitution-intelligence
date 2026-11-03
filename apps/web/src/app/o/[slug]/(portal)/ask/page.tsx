@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { ApprovedAnswerCard } from '@/components/approved-answer';
 import { useState, type FormEvent } from 'react';
 import {
   ChatIcon,
@@ -24,6 +25,7 @@ import {
   type AnswerResponse,
   type ClauseFinderResponse,
   type ClauseMatch,
+  type MemberAnswers,
 } from '@/lib/portal';
 import { useApi } from '@/lib/use-api';
 import { usePortal } from '../portal-context';
@@ -46,6 +48,7 @@ function AskWithAi({ status }: { status: AiStatus }) {
   const suggestions = useApi<string[]>(`${api}/ai/suggested-questions`);
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState<AnswerResponse | null>(null);
+  const [approved, setApproved] = useState<MemberAnswers | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,13 +59,17 @@ function AskWithAi({ status }: { status: AiStatus }) {
     setBusy(true);
     setError(null);
     setAnswer(null);
+    setApproved(null);
     try {
-      setAnswer(
-        await apiFetch<AnswerResponse>(`${api}/ai/ask`, {
+      const [ai, matches] = await Promise.all([
+        apiFetch<AnswerResponse>(`${api}/ai/ask`, {
           method: 'POST',
           body: { question: trimmed },
         }),
-      );
+        matchApproved(api, trimmed),
+      ]);
+      setApproved(matches);
+      setAnswer(ai);
     } catch (caught) {
       setError(describeError(caught));
     } finally {
@@ -133,9 +140,75 @@ function AskWithAi({ status }: { status: AiStatus }) {
       <div aria-live="polite">
         {busy && <PortalLoading label="Looking in the constitution…" />}
         {error && <Notice tone="error">{error}</Notice>}
+        {approved && <ApprovedMatches result={approved} />}
         {answer && <AnswerView answer={answer} slug={slug} api={api} />}
       </div>
+      {!answer && !busy && <CommonQuestions />}
     </div>
+  );
+}
+
+/** Approved answers matching a question (none is fine: the request failing is not shown). */
+function matchApproved(api: string, question: string): Promise<MemberAnswers | null> {
+  return apiFetch<MemberAnswers>(
+    `${api}/answers/match?question=${encodeURIComponent(question)}`,
+  ).catch(() => null);
+}
+
+function ApprovedMatches({ result }: { result: MemberAnswers }) {
+  const { slug, home } = usePortal();
+  if (result.answers.length === 0) return null;
+  return (
+    <section aria-labelledby="approved-heading" className="mb-5 space-y-3">
+      <h2 id="approved-heading" className="text-lg font-semibold text-slate-900">
+        Answered by {home.organisation.name}
+      </h2>
+      {result.answers.map((item) => (
+        <ApprovedAnswerCard
+          key={item.id}
+          answer={item}
+          organisationName={home.organisation.name}
+          disclaimer={result.disclaimer}
+          slug={slug}
+        />
+      ))}
+    </section>
+  );
+}
+
+/** Every approved answer, for browsing. */
+function CommonQuestions() {
+  const { api, slug, home } = usePortal();
+  const all = useApi<MemberAnswers>(`${api}/answers`);
+  if (!all.data || all.data.answers.length === 0) return null;
+  return (
+    <section aria-labelledby="common-heading" className="space-y-3">
+      <h2 id="common-heading" className="text-lg font-semibold text-slate-900">
+        Common questions
+      </h2>
+      <p className="text-base text-slate-600">
+        Answered in everyday words and approved by {home.organisation.name}.
+      </p>
+      <ul className="space-y-2">
+        {all.data.answers.map((item) => (
+          <li key={item.id}>
+            <details className="group rounded-xl border border-slate-300 bg-white">
+              <summary className="flex min-h-12 cursor-pointer items-center px-4 py-2 text-base font-medium text-slate-900">
+                {item.question}
+              </summary>
+              <div className="px-2 pb-2">
+                <ApprovedAnswerCard
+                  answer={item}
+                  organisationName={home.organisation.name}
+                  disclaimer={all.data!.disclaimer}
+                  slug={slug}
+                />
+              </div>
+            </details>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
@@ -148,6 +221,7 @@ function ClauseFinder() {
   const suggestions = useApi<string[]>(`${api}/ai/suggested-questions`);
   const [question, setQuestion] = useState('');
   const [found, setFound] = useState<ClauseFinderResponse | null>(null);
+  const [approved, setApproved] = useState<MemberAnswers | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -158,13 +232,17 @@ function ClauseFinder() {
     setBusy(true);
     setError(null);
     setFound(null);
+    setApproved(null);
     try {
-      setFound(
-        await apiFetch<ClauseFinderResponse>(`${api}/ai/find-clauses`, {
+      const [clauses, matches] = await Promise.all([
+        apiFetch<ClauseFinderResponse>(`${api}/ai/find-clauses`, {
           method: 'POST',
           body: { question: trimmed },
         }),
-      );
+        matchApproved(api, trimmed),
+      ]);
+      setApproved(matches);
+      setFound(clauses);
     } catch (caught) {
       setError(describeError(caught));
     } finally {
@@ -233,7 +311,8 @@ function ClauseFinder() {
       <div aria-live="polite">
         {busy && <PortalLoading label="Looking in the constitution…" />}
         {error && <Notice tone="error">{error}</Notice>}
-        {found && found.results.length === 0 && (
+        {approved && <ApprovedMatches result={approved} />}
+        {found && found.results.length === 0 && (approved?.answers.length ?? 0) === 0 && (
           <Panel title="No matching clauses">
             <p data-testid="clauses-message" className="text-lg text-slate-900">
               {found.message}
@@ -274,6 +353,7 @@ function ClauseFinder() {
           </section>
         )}
       </div>
+      {!found && !busy && <CommonQuestions />}
     </div>
   );
 }

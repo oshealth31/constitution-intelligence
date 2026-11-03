@@ -35,7 +35,7 @@ describe('describeAuditDetails', () => {
         by: 'platform',
         userId: 'hidden',
       }),
-    ).toEqual(['Changed from Trial to Active', 'Reason: Customer paid the annual invoice']);
+    ).toEqual(['Changed from Pilot to Active', 'Reason: Customer paid the annual invoice']);
   });
 
   it('describes field changes, permissions and counts', () => {

@@ -57,6 +57,10 @@ FILE_AREAS = {
     'security-headers.spec.ts': ['Security controls'],
     'security-headers.test.ts': ['Security controls'],
     'config.spec.ts': ['Security controls'],
+    'env.test.ts': ['Security controls'],
+    'access.test.ts': ['Roles and permissions'],
+    'subscriptions.test.ts': ['Subscription entitlements'],
+
 }
 # Areas recognised from test names, wherever the test lives.
 TITLE_AREAS = [

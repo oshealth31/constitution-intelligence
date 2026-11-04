@@ -327,9 +327,7 @@ describe('structure detection', () => {
     expect(reasons(['4. Rules', '(a) one;', '(a) again.'])).toEqual([
       expect.stringMatching(/appears more than once/),
     ]);
-    expect(reasons(['4. Rules', '(c) three.'])).toEqual([
-      expect.stringMatching(/starts at \(c\)/),
-    ]);
+    expect(reasons(['4. Rules', '(c) three.'])).toEqual([expect.stringMatching(/starts at \(c\)/)]);
   });
 
   it('does not mistake a sentence starting with a year for a clause', () => {

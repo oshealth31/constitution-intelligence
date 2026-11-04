@@ -532,8 +532,7 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
     const continued = continuing(readings);
     // A new list of the same kind as one already open is a repeated number, not a deeper list.
     const opening = readings.find(
-      (candidate) =>
-        candidate.value === 1 && !lists.some((list) => list.style === candidate.style),
+      (candidate) => candidate.value === 1 && !lists.some((list) => list.style === candidate.style),
     );
     if (continued) {
       // The next item of an open list, e.g. (ii) after (i)'s own (a), (b): back out to (i)'s list.

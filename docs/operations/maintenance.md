@@ -4,7 +4,8 @@
 
 | When               | Task                                                                                                       | How                                                                                                                        |
 | ------------------ | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Daily (automatic)  | Encrypted backup, copied off the server                                                                    | Cron: `docker compose --profile ops run --rm ops`, then the off-site copy ([backup-and-restore.md](backup-and-restore.md)) |
+| Daily (automatic)  | Encrypted backup, copied off the server and checked | systemd timer `constitution-backup.timer` (01:30) runs `ops/backup-and-copy.sh` ([backup-and-restore.md](backup-and-restore.md#schedule-task-d7)) |
+| Monthly | Thin out off-site backups (35 daily, 12 monthly), with the separate delete-allowed account | `ops/offsite-prune.sh`, then `--yes` |
 | Daily              | Glance at alerts and Control Centre → System health                                                        |                                                                                                                            |
 | Weekly             | Read the "Security scans" results and Dependabot pull requests; merge safe updates after CI                | GitHub                                                                                                                     |
 | Weekly (automatic) | Deployment check, including a full backup-and-restore test on a throwaway runner                           | GitHub Actions, Mondays                                                                                                    |

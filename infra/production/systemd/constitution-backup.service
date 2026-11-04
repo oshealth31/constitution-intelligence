@@ -1,0 +1,13 @@
+# Daily encrypted backup and off-site copy (Task D7). Installed by docs/operations/backup-and-restore.md.
+[Unit]
+Description=Constitution Intelligence: encrypted backup and off-site copy
+Wants=network-online.target docker.service
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/srv/constitution/infra/production
+# backup-and-copy.sh exits non-zero if the backup OR the off-site copy fails: systemd then marks
+# the run "failed", which the monitoring checks (systemctl is-failed constitution-backup).
+ExecStart=/usr/bin/docker compose --profile ops run --rm -T ops /ops/backup-and-copy.sh
+TimeoutStartSec=2h

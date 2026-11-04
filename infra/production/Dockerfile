@@ -57,9 +57,10 @@ CMD ["node", "node_modules/next/dist/bin/next", "start", "--port", "3000", "--ho
 # PostgreSQL 16 client tools (same major version as the server) plus gpg for encryption.
 FROM pgvector/pgvector:pg16 AS ops
 RUN apt-get update \
- && apt-get install -y --no-install-recommends gnupg \
+ && apt-get install -y --no-install-recommends gnupg rclone ca-certificates \
  && rm -rf /var/lib/apt/lists/*
-COPY ops/backup.sh ops/restore.sh ops/export-organisation.sh /ops/
+COPY ops/backup.sh ops/restore.sh ops/export-organisation.sh ops/offsite-copy.sh \
+     ops/offsite-fetch.sh ops/offsite-prune.sh ops/backup-and-copy.sh /ops/
 RUN chmod 0755 /ops/*.sh
 ENTRYPOINT []
 CMD ["/ops/backup.sh"]

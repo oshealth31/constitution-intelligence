@@ -1,0 +1,13 @@
+# Runs constitution-backup.service every night at 01:30 server time (set the server to
+# Africa/Gaborone: timedatectl set-timezone Africa/Gaborone). Persistent: a run missed while the
+# server was off happens at the next start.
+[Unit]
+Description=Constitution Intelligence: nightly backup at 01:30
+
+[Timer]
+OnCalendar=*-*-* 01:30:00
+Persistent=true
+RandomizedDelaySec=5min
+
+[Install]
+WantedBy=timers.target

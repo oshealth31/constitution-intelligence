@@ -7,7 +7,9 @@
 #  4. backup and restore test: fictional data -> encrypted backup -> restore into a NEW
 #     database and storage -> row counts, file checksums, security rules and a real sign-in
 #     on the restored copy;
-#  5. exports one organisation and checks the export contains only that organisation.
+#  5. exports one organisation and checks the export contains only that organisation;
+#  6. off-site copy (Task D7) to a throwaway S3 object store with an add-only account, then the
+#     restore test uses the copy downloaded back from it.
 name: Deployment check
 
 on:
@@ -87,6 +89,14 @@ jobs:
           openssl rand -hex 32 > secrets/backup_passphrase
           openssl rand -hex 24 > secrets/smtp_password
           openssl rand -hex 32 > secrets/mfa_encryption_key
+          # Throwaway object store (MinIO) standing in for the off-site location: an admin, and an
+          # add-only account used by the nightly copy.
+          minio_admin="$(openssl rand -hex 16)"; copier_secret="$(openssl rand -hex 16)"
+          echo "CI_MINIO_PASSWORD=$minio_admin" >> "$GITHUB_ENV"
+          echo "CI_COPIER_SECRET=$copier_secret" >> "$GITHUB_ENV"
+          echo "OFFSITE_REMOTE=offsite:backups/prod" >> "$GITHUB_ENV"
+          printf '[offsite]\ntype = s3\nprovider = Minio\naccess_key_id = ci-copier\nsecret_access_key = %s\nendpoint = http://minio:9000\n' "$copier_secret" > secrets/rclone.conf
+          printf '[offsite]\ntype = s3\nprovider = Minio\naccess_key_id = ci-minio-admin\nsecret_access_key = %s\nendpoint = http://minio:9000\n' "$minio_admin" > secrets/rclone-admin.conf
           # Throwaway mail server certificate, signed by the same throwaway CA the API trusts.
           mkdir -p ci-mail
           openssl req -newkey rsa:2048 -nodes -subj "/CN=mailpit" \
@@ -230,6 +240,58 @@ jobs:
           ! sudo grep -aq 'Sample Community Choir' "$backup/database.dump.gpg"
           echo "[restore-test] ok backup written and encrypted"
 
+      - name: Off-site copy with an add-only account, checked, and downloaded back
+        run: |
+          set -e
+          mc() { docker run --rm --network constitution-intelligence_egress -e MC_HOST_ci="http://ci-minio-admin:$CI_MINIO_PASSWORD@minio:9000" minio/mc:latest "$@"; }
+          for i in $(seq 1 30); do mc ls ci >/dev/null 2>&1 && break; sleep 2; done
+          mc mb ci/backups
+          # Versioning: an overwritten file keeps its earlier version (the copy account may not delete versions).
+          mc version enable ci/backups
+          printf '%s' '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:PutObject","s3:GetObject","s3:ListBucket","s3:GetBucketLocation"],"Resource":["arn:aws:s3:::backups","arn:aws:s3:::backups/*"]}]}' > addonly.json
+          docker run --rm --network constitution-intelligence_egress -v "$PWD/addonly.json:/p.json:ro" \
+            -e MC_HOST_ci="http://ci-minio-admin:$CI_MINIO_PASSWORD@minio:9000" --entrypoint sh minio/mc:latest -c \
+            "mc admin policy create ci addonly /p.json && mc admin user add ci ci-copier $CI_COPIER_SECRET && mc admin policy attach ci addonly --user ci-copier"
+          folder="$(basename "$BACKUP")"
+          docker compose --profile ops run --rm -T ops /ops/offsite-copy.sh | sed 's/^/[offsite-test] /'
+          docker compose --profile ops run --rm -T ops /ops/offsite-copy.sh | tee second.txt
+          grep -q 'nothing new to copy' second.txt
+          sudo test -s backups/.offsite-last-success
+          # The copy account cannot delete what is off-site; an overwrite keeps the earlier version.
+          set +e
+          docker compose --profile ops run --rm -T ops sh -c "rclone deletefile \"\$OFFSITE_REMOTE/$folder/manifest.txt\"" > del.txt 2>&1; deleted=$?
+          set -e
+          tail -n 3 del.txt
+          test "$deleted" -ne 0
+          mc stat "ci/backups/prod/$folder/manifest.txt" >/dev/null
+          docker compose --profile ops run --rm -T ops sh -c 'echo one | rclone rcat "$OFFSITE_REMOTE/versioning-check.txt" && echo two | rclone rcat "$OFFSITE_REMOTE/versioning-check.txt"'
+          test "$(mc ls --versions ci/backups/prod/versioning-check.txt | wc -l)" -ge 2
+          echo "[offsite-test] ok the add-only account cannot delete off-site backups, and overwrites keep the old version"
+          # Download it back into an empty folder (as after losing the server) and check it.
+          mkdir -p fetched
+          docker compose --profile ops run --rm -T -v "$PWD/fetched:/fetched" -e BACKUP_DIR=/fetched ops \
+            /ops/offsite-fetch.sh "$folder" | sed 's/^/[offsite-test] /'
+          sudo cmp "fetched/$folder/database.dump.gpg" "$BACKUP/database.dump.gpg"
+          sudo cmp "fetched/$folder/storage.tar.gz.gpg" "$BACKUP/storage.tar.gz.gpg"
+          echo "RESTORE_SOURCE=fetched" >> "$GITHUB_ENV"
+          echo "[offsite-test] ok copied, checked, and downloaded back identical; the restore below uses the downloaded copy"
+
+      - name: Thinning out old off-site backups (separate account that may delete)
+        run: |
+          set -e
+          admin_ops() { docker compose --profile ops run --rm -T -v "$PWD/secrets/rclone-admin.conf:/admin.conf:ro" -e RCLONE_CONFIG=/admin.conf "$@"; }
+          for old in 20250101T013000Z 20250102T013000Z 20250201T013000Z; do
+            admin_ops ops sh -c "echo test | rclone rcat \"\$OFFSITE_REMOTE/$old/SHA256SUMS\""
+          done
+          admin_ops -e OFFSITE_KEEP_DAILY=2 -e OFFSITE_KEEP_MONTHLY=1 ops /ops/offsite-prune.sh | tee plan.txt
+          grep -q 'would remove 20250101T013000Z' plan.txt
+          grep -q 'would remove 20250102T013000Z' plan.txt
+          admin_ops -e OFFSITE_KEEP_DAILY=2 -e OFFSITE_KEEP_MONTHLY=1 ops /ops/offsite-prune.sh --yes
+          left="$(admin_ops ops sh -c 'rclone lsf --dirs-only "$OFFSITE_REMOTE"' | tr -d '/' | sort | tr '\n' ' ')"
+          echo "[offsite-test] left off-site: $left"
+          test "$left" = "20250201T013000Z $(basename "$BACKUP") "
+          echo "[offsite-test] ok old backups removed, the newest kept"
+
       - name: Restore into a NEW database and NEW storage
         run: |
           set -e
@@ -239,7 +301,7 @@ jobs:
             -c 'CREATE EXTENSION IF NOT EXISTS vector' -c 'ALTER SCHEMA public OWNER TO constitution_migrator'
           docker volume create ci-restored-storage
           docker run --rm --network constitution-intelligence_data \
-            -v "$PWD/backups:/backups:ro" -v "$PWD/secrets:/s:ro" -v ci-restored-storage:/restored \
+            -v "$PWD/${RESTORE_SOURCE:-backups}:/backups:ro" -v "$PWD/secrets:/s:ro" -v ci-restored-storage:/restored \
             -e TARGET_DATABASE_URL_FILE=/s/restore_migrator_url -e TARGET_STORAGE_DIR=/restored \
             -e BACKUP_PASSPHRASE_FILE=/s/backup_passphrase \
             -e PGSSLMODE=verify-full -e PGSSLROOTCERT=/s/database_ca.crt \

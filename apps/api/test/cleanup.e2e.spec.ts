@@ -38,7 +38,8 @@ describe.runIf(Boolean(testDatabaseUrl))('housekeeping cleanup', () => {
     const user = await createUser(context.db, { email: uniqueEmail('cleanup') });
     const organisation = await createOrganisation(context.db);
     const agent = await signIn(context, user.email); // a live session that must survive
-    const token = (n: number) => `cleanup-test-token-${Date.now()}-${n}`;
+    const run = Date.now();
+    const token = (n: number) => `cleanup-test-token-${run}-${n}`;
 
     const old = await context.db
       .insert(sessions)

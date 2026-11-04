@@ -119,7 +119,9 @@ Production refuses to start without real email (`MAIL_TRANSPORT=smtp`). With Bre
 2. **SMTP & API → SMTP**: note the login and create an SMTP key. Put the key in
    `secrets/smtp_password` ([secrets.md](secrets.md)); put the login in `SMTP_USER` and the
    sender (`MAIL_FROM`, on the verified domain) in `api.env`.
-3. `docker compose up -d --wait api`. Then **test**: use "Forgot password" for a test account,
+3. `docker compose up -d --wait api`, then send a test email:
+   `docker compose run --rm -T api node dist/cli/send-test-email.js --to <your address>`
+   (before the server exists, the **Email live test** workflow on GitHub does the same). Then **test**: use "Forgot password" for a test account,
    and check that the email arrives (inbox, not spam), that both the plain-text and formatted
    versions look right, and that **the link points directly to `https://<your address>/…`**. If
    the link has been rewritten to go through the provider (link tracking), one-time links pass

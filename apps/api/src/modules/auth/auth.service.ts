@@ -177,7 +177,9 @@ export class AuthService {
     const link = await this.issuePasswordResetLink(user.id);
     const content = renderEmail({
       greeting: `Hello ${oneLine(user.displayName)},`,
-      paragraphs: ['Someone asked to reset the password of your Constitution Intelligence account.'],
+      paragraphs: [
+        'Someone asked to reset the password of your Constitution Intelligence account.',
+      ],
       action: { label: 'Choose a new password', url: link },
       afterAction: [
         `The link expires in ${this.config.PASSWORD_RESET_TTL_MINUTES} minutes and can be used once.`,

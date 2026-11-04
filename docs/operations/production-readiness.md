@@ -29,7 +29,7 @@ fictional data). But a public go-live needs things that do not exist yet:
 | #   | Condition                                                                                                                                   | Type             |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
 | C1  | Hosting chosen and approved by the owner (in Botswana, or a destination the Act allows); server prepared per [deployment.md](deployment.md) | Decision + setup |
-| C2  | Email: SMTP sending built and tested (D1, done); Brevo account, sending domain with SPF/DKIM/DMARC, link tracking off, live test (S3) | Setup |
+| C2  | Email: SMTP sending built and tested (D1, done); Brevo account, sending domain with SPF/DKIM/DMARC, link tracking off, live test (S3)       | Setup            |
 | C3  | Two-factor sign-in for Super Admins                                                                                                         | Development      |
 | C4  | Pilot agreement with RBPC covering data protection roles, plus a privacy notice for members                                                 | Legal            |
 | C5  | Off-site encrypted backup copy running, **and one restore test on the real server's backup recorded**                                       | Setup + test     |

@@ -49,7 +49,10 @@ export default function MembersPage() {
       setEmail('');
       setMessage(
         created?.emailDelivered === false
-          ? { tone: 'error', text: `${email}: The invitation was created, but the email could not be sent. Check the address and invite again, which sends a new email.` }
+          ? {
+              tone: 'error',
+              text: `${email}: The invitation was created, but the email could not be sent. Check the address and invite again, which sends a new email.`,
+            }
           : { tone: 'success', text: `Invitation sent to ${email}.` },
       );
       await invitations.reload();

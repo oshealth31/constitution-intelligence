@@ -204,7 +204,10 @@ describe('loadConfig', () => {
     });
 
     it('reads the SMTP password from a file', () => {
-      const env = resolveSecretFiles({ SMTP_PASSWORD_FILE: '/run/secrets/smtp_password' }, () => 'k3y\n');
+      const env = resolveSecretFiles(
+        { SMTP_PASSWORD_FILE: '/run/secrets/smtp_password' },
+        () => 'k3y\n',
+      );
       expect(env.SMTP_PASSWORD).toBe('k3y');
     });
   });

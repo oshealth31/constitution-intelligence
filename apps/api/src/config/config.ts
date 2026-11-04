@@ -104,9 +104,15 @@ export const configSchema = z
       .trim()
       .min(3)
       .max(200)
-      .refine((value) => /^(?:[^<>@\r\n]+<[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+>|[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+)$/.test(value), {
-        error: 'must be an email address, optionally with a name: Name <address@domain>',
-      })
+      .refine(
+        (value) =>
+          /^(?:[^<>@\r\n]+<[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+>|[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+)$/.test(
+            value,
+          ),
+        {
+          error: 'must be an email address, optionally with a name: Name <address@domain>',
+        },
+      )
       .optional(),
     // Optional address replies go to (for example the support mailbox).
     MAIL_REPLY_TO: z.email({ error: 'must be an email address' }).optional(),
@@ -158,8 +164,7 @@ export const configSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['MAIL_TRANSPORT'],
-        message:
-          'must be "smtp" in production (invitations and password resets are sent by email)',
+        message: 'must be "smtp" in production (invitations and password resets are sent by email)',
       });
     }
     if (config.AI_PROVIDER === 'anthropic' && !config.ANTHROPIC_API_KEY) {

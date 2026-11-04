@@ -97,13 +97,19 @@ describe('MailService over SMTP', () => {
     await wrong.service.onModuleDestroy();
 
     const closed = mailServiceFor({ ...smtpSettings(smtp), SMTP_PORT: '1' });
-    expect(await closed.service.send({ to: 'a@example.test', subject: 'x', text: 'y' })).toBe(false);
+    expect(await closed.service.send({ to: 'a@example.test', subject: 'x', text: 'y' })).toBe(
+      false,
+    );
     await closed.service.onModuleDestroy();
   });
 
   it('keeps names from adding lines to the subject', async () => {
     const { service } = mailServiceFor(smtpSettings(smtp));
-    await service.send({ to: 'b@example.test', subject: 'Hi\r\nBcc: evil@example.test', text: 'z' });
+    await service.send({
+      to: 'b@example.test',
+      subject: 'Hi\r\nBcc: evil@example.test',
+      text: 'z',
+    });
     const mail = smtp.received.at(-1)!;
     expect(mail.to).toEqual(['b@example.test']);
     expect(mail.raw).not.toMatch(/^Bcc:/m);
@@ -164,13 +170,20 @@ describe.runIf(Boolean(testDatabaseUrl))('invitations and password resets by ema
 
     await client(context)
       .post('/api/v1/invitations/accept')
-      .send({ token: tokenIn(email), displayName: 'Fictional Member', password: NEW_MEMBER_PASSWORD })
+      .send({
+        token: tokenIn(email),
+        displayName: 'Fictional Member',
+        password: NEW_MEMBER_PASSWORD,
+      })
       .expect(200);
   });
 
   it('emails a password reset link that works', async () => {
     const user = await createUser(context.db, { email: uniqueEmail('forgot') });
-    await client(context).post('/api/v1/auth/password/forgot').send({ email: user.email }).expect(202);
+    await client(context)
+      .post('/api/v1/auth/password/forgot')
+      .send({ email: user.email })
+      .expect(202);
     await client(context)
       .post('/api/v1/auth/password/reset')
       .send({ token: tokenIn(user.email), newPassword: 'a completely new passphrase' })
@@ -188,11 +201,16 @@ describe.runIf(Boolean(testDatabaseUrl))('invitations and password resets by ema
         .send({ email, role: 'member' })
         .expect(201);
       expect(created.body.emailDelivered).toBe(false);
-      const list = await agent.get(`/api/v1/organisations/${organisation.id}/invitations`).expect(200);
+      const list = await agent
+        .get(`/api/v1/organisations/${organisation.id}/invitations`)
+        .expect(200);
       expect(list.body.some((item: { email: string }) => item.email === email)).toBe(true);
       // Password resets answer the same whether or not the email went out.
       const user = await createUser(broken.db, { email: uniqueEmail('reset-not-delivered') });
-      await client(broken).post('/api/v1/auth/password/forgot').send({ email: user.email }).expect(202);
+      await client(broken)
+        .post('/api/v1/auth/password/forgot')
+        .send({ email: user.email })
+        .expect(202);
     } finally {
       await broken.close();
     }

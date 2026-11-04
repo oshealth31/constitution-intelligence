@@ -65,7 +65,10 @@ function useAction(
         (result as { emailDelivered?: boolean }).emailDelivered === false;
       setNotice(
         emailFailed
-          ? { tone: 'critical', text: 'The invitation was created, but the email could not be sent. Check the address and invite again, which sends a new email.' }
+          ? {
+              tone: 'critical',
+              text: 'The invitation was created, but the email could not be sent. Check the address and invite again, which sends a new email.',
+            }
           : { tone: 'good', text: success },
       );
       return true;

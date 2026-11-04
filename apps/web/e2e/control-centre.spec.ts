@@ -150,7 +150,7 @@ test('a super admin records a personal data request and can download the copy', 
   await form.getByRole('button', { name: 'Record the request' }).click();
 
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Copy of their data');
-  await expect(page.getByText(ORG_ADMIN).first()).toBeVisible();
+  await expect(page.getByText(ORG_ADMIN, { exact: true }).first()).toBeVisible();
   const download = page.waitForEvent('download');
   await page.getByRole('link', { name: 'Download the copy' }).click();
   const file = await download;

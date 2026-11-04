@@ -112,8 +112,8 @@ items below.
 
 ### Security (from docs/security/security-review.md)
 
-- ~~U1 two-step sign-in~~ (done, D2) · ~~U3 separate database accounts~~ (done, D4) · U4 document parsing in an
-  isolated process · ~~U6 leaked-password check~~ (done, D5; the lock-out part of U6 remains) · U8 tamper-evident audit copy ·
+- ~~U1 two-step sign-in~~ (done, D2) · ~~U3 separate database accounts~~ (done, D4) · ~~U4 document parsing in an
+  isolated process~~ (done, D8) · ~~U6 leaked-password check~~ (done, D5; the lock-out part of U6 remains) · U8 tamper-evident audit copy ·
   U11 independent penetration test before general availability · U12 development-tool
   vulnerabilities (Vitest upgrade).
 
@@ -135,7 +135,7 @@ items below.
 ## Before general availability (beyond the pilot)
 
 Everything above, plus: penetration test; a self-service tool for individual people's data requests (D11); separate database accounts;
-isolated document parsing; a load test; a tested Safari/iOS offline experience; screen-reader
+a load test; a tested Safari/iOS offline experience; screen-reader
 testing; payment-provider decision; the 14.1.3 parser fix.
 
 ## Sources

@@ -86,17 +86,32 @@ describe.runIf(Boolean(testDatabaseUrl))('file quarantine', () => {
       .post(staffUrl(`/${ids.fileId}/quarantine`))
       .send({ reason: REASON })
       .expect(403);
-    await staff.post(staffUrl(`/${ids.fileId}/quarantine`)).send({ reason: 'short' }).expect(400);
-    await staff.post(staffUrl(`/${ids.fileId}/frobnicate`)).send({ reason: REASON }).expect(404);
+    await staff
+      .post(staffUrl(`/${ids.fileId}/quarantine`))
+      .send({ reason: 'short' })
+      .expect(400);
+    await staff
+      .post(staffUrl(`/${ids.fileId}/frobnicate`))
+      .send({ reason: REASON })
+      .expect(404);
   });
 
   it('refuses remove and release before quarantine', async () => {
-    await staff.post(staffUrl(`/${ids.fileId}/remove`)).send({ reason: REASON }).expect(409);
-    await staff.post(staffUrl(`/${ids.fileId}/release`)).send({ reason: REASON }).expect(409);
+    await staff
+      .post(staffUrl(`/${ids.fileId}/remove`))
+      .send({ reason: REASON })
+      .expect(409);
+    await staff
+      .post(staffUrl(`/${ids.fileId}/release`))
+      .send({ reason: REASON })
+      .expect(409);
   });
 
   it('blocks every download path once quarantined, and hides the original', async () => {
-    await staff.post(staffUrl(`/${ids.fileId}/quarantine`)).send({ reason: REASON }).expect(200);
+    await staff
+      .post(staffUrl(`/${ids.fileId}/quarantine`))
+      .send({ reason: REASON })
+      .expect(200);
     const byFile = await owner.agent.get(fileUrl()).expect(403);
     expect(byFile.body.reason).toBe('FILE_QUARANTINED');
     const bySource = await member.agent.get(sourceUrl()).expect(403);
@@ -126,14 +141,23 @@ describe.runIf(Boolean(testDatabaseUrl))('file quarantine', () => {
   });
 
   it('release restores downloads', async () => {
-    await staff.post(staffUrl(`/${ids.fileId}/release`)).send({ reason: REASON }).expect(200);
+    await staff
+      .post(staffUrl(`/${ids.fileId}/release`))
+      .send({ reason: REASON })
+      .expect(200);
     await owner.agent.get(fileUrl()).buffer(true).expect(200);
     expect(await listedFile()).toMatchObject({ status: 'available', downloads: 3 });
   });
 
   it('remove deletes the stored content for good; it cannot be released afterwards', async () => {
-    await staff.post(staffUrl(`/${ids.fileId}/quarantine`)).send({ reason: REASON }).expect(200);
-    await staff.post(staffUrl(`/${ids.fileId}/remove`)).send({ reason: REASON }).expect(200);
+    await staff
+      .post(staffUrl(`/${ids.fileId}/quarantine`))
+      .send({ reason: REASON })
+      .expect(200);
+    await staff
+      .post(staffUrl(`/${ids.fileId}/remove`))
+      .send({ reason: REASON })
+      .expect(200);
     const [row] = await context.db.select().from(files).where(eq(files.id, ids.fileId));
     expect(row?.contentRemovedAt).not.toBeNull();
     const storage = context.app.get(StorageService);
@@ -141,7 +165,10 @@ describe.runIf(Boolean(testDatabaseUrl))('file quarantine', () => {
     const gone = await owner.agent.get(fileUrl()).expect(410);
     expect(gone.body.reason).toBe('FILE_REMOVED');
     await member.agent.get(sourceUrl()).expect(410);
-    await staff.post(staffUrl(`/${ids.fileId}/release`)).send({ reason: REASON }).expect(409);
+    await staff
+      .post(staffUrl(`/${ids.fileId}/release`))
+      .send({ reason: REASON })
+      .expect(409);
     expect(await listedFile()).toMatchObject({ status: 'removed' });
     // The text already read from the document stays readable.
     const reader = await member.agent
@@ -159,7 +186,10 @@ describe.runIf(Boolean(testDatabaseUrl))('file quarantine', () => {
       .expect(200);
     const logoId = upload.body.logoFileId as string;
     await member.agent.get(`/api/v1/portal/${slug}/logo`).buffer(true).expect(200);
-    await staff.post(staffUrl(`/${logoId}/quarantine`)).send({ reason: REASON }).expect(200);
+    await staff
+      .post(staffUrl(`/${logoId}/quarantine`))
+      .send({ reason: REASON })
+      .expect(200);
     await member.agent.get(`/api/v1/portal/${slug}/logo`).expect(404);
   });
 });

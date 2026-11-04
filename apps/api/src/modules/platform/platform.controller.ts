@@ -342,10 +342,7 @@ export class PlatformController {
 
   /** Who downloaded a file (from the audit log). */
   @Get('organisations/:organisationId/files/:fileId/downloads')
-  fileDownloads(
-    @Param('organisationId') organisationId: string,
-    @Param('fileId') fileId: string,
-  ) {
+  fileDownloads(@Param('organisationId') organisationId: string, @Param('fileId') fileId: string) {
     return this.quarantine.downloads(
       parseId(organisationId, 'Organisation'),
       parseId(fileId, 'File'),

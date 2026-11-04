@@ -91,7 +91,11 @@ export class FileQuarantineService {
     if (file.quarantinedAt) throw new ConflictException('This file is already in quarantine.');
     await this.db
       .update(files)
-      .set({ quarantinedAt: new Date(), quarantineReason: reason, quarantinedByUserId: actorUserId })
+      .set({
+        quarantinedAt: new Date(),
+        quarantineReason: reason,
+        quarantinedByUserId: actorUserId,
+      })
       .where(and(eq(files.id, fileId), eq(files.organisationId, organisationId)));
     await this.record('file.quarantined', organisationId, fileId, actorUserId, meta, {
       reason,

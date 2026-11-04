@@ -75,6 +75,11 @@ Three guards run on every API request, in order:
   in staging and production. The database stores only a SHA-256 hash of the token.
 - Sessions end after `SESSION_IDLE_MINUTES` without activity (default 24 hours) and always after
   `SESSION_ABSOLUTE_HOURS` (default 14 days).
+- Platform Super Admin sessions are shorter: `SUPER_ADMIN_SESSION_IDLE_MINUTES` (default 30) and
+  `SUPER_ADMIN_SESSION_ABSOLUTE_HOURS` (default 12). In staging and production the cookie is named
+  `__Host-ci_session`, so it can only be set by the site itself over HTTPS (Stage 12).
+- Password change, password-reset links and invitation links are rate limited too (Stage 12);
+  see [security-review.md](security-review.md).
 - Sessions are ended immediately on sign-out, "sign out everywhere", password reset (all sessions),
   password change (all other sessions), and account suspension or deactivation.
 - Wrong password and unknown email produce the same message, and take the same time, so attackers

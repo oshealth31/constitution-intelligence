@@ -3,6 +3,16 @@ import { isDeployedEnvironment, type AppConfig } from '../../config/config';
 
 /** Name of the session cookie. Its value is a random token; only its hash is stored. */
 export const SESSION_COOKIE = 'ci_session';
+/**
+ * Name used in staging and production. Browsers only accept a "__Host-" cookie if it is
+ * Secure, set by the site itself and not shared with sub-domains, so it cannot be planted
+ * or overwritten from another sub-domain.
+ */
+export const SECURE_SESSION_COOKIE = '__Host-ci_session';
+
+export function sessionCookieName(config?: AppConfig): string {
+  return config && isDeployedEnvironment(config) ? SECURE_SESSION_COOKIE : SESSION_COOKIE;
+}
 
 function cookieOptions(config: AppConfig): CookieOptions {
   return {
@@ -13,7 +23,8 @@ function cookieOptions(config: AppConfig): CookieOptions {
   };
 }
 
-export function readSessionToken(request: Request): string | undefined {
+export function readSessionToken(request: Request, config?: AppConfig): string | undefined {
+  const name = sessionCookieName(config);
   const header = request.headers.cookie;
   if (!header) {
     return undefined;
@@ -23,7 +34,7 @@ export function readSessionToken(request: Request): string | undefined {
     if (separator === -1) {
       continue;
     }
-    if (part.slice(0, separator).trim() === SESSION_COOKIE) {
+    if (part.slice(0, separator).trim() === name) {
       const value = part.slice(separator + 1).trim();
       return /^[A-Za-z0-9_-]{20,200}$/.test(value) ? value : undefined;
     }
@@ -37,9 +48,12 @@ export function setSessionCookie(
   expiresAt: Date,
   config: AppConfig,
 ): void {
-  response.cookie(SESSION_COOKIE, token, { ...cookieOptions(config), expires: expiresAt });
+  response.cookie(sessionCookieName(config), token, {
+    ...cookieOptions(config),
+    expires: expiresAt,
+  });
 }
 
 export function clearSessionCookie(response: Response, config: AppConfig): void {
-  response.clearCookie(SESSION_COOKIE, cookieOptions(config));
+  response.clearCookie(sessionCookieName(config), cookieOptions(config));
 }

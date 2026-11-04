@@ -65,11 +65,20 @@ export class SessionService {
     }
     const { session, user } = row;
     const now = Date.now();
-    const idleLimit = this.config.SESSION_IDLE_MINUTES * 60_000;
+    // Super Admin sessions are shorter: they can affect every organisation.
+    const idleLimit =
+      (user.isPlatformSuperAdmin
+        ? Math.min(this.config.SUPER_ADMIN_SESSION_IDLE_MINUTES, this.config.SESSION_IDLE_MINUTES)
+        : this.config.SESSION_IDLE_MINUTES) * 60_000;
+    const superAdminExpired =
+      user.isPlatformSuperAdmin &&
+      now - session.createdAt.getTime() >
+        this.config.SUPER_ADMIN_SESSION_ABSOLUTE_HOURS * 3_600_000;
     if (
       session.revokedAt !== null ||
       session.expiresAt.getTime() <= now ||
       now - session.lastSeenAt.getTime() > idleLimit ||
+      superAdminExpired ||
       user.status !== 'active'
     ) {
       return null;

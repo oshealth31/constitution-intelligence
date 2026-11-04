@@ -14,6 +14,10 @@ import {
  */
 
 export const PDF_MAX_PAGES = 500;
+/** A document that takes longer than this to read is refused (protects the server). */
+export const PDF_MAX_EXTRACTION_MS = 60_000;
+/** More text than this is not a constitution; refusing it bounds memory use. */
+export const PDF_MAX_TEXT_CHARACTERS = 3_000_000;
 
 interface TextItem {
   str: string;
@@ -173,10 +177,26 @@ export async function extractPdf(content: Buffer): Promise<RawExtraction> {
     }
     const issues: ExtractionIssue[] = [];
     const pages: { page: number; lines: { text: string; size: number }[] }[] = [];
+    const startedAt = Date.now();
+    let characters = 0;
     for (let number = 1; number <= document.numPages; number += 1) {
+      if (Date.now() - startedAt > PDF_MAX_EXTRACTION_MS) {
+        throw new DocumentRejectedError(
+          'too_slow',
+          'The PDF took too long to read. Please save it again (for example "Print to PDF") and upload that copy.',
+        );
+      }
       const page = await document.getPage(number);
       const textContent = await page.getTextContent();
-      pages.push({ page: number, lines: itemsToLines(textContent.items as TextItem[]) });
+      const lines = itemsToLines(textContent.items as TextItem[]);
+      characters += lines.reduce((total, line) => total + line.text.length, 0);
+      if (characters > PDF_MAX_TEXT_CHARACTERS) {
+        throw new DocumentRejectedError(
+          'too_much_text',
+          'The PDF contains far more text than a constitution. Please check that it is the right file.',
+        );
+      }
+      pages.push({ page: number, lines });
       page.cleanup();
     }
 

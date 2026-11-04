@@ -98,9 +98,33 @@ describe('loadConfig', () => {
       CORS_ORIGINS: 'https://admin.example.com,https://example.com',
       WEB_BASE_URL: 'https://app.example.com',
       MAIL_TRANSPORT: 'disabled',
+      STORAGE_LOCAL_DIR: '/var/lib/constitution/storage',
     });
     expect(config.DATABASE_SSL).toBe(true);
     expect(config.CORS_ORIGINS).toHaveLength(2);
+  });
+
+  it('refuses risky logging and storage settings in production', () => {
+    const problems = problemsFor({
+      NODE_ENV: 'production',
+      APP_ENV: 'production',
+      DATABASE_URL: 'postgresql://user:x@db.internal:5432/app',
+      LOG_LEVEL: 'debug',
+      STORAGE_LOCAL_DIR: 'relative/storage',
+    });
+    expect(problems).toEqual(
+      expect.arrayContaining([
+        'LOG_LEVEL must not be "debug" or "trace" in production (too much detail in the logs)',
+        'STORAGE_LOCAL_DIR must be an absolute path in staging and production',
+      ]),
+    );
+  });
+
+  it('applies secure abuse-protection and super-admin session defaults', () => {
+    const config = loadConfig({ DATABASE_URL: LOCAL_DB });
+    expect(config.API_RATE_LIMIT_PER_MINUTE).toBe(600);
+    expect(config.SUPER_ADMIN_SESSION_IDLE_MINUTES).toBe(30);
+    expect(config.SUPER_ADMIN_SESSION_ABSOLUTE_HOURS).toBe(12);
   });
 
   it('never includes setting values in error messages', () => {

@@ -1,4 +1,5 @@
 import { Global, Module } from '@nestjs/common';
+import { AuthModule } from '../auth/auth.module';
 import { BillingController } from './billing.controller';
 import { BillingService } from './billing.service';
 import { LimitsService } from './limits.service';
@@ -11,6 +12,7 @@ import { PlatformBillingService } from './platform-billing.service';
  */
 @Global()
 @Module({
+  imports: [AuthModule],
   controllers: [BillingController, PlatformBillingController],
   providers: [BillingService, LimitsService, PlatformBillingService],
   exports: [LimitsService, PlatformBillingService],

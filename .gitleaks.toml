@@ -1,0 +1,12 @@
+# Secret scanning rules: gitleaks' standard rules, plus known-safe synthetic test values.
+title = "Constitution Intelligence secret scan"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Synthetic development and test values (not real credentials)"
+paths = [
+  '''(^|/)\.env\.example$''',
+  '''pnpm-lock\.yaml$''',
+]

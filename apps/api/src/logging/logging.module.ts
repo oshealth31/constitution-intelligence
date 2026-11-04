@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { DynamicModule } from '@nestjs/common';
 import { LoggerModule } from 'nestjs-pino';
 import type { AppConfig } from '../config/config';
+import { pathOnly } from './path-only';
 import { REQUEST_ID_HEADER, resolveRequestId } from './request-id';
 
 /**
@@ -30,7 +31,8 @@ export function createLoggingModule(config: AppConfig): DynamicModule {
         req: (req: { id?: unknown; method?: string; url?: string }) => ({
           id: req.id,
           method: req.method,
-          url: req.url,
+          // Query strings can hold search words or personal details: only the path is logged.
+          url: pathOnly(req.url),
         }),
         res: (res: { statusCode?: number }) => ({ statusCode: res.statusCode }),
       },

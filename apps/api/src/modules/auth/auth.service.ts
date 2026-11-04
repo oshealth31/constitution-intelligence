@@ -64,7 +64,7 @@ export class AuthService {
         action: 'auth.login.rate_limited',
         outcome: 'denied',
         targetType: 'email',
-        targetId: email,
+        targetId: maskEmail(email),
         meta,
       });
       throw new HttpException(TOO_MANY_ATTEMPTS, HttpStatus.TOO_MANY_REQUESTS);
@@ -78,7 +78,8 @@ export class AuthService {
         outcome: 'failure',
         actorUserId: user?.id ?? null,
         targetType: 'email',
-        targetId: email,
+        // Someone may type a password into the email box: unknown addresses are kept masked.
+        targetId: user ? email : maskEmail(email),
         metadata: { reason: user ? 'wrong_password' : 'unknown_account' },
         meta,
       });
@@ -204,6 +205,13 @@ export class AuthService {
   }
 
   async resetPassword(token: string, newPassword: string, meta: RequestMeta): Promise<void> {
+    const attempts = await this.rateLimits.hit(
+      `reset-use:ip:${meta.ipAddress ?? 'unknown'}`,
+      this.windowSeconds,
+    );
+    if (attempts > this.config.LOGIN_MAX_ATTEMPTS_PER_IP) {
+      throw new HttpException(TOO_MANY_ATTEMPTS, HttpStatus.TOO_MANY_REQUESTS);
+    }
     const now = new Date();
     const [row] = await this.db
       .select({ tokenId: passwordResetTokens.id, user: users })
@@ -276,6 +284,14 @@ export class AuthService {
     newPassword: string,
     meta: RequestMeta,
   ): Promise<void> {
+    // Someone with a stolen session must not be able to guess the current password.
+    const attempts = await this.rateLimits.hit(
+      `password-change:user:${userId}`,
+      this.windowSeconds,
+    );
+    if (attempts > this.config.LOGIN_MAX_ATTEMPTS_PER_EMAIL) {
+      throw new HttpException(TOO_MANY_ATTEMPTS, HttpStatus.TOO_MANY_REQUESTS);
+    }
     const user = await this.usersService.findById(userId);
     if (!user || !(await this.passwords.verify(user.passwordHash, currentPassword))) {
       await this.audit.record({
@@ -320,4 +336,11 @@ export class AuthService {
       meta,
     });
   }
+}
+
+/** "someone@example.com" becomes "s***@example.com": enough to spot a pattern, not the address. */
+export function maskEmail(email: string): string {
+  const at = email.lastIndexOf('@');
+  if (at <= 0) return '***';
+  return `${email.slice(0, 1)}***${email.slice(at)}`.slice(0, 254);
 }

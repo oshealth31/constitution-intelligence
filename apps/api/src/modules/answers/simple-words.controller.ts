@@ -18,6 +18,8 @@ import { parseInput } from '../../common/validation';
 import { RequireFeature, RequireOrgPermission, Tenant } from '../access/decorators';
 import type { TenantScope } from '../tenancy/tenant-scope';
 import { SIMPLE_WORDS_DISCLAIMER, SimpleWordsService } from './simple-words.service';
+import { RateLimitService } from '../auth/rate-limit.service';
+import { ABUSE_LIMITS, HOUR_SECONDS } from '../auth/abuse-limits';
 
 // eslint-disable-next-line no-control-regex -- refusing control characters is the point
 const CONTROL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/;
@@ -71,7 +73,10 @@ export class SimpleWordsController {
 @Controller('organisations/:organisationId/manage/simple-words')
 @RequireFeature('simple_words')
 export class ManageSimpleWordsController {
-  constructor(private readonly simple: SimpleWordsService) {}
+  constructor(
+    private readonly simple: SimpleWordsService,
+    private readonly rateLimits: RateLimitService,
+  ) {}
 
   @Get()
   @RequireOrgPermission('content.edit')
@@ -82,7 +87,12 @@ export class ManageSimpleWordsController {
   @Post('import')
   @RequireOrgPermission('content.edit')
   @HttpCode(HttpStatus.OK)
-  import(@Tenant() tenant: TenantScope, @Body() body: unknown, @Req() request: AppRequest) {
+  async import(@Tenant() tenant: TenantScope, @Body() body: unknown, @Req() request: AppRequest) {
+    await this.rateLimits.assertWithin(
+      `import:org:${tenant.organisationId}`,
+      HOUR_SECONDS,
+      ABUSE_LIMITS.importsPerOrganisationPerHour,
+    );
     const { items } = parseInput(importSchema, body);
     return this.simple.import(tenant, items, requestMeta(request));
   }

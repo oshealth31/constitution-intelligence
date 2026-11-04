@@ -2,6 +2,7 @@ import { STATUS_CODES } from 'node:http';
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import { pathOnly } from '../../logging/path-only';
 
 export interface ErrorResponseBody {
   error: {
@@ -85,14 +86,14 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     if (status >= 500) {
       this.logger.error(
-        { err: exception, requestId, method: request.method, url: request.url },
+        { err: exception, requestId, method: request.method, url: pathOnly(request.url) },
         'Request failed with a server error',
       );
       if (!(exception instanceof HttpException)) {
         message = GENERIC_SERVER_ERROR;
       }
     } else {
-      this.logger.debug({ requestId, status, url: request.url }, 'Request rejected');
+      this.logger.debug({ requestId, status, url: pathOnly(request.url) }, 'Request rejected');
     }
 
     if (response.headersSent) {

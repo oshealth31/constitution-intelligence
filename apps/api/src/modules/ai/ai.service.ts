@@ -168,7 +168,15 @@ export class AiService {
   }
 
   /** The constitution passages that would be given to the AI for this question. */
-  retrieveContext(scope: TenantScope, question: string): Promise<SectionMatch[]> {
+  async retrieveContext(scope: TenantScope, question: string): Promise<SectionMatch[]> {
+    // Shares the "Find relevant clauses" budget, so it cannot be used to search without limit.
+    const attempts = await this.rateLimits.hit(`clauses:user:${scope.userId}`, 3600);
+    if (attempts > CLAUSE_FINDER_LIMIT_PER_HOUR) {
+      throw new HttpException(
+        'You have searched a lot in the last hour. Please wait a while and try again.',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
     return this.search.search(scope, question, 8);
   }
 

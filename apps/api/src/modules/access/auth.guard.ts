@@ -1,9 +1,17 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { AppRequest } from '../../common/request-context';
 import { readSessionToken } from '../auth/session-cookie';
 import { SessionService } from '../auth/session.service';
 import { IS_PUBLIC } from './decorators';
+import type { AppConfig } from '../../config/config';
+import { APP_CONFIG } from '../../config/config.module';
 
 /**
  * Runs on every request. If a session cookie is present and valid, records who the caller is.
@@ -14,6 +22,7 @@ export class AuthGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly sessions: SessionService,
+    @Inject(APP_CONFIG) private readonly config: AppConfig,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -23,7 +32,7 @@ export class AuthGuard implements CanActivate {
       context.getClass(),
     ]);
 
-    const token = readSessionToken(request);
+    const token = readSessionToken(request, this.config);
     if (token) {
       const valid = await this.sessions.validate(token);
       if (valid) {

@@ -376,6 +376,13 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation deletion', () => {
 
   it('keeps the audit log append-only outside an approved deletion', async () => {
     const { organisation, owner } = await tenantWithContent('Protected Club (fictional)', 'crane');
+    // An event of this organisation, so each attempt below has a row to try to change.
+    await context.db.insert(auditEvents).values({
+      action: 'organisation.updated',
+      outcome: 'success',
+      organisationId: organisation.id,
+      actorUserId: owner.user.id,
+    });
     const attempts = [
       // Naming an organisation that is not deleted.
       sql`SELECT set_config('app.deleting_organisation_id', ${organisation.id}, true)`,

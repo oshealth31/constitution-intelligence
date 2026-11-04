@@ -1,11 +1,7 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { Worker } from 'node:worker_threads';
-import {
-  DocumentRejectedError,
-  type DocumentFormat,
-  type RawExtraction,
-} from './extraction-types';
+import { DocumentRejectedError, type DocumentFormat, type RawExtraction } from './extraction-types';
 import type { WorkerReply, WorkerRequest } from './document-worker';
 
 export interface DocumentParserOptions {
@@ -39,7 +35,8 @@ export const TOO_COMPLEX_MESSAGE =
 function resolveEntry(entry: string | undefined): { file: string; execArgv: string[] } {
   const file = entry ?? path.join(__dirname, 'document-worker');
   for (const candidate of [file, `${file}.js`]) {
-    if (candidate.endsWith('.js') && existsSync(candidate)) return { file: candidate, execArgv: [] };
+    if (candidate.endsWith('.js') && existsSync(candidate))
+      return { file: candidate, execArgv: [] };
   }
   const source = file.endsWith('.ts') ? file : `${file}.ts`;
   return { file: source, execArgv: ['--import', 'tsx'] };
@@ -98,7 +95,10 @@ export class DocumentParser {
         execArgv,
         resourceLimits: {
           maxOldGenerationSizeMb: this.options.memoryMb,
-          maxYoungGenerationSizeMb: Math.min(64, Math.max(8, Math.floor(this.options.memoryMb / 8))),
+          maxYoungGenerationSizeMb: Math.min(
+            64,
+            Math.max(8, Math.floor(this.options.memoryMb / 8)),
+          ),
           stackSizeMb: 4,
         },
         // The worker gets nothing from the API's environment: no secrets, no database settings.
@@ -113,10 +113,7 @@ export class DocumentParser {
         outcome();
       };
       const timer = setTimeout(
-        () =>
-          finish(() =>
-            reject(new DocumentRejectedError('too_slow', TOO_SLOW_MESSAGE)),
-          ),
+        () => finish(() => reject(new DocumentRejectedError('too_slow', TOO_SLOW_MESSAGE))),
         this.options.timeoutMs,
       );
       worker.once('message', (reply: WorkerReply) => {

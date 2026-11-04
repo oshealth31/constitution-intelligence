@@ -106,7 +106,10 @@ export class DocumentsService {
     } catch (error) {
       if (error instanceof ParserBusyError) {
         // 429: "try again shortly" (all readers are busy), not a server fault.
-        throw new HttpException({ message: error.message, reason: 'BUSY' }, HttpStatus.TOO_MANY_REQUESTS);
+        throw new HttpException(
+          { message: error.message, reason: 'BUSY' },
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
       }
       if (error instanceof DocumentRejectedError) {
         await this.audit.record({

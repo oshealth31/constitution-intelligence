@@ -1,10 +1,18 @@
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { DocumentParser, ParserBusyError, TOO_COMPLEX_MESSAGE, TOO_SLOW_MESSAGE } from './document-parser';
+import {
+  DocumentParser,
+  ParserBusyError,
+  TOO_COMPLEX_MESSAGE,
+  TOO_SLOW_MESSAGE,
+} from './document-parser';
 import { makeSampleDocx, makeSamplePdf } from '../../dev/sample-documents';
 
 const WORKERS = path.resolve(__dirname, '..', '..', '..', 'test', 'support', 'workers');
-const parser = (entry: string | undefined, overrides: Partial<ConstructorParameters<typeof DocumentParser>[0]> = {}) =>
+const parser = (
+  entry: string | undefined,
+  overrides: Partial<ConstructorParameters<typeof DocumentParser>[0]> = {},
+) =>
   new DocumentParser({
     timeoutMs: 10_000,
     memoryMb: 128,
@@ -51,7 +59,10 @@ describe('document reading in a separate worker (Task D8)', () => {
 
   it('stops a reader that uses too much memory', async () => {
     await expect(
-      parser('memory.ts', { memoryMb: 64, timeoutMs: 20_000 }).parse('pdf', Buffer.from('%PDF-1.4')),
+      parser('memory.ts', { memoryMb: 64, timeoutMs: 20_000 }).parse(
+        'pdf',
+        Buffer.from('%PDF-1.4'),
+      ),
     ).rejects.toMatchObject({ code: 'too_complex', message: TOO_COMPLEX_MESSAGE });
   });
 

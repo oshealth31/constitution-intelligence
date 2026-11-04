@@ -31,14 +31,18 @@ Short restarts for application releases take seconds and need no notice.
 
 ## Housekeeping inside the database
 
-- Expired sessions, used reset links and old rate-limit counters stay as small rows. Deleting
-  them is safe. A scheduled cleanup task is not built yet (open item); until then, monthly:
+- **Automatic cleanup (Task D6).** Every `CLEANUP_INTERVAL_HOURS` (default 6; first run 5
+  minutes after start) the API removes rows nobody needs any more:
+  - sessions that ended (expired, signed out or timed out) more than **30 days** ago — the last
+    30 days are kept for investigating incidents;
+  - password-reset links that expired or were used more than 30 days ago;
+  - rate-limit counters whose window started more than a day ago;
+  - two-step sign-in challenges that expired more than a day ago.
 
-```sql
-DELETE FROM sessions WHERE expires_at < now() - interval '30 days' OR revoked_at < now() - interval '30 days';
-DELETE FROM password_reset_tokens WHERE expires_at < now() - interval '30 days';
-DELETE FROM auth_rate_limits WHERE window_started_at < now() - interval '1 day';
-```
-
+  It never touches organisation data, invitations, accounts or the audit log. Each run is
+  recorded as a `maintenance.cleanup` audit event with the counts (Control Centre → Audit log).
+  A database lock lets only one copy of the API clean at a time. To run it now:
+  `docker compose run --rm -T api node dist/cli/cleanup.js`. Setting `CLEANUP_INTERVAL_HOURS=0`
+  turns the timer off.
 - `VACUUM` and `ANALYZE` are automatic (autovacuum); no manual action is needed at this size.
 - The audit log is append-only by design and is never cleaned up by hand.

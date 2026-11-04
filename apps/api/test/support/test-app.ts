@@ -55,6 +55,8 @@ export async function startTestApp(
     // All test requests come from one address; per-address limits get their own test.
     LOGIN_MAX_ATTEMPTS_PER_IP: '10000',
     API_RATE_LIMIT_PER_MINUTE: '1000000',
+    // The cleanup timer is tested by calling the service directly.
+    CLEANUP_INTERVAL_HOURS: '0',
     STORAGE_LOCAL_DIR: storageDir,
     ...overrides,
   });

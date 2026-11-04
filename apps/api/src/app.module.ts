@@ -12,6 +12,7 @@ import { PermissionGuard } from './modules/access/permission.guard';
 import { AiModule } from './modules/ai/ai.module';
 import { ApprovedAnswersModule } from './modules/answers/approved-answers.module';
 import { OfflineModule } from './modules/offline/offline.module';
+import { MaintenanceModule } from './modules/maintenance/maintenance.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -55,6 +56,7 @@ export class AppModule {
         ApprovedAnswersModule,
         SubscriptionsModule,
         OfflineModule,
+        MaintenanceModule,
       ],
       providers: [
         { provide: APP_FILTER, useClass: AllExceptionsFilter },

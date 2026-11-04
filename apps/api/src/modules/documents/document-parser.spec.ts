@@ -14,8 +14,9 @@ const parser = (
   overrides: Partial<ConstructorParameters<typeof DocumentParser>[0]> = {},
 ) =>
   new DocumentParser({
-    timeoutMs: 10_000,
-    memoryMb: 128,
+    timeoutMs: 20_000,
+    // The production default (DOCUMENT_PARSE_MEMORY_MB): PDF.js needs most of it.
+    memoryMb: 256,
     concurrency: 2,
     queueLimit: 2,
     entry: entry ? path.join(WORKERS, entry) : undefined,

@@ -9,4 +9,6 @@ description = "Synthetic development and test values (not real credentials)"
 paths = [
   '''(^|/)\.env\.example$''',
   '''pnpm-lock\.yaml$''',
+  # Hashed prefixes of publicly known leaked passwords (Task D5), not credentials.
+  '''apps/api/data/breached-passwords\.bin$''',
 ]

@@ -12,6 +12,7 @@ and open risks are in [security-review.md](security-review.md).
 - [x] Changes need the CSRF header and an allowed origin (`security.e2e.spec.ts`).
 - [x] Sign-in, password reset, password change, invitation links, AI, clause finder, uploads, imports, invitations and payment reports are rate limited; there is also a general per-address limit.
 - [x] Super Admin sessions end after 30 minutes idle and 12 hours in total.
+- [x] New passwords checked offline against about 738,000 passwords known from data leaks (D5).
 - [x] Passwords hashed with Argon2id; session tokens stored only as hashes; cookie HttpOnly, SameSite=Lax, Secure and `__Host-` once deployed.
 - [x] API: locked-down Content Security Policy, `no-store` caching, no framing, `nosniff`, HSTS once deployed.
 - [x] Web: per-page nonce Content Security Policy, no framing, HSTS (production), COOP; browser test checks no violations and that injected scripts are blocked.

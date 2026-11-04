@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { z } from 'zod';
 
 /**
@@ -32,7 +33,16 @@ export const configSchema = z
           .map((origin) => origin.trim())
           .filter((origin) => origin.length > 0),
       ),
-    TRUST_PROXY: booleanString('false'),
+    // How many proxies in front of the API to trust when reading the client's address from
+    // X-Forwarded-For: "false"/"0" (none, local development), "true"/"1" (one), or a number.
+    // The production layout (HTTPS proxy -> web app -> API) needs 2. See docs/operations/deployment.md.
+    TRUST_PROXY: z
+      .string()
+      .default('false')
+      .refine((value) => /^(true|false|[0-9])$/.test(value), {
+        error: 'must be "true", "false" or a number of proxies (0-9)',
+      })
+      .transform((value) => (value === 'true' ? 1 : value === 'false' ? 0 : Number(value))),
 
     LOG_LEVEL: z.enum(LOG_LEVELS).default('info'),
     LOG_PRETTY: booleanString('false'),
@@ -203,9 +213,41 @@ export class ConfigValidationError extends Error {
   }
 }
 
+/**
+ * Secret settings that may be given as a file instead of a variable: set DATABASE_URL_FILE to
+ * the path of a file holding the value (for example a Docker or Kubernetes secret mounted at
+ * /run/secrets/...). Keeps secrets out of process listings, crash dumps and `docker inspect`.
+ */
+export const SECRET_SETTINGS = ['DATABASE_URL', 'ANTHROPIC_API_KEY'] as const;
+
+/** Replaces NAME_FILE entries with the file's contents. Errors name the setting, never the value. */
+export function resolveSecretFiles(
+  env: Record<string, string | undefined>,
+  read: (path: string) => string = (path) => readFileSync(path, 'utf8'),
+): Record<string, string | undefined> {
+  const resolved = { ...env };
+  const problems: string[] = [];
+  for (const name of SECRET_SETTINGS) {
+    const filePath = env[`${name}_FILE`];
+    if (!filePath) continue;
+    if (env[name]) {
+      problems.push(`${name} and ${name}_FILE are both set; use only one`);
+      continue;
+    }
+    try {
+      resolved[name] = read(filePath).trim();
+    } catch {
+      problems.push(`${name}_FILE points to a file that cannot be read`);
+    }
+    delete resolved[`${name}_FILE`];
+  }
+  if (problems.length > 0) throw new ConfigValidationError(problems);
+  return resolved;
+}
+
 /** Validates the given environment and returns a frozen, typed configuration object. */
 export function loadConfig(env: Record<string, string | undefined>): AppConfig {
-  const result = configSchema.safeParse(env);
+  const result = configSchema.safeParse(resolveSecretFiles(env));
   if (!result.success) {
     throw new ConfigValidationError(
       result.error.issues.map((issue) => `${issue.path.join('.') || 'config'} ${issue.message}`),

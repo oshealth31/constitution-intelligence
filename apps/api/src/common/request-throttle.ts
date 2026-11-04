@@ -9,7 +9,7 @@ import type { NextFunction, Request, Response } from 'express';
  * behind a load balancer each copy counts separately, and a large distributed attack needs
  * protection in front of the API (hosting provider or firewall). See docs/security/security-review.md.
  *
- * Behind a proxy the real client address is only seen when TRUST_PROXY=true; otherwise every
+ * Behind a proxy the real client address is only seen when TRUST_PROXY matches the number of proxies; otherwise every
  * request appears to come from the proxy and shares one budget.
  */
 export interface RequestThrottleOptions {

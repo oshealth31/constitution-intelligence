@@ -23,8 +23,9 @@ export async function createApp(config: AppConfig): Promise<NestExpressApplicati
 export function configureApp(app: NestExpressApplication, config: AppConfig): void {
   app.useLogger(app.get(Logger));
   app.disable('x-powered-by');
-  if (config.TRUST_PROXY) {
-    app.set('trust proxy', 1);
+  if (config.TRUST_PROXY > 0) {
+    // Trust exactly this many proxy hops when reading the client address (X-Forwarded-For).
+    app.set('trust proxy', config.TRUST_PROXY);
   }
   app.use(
     helmet({

@@ -141,6 +141,28 @@ describe.runIf(Boolean(testDatabaseUrl))('security hardening', () => {
     });
   });
 
+  describe('client address behind proxies', () => {
+    it('reads the visitor’s address through the configured number of proxies', async () => {
+      // Production layout: HTTPS proxy -> web app -> API, so TRUST_PROXY=2.
+      const proxied = await startTestApp({ TRUST_PROXY: '2' });
+      try {
+        const email = uniqueEmail('proxied');
+        await client(proxied)
+          .post('/api/v1/auth/login')
+          .set('X-Forwarded-For', '198.51.100.7, 172.18.0.5')
+          .send({ email, password: 'not the right password at all' })
+          .expect(401);
+        const rows = await proxied.db.execute(sql`
+          SELECT ip_address FROM audit_events
+          WHERE action = 'auth.login.failed' ORDER BY occurred_at DESC LIMIT 1
+        `);
+        expect((rows.rows[0] as { ip_address: string }).ip_address).toBe('198.51.100.7');
+      } finally {
+        await proxied.close();
+      }
+    });
+  });
+
   describe('audit log', () => {
     it('cannot be changed or deleted, even by the database account the API uses', async () => {
       const user = await createUser(context.db, { email: uniqueEmail('audit') });

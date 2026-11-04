@@ -1,0 +1,273 @@
+# Deployment readiness check, in a throwaway GitHub runner (never a live system):
+#  1. builds the production images (api, web, ops) from infra/production/Dockerfile;
+#  2. starts the production layout (Caddy HTTPS -> web -> API -> PostgreSQL with TLS) in
+#     production mode, with freshly generated secrets and certificates;
+#  3. checks HTTPS, headers, health checks, the client address through the proxies, the
+#     non-superuser database account, and that unsafe settings and the dev seed are refused;
+#  4. backup and restore test: fictional data -> encrypted backup -> restore into a NEW
+#     database and storage -> row counts, file checksums, security rules and a real sign-in
+#     on the restored copy;
+#  5. exports one organisation and checks the export contains only that organisation.
+name: Deployment check
+
+on:
+  pull_request:
+    paths:
+      - 'infra/**'
+      - 'ops/**'
+      - 'apps/**'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/deployment-check.yml'
+  schedule:
+    - cron: '41 3 * * 1' # weekly restore test, Mondays 03:41 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deployment-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deployment:
+    name: Production images, HTTPS stack, backup and restore test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: infra/production
+    env:
+      SITE_ADDRESS: localhost
+      API_IMAGE: constitution-api:ci
+      WEB_IMAGE: constitution-web:ci
+      OPS_IMAGE: constitution-ops:ci
+      COMPOSE_PROJECT_NAME: constitution-intelligence
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build production images
+        working-directory: .
+        run: |
+          docker build -f infra/production/Dockerfile --target api -t "$API_IMAGE" .
+          docker build -f infra/production/Dockerfile --target web -t "$WEB_IMAGE" \
+            --build-arg API_INTERNAL_URL=http://api:4000 .
+          docker build -f infra/production/Dockerfile --target ops -t "$OPS_IMAGE" .
+          docker image ls | grep constitution
+
+      - name: Images run as an unprivileged user and contain no secrets
+        run: |
+          for image in "$API_IMAGE" "$WEB_IMAGE"; do
+            user="$(docker run --rm --entrypoint id "$image" -un)"
+            echo "[deploy-test] $image runs as: $user"
+            test "$user" = node
+            if docker run --rm --entrypoint sh "$image" -c 'ls -a /app; ls -a /app/apps 2>/dev/null' | grep -E '^\.env$'; then
+              echo "[deploy-test] FAIL an .env file is inside $image"; exit 1
+            fi
+          done
+          echo "[deploy-test] ok images run as 'node' and contain no .env files"
+
+      - name: Generate throwaway secrets and certificates (this run only)
+        run: |
+          mkdir -p secrets backups exports
+          openssl req -x509 -newkey rsa:2048 -nodes -days 2 -subj "/CN=CI throwaway database CA" \
+            -keyout ca.key -out secrets/database_ca.crt 2>/dev/null
+          openssl req -newkey rsa:2048 -nodes -subj "/CN=postgres" \
+            -keyout secrets/database_server.key -out server.csr 2>/dev/null
+          printf 'subjectAltName=DNS:postgres\n' > san.ext
+          openssl x509 -req -in server.csr -CA secrets/database_ca.crt -CAkey ca.key -CAcreateserial \
+            -days 2 -extfile san.ext -out secrets/database_server.crt 2>/dev/null
+          sudo chown 0:999 secrets/database_server.key && sudo chmod 0640 secrets/database_server.key
+          openssl rand -hex 24 > secrets/postgres_password
+          openssl rand -hex 24 > secrets/app_db_password
+          openssl rand -hex 32 > secrets/backup_passphrase
+          printf 'postgresql://constitution_app:%s@postgres:5432/constitution' "$(cat secrets/app_db_password)" > secrets/database_url
+          cp secrets/database_url secrets/database_owner_url
+          printf 'postgresql://constitution_app:%s@postgres:5432/constitution_restore' "$(cat secrets/app_db_password)" > secrets/restore_url
+          cp api.env.example api.env
+          sed -i 's#https://portal.example.co.bw#https://localhost#g; s#^APP_VERSION=.*#APP_VERSION=ci#' api.env
+
+      - name: Start the database (TLS on) and apply migrations with the application account
+        run: |
+          docker compose up -d --wait postgres
+          docker compose --profile migrate run --rm migrate
+
+      - name: Start API, web app and HTTPS proxy in production mode
+        run: |
+          docker compose up -d --wait api web caddy
+          for i in $(seq 1 30); do
+            curl -sk -o /dev/null -w '%{http_code}' https://localhost/api/health | grep -q 200 && break
+            sleep 2
+          done
+
+      - name: HTTPS, headers and health checks
+        run: |
+          set -e
+          code() { curl -sk -o /dev/null -w '%{http_code}' "$@"; }
+          test "$(code https://localhost/api/health)" = 200
+          test "$(code https://localhost/api/v1/health/ready)" = 200
+          redirect="$(curl -s -o /dev/null -w '%{http_code}' http://localhost/)"
+          echo "[deploy-test] plain HTTP answers $redirect"; [[ "$redirect" =~ ^30[178]$ ]]
+          headers="$(curl -skI https://localhost/o/no-such-portal)"
+          echo "$headers" | grep -qi '^strict-transport-security: max-age=31536000'
+          echo "$headers" | grep -qi "^content-security-policy: .*script-src 'self' 'nonce-"
+          api_headers="$(curl -skI https://localhost/api/v1/health/live)"
+          echo "$api_headers" | grep -qi '^cache-control: no-store'
+          ! echo "$api_headers" | grep -qi '^x-powered-by'
+          ! echo "$api_headers" | grep -qi '^server:'
+          bash ../../ops/check-health.sh https://localhost || true # certificate check needs a public CA
+          echo "[deploy-test] ok HTTPS, redirect, HSTS, page and API security headers, health checks"
+
+      - name: The API sees the visitor's address through both proxies (TRUST_PROXY=2)
+        run: |
+          set -e
+          curl -sk -o /dev/null -w '%{http_code}\n' -X POST https://localhost/api/v1/auth/login \
+            -H 'Content-Type: application/json' -H 'X-Requested-With: XMLHttpRequest' \
+            -H 'Origin: https://localhost' \
+            -d '{"email":"nobody@example.test","password":"definitely the wrong password"}'
+          seen="$(docker compose exec -T postgres psql -U constitution_owner -d constitution -Atc \
+            "SELECT ip_address FROM audit_events WHERE action = 'auth.login.failed' ORDER BY occurred_at DESC LIMIT 1")"
+          caddy_ip="$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}} {{end}}' "$(docker compose ps -q caddy)")"
+          web_ip="$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}} {{end}}' "$(docker compose ps -q web)")"
+          echo "[deploy-test] address recorded: $seen (caddy: $caddy_ip; web: $web_ip)"
+          test -n "$seen"
+          for proxy in $caddy_ip $web_ip; do test "$seen" != "$proxy"; done
+          echo "[deploy-test] ok the recorded address is the visitor's, not a proxy's"
+
+      - name: The application's database account is not a superuser
+        run: |
+          set -e
+          url="$(sed 's#@postgres:#@localhost:#' secrets/database_url)"
+          flags="$(docker compose exec -T postgres psql "$url" -Atc \
+            "SELECT rolsuper::text || ',' || rolbypassrls::text FROM pg_roles WHERE rolname = current_user")"
+          echo "[deploy-test] constitution_app superuser,bypassrls = $flags"
+          test "$flags" = "false,false"
+
+      - name: Unsafe production settings and the development seed are refused
+        run: |
+          set +e
+          out="$(docker run --rm -e NODE_ENV=production -e APP_ENV=production \
+            -e DATABASE_URL=postgresql://u:p@db.invalid/x "$API_IMAGE" 2>&1)"; status=$?
+          set -e
+          echo "$out" | tail -n 12
+          test "$status" -ne 0
+          echo "$out" | grep -q 'DATABASE_SSL must be true'
+          echo "$out" | grep -q 'CORS_ORIGINS must list the allowed web origins'
+          set +e
+          seed="$(docker compose run --rm -T api node dist/cli/seed-dev.js 2>&1)"; status=$?
+          set -e
+          test "$status" -ne 0
+          echo "$seed" | grep -q 'Refusing to seed'
+          echo "[deploy-test] ok unsafe settings stop the API; the development seed refuses production"
+
+      - name: Load fictional test data (this throwaway run only)
+        run: |
+          docker compose run --rm -T -e APP_ENV=local -e NODE_ENV=development \
+            api node dist/cli/seed-dev.js > seed-output.txt 2>&1 || { tail -n 30 seed-output.txt; exit 1; }
+          grep -c '@sample.test' seed-output.txt
+
+      - name: Back up (encrypted)
+        run: |
+          docker compose --profile ops run --rm -T ops
+          backup="$(ls -d backups/20*Z | tail -n 1)"
+          echo "BACKUP=$backup" >> "$GITHUB_ENV"
+          sudo ls -l "$backup"
+          sudo cat "$backup/manifest.txt" | sed 's/^/[restore-test] manifest /'
+          # Nothing readable without the passphrase.
+          ! sudo grep -aq 'Sample Community Choir' "$backup/database.dump.gpg"
+          echo "[restore-test] ok backup written and encrypted"
+
+      - name: Restore into a NEW database and NEW storage
+        run: |
+          set -e
+          admin() { docker compose exec -T postgres psql -U constitution_owner -v ON_ERROR_STOP=1 "$@"; }
+          admin -d constitution -c 'CREATE DATABASE constitution_restore OWNER constitution_app'
+          admin -d constitution_restore -c 'CREATE EXTENSION IF NOT EXISTS pg_trgm' \
+            -c 'CREATE EXTENSION IF NOT EXISTS vector' -c 'ALTER SCHEMA public OWNER TO constitution_app'
+          docker volume create ci-restored-storage
+          docker run --rm --network constitution-intelligence_data \
+            -v "$PWD/backups:/backups:ro" -v "$PWD/secrets:/s:ro" -v ci-restored-storage:/restored \
+            -e TARGET_DATABASE_URL_FILE=/s/restore_url -e TARGET_STORAGE_DIR=/restored \
+            -e BACKUP_PASSPHRASE_FILE=/s/backup_passphrase \
+            -e PGSSLMODE=verify-full -e PGSSLROOTCERT=/s/database_ca.crt \
+            "$OPS_IMAGE" /ops/restore.sh "/backups/$(basename "$BACKUP")" | sed 's/^/[restore-test] /'
+
+      - name: Restored files are byte-for-byte identical
+        run: |
+          set -e
+          sums() { docker run --rm -v "$1:/d:ro" "$OPS_IMAGE" bash -c 'cd /d && find . -type f -exec sha256sum {} + | sort -k2'; }
+          sums constitution-intelligence_storage > original.sha
+          sums ci-restored-storage > restored.sha
+          diff original.sha restored.sha
+          echo "[restore-test] ok $(wc -l < restored.sha) files identical (SHA-256)"
+
+      - name: Security rules survive the restore
+        run: |
+          set -e
+          q() { docker compose exec -T postgres psql -U constitution_owner -d constitution_restore -Atc "$1"; }
+          tamper="$(q "UPDATE audit_events SET action = 'tampered'" 2>&1 || true)"
+          echo "$tamper" | grep -q 'audit_events is append-only'
+          choir="$(q "SELECT id FROM organisations WHERE slug = 'sample-community-choir'")"
+          visible="$(docker compose exec -T postgres psql -U constitution_owner -d constitution_restore -Atq \
+            -c 'BEGIN' -c 'SET LOCAL ROLE app_tenant' \
+            -c "SELECT set_config('app.current_organisation_id', '$choir', true)" \
+            -c 'SELECT count(*) FROM organisations' -c 'COMMIT' | sed -n 2p)"
+          echo "[restore-test] organisations visible to the tenant role: $visible"
+          test "$visible" = 1
+          echo "[restore-test] ok audit log still append-only; row-level security still isolates organisations"
+
+      - name: The application works on the restored copy (real sign-in)
+        run: |
+          set -e
+          password="$(grep 'member@sample.test' seed-output.txt | head -n 1 | awk '{print $NF}')"
+          docker run -d --name api-restored --network constitution-intelligence_data \
+            --env-file api.env -e DATABASE_URL_FILE=/s/restore_url -e NODE_EXTRA_CA_CERTS=/s/database_ca.crt \
+            -v "$PWD/secrets:/s:ro" -v ci-restored-storage:/var/lib/constitution/storage \
+            -v "$PWD/../../ops/ci:/check:ro" "$API_IMAGE"
+          for i in $(seq 1 30); do
+            docker exec api-restored node -e "fetch('http://127.0.0.1:4000/api/v1/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" && break
+            sleep 2
+          done
+          docker exec api-restored node /check/restored-app-check.mjs member@sample.test "$password"
+
+      - name: Export one organisation and check it holds only that organisation
+        run: |
+          set -e
+          choir="$(docker compose exec -T postgres psql -U constitution_owner -d constitution -Atc \
+            "SELECT id FROM organisations WHERE slug = 'sample-community-choir'")"
+          netball="$(docker compose exec -T postgres psql -U constitution_owner -d constitution -Atc \
+            "SELECT id FROM organisations WHERE slug = 'sample-netball-club'")"
+          docker compose --profile ops run --rm -T ops /ops/export-organisation.sh "$choir"
+          file="$(ls exports/*.tar.gz.gpg | tail -n 1)"
+          sudo gpg --batch --quiet --pinentry-mode loopback --passphrase-file secrets/backup_passphrase \
+            --decrypt --output export.tar.gz "$file"
+          mkdir export && sudo tar -C export -xzf export.tar.gz && sudo chown -R "$(id -u)" export
+          root="$(ls -d export/*)"
+          (cd "$root" && sha256sum --check --quiet SHA256SUMS)
+          test "$(jq length "$root/data/sections.json")" -gt 0
+          test "$(jq length "$root/data/people.json")" -gt 0
+          ! grep -rq "$netball" "$root/data"
+          ! grep -rqi 'password_hash\|token_hash' "$root/data"
+          ! grep -rq 'netball' "$root/data/people.json"
+          ls "$root/files" | head
+          echo "[export-test] ok $(ls "$root/data" | wc -l) tables, $(find "$root/files" -type f | wc -l) files; no other organisation, no password or token hashes"
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo '### Deployment check'
+            echo "Backup tested: ${BACKUP:-none}"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs --no-color --tail 80 || true
+
+      - name: Remove everything
+        if: always()
+        run: |
+          docker rm -f api-restored 2>/dev/null || true
+          docker compose --profile ops --profile migrate down -v --remove-orphans || true
+          docker volume rm ci-restored-storage 2>/dev/null || true

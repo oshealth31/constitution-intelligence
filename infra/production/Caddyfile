@@ -1,0 +1,28 @@
+# HTTPS front door. Caddy obtains and renews the certificate automatically (Let's Encrypt),
+# redirects HTTP to HTTPS, and forwards everything to the web app, which forwards /api/v1 to
+# the API. With this layout the API needs TRUST_PROXY=2 (Caddy, then the web app).
+# Optional: add a global block with "email you@example.co.bw" for certificate expiry notices.
+
+{$SITE_ADDRESS} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+		-X-Powered-By
+	}
+
+	# Large enough for a 10 MB constitution upload, small enough to refuse floods.
+	request_body {
+		max_size 12MB
+	}
+
+	reverse_proxy web:3000 {
+		header_up X-Forwarded-Proto {scheme}
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}

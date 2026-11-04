@@ -48,7 +48,10 @@ export function setSessionCookie(
   expiresAt: Date,
   config: AppConfig,
 ): void {
-  response.cookie(sessionCookieName(config), token, { ...cookieOptions(config), expires: expiresAt });
+  response.cookie(sessionCookieName(config), token, {
+    ...cookieOptions(config),
+    expires: expiresAt,
+  });
 }
 
 export function clearSessionCookie(response: Response, config: AppConfig): void {

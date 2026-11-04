@@ -48,10 +48,16 @@ export function configureApp(app: NestExpressApplication, config: AppConfig): vo
   );
   // Responses carry personal or organisation data: browsers and proxies must not store them,
   // unless a route says otherwise (for example the public portal logo).
-  app.use((_request: unknown, response: { setHeader(name: string, value: string): void }, next: () => void) => {
-    response.setHeader('Cache-Control', 'no-store');
-    next();
-  });
+  app.use(
+    (
+      _request: unknown,
+      response: { setHeader(name: string, value: string): void },
+      next: () => void,
+    ) => {
+      response.setHeader('Cache-Control', 'no-store');
+      next();
+    },
+  );
   app.use(
     createRequestThrottle({
       limit: config.API_RATE_LIMIT_PER_MINUTE,

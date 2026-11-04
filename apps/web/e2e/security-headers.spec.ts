@@ -18,7 +18,9 @@ async function watchViolations(page: Page): Promise<string[]> {
   });
   await page.addInitScript(() => {
     document.addEventListener('securitypolicyviolation', (event) => {
-      console.error(`Content Security Policy violation: ${event.violatedDirective} ${event.blockedURI}`);
+      console.error(
+        `Content Security Policy violation: ${event.violatedDirective} ${event.blockedURI}`,
+      );
     });
   });
   return violations;
@@ -46,7 +48,12 @@ test('the member and admin pages work with no policy violations', async ({ page 
   await page.getByRole('button', { name: 'Sign in' }).click();
   await expect(page.locator('#welcome-heading')).toBeVisible();
 
-  for (const address of [`${CHOIR}/library`, `${CHOIR}/search`, `${CHOIR}/ask`, `${CHOIR}/manage`]) {
+  for (const address of [
+    `${CHOIR}/library`,
+    `${CHOIR}/search`,
+    `${CHOIR}/ask`,
+    `${CHOIR}/manage`,
+  ]) {
     await page.goto(address);
     await expect(page.locator('main')).toBeVisible();
   }

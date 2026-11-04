@@ -103,7 +103,8 @@ describe('route access rules', () => {
     const exposed = routes
       .filter(
         (route) =>
-          route.isPublic && (route.key.includes(':organisationId') || route.key.includes('platform/')),
+          route.isPublic &&
+          (route.key.includes(':organisationId') || route.key.includes('platform/')),
       )
       .map((route) => route.key);
     expect(exposed).toEqual([]);

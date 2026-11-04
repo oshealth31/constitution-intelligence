@@ -285,7 +285,10 @@ export class AuthService {
     meta: RequestMeta,
   ): Promise<void> {
     // Someone with a stolen session must not be able to guess the current password.
-    const attempts = await this.rateLimits.hit(`password-change:user:${userId}`, this.windowSeconds);
+    const attempts = await this.rateLimits.hit(
+      `password-change:user:${userId}`,
+      this.windowSeconds,
+    );
     if (attempts > this.config.LOGIN_MAX_ATTEMPTS_PER_EMAIL) {
       throw new HttpException(TOO_MANY_ATTEMPTS, HttpStatus.TOO_MANY_REQUESTS);
     }

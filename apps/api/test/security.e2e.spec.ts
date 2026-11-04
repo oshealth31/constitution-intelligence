@@ -88,7 +88,10 @@ describe.runIf(Boolean(testDatabaseUrl))('security hardening', () => {
       for (let attempt = 0; attempt < 5; attempt += 1) {
         await agent
           .post('/api/v1/auth/password/change')
-          .send({ currentPassword: `wrong guess number ${attempt}`, newPassword: 'another long passphrase here' })
+          .send({
+            currentPassword: `wrong guess number ${attempt}`,
+            newPassword: 'another long passphrase here',
+          })
           .expect(400);
       }
       await agent
@@ -122,7 +125,10 @@ describe.runIf(Boolean(testDatabaseUrl))('security hardening', () => {
         for (let attempt = 0; attempt < 2; attempt += 1) {
           await client(limited)
             .post('/api/v1/auth/password/reset')
-            .send({ token: `not-a-real-reset-token-${attempt}`, newPassword: 'a long new passphrase' })
+            .send({
+              token: `not-a-real-reset-token-${attempt}`,
+              newPassword: 'a long new passphrase',
+            })
             .expect(400);
         }
         await client(limited)
@@ -146,7 +152,10 @@ describe.runIf(Boolean(testDatabaseUrl))('security hardening', () => {
     }
 
     it('end after 30 minutes without activity, while a member’s session continues', async () => {
-      const admin = await createUser(context.db, { email: uniqueEmail('idle-super'), superAdmin: true });
+      const admin = await createUser(context.db, {
+        email: uniqueEmail('idle-super'),
+        superAdmin: true,
+      });
       const member = await createUser(context.db, { email: uniqueEmail('idle-member') });
       const adminAgent = await signIn(context, admin.email);
       const memberAgent = await signIn(context, member.email);
@@ -157,7 +166,10 @@ describe.runIf(Boolean(testDatabaseUrl))('security hardening', () => {
     });
 
     it('end after 12 hours even when active', async () => {
-      const admin = await createUser(context.db, { email: uniqueEmail('old-super'), superAdmin: true });
+      const admin = await createUser(context.db, {
+        email: uniqueEmail('old-super'),
+        superAdmin: true,
+      });
       const agent = await signIn(context, admin.email);
       await ageSession(admin.email, 0, 13);
       await agent.get('/api/v1/auth/me').expect(401);

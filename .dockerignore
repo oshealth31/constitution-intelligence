@@ -1,0 +1,16 @@
+# Keep secrets, local data and build output out of the image build context.
+**/node_modules
+**/.next
+**/dist
+**/.env
+**/.env.*
+!**/.env.example
+.data
+infra/production/secrets
+infra/production/backups
+apps/web/e2e/.auth
+apps/web/test-results
+apps/web/playwright-report
+qa-results
+.git
+infra/production/exports

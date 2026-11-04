@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ConfigValidationError, loadConfig } from './config';
+import { ConfigValidationError, loadConfig, resolveSecretFiles } from './config';
 
 const LOCAL_DB = 'postgresql://user:local@localhost:5432/constitution_dev';
 
@@ -139,5 +139,44 @@ describe('loadConfig', () => {
     })();
     expect(error).toBeInstanceOf(ConfigValidationError);
     expect(error?.message).not.toContain('SuperSecret123');
+  });
+
+  it('reads TRUST_PROXY as a number of proxies', () => {
+    expect(loadConfig({ DATABASE_URL: LOCAL_DB }).TRUST_PROXY).toBe(0);
+    expect(loadConfig({ DATABASE_URL: LOCAL_DB, TRUST_PROXY: 'true' }).TRUST_PROXY).toBe(1);
+    expect(loadConfig({ DATABASE_URL: LOCAL_DB, TRUST_PROXY: '2' }).TRUST_PROXY).toBe(2);
+    expect(problemsFor({ DATABASE_URL: LOCAL_DB, TRUST_PROXY: 'yes' })).toEqual([
+      'TRUST_PROXY must be "true", "false" or a number of proxies (0-9)',
+    ]);
+  });
+
+  describe('secrets from files', () => {
+    it('reads DATABASE_URL from the file named by DATABASE_URL_FILE', () => {
+      const env = resolveSecretFiles(
+        { DATABASE_URL_FILE: '/run/secrets/database_url' },
+        (path) => (path === '/run/secrets/database_url' ? 'postgresql://app:s3cret@db/app\n' : ''),
+      );
+      expect(env.DATABASE_URL).toBe('postgresql://app:s3cret@db/app');
+      expect(env.DATABASE_URL_FILE).toBeUndefined();
+    });
+
+    it('refuses both forms at once, and unreadable files, without showing values', () => {
+      expect(() =>
+        resolveSecretFiles({ DATABASE_URL: 'postgresql://a@b/c', DATABASE_URL_FILE: '/x' }),
+      ).toThrow(/DATABASE_URL and DATABASE_URL_FILE are both set/);
+      const error = (() => {
+        try {
+          resolveSecretFiles({ ANTHROPIC_API_KEY_FILE: '/no/such/file' }, () => {
+            throw new Error('ENOENT /no/such/file');
+          });
+        } catch (caught) {
+          return caught as Error;
+        }
+        return undefined;
+      })();
+      expect(error).toBeInstanceOf(ConfigValidationError);
+      expect(error?.message).toContain('ANTHROPIC_API_KEY_FILE points to a file that cannot be read');
+      expect(error?.message).not.toContain('/no/such/file');
+    });
   });
 });

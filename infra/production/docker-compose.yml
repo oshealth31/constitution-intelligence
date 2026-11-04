@@ -1,0 +1,163 @@
+# Production / staging layout for ONE server (for example a virtual machine hosted in Botswana).
+#
+#   internet ──HTTPS──> caddy ──> web (Next.js) ──/api/v1──> api (NestJS) ──TLS──> postgres
+#
+# Only Caddy is reachable from outside (ports 80 and 443). The API and database are on
+# internal networks with no published ports. Secrets are files in ./secrets/ (never committed,
+# readable only by the deploying account), mounted read-only at /run/secrets/.
+#
+# Full instructions: docs/operations/deployment.md. Nothing here is deployed automatically.
+name: constitution-intelligence
+
+x-restart: &restart
+  restart: unless-stopped
+
+services:
+  caddy:
+    <<: *restart
+    image: caddy:2.8-alpine
+    ports:
+      - '80:80'
+      - '443:443'
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?Set SITE_ADDRESS, e.g. portal.example.co.bw}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      web:
+        condition: service_healthy
+    networks: [edge]
+
+  web:
+    <<: *restart
+    image: ${WEB_IMAGE:?Set WEB_IMAGE, e.g. constitution-web:<git-sha>}
+    environment:
+      NODE_ENV: production
+    depends_on:
+      api:
+        condition: service_healthy
+    networks: [edge, app]
+
+  api:
+    <<: *restart
+    image: ${API_IMAGE:?Set API_IMAGE, e.g. constitution-api:<git-sha>}
+    env_file: [./api.env]
+    environment:
+      NODE_ENV: production
+      DATABASE_URL_FILE: /run/secrets/database_url
+      # The database's certificate authority, so the API can verify the database it talks to.
+      NODE_EXTRA_CA_CERTS: /run/secrets/database_ca.crt
+    secrets: [database_url, database_ca.crt]
+    volumes:
+      - storage:/var/lib/constitution/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [app, data]
+
+  # One-off: apply database migrations with the OWNER account, before starting a new version.
+  #   docker compose --profile migrate run --rm migrate
+  migrate:
+    image: ${API_IMAGE:?Set API_IMAGE}
+    profiles: [migrate]
+    command: ['node', 'dist/cli/migrate.js']
+    environment:
+      NODE_ENV: production
+      DATABASE_SSL: 'true'
+      DATABASE_URL_FILE: /run/secrets/database_owner_url
+      NODE_EXTRA_CA_CERTS: /run/secrets/database_ca.crt
+    secrets: [database_owner_url, database_ca.crt]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [data]
+
+  # Backups and exports (docs/operations/backup-and-restore.md):
+  #   docker compose --profile ops run --rm ops                                  # backup
+  #   docker compose --profile ops run --rm ops /ops/export-organisation.sh <id> # export
+  ops:
+    image: ${OPS_IMAGE:?Set OPS_IMAGE, e.g. constitution-ops:<git-sha>}
+    profiles: [ops]
+    environment:
+      DATABASE_URL_FILE: /run/secrets/database_url
+      BACKUP_PASSPHRASE_FILE: /run/secrets/backup_passphrase
+      STORAGE_DIR: /storage
+      BACKUP_DIR: /backups
+      EXPORT_DIR: /exports
+      BACKUP_KEEP_DAYS: '35'
+      # Verify the database's certificate (libpq settings).
+      PGSSLMODE: verify-full
+      PGSSLROOTCERT: /run/secrets/database_ca.crt
+    secrets: [database_url, database_ca.crt, backup_passphrase]
+    volumes:
+      - storage:/storage:ro
+      - ./backups:/backups
+      - ./exports:/exports
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [data]
+
+  # Leave this out (and change the URLs) when using a managed database service.
+  postgres:
+    <<: *restart
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: constitution_owner
+      POSTGRES_DB: constitution
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    command:
+      - postgres
+      - -c
+      - ssl=on
+      - -c
+      - ssl_cert_file=/run/secrets/database_server.crt
+      - -c
+      - ssl_key_file=/run/secrets/database_server.key
+      - -c
+      - log_connections=on
+    # The key file must be owned by root, group 999 (postgres), mode 0640 on the server.
+    secrets: [postgres_password, app_db_password, database_server.crt, database_server.key]
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      # First start only: creates the application's own (non-superuser) database account.
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U constitution_owner -d constitution']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    networks: [data]
+
+secrets:
+  database_url:
+    file: ./secrets/database_url
+  database_owner_url:
+    file: ./secrets/database_owner_url
+  postgres_password:
+    file: ./secrets/postgres_password
+  app_db_password:
+    file: ./secrets/app_db_password
+  backup_passphrase:
+    file: ./secrets/backup_passphrase
+  database_ca.crt:
+    file: ./secrets/database_ca.crt
+  database_server.crt:
+    file: ./secrets/database_server.crt
+  database_server.key:
+    file: ./secrets/database_server.key
+
+volumes:
+  postgres-data:
+  storage:
+  caddy-data:
+  caddy-config:
+
+networks:
+  edge:
+  app:
+    internal: true
+  data:
+    internal: true

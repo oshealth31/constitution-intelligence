@@ -40,7 +40,9 @@
       "unrs-resolver"
     ],
     "overrides": {
-      "multer": ">=2.5.0"
+      "multer": ">=2.5.0",
+      "minimatch@>=7.0.0 <11.0.1": "^11.0.1",
+      "esbuild@<0.25.0": "^0.25.0"
     }
   }
 }

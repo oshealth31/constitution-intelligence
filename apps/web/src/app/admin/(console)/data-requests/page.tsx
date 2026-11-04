@@ -78,8 +78,8 @@ export default function DataRequestsPage() {
       />
       <div className="grid gap-6 xl:grid-cols-2 [&>*]:min-w-0">
         <Card title="Requests">
-          {list.error && <Alert>{describeError(list.error)}</Alert>}
-          {!list.data && !list.error && <Loading />}
+          {list.error ? <Alert>{describeError(list.error)}</Alert> : null}
+          {!list.data && !list.error ? <Loading /> : null}
           {list.data && list.data.length === 0 && <EmptyState>No requests yet.</EmptyState>}
           {list.data && list.data.length > 0 && (
             <ul className="divide-y divide-ivory-100">

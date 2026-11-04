@@ -363,6 +363,9 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation deletion', () => {
         approvalMode: 'second_person',
         reason: REASON,
       });
+      // Staff are named, not shown as ids.
+      expect(String(deletionEvent.metadata.requestedBy)).toContain(firstAdmin.email);
+      expect(String(deletionEvent.metadata.approvedBy)).toMatch(/del-super-2/);
 
       // Accounts: A's owner deleted with their sign-in events; shared member and staff kept.
       expect(

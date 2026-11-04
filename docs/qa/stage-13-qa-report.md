@@ -117,7 +117,7 @@ were fixed and passed in run 3.
 - **Form hints are inside labels**, so screen readers read the hint as part of the field name.
   Allowed by WCAG and not flagged by the scan, but longer than ideal.
 - **Development tools** (Vitest and others) have known vulnerabilities; nothing that ships is
-  affected (Stage 12, U12).
+  affected (Stage 12, U12). **Fixed later in task D10** (one low item without a fix remains).
 - **Test data:** browser tests use one fixed seed; most API tests create their own data.
 
 ## How to repeat this QA

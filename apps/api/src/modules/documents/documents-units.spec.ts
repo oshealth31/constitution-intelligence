@@ -256,6 +256,80 @@ describe('structure detection', () => {
     expect(byNumber['(ii)']!.parentKey).toBe(byNumber['(a)']!.key);
   });
 
+  // Task D9: the RBPC clause 14.1.3 pattern (fictional wording): letters inside a roman item.
+  it('places lettered items inside a roman item, and the next roman item beside it', () => {
+    const result = parseStructure(
+      asLines([
+        '14. Committee',
+        '14.1 Duties',
+        '14.1.3 The committee shall:',
+        '(i) keep records, which must:',
+        '(a) be written;',
+        '(b) be signed;',
+        '(ii) report to members every year.',
+        '14.1.4 The committee may form sub-committees.',
+      ]),
+    );
+    const byNumber = Object.fromEntries(result.sections.map((s) => [s.number, s]));
+    expect(byNumber['(i)']!.parentKey).toBe(byNumber['14.1.3']!.key);
+    expect(byNumber['(a)']!.parentKey).toBe(byNumber['(i)']!.key);
+    expect(byNumber['(b)']!.parentKey).toBe(byNumber['(i)']!.key);
+    expect(byNumber['(ii)']!.parentKey).toBe(byNumber['14.1.3']!.key);
+    expect(byNumber['14.1.4']!.parentKey).toBe(byNumber['14.1']!.key);
+    for (const number of ['(i)', '(a)', '(b)', '(ii)']) {
+      expect(byNumber[number]!.needsReview, number).toBe(false);
+    }
+  });
+
+  it('nests lists three deep and steps back out correctly', () => {
+    const result = parseStructure(
+      asLines([
+        '3. Members',
+        '(a) Full members:',
+        '(i) who pay:',
+        '(1) monthly;',
+        '(2) yearly;',
+        '(ii) who serve;',
+        '(b) Associate members.',
+      ]),
+    );
+    const byNumber = Object.fromEntries(result.sections.map((s) => [s.number, s]));
+    expect(byNumber['(a)']!.parentKey).toBe(byNumber['3']!.key);
+    expect(byNumber['(i)']!.parentKey).toBe(byNumber['(a)']!.key);
+    expect(byNumber['(1)']!.parentKey).toBe(byNumber['(i)']!.key);
+    expect(byNumber['(2)']!.parentKey).toBe(byNumber['(i)']!.key);
+    expect(byNumber['(ii)']!.parentKey).toBe(byNumber['(a)']!.key);
+    expect(byNumber['(b)']!.parentKey).toBe(byNumber['3']!.key);
+    expect(result.sections.some((s) => s.needsReview)).toBe(false);
+  });
+
+  it('reads (i) after (h) as the ninth letter, not a new roman list', () => {
+    const letters = 'abcdefghij'.split('');
+    const result = parseStructure(
+      asLines(['2. Objects', ...letters.map((letter) => `(${letter}) object ${letter};`)]),
+    );
+    const clause = result.sections.find((s) => s.number === '2')!;
+    for (const letter of letters) {
+      const item = result.sections.find((s) => s.number === `(${letter})`)!;
+      expect(item.parentKey, letter).toBe(clause.key);
+      expect(item.needsReview, letter).toBe(false);
+    }
+  });
+
+  it('still flags missing, repeated and late-starting list items', () => {
+    const reasons = (lines: string[]) =>
+      parseStructure(asLines(lines))
+        .sections.filter((s) => s.needsReview)
+        .map((s) => s.reviewReason);
+    expect(reasons(['4. Rules', '(a) one;', '(c) three.'])).toEqual([
+      expect.stringMatching(/\(c\) follows \(a\)/),
+    ]);
+    expect(reasons(['4. Rules', '(a) one;', '(a) again.'])).toEqual([
+      expect.stringMatching(/appears more than once/),
+    ]);
+    expect(reasons(['4. Rules', '(c) three.'])).toEqual([expect.stringMatching(/starts at \(c\)/)]);
+  });
+
   it('does not mistake a sentence starting with a year for a clause', () => {
     const result = parseStructure(
       asLines([

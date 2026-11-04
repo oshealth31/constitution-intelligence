@@ -67,9 +67,9 @@ price by changing this document and the agreement template; no code changes are 
    saved as a **draft** that members cannot see.
 2. A Content Reviewer (named by the organisation; CI may assist but does not approve) compares
    every section with the original: clause numbers, sub-clauses, schedules, tables. Sections
-   marked "Check this" must be confirmed before the version can go further. Known limitation:
-   lettered items under roman-numeral items can be nested wrongly (seen in RBPC 14.1.3); check
-   these by hand.
+   marked "Check this" must be confirmed before the version can go further. Still check nested
+   lists (for example lettered items inside roman-numeral items, as in RBPC 14.1.3): these are
+   read correctly since task D9, but versions uploaded before D9 keep the old placement.
 3. Corrections are made in the review screen; each change is recorded.
 4. The reviewer ticks "I have compared this text with the original document" and sends it for
    approval.

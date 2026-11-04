@@ -27,5 +27,5 @@ is still to be written (open requirement in production-readiness.md).
 
 **RBPC specifically:** the typed constitution (`RBPC-Constitution-typed.docx`), 25 draft answers
 and 56 draft simple-words items were prepared earlier. They are drafts: the RBPC
-administrator must read and approve each one. Clause 14.1.3 needs a manual check in step 7
-(known parser limitation).
+administrator must read and approve each one. Clause 14.1.3 is read correctly since task D9;
+if RBPC's version was uploaded before D9, check 14.1.3 in step 7 or upload it again.

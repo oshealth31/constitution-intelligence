@@ -167,6 +167,13 @@ superseded, archived), with who did it, when, and any comment.
   `docs/operations/incident-response.md` ("Suspected unsafe file").
 - Extraction runs during the upload request. Large documents may take a few seconds. A
   background job queue comes later.
+- **Nested lists (task D9):** lettered (a), roman (i) and numbered (1) items nest to any depth
+  and in any order, for example letters inside a roman item (RBPC clause 14.1.3) as well as
+  romans inside a lettered item. An item that continues an open list, such as (ii) after the
+  (a), (b) inside (i), goes back to that list; a first item, such as (a), (i) or (1), starts a
+  list inside the item above it; anything else is placed with the nearest list of the same kind
+  and flagged. (i) straight after (h) is read as the letter i. Versions uploaded before D9 keep
+  their old structure.
 - The structure reader uses patterns, so unusual layouts (tables, two columns, numbering written
   in words) may need more manual correction. Such cases are flagged where they can be detected.
 - The person who uploads can also approve, if they are an administrator. Separate people are not

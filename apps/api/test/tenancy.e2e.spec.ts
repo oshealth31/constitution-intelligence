@@ -419,6 +419,8 @@ describe.runIf(Boolean(testDatabaseUrl))('tenant isolation', () => {
         'user_two_step',
         'two_step_recovery_codes',
         'two_step_challenges',
+        // Platform staff's requests to delete an organisation (Task D3): not granted to app_tenant.
+        'organisation_deletion_requests',
       ];
       const result = await context.db.execute(sql`
         SELECT c.relname AS name,

@@ -59,5 +59,6 @@ Plan names and prices are placeholders until confirmed.
 - No email delivery yet: invitations sent from the control centre are written to the API log
   (development only). Until email is connected, invitees in deployed environments cannot receive links.
 - Two-step sign-in is required for Super Admins: until it is set up, the Control Centre shows only the setup steps (Task D2). The **Support** page has your own two-step settings and the reset for someone who lost their phone (see [authentication](security/authentication.md#two-step-sign-in)).
+- **Deleting an organisation's data** (Task D3) is at the bottom of its page: available once its access has ended; a second Super Admin approves (or, with only one Super Admin, it is confirmed after 24 hours). See [offboarding-and-retention.md](operations/offboarding-and-retention.md#deletion-task-d3).
 - Lists are capped (500 organisations, 500 audit events per query) without pagination.
 - Logos cannot be uploaded yet (arrives with secure uploads).

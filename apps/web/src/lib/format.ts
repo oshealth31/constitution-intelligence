@@ -2,6 +2,7 @@ const STATUS_LABELS: Record<string, string> = {
   active: 'Active',
   suspended: 'Suspended',
   archived: 'Archived',
+  deleted: 'Deleted',
   deactivated: 'Deactivated',
   trialing: 'Pilot',
   past_due: 'Past due',
@@ -54,6 +55,7 @@ export function statusTone(status: string | null | undefined): Tone {
     case 'denied':
     case 'down':
     case 'deactivated':
+    case 'deleted':
       return 'critical';
     default:
       return 'neutral';

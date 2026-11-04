@@ -70,7 +70,7 @@ items below.
 - ❌ Restore test on the real server's backups (C5)
 - ❌ Off-site backup copy (C5)
 - ✅ Organisation export (tested: contains only that organisation, no password or token hashes)
-- ❌ Organisation deletion tool ([offboarding-and-retention.md](offboarding-and-retention.md))
+- ✅ Organisation deletion tool with second-person approval or a 24-hour wait; tested in CI and in the deployment check, not yet on the real server ([offboarding-and-retention.md](offboarding-and-retention.md#deletion-task-d3))
 - ⏳ Retention periods proposed, not confirmed by the data-protection review
 
 ### Operations
@@ -107,7 +107,7 @@ items below.
 - **Cross-border transfers**: hosting and backups in Botswana, or only to countries/safeguards
   the Act allows. This also covers outside services such as uptime monitors, email providers and
   GitHub (which holds code and fictional test data only, never production data).
-- Data-subject requests (access, correction, deletion): manual procedure only; deletion tool missing.
+- Data-subject requests (access, correction, deletion) from individual people: manual procedure only (Task D11). Whole-organisation deletion has a tool (D3).
 - AI stays off. Any AI provider outside Botswana needs a transfer assessment first (decided earlier).
 
 ### Security (from docs/security/security-review.md)
@@ -134,7 +134,7 @@ items below.
 
 ## Before general availability (beyond the pilot)
 
-Everything above, plus: penetration test; deletion tool; separate database accounts;
+Everything above, plus: penetration test; a self-service tool for individual people's data requests (D11); separate database accounts;
 isolated document parsing; a load test; a tested Safari/iOS offline experience; screen-reader
 testing; payment-provider decision; the 14.1.3 parser fix.
 

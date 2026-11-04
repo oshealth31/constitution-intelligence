@@ -5,12 +5,13 @@ import { OrganisationsModule } from '../organisations/organisations.module';
 import { PlatformController } from './platform.controller';
 import { PlatformDashboardService } from './platform-dashboard.service';
 import { PlatformService } from './platform.service';
+import { OrganisationDeletionService } from './organisation-deletion.service';
 
 /** Platform Super Admin operations. */
 @Module({
   imports: [AuthModule, OrganisationsModule, FilesModule],
   controllers: [PlatformController],
-  providers: [PlatformService, PlatformDashboardService],
-  exports: [PlatformService],
+  providers: [PlatformService, PlatformDashboardService, OrganisationDeletionService],
+  exports: [PlatformService, OrganisationDeletionService],
 })
 export class PlatformModule {}

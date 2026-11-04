@@ -175,15 +175,16 @@ date and recipient.
 
 ## 12. Data deletion
 
-**There is no deletion tool yet.** Until there is, deletion requests are handled like this, and
-the agreement must say so:
+Done with the Control Centre's deletion tool (Task D3). The agreement must say so:
 
-1. Access is restricted (cancel the subscription) and the data exported (process 11).
+1. Access is restricted (cancel the subscription, or suspend the organisation) and the data
+   exported (process 11).
 2. After the agreed retention period (proposed 90 days after access ends, unless the
-   organisation asks for earlier deletion in writing), CI deletes the organisation's data using
-   a reviewed, two-person procedure, keeping invoices and payment records as financial records.
+   organisation asks for earlier deletion in writing), a Super Admin requests deletion in the
+   Control Centre. A second Super Admin approves it; when there is only one, they confirm it
+   after 24 hours. Invoices and payment records are kept as financial records.
 3. Data remains inside encrypted backups until they expire (35 days), then it is gone.
-4. CI confirms the deletion to the Owner in writing.
+4. CI confirms the deletion to the Owner in writing
+   ([template](templates/deletion-confirmation.md)).
 
-Building and testing the deletion tool before the first organisation leaves (day 60 of the
-first pilot at the latest) is part of the readiness conditions.
+Steps and what is deleted or kept: [offboarding-and-retention.md](../operations/offboarding-and-retention.md#deletion-task-d3).

@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { findWorkspaceRoot } from '@constitution/shared';
@@ -52,6 +52,32 @@ export class StorageService {
       throw new ForbiddenException('File is not available to this organisation.');
     }
     return readFile(this.resolve(organisationId, key));
+  }
+
+  /**
+   * Removes one organisation's whole folder (tenants/<organisationId>/). Used only by the
+   * organisation deletion procedure, after its database transaction has committed. Safe to run
+   * again: a folder that is already gone is not an error.
+   */
+  async removeOrganisationFolder(organisationId: string): Promise<void> {
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(organisationId)) {
+      throw new ForbiddenException('Not an organisation id.');
+    }
+    const folder = path.resolve(this.root, tenantPrefix(organisationId));
+    if (!folder.startsWith(this.root + path.sep)) {
+      throw new ForbiddenException('Not an organisation folder.');
+    }
+    await rm(folder, { recursive: true, force: true });
+  }
+
+  /** Whether the organisation's folder still exists (tests and the deletion report). */
+  async organisationFolderExists(organisationId: string): Promise<boolean> {
+    try {
+      await access(path.resolve(this.root, tenantPrefix(organisationId)));
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /** Health check: can the storage location be written to? Writes and removes a small file. */

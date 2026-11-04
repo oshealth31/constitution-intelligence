@@ -71,6 +71,13 @@
       "when": 1793860000000,
       "tag": "0009_two_step_sign_in",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793870000000,
+      "tag": "0010_organisation_deletion",
+      "breakpoints": true
     }
   ]
 }

@@ -295,6 +295,32 @@ jobs:
           ls "$root/files" | head
           echo "[export-test] ok $(ls "$root/data" | wc -l) tables, $(find "$root/files" -type f | wc -l) files; no other organisation, no password or token hashes"
 
+      - name: Delete one organisation with the server command (after its export)
+        run: |
+          set -e
+          q() { docker compose exec -T postgres psql -U constitution_owner -d constitution -Atqc "$1"; }
+          netball="$(q "SELECT id FROM organisations WHERE slug = 'sample-netball-club'")"
+          choir="$(q "SELECT id FROM organisations WHERE slug = 'sample-community-choir'")"
+          choir_sections="$(q "SELECT count(*) FROM sections WHERE organisation_id = '$choir'")"
+          admin="$(q "SELECT id FROM users WHERE email = 'superadmin@sample.test'")"
+          # A request as the Control Centre would record it, made 25 hours ago (the command line
+          # may confirm only after the 24-hour wait). Access must have ended first.
+          q "UPDATE organisations SET status = 'suspended' WHERE id = '$netball'"
+          q "INSERT INTO organisation_deletion_requests (organisation_id, reason, export_confirmed, requested_by_user_id, requested_at, expires_at)
+             VALUES ('$netball', 'Deployment check: fictional organisation', true, '$admin', now() - interval '25 hours', now() + interval '6 days')"
+          docker compose run --rm -T api node dist/cli/delete-organisation.js \
+            --organisation "$netball" --approve --confirm sample-netball-club | tee delete-output.txt
+          grep -q 'Files removed from storage' delete-output.txt
+          test "$(q "SELECT count(*) FROM sections WHERE organisation_id = '$netball'")" = 0
+          test "$(q "SELECT count(*) FROM memberships WHERE organisation_id = '$netball'")" = 0
+          test "$(q "SELECT count(*) FROM audit_events WHERE organisation_id = '$netball' AND action <> 'organisation.deleted'")" = 0
+          test "$(q "SELECT count(*) FROM users WHERE email LIKE 'netball.%@sample.test'")" = 0
+          test -n "$(q "SELECT deleted_at FROM organisations WHERE id = '$netball'")"
+          test "$(q "SELECT count(*) FROM sections WHERE organisation_id = '$choir'")" = "$choir_sections"
+          docker compose run --rm -T --entrypoint sh api -c \
+            "test ! -e /var/lib/constitution/storage/tenants/$netball && test -d /var/lib/constitution/storage/tenants/$choir"
+          echo "[delete-test] ok netball deleted (database and files); choir untouched"
+
       - name: Summary
         if: always()
         run: |

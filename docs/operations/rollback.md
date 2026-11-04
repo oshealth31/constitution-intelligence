@@ -32,11 +32,11 @@ There are no "down" migrations. Restore the backup taken just before the release
 
 ## Deciding
 
-| Situation | Rollback |
-| --- | --- |
-| New version crashes or misbehaves, migrations were additive | A |
-| Wrong data written by the new version | A, then repair with a new migration or a careful script, or B if repair is not safe |
-| A migration failed halfway | Nothing to roll back: pending migrations run in one transaction and the failed batch is not applied. Fix and re-run |
-| Migration dropped or rewrote data | B |
+| Situation                                                   | Rollback                                                                                                            |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| New version crashes or misbehaves, migrations were additive | A                                                                                                                   |
+| Wrong data written by the new version                       | A, then repair with a new migration or a careful script, or B if repair is not safe                                 |
+| A migration failed halfway                                  | Nothing to roll back: pending migrations run in one transaction and the failed batch is not applied. Fix and re-run |
+| Migration dropped or rewrote data                           | B                                                                                                                   |
 
 Record every rollback in the change log and the incident note.

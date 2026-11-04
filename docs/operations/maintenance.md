@@ -2,19 +2,19 @@
 
 ## Routine
 
-| When | Task | How |
-| --- | --- | --- |
-| Daily (automatic) | Encrypted backup, copied off the server | Cron: `docker compose --profile ops run --rm ops`, then the off-site copy ([backup-and-restore.md](backup-and-restore.md)) |
-| Daily | Glance at alerts and Control Centre → System health | |
-| Weekly | Read the "Security scans" results and Dependabot pull requests; merge safe updates after CI | GitHub |
-| Weekly (automatic) | Deployment check, including a full backup-and-restore test on a throwaway runner | GitHub Actions, Mondays |
-| Monthly | Operating-system and Docker updates; restart in the maintenance window | `apt upgrade`, `docker compose pull` for Caddy/Postgres images, then `up -d` |
-| Monthly | Review Super Admin and organisation Owner accounts; remove leavers | Control Centre |
-| Monthly | Check disk space for database, storage, backups and logs | `df -h`, `docker system df` |
-| Quarterly | **Restore test on the real backups** into a separate database on a separate machine, and record the result | [backup-and-restore.md](backup-and-restore.md) |
-| Quarterly | Check retention: organisations past their retention period (Control Centre → Billing) | [offboarding-and-retention.md](offboarding-and-retention.md) |
-| Yearly | Rotate database passwords; review this documentation; incident-response drill | [secrets.md](secrets.md) |
-| Before expiry | Database TLS certificate (825 days) | [secrets.md](secrets.md) |
+| When               | Task                                                                                                       | How                                                                                                                        |
+| ------------------ | ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Daily (automatic)  | Encrypted backup, copied off the server                                                                    | Cron: `docker compose --profile ops run --rm ops`, then the off-site copy ([backup-and-restore.md](backup-and-restore.md)) |
+| Daily              | Glance at alerts and Control Centre → System health                                                        |                                                                                                                            |
+| Weekly             | Read the "Security scans" results and Dependabot pull requests; merge safe updates after CI                | GitHub                                                                                                                     |
+| Weekly (automatic) | Deployment check, including a full backup-and-restore test on a throwaway runner                           | GitHub Actions, Mondays                                                                                                    |
+| Monthly            | Operating-system and Docker updates; restart in the maintenance window                                     | `apt upgrade`, `docker compose pull` for Caddy/Postgres images, then `up -d`                                               |
+| Monthly            | Review Super Admin and organisation Owner accounts; remove leavers                                         | Control Centre                                                                                                             |
+| Monthly            | Check disk space for database, storage, backups and logs                                                   | `df -h`, `docker system df`                                                                                                |
+| Quarterly          | **Restore test on the real backups** into a separate database on a separate machine, and record the result | [backup-and-restore.md](backup-and-restore.md)                                                                             |
+| Quarterly          | Check retention: organisations past their retention period (Control Centre → Billing)                      | [offboarding-and-retention.md](offboarding-and-retention.md)                                                               |
+| Yearly             | Rotate database passwords; review this documentation; incident-response drill                              | [secrets.md](secrets.md)                                                                                                   |
+| Before expiry      | Database TLS certificate (825 days)                                                                        | [secrets.md](secrets.md)                                                                                                   |
 
 ## Maintenance windows
 

@@ -2,12 +2,12 @@
 
 ## What is backed up
 
-| Part | How | Where |
-| --- | --- | --- |
-| Database (every table, row-level security policies, triggers, migration history) | `pg_dump` custom format, run as the application account (sees every row) | `database.dump.gpg` |
-| Uploaded files (original constitutions, logos) | `tar` of the `storage` volume | `storage.tar.gz.gpg` |
-| What was backed up | Time, database version, number of migrations, files, rows per table | `manifest.txt` |
-| Integrity | SHA-256 of the three files | `SHA256SUMS` |
+| Part                                                                             | How                                                                      | Where                |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | -------------------- |
+| Database (every table, row-level security policies, triggers, migration history) | `pg_dump` custom format, run as the application account (sees every row) | `database.dump.gpg`  |
+| Uploaded files (original constitutions, logos)                                   | `tar` of the `storage` volume                                            | `storage.tar.gz.gpg` |
+| What was backed up                                                               | Time, database version, number of migrations, files, rows per table      | `manifest.txt`       |
+| Integrity                                                                        | SHA-256 of the three files                                               | `SHA256SUMS`         |
 
 Both data files are encrypted (AES-256, gpg) with `backup_passphrase`; nothing unencrypted is
 written. Not in the backup, on purpose: the secrets (kept separately, see
@@ -87,8 +87,8 @@ the off-site copy, then the same steps.
 No restore has been performed on production infrastructure, because none exists yet. The
 off-site copy has not been tested.
 
-| Date | Where | What was restored | Result |
-| --- | --- | --- | --- |
+| Date       | Where                                                                                                                                                                                      | What was restored                                                                                                                               | Result                                                                                                                                                                                                                                                                                                                                    |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 4 Nov 2026 | GitHub Actions runner, production images and layout, TLS database, generated secrets ([run 41766576968](https://github.com/oshealth31/constitution-intelligence/actions/runs/41766576968)) | Fictional development data: 2 organisations, 8 users, 2 constitutions with 4 versions and 36 sections, 4 stored files, 9 migrations (29 tables) | **Passed**: checksums verified; 29 tables matched row for row; the 4 files were byte-identical (SHA-256); the audit log was still append-only; row-level security still showed one organisation to the tenant role; a member signed in **on the restored copy** through the API and saw 1 constitution and 6 search results for "meeting" |
 
 Also tested locally (4 Nov 2026), on a small stand-in database: restore refuses a database
@@ -100,7 +100,7 @@ the code and procedure, **not** for a real server's backups. After go-live, the 
 restore test on the real backups (on a separate machine) is the evidence that recovery works.
 Record each one in this table.
 
-| Target | Value |
-| --- | --- |
+| Target                                               | Value                                                                                    |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | Recovery point objective (how much data may be lost) | 24 hours (daily backup); shorter needs continuous archiving (PostgreSQL WAL), not set up |
-| Recovery time objective (how long to restore) | 4 hours, to be confirmed by the first real restore test |
+| Recovery time objective (how long to restore)        | 4 hours, to be confirmed by the first real restore test                                  |

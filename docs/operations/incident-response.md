@@ -7,12 +7,12 @@ lost or corrupted.
 
 ## Roles (fill in before go-live)
 
-| Role | Person | Backup person | Contact |
-| --- | --- | --- | --- |
-| Incident lead (decides, communicates) | _to be named_ | _to be named_ | |
-| Technical responder (server, database) | _to be named_ | _to be named_ | |
-| Data protection contact (regulator, organisations) | _to be named_ | | |
-| Hosting provider support | _provider_ | | |
+| Role                                               | Person        | Backup person | Contact |
+| -------------------------------------------------- | ------------- | ------------- | ------- |
+| Incident lead (decides, communicates)              | _to be named_ | _to be named_ |         |
+| Technical responder (server, database)             | _to be named_ | _to be named_ |         |
+| Data protection contact (regulator, organisations) | _to be named_ |               |         |
+| Hosting provider support                           | _provider_    |               |         |
 
 ## The steps
 

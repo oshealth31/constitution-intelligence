@@ -2,13 +2,13 @@
 
 ## Offboarding an organisation
 
-| # | Who | Step |
-| --- | --- | --- |
-| 1 | Owner | Asks to leave, in writing (email is enough), or the subscription is not renewed. |
-| 2 | Super Admin | Control Centre → organisation → Subscription → **Cancel** (at period end or now). Access continues until the period end plus the grace period (plan's grace days), then becomes **restricted**: members are blocked, Owners and Administrators can only read. Nothing is deleted. |
-| 3 | Super Admin | **Export** the organisation's data (below) if the Owner asks for it, and send it securely. |
-| 4 | Super Admin | After the retention period (`SUBSCRIPTION_DATA_RETENTION_DAYS`, default **90 days** after access became restricted), the organisation appears under Billing → "Restricted or suspended". Contact the Owner once more, then delete (below). |
-| 5 | Super Admin | Record the export, the confirmation and the deletion in the change log. |
+| #   | Who         | Step                                                                                                                                                                                                                                                                              |
+| --- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Owner       | Asks to leave, in writing (email is enough), or the subscription is not renewed.                                                                                                                                                                                                  |
+| 2   | Super Admin | Control Centre → organisation → Subscription → **Cancel** (at period end or now). Access continues until the period end plus the grace period (plan's grace days), then becomes **restricted**: members are blocked, Owners and Administrators can only read. Nothing is deleted. |
+| 3   | Super Admin | **Export** the organisation's data (below) if the Owner asks for it, and send it securely.                                                                                                                                                                                        |
+| 4   | Super Admin | After the retention period (`SUBSCRIPTION_DATA_RETENTION_DAYS`, default **90 days** after access became restricted), the organisation appears under Billing → "Restricted or suspended". Contact the Owner once more, then delete (below).                                        |
+| 5   | Super Admin | Record the export, the confirmation and the deletion in the change log.                                                                                                                                                                                                           |
 
 ## Data export
 
@@ -36,16 +36,16 @@ built yet.
 
 ## Retention
 
-| Data | Kept while active | After the subscription ends | Notes |
-| --- | --- | --- | --- |
-| Constitutions, versions, files, answers, simple words | Yes | Unchanged for the retention period (90 days after restriction), then deleted on request/after contact | The organisation's own records |
-| Members and invitations | Yes | Same as above | |
-| Audit log | Yes | Same as the organisation's data | Append-only; deleted only with the organisation |
-| Invoices, payments, receipts | Yes | **Kept** as financial records even after the rest is deleted (period to be confirmed by an accountant; commonly several years) | Stated on the subscription page |
-| AI questions (if AI is ever on) | Each person's own | Deleted with the organisation | Not used for training |
-| Sessions, reset links, rate-limit counters | Days | Cleaned up monthly | [maintenance.md](maintenance.md) |
-| Backups | 35 days locally (`BACKUP_KEEP_DAYS`), off-site per policy | Deleted data disappears from backups when they expire | Proposed: 35 days |
-| Application and proxy logs | Proposed 90 days | | [logging-and-monitoring.md](logging-and-monitoring.md) |
+| Data                                                  | Kept while active                                         | After the subscription ends                                                                                                    | Notes                                                  |
+| ----------------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------ |
+| Constitutions, versions, files, answers, simple words | Yes                                                       | Unchanged for the retention period (90 days after restriction), then deleted on request/after contact                          | The organisation's own records                         |
+| Members and invitations                               | Yes                                                       | Same as above                                                                                                                  |                                                        |
+| Audit log                                             | Yes                                                       | Same as the organisation's data                                                                                                | Append-only; deleted only with the organisation        |
+| Invoices, payments, receipts                          | Yes                                                       | **Kept** as financial records even after the rest is deleted (period to be confirmed by an accountant; commonly several years) | Stated on the subscription page                        |
+| AI questions (if AI is ever on)                       | Each person's own                                         | Deleted with the organisation                                                                                                  | Not used for training                                  |
+| Sessions, reset links, rate-limit counters            | Days                                                      | Cleaned up monthly                                                                                                             | [maintenance.md](maintenance.md)                       |
+| Backups                                               | 35 days locally (`BACKUP_KEEP_DAYS`), off-site per policy | Deleted data disappears from backups when they expire                                                                          | Proposed: 35 days                                      |
+| Application and proxy logs                            | Proposed 90 days                                          |                                                                                                                                | [logging-and-monitoring.md](logging-and-monitoring.md) |
 
 These periods are proposals. The data-protection review must confirm them (see the open
 requirements in production-readiness.md).

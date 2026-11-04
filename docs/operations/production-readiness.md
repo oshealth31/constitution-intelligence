@@ -26,15 +26,15 @@ fictional data). But a public go-live needs things that do not exist yet:
 
 ### What would make it "Ready with conditions" (controlled pilot with RBPC only)
 
-| # | Condition | Type |
-| --- | --- | --- |
-| C1 | Hosting chosen and approved by the owner (in Botswana, or a destination the Act allows); server prepared per [deployment.md](deployment.md) | Decision + setup |
-| C2 | Email provider integrated and tested (SMTP or API, sending domain with SPF/DKIM/DMARC) | Development |
-| C3 | Two-factor sign-in for Super Admins | Development |
-| C4 | Pilot agreement with RBPC covering data protection roles, plus a privacy notice for members | Legal |
-| C5 | Off-site encrypted backup copy running, **and one restore test on the real server's backup recorded** | Setup + test |
-| C6 | Uptime monitor and the critical alerts from [logging-and-monitoring.md](logging-and-monitoring.md) running; two named responders | Setup |
-| C7 | Deployment check green on the release commit; owner's written go-ahead | Approval |
+| #   | Condition                                                                                                                                   | Type             |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| C1  | Hosting chosen and approved by the owner (in Botswana, or a destination the Act allows); server prepared per [deployment.md](deployment.md) | Decision + setup |
+| C2  | Email provider integrated and tested (SMTP or API, sending domain with SPF/DKIM/DMARC)                                                      | Development      |
+| C3  | Two-factor sign-in for Super Admins                                                                                                         | Development      |
+| C4  | Pilot agreement with RBPC covering data protection roles, plus a privacy notice for members                                                 | Legal            |
+| C5  | Off-site encrypted backup copy running, **and one restore test on the real server's backup recorded**                                       | Setup + test     |
+| C6  | Uptime monitor and the critical alerts from [logging-and-monitoring.md](logging-and-monitoring.md) running; two named responders            | Setup            |
+| C7  | Deployment check green on the release commit; owner's written go-ahead                                                                      | Approval         |
 
 With C1–C7 met, a **pilot with one organisation**, a small group of known users, AI off and
 manual payments is reasonable. Wider launch also needs the "Before general availability"
@@ -45,6 +45,7 @@ items below.
 ✅ = done and evidenced; ⏳ = documented or prepared, not in place; ❌ = missing.
 
 ### Application and configuration
+
 - ✅ Production configuration reviewed; the API refuses unsafe production settings (tested in CI and in the Deployment check)
 - ✅ Production images for API, web and operations; unprivileged user; no secrets inside (checked)
 - ✅ Development seed refuses to run in production; no development credentials in any image or template
@@ -59,6 +60,7 @@ items below.
 - ❌ Two-factor sign-in (C3)
 
 ### Data
+
 - ✅ Encrypted backup of database and files, with manifest and checksums
 - ✅ Restore procedure; **restore tested** on fictional data in a throwaway environment ([record](backup-and-restore.md#restore-test-record)); repeats weekly in CI
 - ❌ Restore test on the real server's backups (C5)
@@ -68,6 +70,7 @@ items below.
 - ⏳ Retention periods proposed, not confirmed by the data-protection review
 
 ### Operations
+
 - ✅ Deployment, migration, rollback, maintenance, incident-response, onboarding and offboarding procedures written
 - ❌ Server, DNS, firewall (C1)
 - ❌ Monitoring and alerting running (C6)
@@ -77,6 +80,7 @@ items below.
 ## Unresolved requirements
 
 ### Legal
+
 - Agreements with organisations: service terms, fees, liability, and the **data processing
   terms** (which party is the controller of members' data, and what Constitution Intelligence
   may do with it as processor).
@@ -87,6 +91,7 @@ items below.
   own agreement.
 
 ### Privacy (Data Protection Act, 2024, Act No. 18 of 2024)
+
 - Whether Constitution Intelligence and/or each organisation must **register** with the
   Information and Data Protection Commission. The Act provides for a register of data
   controllers, but the registration method had not been published when last checked.
@@ -102,18 +107,21 @@ items below.
 - AI stays off. Any AI provider outside Botswana needs a transfer assessment first (decided earlier).
 
 ### Security (from docs/security/security-review.md)
+
 - U1 two-factor sign-in (C3) · U3 separate database accounts · U4 document parsing in an
   isolated process · U6 breached-password check · U8 tamper-evident audit copy ·
   U11 independent penetration test before general availability · U12 development-tool
   vulnerabilities (Vitest upgrade).
 
 ### Hosting
+
 - Provider and location; data-centre security; who at the provider can access the server or disks.
 - Off-site backup location; disk encryption at rest; snapshots.
 - Firewall/DDoS protection in front of the site (U5).
 - Sizing confirmed by a load test (not done, see the Stage 13 QA report).
 
 ### Operational
+
 - Named incident lead, technical responder and data-protection contact, with backups.
 - Support process for organisations (how they report problems, response times).
 - Service levels: availability target, recovery point (proposed 24 h) and recovery time (proposed 4 h).
@@ -127,6 +135,7 @@ isolated document parsing; a load test; a tested Safari/iOS offline experience; 
 testing; payment-provider decision; the 14.1.3 parser fix.
 
 ## Sources
+
 - [Data Protection in Botswana – DLA Piper](https://www.dlapiperdataprotection.com/?c=BW&t=law)
 - [Botswana's Data Protection Act – Michalsons](https://www.michalsons.com/blog/botswanas-data-protection-act-grace-period-extended/60775)
 - [Understanding Botswana's new Data Protection Act – Tech Hive Advisory](https://www.techhiveadvisory.africa/insights/understanding-botswanas-new-data-protection-act-key-updates-and-changes)

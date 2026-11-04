@@ -48,14 +48,14 @@ authority file as `database_ca.crt` and the provider's connection string in `dat
 
 ## Rotation
 
-| Secret | How often | How |
-| --- | --- | --- |
-| `app_db_password` | Yearly, and when anyone with access leaves | `ALTER ROLE constitution_app PASSWORD '...'` as the administrator, update `app_db_password`, `database_url`, `database_owner_url`, then `docker compose up -d api` |
-| `postgres_password` | Yearly | `ALTER ROLE constitution_owner PASSWORD '...'`, update the file |
-| Database certificate | Before it expires (825 days) | Issue a new one with the same CA; restart `postgres` |
-| `backup_passphrase` | When someone who knew it leaves | New file; **keep the old passphrase** until every backup made with it has expired |
-| AI provider key (if AI is ever turned on) | Every 90 days | Provider console; `ANTHROPIC_API_KEY_FILE` |
-| Session tokens | Automatic | Users can "sign out everywhere"; suspending a user ends their sessions |
+| Secret                                    | How often                                  | How                                                                                                                                                                |
+| ----------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `app_db_password`                         | Yearly, and when anyone with access leaves | `ALTER ROLE constitution_app PASSWORD '...'` as the administrator, update `app_db_password`, `database_url`, `database_owner_url`, then `docker compose up -d api` |
+| `postgres_password`                       | Yearly                                     | `ALTER ROLE constitution_owner PASSWORD '...'`, update the file                                                                                                    |
+| Database certificate                      | Before it expires (825 days)               | Issue a new one with the same CA; restart `postgres`                                                                                                               |
+| `backup_passphrase`                       | When someone who knew it leaves            | New file; **keep the old passphrase** until every backup made with it has expired                                                                                  |
+| AI provider key (if AI is ever turned on) | Every 90 days                              | Provider console; `ANTHROPIC_API_KEY_FILE`                                                                                                                         |
+| Session tokens                            | Automatic                                  | Users can "sign out everywhere"; suspending a user ends their sessions                                                                                             |
 
 ## What is not secret
 

@@ -60,16 +60,25 @@ test('the member and admin pages work with no policy violations', async ({ page 
   expect(violations).toEqual([]);
 });
 
-test('an injected inline script is blocked', async ({ page }) => {
+test('injected markup cannot run code', async ({ page }) => {
   await page.goto(`${CHOIR}/sign-in`);
-  const ran = await page.evaluate(async () => {
-    const script = document.createElement('script');
-    script.textContent = 'window.__injected = true;';
-    document.body.appendChild(script);
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    return (window as unknown as { __injected?: boolean }).__injected === true;
+  const result = await page.evaluate(async () => {
+    const state = window as unknown as { __injected?: boolean };
+    // The classic cross-site scripting payload: an inline event handler in injected HTML.
+    const box = document.createElement('div');
+    box.innerHTML = '<img src="/does-not-exist.png" onerror="window.__injected = true">';
+    document.body.appendChild(box);
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    // Turning text into code is refused too.
+    let evalWorked = false;
+    try {
+      evalWorked = (0, eval)('1 + 1') === 2;
+    } catch {
+      evalWorked = false;
+    }
+    return { handlerRan: state.__injected === true, evalWorked };
   });
-  expect(ran).toBe(false);
+  expect(result).toEqual({ handlerRan: false, evalWorked: false });
 });
 
 test('API responses are not stored by the browser', async ({ request }) => {

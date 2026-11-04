@@ -359,7 +359,10 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation deletion', () => {
       ]);
       const deletionEvent = events.find((event) => event.action === 'organisation.deleted')!;
       expect(JSON.stringify(deletionEvent)).not.toContain(ownerEmail);
-      expect(deletionEvent.metadata).toMatchObject({ approvalMode: 'second_person', reason: REASON });
+      expect(deletionEvent.metadata).toMatchObject({
+        approvalMode: 'second_person',
+        reason: REASON,
+      });
 
       // Accounts: A's owner deleted with their sign-in events; shared member and staff kept.
       expect(

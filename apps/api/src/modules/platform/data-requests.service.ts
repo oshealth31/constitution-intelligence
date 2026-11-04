@@ -6,13 +6,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  dataRequests,
-  sessions,
-  users,
-  type Database,
-  type DataRequest,
-} from '@constitution/db';
+import { dataRequests, sessions, users, type Database, type DataRequest } from '@constitution/db';
 import { and, desc, eq, sql } from 'drizzle-orm';
 import type { RequestMeta } from '../../common/request-context';
 import { DRIZZLE } from '../../database/database.constants';
@@ -395,9 +389,11 @@ export class DataRequestsService {
           target_id = CASE WHEN target_id = ${userId} OR lower(target_id) = ${email}
                            THEN ${REMOVED} ELSE target_id END,
           metadata = regexp_replace(
-                       ${namedPattern
-                         ? sql`regexp_replace(metadata::text, ${namedPattern}, ${REMOVED}, 'gi')`
-                         : sql`metadata::text`},
+                       ${
+                         namedPattern
+                           ? sql`regexp_replace(metadata::text, ${namedPattern}, ${REMOVED}, 'gi')`
+                           : sql`metadata::text`
+                       },
                        ${emailPattern}, ${REMOVED}, 'gi')::jsonb
         WHERE actor_user_id = ${userId}::uuid OR target_id = ${userId}
            OR lower(target_id) = ${email}
@@ -491,7 +487,8 @@ export class DataRequestsService {
   /** The account the request is about, found by email when the request was made or now. */
   private async subjectId(request: DataRequest): Promise<string> {
     const subject = await this.subject(request);
-    if (!subject.userId) throw new ConflictException('There is no account with this email address.');
+    if (!subject.userId)
+      throw new ConflictException('There is no account with this email address.');
     return subject.userId;
   }
 

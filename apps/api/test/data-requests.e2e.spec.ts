@@ -145,8 +145,13 @@ describe.runIf(Boolean(testDatabaseUrl))('personal data requests', () => {
     );
     expect(JSON.stringify(created)).not.toContain(subject.email);
 
-    const response = await staff.get(api(`/${id}/copy`)).buffer(true).expect(200);
-    expect(response.headers['content-disposition']).toMatch(/^attachment; filename="personal-data-/);
+    const response = await staff
+      .get(api(`/${id}/copy`))
+      .buffer(true)
+      .expect(200);
+    expect(response.headers['content-disposition']).toMatch(
+      /^attachment; filename="personal-data-/,
+    );
     const text = Buffer.isBuffer(response.body) ? response.body.toString() : response.text;
     const copy = JSON.parse(text);
     expect(copy.account).toMatchObject({ email: subject.email, name: 'Thato Fictional' });
@@ -179,10 +184,16 @@ describe.runIf(Boolean(testDatabaseUrl))('personal data requests', () => {
     const downloads = await auditEventsFor(context.db, 'data_request.copy_downloaded');
     expect(downloads.some((event) => event.targetId === id)).toBe(true);
 
-    await staff.post(api(`/${id}/complete`)).send({ note: 'Sent by encrypted email' }).expect(200);
+    await staff
+      .post(api(`/${id}/complete`))
+      .send({ note: 'Sent by encrypted email' })
+      .expect(200);
     const done = await staff.get(api(`/${id}`)).expect(200);
     expect(done.body.request).toMatchObject({ status: 'completed' });
-    await staff.post(api(`/${id}/complete`)).send({ note: 'Again' }).expect(409);
+    await staff
+      .post(api(`/${id}/complete`))
+      .send({ note: 'Again' })
+      .expect(409);
   });
 
   it('corrects the name only on a correction request', async () => {
@@ -199,7 +210,10 @@ describe.runIf(Boolean(testDatabaseUrl))('personal data requests', () => {
     const [row] = await context.db.select().from(users).where(eq(users.id, subject.id));
     expect(row).toMatchObject({ displayName: 'Thato M. Fictional', email: subject.email });
     subject.displayName = 'Thato M. Fictional';
-    await staff.post(api(`/${copyId}/cancel`)).send({ reason: REASON }).expect(200);
+    await staff
+      .post(api(`/${copyId}/cancel`))
+      .send({ reason: REASON })
+      .expect(200);
   });
 
   it('refuses to delete a Super Admin or the only Owner of an active organisation', async () => {
@@ -219,7 +233,10 @@ describe.runIf(Boolean(testDatabaseUrl))('personal data requests', () => {
       .send({ confirmEmail: owner.user.email, reason: REASON })
       .expect(409);
     for (const id of [adminRequest, ownerRequest]) {
-      await staff.post(api(`/${id}/cancel`)).send({ reason: REASON }).expect(200);
+      await staff
+        .post(api(`/${id}/cancel`))
+        .send({ reason: REASON })
+        .expect(200);
     }
   });
 

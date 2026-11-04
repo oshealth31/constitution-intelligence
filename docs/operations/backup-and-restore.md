@@ -100,11 +100,14 @@ off-site copy are, and fails if either is older than 26 hours: the monitoring (t
 run it and alert. Also take a backup by hand **before every release** and before any risky change.
 
 **Tested** (Deployment check, on every change and weekly): the backup is copied to a throwaway
-S3-compatible store (MinIO) with an add-only account; a second run copies nothing new; the
-account is refused when it tries to delete; an overwrite keeps the earlier version; the copy is
-downloaded back into an empty folder, is byte-for-byte identical, and **the restore test then
-restores that downloaded copy**; pruning keeps the right backups. **Not tested yet: a real
-provider, and the timer on a real server.**
+SFTP server with an add-only account (removing files is refused by the server); a second run
+copies nothing new; the account is refused when it tries to delete; the copy is downloaded back
+into an empty folder, is byte-for-byte identical, and **the restore test then restores that
+downloaded copy**; pruning with the separate account keeps the right backups. **Not tested yet:
+an object-storage provider (S3), its versioning and add-only keys, and the timer on a real
+server.** For an SFTP destination of your own, the same add-only setup is
+`ForceCommand internal-sftp -P remove,rmdir` for the copy account
+(see `infra/production/ci-offsite/sshd_config`).
 
 ## Restoring
 

@@ -7,6 +7,7 @@ import {
   organisationDeletionRequests,
   organisations,
   payments,
+  subscriptions,
   users,
 } from '@constitution/db';
 import { and, eq, isNull, sql } from 'drizzle-orm';
@@ -249,6 +250,13 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation deletion', () => {
       ]);
       const aKeptBefore = await countsFor(a.organisation.id, KEPT_TABLES);
       const aBefore = await countsFor(a.organisation.id, DELETED_TABLES);
+      const openSubscriptionsBefore = (
+        await context.db
+          .select()
+          .from(subscriptions)
+          .where(eq(subscriptions.organisationId, a.organisation.id))
+      ).filter((subscription) => subscription.status !== 'cancelled').length;
+      expect(openSubscriptionsBefore).toBeGreaterThan(0);
       expect(aBefore.sections).toBeGreaterThan(0);
       expect(aBefore.files).toBeGreaterThan(0);
 
@@ -282,7 +290,47 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation deletion', () => {
       // A: every organisation record gone; financial records kept.
       const aAfter = await countsFor(a.organisation.id, DELETED_TABLES);
       expect(Object.values(aAfter).every((count) => count === 0)).toBe(true);
-      expect(await countsFor(a.organisation.id, KEPT_TABLES)).toEqual(aKeptBefore);
+      // Kept, plus one subscription-history entry per subscription the deletion ended.
+      expect(await countsFor(a.organisation.id, KEPT_TABLES)).toEqual({
+        ...aKeptBefore,
+        subscription_events: aKeptBefore.subscription_events! + openSubscriptionsBefore,
+      });
+      const ended = await context.db
+        .select()
+        .from(subscriptions)
+        .where(eq(subscriptions.organisationId, a.organisation.id));
+      expect(ended.length).toBeGreaterThan(0);
+      for (const subscription of ended) {
+        expect(subscription).toMatchObject({ status: 'cancelled', autoRenew: false });
+        expect(subscription.cancellationReason).toMatch(/data was deleted/);
+      }
+      const billing = await firstAgent.get(platform(a.organisation.id, '/billing')).expect(200);
+      expect(billing.body.organisation.deletedAt).toBeTruthy();
+      // Nothing can renew or be invoiced; existing invoices can still be settled or voided.
+      for (const [path, body] of [
+        ['/subscription/renew', {}],
+        ['/subscription/reactivate', { reason: 'Trying to restart it (fictional)' }],
+        ['/subscription/suspend', { reason: 'Trying to suspend it (fictional)' }],
+        [
+          '/invoices',
+          {
+            description: 'Late invoice (fictional)',
+            amountMinor: 1000,
+            dueAt: new Date(Date.now() + 86_400_000).toISOString(),
+          },
+        ],
+      ] as const) {
+        const refused = await firstAgent.post(platform(a.organisation.id, path)).send(body);
+        expect(refused.status, path).toBe(409);
+      }
+      const [keptInvoice] = await context.db
+        .select()
+        .from(invoices)
+        .where(eq(invoices.organisationId, a.organisation.id));
+      await firstAgent
+        .post(platform(a.organisation.id, `/invoices/${keptInvoice!.id}/void`))
+        .send({ reason: 'Pilot ended before payment (fictional)' })
+        .expect(200);
       const [payment] = await context.db
         .select()
         .from(payments)
@@ -304,9 +352,17 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation deletion', () => {
         .select()
         .from(auditEvents)
         .where(eq(auditEvents.organisationId, a.organisation.id));
-      expect(events.map((event) => event.action)).toEqual(['organisation.deleted']);
-      expect(JSON.stringify(events[0])).not.toContain(ownerEmail);
-      expect(events[0]!.metadata).toMatchObject({ approvalMode: 'second_person', reason: REASON });
+      // (plus the invoice voided above, after the deletion: financial actions are still recorded).
+      expect(events.map((event) => event.action).sort()).toEqual([
+        'invoice.voided',
+        'organisation.deleted',
+      ]);
+      const deletionEvent = events.find((event) => event.action === 'organisation.deleted')!;
+      expect(JSON.stringify(deletionEvent)).not.toContain(ownerEmail);
+      expect(deletionEvent.metadata).toMatchObject({
+        approvalMode: 'second_person',
+        reason: REASON,
+      });
 
       // Accounts: A's owner deleted with their sign-in events; shared member and staff kept.
       expect(

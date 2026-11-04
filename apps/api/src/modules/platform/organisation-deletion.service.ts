@@ -160,8 +160,8 @@ async function countRows(
  * - One database transaction: content, members, invitations, branding, files records, usage, the
  *   organisation's audit events, and the accounts of people who belong to no other organisation
  *   (with their platform-level sign-in events). Invoices, payments, receipts and the
- *   subscription history are kept; the organisation row stays as a "deleted" marker with a
- *   freed web address. The deletion is recorded as a new audit event with counts only.
+ *   subscription history are kept, and the subscription is ended (cancelled, no renewal); the
+ *   organisation row stays as a "deleted" marker with a freed web address. The deletion is recorded as a new audit event with counts only.
  * - Then the organisation's files folder is removed from storage (can be retried).
  */
 @Injectable()
@@ -412,6 +412,27 @@ export class OrganisationDeletionService {
           updatedAt: new Date(now),
         })
         .where(eq(organisations.id, organisationId));
+
+      // 1b. End the subscription: nothing can renew or be invoiced for a deleted organisation.
+      //     The subscription row and its history stay, as financial records.
+      const ended = await tx.execute(sql`
+        UPDATE subscriptions
+        SET status = 'cancelled',
+            cancelled_at = coalesce(cancelled_at, ${new Date(now).toISOString()}::timestamptz),
+            cancellation_reason = coalesce(cancellation_reason, 'The organisation’s data was deleted.'),
+            auto_renew = false,
+            current_period_start = least(current_period_start, ${new Date(now - 1000).toISOString()}::timestamptz),
+            current_period_end = ${new Date(now).toISOString()}::timestamptz,
+            updated_at = ${new Date(now).toISOString()}::timestamptz
+        WHERE organisation_id = ${organisationId} AND status <> 'cancelled'
+        RETURNING id::text AS id, status`);
+      for (const row of ended.rows as { id: string }[]) {
+        await tx.execute(sql`
+          INSERT INTO subscription_events (organisation_id, subscription_id, kind, summary, detail, actor_user_id)
+          VALUES (${organisationId}, ${row.id}, 'cancelled',
+                  'Cancelled because the organisation’s data was deleted.',
+                  ${JSON.stringify({ reason: 'organisation_deleted', requestId })}::jsonb, ${actorUserId})`);
+      }
 
       // 2. The organisation's own records, children first.
       for (const table of DELETE_ORDER) {

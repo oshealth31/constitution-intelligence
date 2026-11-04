@@ -140,6 +140,7 @@ export class PlatformBillingService {
         id: organisations.id,
         name: organisations.name,
         subscriptionId: organisations.currentSubscriptionId,
+        deletedAt: organisations.deletedAt,
       })
       .from(organisations)
       .where(eq(organisations.id, organisationId));
@@ -186,7 +187,11 @@ export class PlatformBillingService {
       .limit(100);
     const eventNames = await this.names(events.map((event) => event.actorUserId));
     return {
-      organisation: { id: organisation.id, name: organisation.name },
+      organisation: {
+        id: organisation.id,
+        name: organisation.name,
+        deletedAt: organisation.deletedAt?.toISOString() ?? null,
+      },
       access,
       usage,
       subscription,
@@ -218,6 +223,7 @@ export class PlatformBillingService {
     actorUserId: string,
     meta: RequestMeta,
   ) {
+    await this.assertNotDeleted(organisationId);
     const [plan] = await this.db.select().from(plans).where(eq(plans.code, change.planCode));
     if (!plan) throw new BadRequestException('There is no plan with this code.');
     const now = new Date();
@@ -330,6 +336,7 @@ export class PlatformBillingService {
   }
 
   async suspend(organisationId: string, reason: string, actorUserId: string, meta: RequestMeta) {
+    await this.assertNotDeleted(organisationId);
     const current = await this.requireSubscription(organisationId);
     if (current.status === 'suspended') throw new ConflictException('Already suspended.');
     await this.db.transaction(async (tx) => {
@@ -370,6 +377,7 @@ export class PlatformBillingService {
 
   /** Suspended or cancelled → back to a pilot (for unbilled subscriptions) or active. */
   async reactivate(organisationId: string, reason: string, actorUserId: string, meta: RequestMeta) {
+    await this.assertNotDeleted(organisationId);
     const current = await this.requireSubscription(organisationId);
     if (current.status !== 'suspended' && current.status !== 'cancelled') {
       throw new ConflictException('Only a suspended or cancelled subscription can be reactivated.');
@@ -422,6 +430,7 @@ export class PlatformBillingService {
     actorUserId: string,
     meta: RequestMeta,
   ) {
+    await this.assertNotDeleted(organisationId);
     const current = await this.requireSubscription(organisationId);
     if (current.status === 'cancelled') throw new ConflictException('Already cancelled.');
     const now = new Date();
@@ -475,6 +484,7 @@ export class PlatformBillingService {
    * interval, issues the invoice for it. A renewal after the grace period has run out starts today.
    */
   async renew(organisationId: string, actorUserId: string, meta: RequestMeta) {
+    await this.assertNotDeleted(organisationId);
     const current = await this.requireSubscription(organisationId);
     if (current.status === 'suspended' || current.status === 'cancelled') {
       throw new ConflictException(`This subscription is ${current.status}. Reactivate it first.`);
@@ -549,6 +559,7 @@ export class PlatformBillingService {
     actorUserId: string,
     meta: RequestMeta,
   ) {
+    await this.assertNotDeleted(organisationId);
     const current = await this.requireSubscription(organisationId);
     const [plan] = await this.db.select().from(plans).where(eq(plans.code, current.planCode));
     const number = await this.db.transaction(async (tx) =>
@@ -859,6 +870,22 @@ export class PlatformBillingService {
         ),
       );
     return subscription ?? null;
+  }
+
+  /**
+   * A deleted organisation (Task D3) keeps its financial records: its invoices can still be
+   * settled or voided, but its subscription cannot be changed, renewed or re-invoiced.
+   */
+  private async assertNotDeleted(organisationId: string) {
+    const [organisation] = await this.db
+      .select({ deletedAt: organisations.deletedAt })
+      .from(organisations)
+      .where(eq(organisations.id, organisationId));
+    if (organisation?.deletedAt) {
+      throw new ConflictException(
+        'This organisation’s data has been deleted and its subscription has ended. Existing invoices can still be settled or voided.',
+      );
+    }
   }
 
   private async requireSubscription(organisationId: string) {

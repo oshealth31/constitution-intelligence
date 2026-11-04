@@ -106,7 +106,31 @@ export interface CurrentUser {
     organisationName: string;
     role: string;
   }[];
+  twoStep: TwoStepStatus | null;
 }
+
+/** The signed-in person's two-step sign-in (an authenticator-app code after the password). */
+export interface TwoStepStatus {
+  enabled: boolean;
+  /** Must be on before the Control Centre opens (Platform Super Admins). */
+  required: boolean;
+  /** This person may turn it on (Super Admins, organisation Owners and Administrators). */
+  available: boolean;
+  enabledAt: string | null;
+  recoveryCodesRemaining: number;
+}
+
+export interface TwoStepSetup {
+  secret: string;
+  otpauthUrl: string;
+  /** SVG data address for an <img>. */
+  qrCode: string;
+}
+
+/** POST /auth/login answers with the person, or asks for the second step first. */
+export type LoginResponse =
+  | { user: NonNullable<CurrentUser['user']>; twoStepRequired?: undefined }
+  | { twoStepRequired: true; challengeToken: string; expiresAt: string };
 
 export interface StatusCount {
   status: string;

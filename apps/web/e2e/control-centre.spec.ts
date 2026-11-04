@@ -2,6 +2,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
+import { enterTwoStepCodeIfNeeded } from './qa-helpers';
 
 const accounts = JSON.parse(
   readFileSync(path.join(__dirname, '.auth', 'accounts.json'), 'utf8'),
@@ -15,6 +16,7 @@ async function signIn(page: Page, email: string) {
   await page.getByLabel('Email address').fill(email);
   await page.getByLabel('Password').fill(accounts[email] ?? '');
   await page.getByRole('button', { name: 'Sign in' }).click();
+  await enterTwoStepCodeIfNeeded(page, email);
 }
 
 test('rejects a wrong password with a clear message', async ({ page }) => {

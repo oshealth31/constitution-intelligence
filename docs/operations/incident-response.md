@@ -29,6 +29,7 @@ lost or corrupted.
      allows it.
    - Compromised account: Control Centre → suspend the user (ends their sessions immediately),
      or suspend the organisation.
+   - Lost or stolen phone (two-step sign-in): see "Lost phone" below.
    - Leaked secret: rotate it now ([secrets.md](secrets.md)); rotate the database password and
      restart the API if in doubt.
    - Attack traffic: block the source addresses at the firewall; the application's own limits
@@ -53,6 +54,30 @@ lost or corrupted.
      is confirmed, and record every decision.
 7. **Review** within 5 working days, without blame: timeline, cause, what worked, what to
    change. Changes go into the backlog with owners and dates.
+
+## Lost phone (two-step sign-in)
+
+Not an emergency on its own (the phone alone cannot sign in without the password), but act the
+same day.
+
+1. **Confirm who is asking.** Call them back on a number you already have, or check in person.
+   Never reset because of an email or message alone: that is how accounts are taken over.
+2. **If they still have a recovery code:** they sign in with it (each works once). An Owner or
+   Administrator then turns two-step sign-in off and on again on their profile page with the new
+   phone. A Super Admin asks another Super Admin to reset it (step 3), then sets it up again.
+3. **No recovery code:** another Super Admin opens Control Centre → **Support** → "Reset
+   someone's two-step sign-in", with their email and the reason (for example "Lost phone; called
+   back on the number on file"). This signs them out everywhere and emails them. It is recorded
+   as `auth.two_step.reset`.
+4. **The only Super Admin lost their phone:** someone with server access runs
+   ```bash
+   docker compose run --rm -T api node dist/cli/reset-two-step.js \
+     --email <their address> --reason "<why, and how identity was confirmed>"
+   ```
+   They then sign in and set up two-step sign-in again before the Control Centre opens.
+5. If the phone was **stolen** and the password may be known too: also change the password
+   (Forgot password), and look in the Audit log for `auth.two_step.failed`,
+   `auth.two_step.recovery_code_used` and `auth.login.*` events for that person.
 
 ## Quick commands
 

@@ -10,6 +10,8 @@ export interface AuthContext {
   email: string;
   displayName: string;
   isPlatformSuperAdmin: boolean;
+  /** Two-step sign-in is turned on (required before a Super Admin may use the Control Centre). */
+  twoStepEnabled: boolean;
 }
 
 /** The caller's membership in the organisation named in the URL (set by PermissionGuard). */

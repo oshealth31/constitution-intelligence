@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { sessions, users, type Database, type User } from '@constitution/db';
+import { sessions, users, userTwoStep, type Database, type User } from '@constitution/db';
 import { and, eq, isNull, ne } from 'drizzle-orm';
 import type { RequestMeta } from '../../common/request-context';
 import type { AppConfig } from '../../config/config';
@@ -19,6 +19,8 @@ export interface CreatedSession {
 export interface ValidSession {
   sessionId: string;
   user: User;
+  /** Two-step sign-in is turned on for this person (and this session passed it). */
+  twoStepEnabled: boolean;
 }
 
 /**
@@ -33,7 +35,15 @@ export class SessionService {
     @Inject(APP_CONFIG) private readonly config: AppConfig,
   ) {}
 
-  async create(userId: string, meta: RequestMeta): Promise<CreatedSession> {
+  /**
+   * `twoStepVerified`: the person passed two-step sign-in for this session. Required for anyone
+   * who has it turned on: validate() refuses their sessions without it.
+   */
+  async create(
+    userId: string,
+    meta: RequestMeta,
+    options: { twoStepVerified?: boolean } = {},
+  ): Promise<CreatedSession> {
     const token = generateToken();
     const expiresAt = new Date(Date.now() + this.config.SESSION_ABSOLUTE_HOURS * 3_600_000);
     const [row] = await this.db
@@ -44,6 +54,7 @@ export class SessionService {
         expiresAt,
         ipAddress: meta.ipAddress,
         userAgent: meta.userAgent,
+        twoStepVerifiedAt: options.twoStepVerified ? new Date() : null,
       })
       .returning({ id: sessions.id });
     if (!row) {
@@ -55,15 +66,17 @@ export class SessionService {
   /** Returns the session and its user, or null if the token is unknown, expired, revoked or the user is not active. */
   async validate(token: string): Promise<ValidSession | null> {
     const [row] = await this.db
-      .select({ session: sessions, user: users })
+      .select({ session: sessions, user: users, twoStepEnabledAt: userTwoStep.enabledAt })
       .from(sessions)
       .innerJoin(users, eq(sessions.userId, users.id))
+      .leftJoin(userTwoStep, eq(userTwoStep.userId, users.id))
       .where(eq(sessions.tokenHash, hashToken(token)))
       .limit(1);
     if (!row) {
       return null;
     }
     const { session, user } = row;
+    const twoStepEnabled = row.twoStepEnabledAt !== null;
     const now = Date.now();
     // Super Admin sessions are shorter: they can affect every organisation.
     const idleLimit =
@@ -79,7 +92,9 @@ export class SessionService {
       session.expiresAt.getTime() <= now ||
       now - session.lastSeenAt.getTime() > idleLimit ||
       superAdminExpired ||
-      user.status !== 'active'
+      user.status !== 'active' ||
+      // Defence in depth: a session that never passed the second step is useless once it is on.
+      (twoStepEnabled && session.twoStepVerifiedAt === null)
     ) {
       return null;
     }
@@ -89,7 +104,7 @@ export class SessionService {
         .set({ lastSeenAt: new Date(now) })
         .where(eq(sessions.id, session.id));
     }
-    return { sessionId: session.id, user };
+    return { sessionId: session.id, user, twoStepEnabled };
   }
 
   async revoke(sessionId: string, reason: string): Promise<void> {

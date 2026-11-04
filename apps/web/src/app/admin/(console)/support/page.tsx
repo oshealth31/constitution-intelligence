@@ -1,8 +1,20 @@
 'use client';
 
 import Link from 'next/link';
-import { Alert, Card, EmptyState, Loading, PageHeader, Stat, StatusBadge } from '@/components/ui';
-import { describeError, type SupportOverview } from '@/lib/api';
+import { useState, type FormEvent } from 'react';
+import {
+  Alert,
+  Button,
+  Card,
+  EmptyState,
+  Loading,
+  PageHeader,
+  Stat,
+  StatusBadge,
+  TextField,
+} from '@/components/ui';
+import { CONSOLE_LOOK, TwoStepCard } from '@/components/two-step';
+import { apiFetch, describeError, type SupportOverview } from '@/lib/api';
 import { actionLabel, formatDate, formatDateTime, formatNumber } from '@/lib/format';
 import { useApi } from '@/lib/use-api';
 
@@ -30,6 +42,69 @@ function OrganisationList({
         </li>
       ))}
     </ul>
+  );
+}
+
+/**
+ * Lost phone and no recovery codes: removes someone's two-step sign-in so they can set it up
+ * again. Confirm who is asking first (for example by calling a number you already have).
+ */
+function TwoStepResetCard() {
+  const [email, setEmail] = useState('');
+  const [reason, setReason] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState<{ tone: 'good' | 'critical'; text: string } | null>(null);
+
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBusy(true);
+    setNotice(null);
+    try {
+      const result = await apiFetch<{ sessionsRevoked: number }>('/platform/two-step/reset', {
+        method: 'POST',
+        body: { email, reason },
+      });
+      setNotice({
+        tone: 'good',
+        text: `Two-step sign-in was reset for ${email}. They were signed out on ${result.sessionsRevoked} device(s) and told by email.`,
+      });
+      setEmail('');
+      setReason('');
+    } catch (caught) {
+      setNotice({ tone: 'critical', text: describeError(caught) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Card
+      title="Reset someone's two-step sign-in"
+      description="For a person who lost their phone and their recovery codes. Confirm who is asking before you do this: it is recorded in the audit log and the person is emailed."
+    >
+      <form onSubmit={onSubmit} className="space-y-4" aria-label="Reset two-step sign-in">
+        {notice && <Alert tone={notice.tone}>{notice.text}</Alert>}
+        <TextField
+          label="Their email address"
+          type="email"
+          required
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+        />
+        <TextField
+          label="Reason"
+          hint="At least 10 characters, for example how you confirmed who they are."
+          required
+          minLength={10}
+          maxLength={500}
+          value={reason}
+          onChange={(event) => setReason(event.target.value)}
+        />
+        <Button type="submit" variant="danger" busy={busy}>
+          Reset two-step sign-in
+        </Button>
+      </form>
+    </Card>
   );
 }
 
@@ -143,6 +218,17 @@ export default function SupportPage() {
           </Card>
         </div>
       )}
+      <div className="mt-6 grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
+        <TwoStepCard
+          look={CONSOLE_LOOK}
+          wrap={({ title, description, children }) => (
+            <Card title={`Your ${title.toLowerCase()}`} description={description}>
+              {children}
+            </Card>
+          )}
+        />
+        <TwoStepResetCard />
+      </div>
     </>
   );
 }

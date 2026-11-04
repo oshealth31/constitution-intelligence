@@ -2,7 +2,16 @@
 // Constraints (checks, uniques, triggers) live in the SQL migration; these definitions
 // give the API type-safe queries.
 import { ORGANISATION_ROLES } from '@constitution/shared';
-import { boolean, integer, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import {
+  bigint,
+  boolean,
+  integer,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core';
 
 const timestamps = {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -80,6 +89,43 @@ export const sessions = pgTable('sessions', {
   revokedReason: text('revoked_reason'),
   ipAddress: text('ip_address'),
   userAgent: text('user_agent'),
+  /** When this session passed two-step sign-in (migration 0009). */
+  twoStepVerifiedAt: timestamp('two_step_verified_at', { withTimezone: true }),
+});
+
+// Two-step sign-in (migrations/0009_two_step_sign_in.sql).
+export const userTwoStep = pgTable('user_two_step', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  secretCiphertext: text('secret_ciphertext').notNull(),
+  enabledAt: timestamp('enabled_at', { withTimezone: true }),
+  lastUsedStep: bigint('last_used_step', { mode: 'number' }),
+  ...timestamps,
+});
+
+export const twoStepRecoveryCodes = pgTable('two_step_recovery_codes', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  codeHash: text('code_hash').notNull(),
+  usedAt: timestamp('used_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const twoStepChallenges = pgTable('two_step_challenges', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  tokenHash: text('token_hash').notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  failedAttempts: integer('failed_attempts').notNull().default(0),
+  usedAt: timestamp('used_at', { withTimezone: true }),
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const passwordResetTokens = pgTable('password_reset_tokens', {

@@ -95,6 +95,7 @@ describe('session cookie name', () => {
       SMTP_PASSWORD: 'not-a-real-password',
       MAIL_FROM: 'Constitution Intelligence <no-reply@example.com>',
       STORAGE_LOCAL_DIR: '/var/lib/constitution/storage',
+      MFA_ENCRYPTION_KEY: 'ab'.repeat(32),
     });
     expect(sessionCookieName(local)).toBe('ci_session');
     expect(sessionCookieName(production)).toBe('__Host-ci_session');

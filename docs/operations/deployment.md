@@ -85,7 +85,10 @@ docker compose run --rm -T api node dist/cli/create-super-admin.js --email <name
 ```
 
 (See `apps/api/src/cli/create-super-admin.ts` for its options.) The person opens the link and
-chooses their own password. Do **not** run `seed-dev`: it refuses to run outside local
+chooses their own password. At their first sign-in the Control Centre asks them to set up
+**two-step sign-in** with an authenticator app (required for Super Admins) and shows 10 recovery
+codes to keep somewhere safe. Create a second Super Admin early, so that one can reset the
+other's two-step sign-in after a lost phone. Do **not** run `seed-dev`: it refuses to run outside local
 development, and its fictional accounts must never exist in production.
 
 ## 5. HTTPS requirements

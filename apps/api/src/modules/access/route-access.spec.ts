@@ -22,6 +22,12 @@ const SIGNED_IN_SELF_ROUTES = new Set([
   'GET auth/me',
   'PATCH auth/me',
   'POST auth/password/change',
+  // Two-step sign-in for the signed-in person's own account.
+  'GET auth/two-step',
+  'POST auth/two-step/setup',
+  'POST auth/two-step/confirm',
+  'POST auth/two-step/recovery-codes',
+  'POST auth/two-step/disable',
 ]);
 
 /** Every *.controller.ts file under src/, loaded so its decorators can be read. */
@@ -137,6 +143,7 @@ describe('route access rules', () => {
         'GET portal/:slug',
         'GET portal/:slug/logo',
         'POST auth/login',
+        'POST auth/login/two-step',
         'POST auth/password/forgot',
         'POST auth/password/reset',
         'POST invitations/accept',

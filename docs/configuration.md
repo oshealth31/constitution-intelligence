@@ -45,6 +45,7 @@ and refuses to start if anything is missing or unsafe, listing the problem setti
 | `SMTP_SECURITY`                                                      | No                            | `starttls`               | `starttls` (upgrade required, refused if the server cannot encrypt) or `tls`. There is no unencrypted option. The server certificate is always checked. |
 | `SMTP_USER`                                                          | With `smtp`                   | —                        | SMTP login.                                                                                                                                             |
 | `SMTP_PASSWORD` / `SMTP_PASSWORD_FILE`                               | With `smtp`                   | —                        | SMTP password or key. **Secret**: use the file form in staging and production.                                                                          |
+| `MFA_ENCRYPTION_KEY` / `MFA_ENCRYPTION_KEY_FILE`                     | Staging and production        | public development key   | 64 hexadecimal characters (`openssl rand -hex 32`) that encrypt two-step sign-in secrets. **Secret**: use the file form; keep a copy offline.           |
 | `SMTP_CA_FILE`                                                       | No                            | —                        | Extra certificate authority for a private SMTP relay (not needed for Brevo).                                                                            |
 | `MAIL_FROM`                                                          | With `smtp`                   | —                        | Sender: `Name <address@domain>` or an address; the domain must be verified with the provider.                                                           |
 | `MAIL_REPLY_TO`                                                      | No                            | —                        | Where replies go, for example the support mailbox.                                                                                                      |
@@ -92,7 +93,7 @@ These rules are enforced in code (`apps/api/src/config/config.ts`) and covered b
 
 ## Secrets as files (staging and production)
 
-`DATABASE_URL`, `ANTHROPIC_API_KEY` and `SMTP_PASSWORD` can be given as files instead: set `DATABASE_URL_FILE`
+`DATABASE_URL`, `ANTHROPIC_API_KEY`, `SMTP_PASSWORD` and `MFA_ENCRYPTION_KEY` can be given as files instead: set `DATABASE_URL_FILE`
 (or `ANTHROPIC_API_KEY_FILE`) to the path of a file holding the value, for example a Docker
 secret at `/run/secrets/database_url`. Setting both forms is refused. See
 [operations/secrets.md](operations/secrets.md).

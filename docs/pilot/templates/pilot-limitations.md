@@ -27,8 +27,9 @@ administrators, reviewers, members and auditors; an activity log; invoices and r
 8. **Data:** stored in [location to be confirmed: South Africa or Botswana], encrypted backups
    daily. You can get a full export at any time on request; deletion is done by us on request
    (no self-service deletion).
-9. **Sign-in:** email and password. Two-factor sign-in is not available yet; it is planned for
-   Constitution Intelligence staff accounts before the pilot starts.
+9. **Sign-in:** email and password. Owners and administrators can also turn on two-step sign-in
+   (a code from an app on their phone) on their profile page, and we recommend it. It is always
+   on for Constitution Intelligence staff. Codes by text message (SMS) are not offered.
 10. **Things still being finished** before or during the pilot are listed in your agreement; we
     do not promise features that are not built.
 

@@ -55,9 +55,11 @@ services:
       NODE_ENV: production
       DATABASE_URL_FILE: /run/secrets/database_url
       SMTP_PASSWORD_FILE: /run/secrets/smtp_password
+      # Key that encrypts two-step sign-in secrets (32 bytes as 64 hex characters).
+      MFA_ENCRYPTION_KEY_FILE: /run/secrets/mfa_encryption_key
       # The database's certificate authority, so the API can verify the database it talks to.
       NODE_EXTRA_CA_CERTS: /run/secrets/database_ca.crt
-    secrets: [database_url, database_ca.crt, smtp_password]
+    secrets: [database_url, database_ca.crt, smtp_password, mfa_encryption_key]
     volumes:
       - storage:/var/lib/constitution/storage
     depends_on:
@@ -154,6 +156,8 @@ secrets:
     file: ./secrets/backup_passphrase
   smtp_password:
     file: ./secrets/smtp_password
+  mfa_encryption_key:
+    file: ./secrets/mfa_encryption_key
   database_ca.crt:
     file: ./secrets/database_ca.crt
   database_server.crt:

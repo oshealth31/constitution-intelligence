@@ -141,6 +141,18 @@ describe.runIf(Boolean(testDatabaseUrl))('security hardening', () => {
     });
   });
 
+  describe('audit log', () => {
+    it('cannot be changed or deleted, even by the database account the API uses', async () => {
+      const user = await createUser(context.db, { email: uniqueEmail('audit') });
+      await signIn(context, user.email); // writes an "auth.login.succeeded" event
+      await expect(
+        context.db.execute(sql`UPDATE audit_events SET action = 'tampered'`),
+      ).rejects.toThrow();
+      await expect(context.db.execute(sql`DELETE FROM audit_events`)).rejects.toThrow();
+      await expect(context.db.execute(sql`TRUNCATE audit_events`)).rejects.toThrow();
+    });
+  });
+
   describe('Super Admin sessions', () => {
     async function ageSession(email: string, minutesIdle: number, hoursOld = 0) {
       await context.db.execute(sql`

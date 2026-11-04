@@ -36,6 +36,9 @@ and refuses to start if anything is missing or unsafe, listing the problem setti
 | `AUTH_RATE_LIMIT_WINDOW_MINUTES`                                     | No                            | `15`                     | Brute-force counting window.                                                                        |
 | `LOGIN_MAX_ATTEMPTS_PER_EMAIL`                                       | No                            | `5`                      | Sign-in attempts per email address per window.                                                      |
 | `LOGIN_MAX_ATTEMPTS_PER_IP`                                          | No                            | `50`                     | Sign-in attempts per network address per window.                                                    |
+| `API_RATE_LIMIT_PER_MINUTE` | No | `600` | Requests per minute from one network address, per copy of the API (health checks not counted). Over the limit: 429. |
+| `SUPER_ADMIN_SESSION_IDLE_MINUTES` | No | `30` | Platform Super Admins are signed out after this long without activity. |
+| `SUPER_ADMIN_SESSION_ABSOLUTE_HOURS` | No | `12` | Platform Super Admins are always signed out after this long. |
 | `MAIL_TRANSPORT`                                                     | No                            | `log`                    | `log` (local/test only) or `disabled`. A real provider comes later.                                 |
 | `STORAGE_DRIVER`, `STORAGE_LOCAL_DIR`                                | No                            | `local`, `.data/storage` | Where uploaded files are kept (private; never served directly).                                     |
 | `DOCUMENT_MAX_BYTES`                                                 | No                            | `10485760` (10 MB)       | Largest constitution document (PDF or DOCX) accepted for upload. Up to 50 MB.                       |

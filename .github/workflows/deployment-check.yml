@@ -206,7 +206,8 @@ jobs:
         run: |
           set -e
           q() { docker compose exec -T postgres psql -U constitution_owner -d constitution_restore -Atc "$1"; }
-          ! q "UPDATE audit_events SET action = 'tampered'" 2>/dev/null
+          tamper="$(q "UPDATE audit_events SET action = 'tampered'" 2>&1 || true)"
+          echo "$tamper" | grep -q 'audit_events is append-only'
           choir="$(q "SELECT id FROM organisations WHERE slug = 'sample-community-choir'")"
           visible="$(docker compose exec -T postgres psql -U constitution_owner -d constitution_restore -Atq \
             -c 'BEGIN' -c 'SET LOCAL ROLE app_tenant' \

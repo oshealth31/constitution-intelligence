@@ -11,6 +11,13 @@ name: constitution-intelligence
 
 x-restart: &restart
   restart: unless-stopped
+  # Structured JSON logs, rotated: at most 10 files of 20 MB per service on the server
+  # (docs/operations/logging-and-monitoring.md says how long they are kept and where they go).
+  logging:
+    driver: json-file
+    options:
+      max-size: 20m
+      max-file: '10'
 
 services:
   caddy:

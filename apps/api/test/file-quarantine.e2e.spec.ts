@@ -113,9 +113,9 @@ describe.runIf(Boolean(testDatabaseUrl))('file quarantine', () => {
       .send({ reason: REASON })
       .expect(200);
     const byFile = await owner.agent.get(fileUrl()).expect(403);
-    expect(byFile.body.reason).toBe('FILE_QUARANTINED');
+    expect(byFile.body.error.reason).toBe('FILE_QUARANTINED');
     const bySource = await member.agent.get(sourceUrl()).expect(403);
-    expect(bySource.body.reason).toBe('FILE_QUARANTINED');
+    expect(bySource.body.error.reason).toBe('FILE_QUARANTINED');
     expect(await listedFile()).toMatchObject({
       status: 'quarantined',
       quarantineReason: REASON,
@@ -163,7 +163,7 @@ describe.runIf(Boolean(testDatabaseUrl))('file quarantine', () => {
     const storage = context.app.get(StorageService);
     expect(await storage.objectExists(organisationId, row!.storageKey)).toBe(false);
     const gone = await owner.agent.get(fileUrl()).expect(410);
-    expect(gone.body.reason).toBe('FILE_REMOVED');
+    expect(gone.body.error.reason).toBe('FILE_REMOVED');
     await member.agent.get(sourceUrl()).expect(410);
     await staff
       .post(staffUrl(`/${ids.fileId}/release`))

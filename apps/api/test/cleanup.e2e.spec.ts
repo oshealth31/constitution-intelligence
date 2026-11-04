@@ -44,9 +44,21 @@ describe.runIf(Boolean(testDatabaseUrl))('housekeeping cleanup', () => {
       .insert(sessions)
       .values([
         // expired 31 days ago
-        { userId: user.id, tokenHash: token(1), expiresAt: ago(31), createdAt: ago(45), lastSeenAt: ago(40) },
+        {
+          userId: user.id,
+          tokenHash: token(1),
+          expiresAt: ago(31),
+          createdAt: ago(45),
+          lastSeenAt: ago(40),
+        },
         // signed out 40 days ago
-        { userId: user.id, tokenHash: token(2), expiresAt: inDays(1), revokedAt: ago(40), lastSeenAt: ago(40) },
+        {
+          userId: user.id,
+          tokenHash: token(2),
+          expiresAt: inDays(1),
+          revokedAt: ago(40),
+          lastSeenAt: ago(40),
+        },
         // idle for more than the idle limit plus 30 days
         { userId: user.id, tokenHash: token(3), expiresAt: inDays(1), lastSeenAt: ago(32) },
       ])
@@ -56,7 +68,13 @@ describe.runIf(Boolean(testDatabaseUrl))('housekeeping cleanup', () => {
       .values([
         // ended 5 days ago: kept for investigations
         { userId: user.id, tokenHash: token(4), expiresAt: ago(5), lastSeenAt: ago(6) },
-        { userId: user.id, tokenHash: token(5), expiresAt: inDays(1), revokedAt: ago(5), lastSeenAt: ago(5) },
+        {
+          userId: user.id,
+          tokenHash: token(5),
+          expiresAt: inDays(1),
+          revokedAt: ago(5),
+          lastSeenAt: ago(5),
+        },
       ])
       .returning({ id: sessions.id });
 
@@ -94,10 +112,16 @@ describe.runIf(Boolean(testDatabaseUrl))('housekeeping cleanup', () => {
 
     const ids = (rows: { id: string }[]) => rows.map((row) => row.id);
     expect(
-      await context.db.select().from(sessions).where(inArray(sessions.id, ids(old))),
+      await context.db
+        .select()
+        .from(sessions)
+        .where(inArray(sessions.id, ids(old))),
     ).toHaveLength(0);
     expect(
-      await context.db.select().from(sessions).where(inArray(sessions.id, ids(recent))),
+      await context.db
+        .select()
+        .from(sessions)
+        .where(inArray(sessions.id, ids(recent))),
     ).toHaveLength(2);
     await agent.get('/api/v1/auth/me').expect(200); // the live session still works
     const resets = await context.db
@@ -121,7 +145,12 @@ describe.runIf(Boolean(testDatabaseUrl))('housekeeping cleanup', () => {
 
     // Running it again finds nothing more to do.
     const again = await context.app.get(CleanupService).run();
-    expect(again).toMatchObject({ ran: true, sessions: 0, passwordResetLinks: 0, twoStepChallenges: 0 });
+    expect(again).toMatchObject({
+      ran: true,
+      sessions: 0,
+      passwordResetLinks: 0,
+      twoStepChallenges: 0,
+    });
   });
 
   it('does nothing while another copy holds the cleanup lock', async () => {

@@ -1,4 +1,9 @@
-import { Inject, Injectable, type OnApplicationBootstrap, type OnModuleDestroy } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  type OnApplicationBootstrap,
+  type OnModuleDestroy,
+} from '@nestjs/common';
 import { auditEvents, type Database } from '@constitution/db';
 import { sql } from 'drizzle-orm';
 import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
@@ -66,7 +71,13 @@ export class CleanupService implements OnApplicationBootstrap, OnModuleDestroy {
         sql`SELECT pg_try_advisory_xact_lock(${CLEANUP_LOCK_ID}) AS locked`,
       );
       if (!(lock.rows[0] as { locked: boolean }).locked) {
-        return { ran: false, sessions: 0, passwordResetLinks: 0, rateLimitCounters: 0, twoStepChallenges: 0 };
+        return {
+          ran: false,
+          sessions: 0,
+          passwordResetLinks: 0,
+          rateLimitCounters: 0,
+          twoStepChallenges: 0,
+        };
       }
       const keep = new Date(now.getTime() - KEEP_ENDED_SESSIONS_DAYS * 86_400_000).toISOString();
       const day = new Date(now.getTime() - 86_400_000).toISOString();

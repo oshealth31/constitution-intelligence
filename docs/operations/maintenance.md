@@ -44,5 +44,6 @@ Short restarts for application releases take seconds and need no notice.
   A database lock lets only one copy of the API clean at a time. To run it now:
   `docker compose run --rm -T api node dist/cli/cleanup.js`. Setting `CLEANUP_INTERVAL_HOURS=0`
   turns the timer off.
+
 - `VACUUM` and `ANALYZE` are automatic (autovacuum); no manual action is needed at this size.
 - The audit log is append-only by design and is never cleaned up by hand.

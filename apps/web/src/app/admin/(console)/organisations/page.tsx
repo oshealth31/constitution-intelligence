@@ -200,7 +200,9 @@ export default function OrganisationsPage() {
                       </p>
                     </td>
                     <td className="px-3 py-3">
-                      <StatusBadge status={organisation.deletedAt ? 'deleted' : organisation.status} />
+                      <StatusBadge
+                        status={organisation.deletedAt ? 'deleted' : organisation.status}
+                      />
                     </td>
                     <td className="px-3 py-3">
                       {organisation.subscription ? (

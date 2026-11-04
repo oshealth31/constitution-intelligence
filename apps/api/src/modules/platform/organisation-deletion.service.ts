@@ -52,7 +52,12 @@ export const DELETED_TABLES = [
 ] as const;
 
 /** Kept as financial records (invoices, payments, receipts and how the subscription changed). */
-export const KEPT_TABLES = ['subscriptions', 'invoices', 'payments', 'subscription_events'] as const;
+export const KEPT_TABLES = [
+  'subscriptions',
+  'invoices',
+  'payments',
+  'subscription_events',
+] as const;
 
 /** Tables with an organisation_id handled separately: the audit log and these requests. */
 export const SPECIAL_TABLES = ['audit_events', 'organisation_deletion_requests'] as const;
@@ -86,7 +91,13 @@ export const NOT_ELIGIBLE =
   'Only an organisation whose access has ended can be deleted: suspend it, or cancel its subscription and wait until access is restricted.';
 
 export interface DeletionPreview {
-  organisation: { id: string; name: string; slug: string; status: string; deletedAt: string | null };
+  organisation: {
+    id: string;
+    name: string;
+    slug: string;
+    status: string;
+    deletedAt: string | null;
+  };
   eligible: boolean;
   notEligibleReason: string | null;
   accessState: string;
@@ -547,7 +558,11 @@ export class OrganisationDeletionService {
     executor: Executor = this.db,
   ): Promise<{ eligible: boolean; reason: string; accessState: string }> {
     if (organisation.deletedAt) {
-      return { eligible: false, reason: 'This organisation has already been deleted.', accessState: 'deleted' };
+      return {
+        eligible: false,
+        reason: 'This organisation has already been deleted.',
+        accessState: 'deleted',
+      };
     }
     const access = await loadAccess(
       executor,

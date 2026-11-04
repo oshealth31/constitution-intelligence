@@ -44,7 +44,10 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation deletion', () => {
 
   beforeAll(async () => {
     context = await startTestApp();
-    firstAdmin = await createUser(context.db, { email: uniqueEmail('del-super-1'), superAdmin: true });
+    firstAdmin = await createUser(context.db, {
+      email: uniqueEmail('del-super-1'),
+      superAdmin: true,
+    });
     firstAgent = await signIn(context, firstAdmin.email);
   });
   afterAll(async () => {
@@ -239,7 +242,11 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation deletion', () => {
       const storage = context.app.get(StorageService);
       expect(await storage.organisationFolderExists(a.organisation.id)).toBe(true);
 
-      const bBefore = await countsFor(b.organisation.id, [...DELETED_TABLES, ...KEPT_TABLES, 'audit_events']);
+      const bBefore = await countsFor(b.organisation.id, [
+        ...DELETED_TABLES,
+        ...KEPT_TABLES,
+        'audit_events',
+      ]);
       const aKeptBefore = await countsFor(a.organisation.id, KEPT_TABLES);
       const aBefore = await countsFor(a.organisation.id, DELETED_TABLES);
       expect(aBefore.sections).toBeGreaterThan(0);
@@ -302,11 +309,15 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation deletion', () => {
       expect(events[0]!.metadata).toMatchObject({ approvalMode: 'second_person', reason: REASON });
 
       // Accounts: A's owner deleted with their sign-in events; shared member and staff kept.
-      expect(await context.db.select().from(users).where(eq(users.id, a.owner.user.id))).toHaveLength(0);
+      expect(
+        await context.db.select().from(users).where(eq(users.id, a.owner.user.id)),
+      ).toHaveLength(0);
       const ownerEvents = await context.db
         .select()
         .from(auditEvents)
-        .where(and(isNull(auditEvents.organisationId), eq(auditEvents.actorUserId, a.owner.user.id)));
+        .where(
+          and(isNull(auditEvents.organisationId), eq(auditEvents.actorUserId, a.owner.user.id)),
+        );
       expect(ownerEvents).toHaveLength(0);
       await a.owner.agent.get('/api/v1/auth/me').expect(401);
       const sharedMemberships = await context.db
@@ -320,9 +331,15 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation deletion', () => {
       expect(await storage.organisationFolderExists(b.organisation.id)).toBe(true);
 
       // B untouched, and still works.
-      const bAfter = await countsFor(b.organisation.id, [...DELETED_TABLES, ...KEPT_TABLES, 'audit_events']);
+      const bAfter = await countsFor(b.organisation.id, [
+        ...DELETED_TABLES,
+        ...KEPT_TABLES,
+        'audit_events',
+      ]);
       expect(bAfter).toEqual(bBefore);
-      await b.owner.agent.get(`/api/v1/organisations/${b.organisation.id}/constitutions`).expect(200);
+      await b.owner.agent
+        .get(`/api/v1/organisations/${b.organisation.id}/constitutions`)
+        .expect(200);
 
       // A deleted organisation cannot be changed or brought back.
       await firstAgent
@@ -382,7 +399,9 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation deletion', () => {
     }
     let updateMessage = 'no error';
     try {
-      await context.db.execute(sql`UPDATE audit_events SET action = 'x' WHERE organisation_id = ${organisation.id}`);
+      await context.db.execute(
+        sql`UPDATE audit_events SET action = 'x' WHERE organisation_id = ${organisation.id}`,
+      );
     } catch (error) {
       const cause = (error as { cause?: { message?: string } }).cause;
       updateMessage = cause?.message ?? (error as Error).message;
@@ -399,4 +418,3 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation deletion', () => {
       .expect(403);
   });
 });
-

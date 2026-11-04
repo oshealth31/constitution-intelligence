@@ -38,24 +38,26 @@ async function main(): Promise<void> {
     }
     if (action === '--remove-files') {
       const removed = await deletion.removeFiles(organisationId.data);
-      console.log(removed ? 'Files removed.' : 'Removing the files failed; see the log and try again.');
+      console.log(
+        removed ? 'Files removed.' : 'Removing the files failed; see the log and try again.',
+      );
       if (!removed) process.exitCode = 1;
       return;
     }
     const confirm = readArgument('confirm') ?? '';
     const preview = await deletion.preview(organisationId.data);
     if (!preview.request) {
-      console.error('There is no waiting deletion request. Request it in the Control Centre first.');
+      console.error(
+        'There is no waiting deletion request. Request it in the Control Centre first.',
+      );
       process.exitCode = 1;
       return;
     }
-    const result = await deletion.approve(
-      organisationId.data,
-      preview.request.id,
-      confirm,
-      null,
-      { ipAddress: null, userAgent: 'cli', requestId: null },
-    );
+    const result = await deletion.approve(organisationId.data, preview.request.id, confirm, null, {
+      ipAddress: null,
+      userAgent: 'cli',
+      requestId: null,
+    });
     console.log(
       [
         '',

@@ -65,11 +65,11 @@ Deletion is permanent. It is done in the Control Centre: **Organisations → the
 
 **Who approves**
 
-| Super Admins on the platform | Rule                                                                                                                |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| Two or more                  | One requests; a **different** Super Admin approves. The requester cannot approve their own request.                 |
-| Only one                     | The same person may confirm **24 hours** after requesting, and may cancel before then.                              |
-| Either (server backup)       | `delete-organisation.js --approve` on the server command line, also only 24 hours after the request (see below).    |
+| Super Admins on the platform | Rule                                                                                                             |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Two or more                  | One requests; a **different** Super Admin approves. The requester cannot approve their own request.              |
+| Only one                     | The same person may confirm **24 hours** after requesting, and may cancel before then.                           |
+| Either (server backup)       | `delete-organisation.js --approve` on the server command line, also only 24 hours after the request (see below). |
 
 Every request needs a reason (no members' names, please), the tick that the data was exported,
 and the organisation's web address typed exactly. Requests expire after **7 days**. Any Super

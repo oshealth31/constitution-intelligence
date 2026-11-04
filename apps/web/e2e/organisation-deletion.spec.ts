@@ -43,5 +43,7 @@ test('requesting and cancelling a deletion in the Control Centre', async ({ page
   await expect(page.getByRole('form', { name: 'Request deletion' })).toBeVisible();
   // Nothing was deleted.
   const after = await apiFrom(page, 'GET', `/platform/organisations/${organisationId}`);
-  expect((after.body as { organisation: { deletedAt: string | null } }).organisation.deletedAt).toBeNull();
+  expect(
+    (after.body as { organisation: { deletedAt: string | null } }).organisation.deletedAt,
+  ).toBeNull();
 });

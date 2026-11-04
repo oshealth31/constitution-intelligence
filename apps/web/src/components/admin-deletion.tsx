@@ -26,7 +26,13 @@ interface DeletionRequest {
 }
 
 interface DeletionPreview {
-  organisation: { id: string; name: string; slug: string; status: string; deletedAt: string | null };
+  organisation: {
+    id: string;
+    name: string;
+    slug: string;
+    status: string;
+    deletedAt: string | null;
+  };
   eligible: boolean;
   notEligibleReason: string | null;
   willDelete: Record<string, number>;
@@ -75,7 +81,9 @@ function Counts({ counts, keys }: { counts: Record<string, number>; keys?: strin
       {entries.map(([key, value]) => (
         <div key={key} className="contents">
           <dt className="text-muted">{LABELS[key]}</dt>
-          <dd className="text-right font-medium text-navy-900 tabular-nums">{formatNumber(value)}</dd>
+          <dd className="text-right font-medium text-navy-900 tabular-nums">
+            {formatNumber(value)}
+          </dd>
         </div>
       ))}
     </dl>
@@ -299,8 +307,8 @@ export function DeletionCard({
                 checked={exported}
                 onChange={(event) => setExported(event.target.checked)}
               />
-              The organisation’s data was exported and handed over, or its owner declined an
-              export in writing.
+              The organisation’s data was exported and handed over, or its owner declined an export
+              in writing.
             </label>
             <TextField
               label={`Type the web address “${preview.organisation.slug}” to confirm`}
@@ -324,12 +332,15 @@ export function DeletionCard({
         {request && (
           <div className="space-y-3 rounded-xl border border-rose-200 bg-rose-50 p-4">
             <p className="text-sm text-rose-900">
-              <strong>Deletion requested</strong> by {request.requestedBy.displayName ?? 'a Super Admin'}{' '}
-              on {formatDateTime(request.requestedAt)}. Reason: {request.reason}. The request expires{' '}
+              <strong>Deletion requested</strong> by{' '}
+              {request.requestedBy.displayName ?? 'a Super Admin'} on{' '}
+              {formatDateTime(request.requestedAt)}. Reason: {request.reason}. The request expires{' '}
               {formatDateTime(request.expiresAt)}.
             </p>
             {preview.rule === 'second_person' && isRequester && (
-              <p className="text-sm text-rose-900">Waiting for another Super Admin to approve it.</p>
+              <p className="text-sm text-rose-900">
+                Waiting for another Super Admin to approve it.
+              </p>
             )}
             {waitingUntil && (
               <p className="text-sm text-rose-900">

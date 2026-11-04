@@ -23,6 +23,7 @@ RUN pnpm build:packages \
 # Standalone folders with production dependencies only.
 RUN pnpm --filter @constitution/api deploy --prod --legacy /out/api \
  && rm -rf /out/api/dist && cp -r apps/api/dist /out/api/dist \
+ && rm -rf /out/api/data && cp -r apps/api/data /out/api/data \
  && pnpm --filter @constitution/web deploy --prod --legacy /out/web \
  && rm -rf /out/web/.next && cp -r apps/web/.next /out/web/.next \
  && rm -rf /out/web/.next/cache
@@ -38,7 +39,7 @@ USER node
 EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:4000/api/v1/health/live').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
-# Migrations run separately, with the database owner account:  node dist/cli/migrate.js
+# Migrations run separately, with the migration account (constitution_migrator):  node dist/cli/migrate.js
 CMD ["node", "dist/main.js"]
 
 # ---- Web -----------------------------------------------------------------------------------

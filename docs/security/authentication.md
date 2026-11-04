@@ -69,7 +69,12 @@ Three guards run on every API request, in order:
 - Passwords are hashed with **Argon2id** (19 MiB memory, 2 iterations: OWASP's recommended minimum).
   Passwords are never stored, logged, or returned by the API.
 - Password rules: 12–128 characters, not a common password, not mostly one repeated character,
-  must not contain your email name or display name. (A breached-password check is planned.)
+  must not contain your email name or display name, and **must not be a password known from data
+  leaks** (Task D5). The leak check runs offline against about 738,000 leaked passwords of 12+
+  characters (from SecLists, MIT licence), ignoring upper/lower case; nothing about the password
+  leaves the server. The list is stored as hashed prefixes in `apps/api/data/` (see its README).
+  It applies when a password is chosen (invitation, reset, change); existing passwords are not
+  re-checked, because only their hashes are stored.
 - A successful sign-in creates a server-side session. The browser receives a random 256-bit token
   in a cookie that is **HttpOnly** (invisible to JavaScript), **SameSite=Lax**, and **Secure** (HTTPS-only)
   in staging and production. The database stores only a SHA-256 hash of the token.
@@ -272,7 +277,9 @@ The `.test` domain is reserved and can never receive real email.
 
 - Two-step sign-in is optional (not required) for organisation Owners and Administrators. Making it
   required for them is a business decision; the code supports it.
-- Breached-password checking is not yet implemented (Task D5).
+- The leak list is a fixed copy (SecLists, 2025/26) and is not updated automatically; online
+  services such as Have I Been Pwned know more leaks but would send part of a password hash
+  abroad, which needs the data-protection review first.
 - Two-step sign-in has been tested in Chromium only (desktop and a phone-sized screen); Safari and
   Firefox checks are Task T1.
 - Database-level tenant isolation is described in [tenant-isolation.md](tenant-isolation.md).

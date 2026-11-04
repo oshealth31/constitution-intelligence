@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { hash, verify } from '@node-rs/argon2';
+import { loadBreachedPasswordList } from './breached-passwords';
 import { checkPasswordPolicy, type PasswordContext } from './password-policy';
 
 /**
@@ -11,6 +12,12 @@ const HASH_OPTIONS = { memoryCost: 19_456, timeCost: 2, parallelism: 1, outputLe
 @Injectable()
 export class PasswordService {
   private dummyHash: Promise<string> | undefined;
+
+  constructor() {
+    // Load the leaked-password list at start-up, so a missing or damaged file stops the API
+    // straight away instead of failing someone's password change later.
+    loadBreachedPasswordList();
+  }
 
   hash(password: string): Promise<string> {
     return hash(password, HASH_OPTIONS);

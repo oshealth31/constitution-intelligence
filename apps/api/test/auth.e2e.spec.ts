@@ -275,6 +275,13 @@ describe.runIf(Boolean(testDatabaseUrl))('authentication', () => {
         .expect(400);
       expect(weak.body.error.message).toMatch(/at least 12/);
 
+      // Task D5: a password known from data leaks is refused.
+      const leaked = await client(context)
+        .post('/api/v1/auth/password/reset')
+        .send({ token, newPassword: '1qaz2wsx3edc' })
+        .expect(400);
+      expect(leaked.body.error.message).toMatch(/known data leak/);
+
       const expiring = await startTestApp({ PASSWORD_RESET_TTL_MINUTES: '5' });
       try {
         const other = await createUser(expiring.db, { email: uniqueEmail('expiring') });

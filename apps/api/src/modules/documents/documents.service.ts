@@ -5,6 +5,8 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   constitutionVersions,
@@ -27,13 +29,13 @@ import { StorageService, tenantPrefix } from '../files/storage.service';
 import { TenantDatabase, type TenantTransaction } from '../tenancy/tenant-database.service';
 import type { TenantScope } from '../tenancy/tenant-scope';
 import { validateDocument, type ValidatedDocument } from './document-validation';
-import { extractDocx } from './docx-extractor';
 import {
   DocumentRejectedError,
   type ExtractionIssue,
   type RawExtraction,
 } from './extraction-types';
-import { extractPdf } from './pdf-extractor';
+import { ParserBusyError } from './document-parser';
+import { DocumentParserService } from './document-parser.service';
 import { parseStructure, type SectionKind } from './structure-parser';
 
 type VersionStatus = ConstitutionVersion['status'];
@@ -67,6 +69,7 @@ export class DocumentsService {
     private readonly tenantDb: TenantDatabase,
     private readonly storage: StorageService,
     private readonly audit: AuditService,
+    private readonly parser: DocumentParserService,
   ) {}
 
   // ----- Constitutions ------------------------------------------------------------------------
@@ -98,9 +101,13 @@ export class DocumentsService {
     let failure: ExtractionIssue | null = null;
     try {
       validated = validateDocument(upload.fileName, upload.content, this.config.DOCUMENT_MAX_BYTES);
-      raw =
-        validated.format === 'pdf' ? await extractPdf(upload.content) : extractDocx(upload.content);
+      // Read in a separate worker with memory and time limits (Task D8).
+      raw = await this.parser.parse(validated.format, upload.content);
     } catch (error) {
+      if (error instanceof ParserBusyError) {
+        // 429: "try again shortly" (all readers are busy), not a server fault.
+        throw new HttpException({ message: error.message, reason: 'BUSY' }, HttpStatus.TOO_MANY_REQUESTS);
+      }
       if (error instanceof DocumentRejectedError) {
         await this.audit.record({
           action: 'document.rejected',

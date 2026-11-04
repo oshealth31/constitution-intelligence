@@ -128,6 +128,13 @@ export const configSchema = z
       .regex(/^[0-9a-fA-F]{64}$/, { error: 'must be 64 hexadecimal characters (32 bytes)' })
       .optional(),
 
+    // Reading uploaded documents (Task D8): each document is read in its own worker thread,
+    // stopped after this many seconds or when it uses more than this much memory. At most
+    // DOCUMENT_PARSE_CONCURRENCY are read at once per copy of the API (10 more may wait).
+    DOCUMENT_PARSE_TIMEOUT_SECONDS: z.coerce.number().int().min(5).max(300).default(60),
+    DOCUMENT_PARSE_MEMORY_MB: z.coerce.number().int().min(64).max(2048).default(256),
+    DOCUMENT_PARSE_CONCURRENCY: z.coerce.number().int().min(1).max(16).default(2),
+
     // Where uploaded files are kept. "local" = a folder on this computer (development and tests).
     // A cloud object-storage driver is added in the deployment stage.
     STORAGE_DRIVER: z.enum(['local']).default('local'),

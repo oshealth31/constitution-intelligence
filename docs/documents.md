@@ -57,6 +57,14 @@ Each check runs before anything is stored or opened:
   password-protected or damaged PDFs and PDFs over 500 pages.
 - **Word files** with macros are refused. Encrypted or unusual ZIP formats, archives with too many
   parts, and archives that would expand to an unreasonable size ("zip bombs") are also refused.
+- **Read in a sealed-off worker (Task D8).** The text is read in a separate worker thread for each
+  document, never in the main server: with a memory limit (`DOCUMENT_PARSE_MEMORY_MB`, default
+  256 MB) and a hard time limit (`DOCUMENT_PARSE_TIMEOUT_SECONDS`, default 60) after which the
+  worker is stopped outright, even in the middle of one page. The worker gets no settings or
+  secrets from the server. At most `DOCUMENT_PARSE_CONCURRENCY` (default 2) documents are read at
+  once per copy of the API and 10 more may wait; beyond that the upload is refused with "The
+  system is busy reading other documents. Please try again in a minute." (HTTP 429, reason `BUSY`).
+  Too slow → `too_slow`; too much memory → `too_complex`, both asking for a re-saved copy.
 - Every refusal is recorded in the audit log (`document.rejected`) with the reason code.
 
 ## Private storage and the original document
@@ -145,9 +153,10 @@ superseded, archived), with who did it, when, and any comment.
 ## Known limitations
 
 - **No OCR:** scanned PDFs are stored and flagged as unreadable, but their text is not recognised.
-- **No malware scanning yet:** uploads are checked for type, structure and active content, never
-  opened by anything other than the text readers, and only ever downloaded as attachments. A
-  virus scanner should be added before production.
+- **No malware scanning** (decided for the pilot, Task D8 option A): uploads come only from
+  organisation administrators, are checked for type, structure and active content, are read only
+  by the text readers inside a limited worker, and are only ever downloaded as attachments. A
+  virus scanner (for example ClamAV) can be added later.
 - Extraction runs during the upload request. Large documents may take a few seconds. A
   background job queue comes later.
 - The structure reader uses patterns, so unusual layouts (tables, two columns, numbering written

@@ -91,6 +91,10 @@ export type AuditAction =
   | 'payment.rejected'
   | 'support.content_accessed'
   | 'maintenance.cleanup'
+  | 'file.downloaded'
+  | 'file.quarantined'
+  | 'file.released'
+  | 'file.content_removed'
   | 'permission.denied';
 
 export interface AuditEntry {

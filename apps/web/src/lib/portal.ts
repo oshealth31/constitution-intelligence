@@ -359,6 +359,10 @@ export interface VersionReview {
     contentType: string;
     sizeBytes: number;
     sha256: string;
+    /** Held by staff for a safety check: cannot be downloaded. */
+    quarantined?: boolean;
+    /** Removed by staff after a safety check. */
+    contentRemoved?: boolean;
     uploadedAt: string;
     uploadedBy: string | null;
   } | null;

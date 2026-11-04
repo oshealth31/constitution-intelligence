@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Body,
+  NotFoundException,
   Controller,
   Get,
   HttpCode,
@@ -26,6 +27,7 @@ import { PlatformService } from './platform.service';
 import { PlatformBillingService } from '../subscriptions/platform-billing.service';
 import { TwoStepService } from '../auth/two-step.service';
 import { OrganisationDeletionService } from './organisation-deletion.service';
+import { FileQuarantineService } from './file-quarantine.service';
 
 const nameSchema = z.string().trim().min(2).max(200);
 const createOrganisationSchema = z.object({ name: nameSchema, slug: slugSchema });
@@ -113,6 +115,7 @@ export class PlatformController {
     private readonly billing: PlatformBillingService,
     private readonly twoStep: TwoStepService,
     private readonly deletion: OrganisationDeletionService,
+    private readonly quarantine: FileQuarantineService,
   ) {}
 
   @Get('overview')
@@ -329,6 +332,52 @@ export class PlatformController {
       auth.userId,
       requestMeta(request),
     );
+  }
+
+  /** The organisation's uploaded files, with downloads and quarantine status (staff tool). */
+  @Get('organisations/:organisationId/files')
+  listFiles(@Param('organisationId') organisationId: string) {
+    return this.quarantine.list(parseId(organisationId, 'Organisation'));
+  }
+
+  /** Who downloaded a file (from the audit log). */
+  @Get('organisations/:organisationId/files/:fileId/downloads')
+  fileDownloads(@Param('organisationId') organisationId: string, @Param('fileId') fileId: string) {
+    return this.quarantine.downloads(
+      parseId(organisationId, 'Organisation'),
+      parseId(fileId, 'File'),
+    );
+  }
+
+  /** quarantine | release | remove, each with a reason. */
+  @Post('organisations/:organisationId/files/:fileId/:action')
+  @HttpCode(HttpStatus.OK)
+  changeFile(
+    @CurrentAuth() auth: AuthContext,
+    @Param('organisationId') organisationId: string,
+    @Param('fileId') fileId: string,
+    @Param('action') action: string,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
+    const { reason } = parseInput(z.object({ reason: reasonSchema }), body);
+    const args = [
+      parseId(organisationId, 'Organisation'),
+      parseId(fileId, 'File'),
+      reason,
+      auth.userId,
+      requestMeta(request),
+    ] as const;
+    switch (action) {
+      case 'quarantine':
+        return this.quarantine.quarantine(...args);
+      case 'release':
+        return this.quarantine.release(...args);
+      case 'remove':
+        return this.quarantine.remove(...args);
+      default:
+        throw new NotFoundException('Unknown action.');
+    }
   }
 
   /** What deleting this organisation would remove and keep, and any waiting request. */

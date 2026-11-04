@@ -70,6 +70,21 @@ export class StorageService {
     await rm(folder, { recursive: true, force: true });
   }
 
+  /** Removes one stored object for good (file quarantine: "remove"). Gone already is not an error. */
+  async removeObject(organisationId: string, key: string): Promise<void> {
+    await rm(this.resolve(organisationId, key), { force: true });
+  }
+
+  /** Whether one stored object exists (tests). */
+  async objectExists(organisationId: string, key: string): Promise<boolean> {
+    try {
+      await access(this.resolve(organisationId, key));
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   /** Whether the organisation's folder still exists (tests and the deletion report). */
   async organisationFolderExists(organisationId: string): Promise<boolean> {
     try {

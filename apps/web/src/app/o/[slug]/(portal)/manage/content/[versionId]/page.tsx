@@ -312,12 +312,23 @@ function OriginalPanel({ version, api }: { version: VersionReview; api: string }
           </dd>
         </div>
       </dl>
-      <a
-        href={`/api/v1${api}/versions/${version.id}/source`}
-        className="mt-4 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-white px-5 text-base font-semibold text-[var(--brand-ink)] ring-1 ring-slate-300 ring-inset hover:bg-slate-50"
-      >
-        Download the original
-      </a>
+      {source.contentRemoved || source.quarantined ? (
+        <p
+          role="status"
+          className="mt-4 rounded-xl bg-amber-50 p-4 text-sm text-amber-900 ring-1 ring-amber-200 ring-inset"
+        >
+          {source.contentRemoved
+            ? 'Constitution Intelligence staff removed this file after a safety check. The text already read from it is still available. Contact support if you need to upload a clean copy.'
+            : 'Constitution Intelligence staff are holding this file for a safety check, so it cannot be downloaded at the moment. The text already read from it is still available.'}
+        </p>
+      ) : (
+        <a
+          href={`/api/v1${api}/versions/${version.id}/source`}
+          className="mt-4 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-white px-5 text-base font-semibold text-[var(--brand-ink)] ring-1 ring-slate-300 ring-inset hover:bg-slate-50"
+        >
+          Download the original
+        </a>
+      )}
     </Panel>
   );
 }

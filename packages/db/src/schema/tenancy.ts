@@ -170,6 +170,11 @@ export const files = pgTable('files', {
     onDelete: 'set null',
   }),
   purpose: text('purpose', { enum: FILE_PURPOSES }).notNull().default('other'),
+  // Quarantine (migration 0012): no download while set; content removed for good when set.
+  quarantinedAt: timestamp('quarantined_at', { withTimezone: true }),
+  quarantineReason: text('quarantine_reason'),
+  quarantinedByUserId: uuid('quarantined_by_user_id'),
+  contentRemovedAt: timestamp('content_removed_at', { withTimezone: true }),
   createdAt,
 });
 

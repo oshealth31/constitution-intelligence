@@ -360,11 +360,13 @@ export class DocumentsController {
   async source(
     @Tenant() tenant: TenantScope,
     @Param('versionId') versionId: string,
+    @Req() request: AppRequest,
     @Res() response: Response,
   ): Promise<void> {
     const { fileName, contentType, content } = await this.documents.readSource(
       tenant,
       parseId(versionId, 'Version'),
+      requestMeta(request),
     );
     const asciiName = fileName.replace(/[^A-Za-z0-9._ -]/g, '_');
     response

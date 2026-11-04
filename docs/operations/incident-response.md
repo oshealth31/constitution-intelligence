@@ -55,6 +55,36 @@ lost or corrupted.
 7. **Review** within 5 working days, without blame: timeline, cause, what worked, what to
    change. Changes go into the backlog with owners and dates.
 
+## Suspected unsafe file (virus or other harmful content)
+
+Treat it as an incident (steps above) if anyone opened the file. Quarantine first, investigate
+second.
+
+1. **Quarantine at once.** Control Centre → Organisations → the organisation → **Uploaded
+   files** → **Quarantine**, with the reason (for example "Owner reports a virus warning on
+   download"). From that moment nobody can download the file by any route (the files page, the
+   "Download the original" link, the portal logo), it is hidden in the reader and left out of
+   organisation exports. Recorded as `file.quarantined`.
+2. **See who already has a copy.** The card shows how many times the file was downloaded and
+   "Show who" lists each person and time (from `file.downloaded` audit events). Quarantine
+   **cannot reach copies already on people's computers**: contact each of them, ask them to
+   delete it and to scan their device with their own antivirus.
+3. **Check the file** outside the system, on a computer that is not used for anything
+   important (for example upload the fingerprint shown in the audit event, or the file, to a
+   scanning service, as long as the content is not confidential).
+4. **Decide:**
+   - **False alarm:** **Release**, with the reason. Downloads work again (`file.released`).
+   - **Unsafe:** **Remove permanently**, with the reason. The stored file is deleted for good
+     (`file.content_removed`); the record, and the text already read from it, stay, because
+     the constitution version points at it. Ask the organisation to upload a clean copy as a
+     new version.
+5. Backups still contain the file until they expire (35 days by default). Never restore it from
+   a backup without checking it first.
+
+What this does **not** do: there is no automatic virus scan (decided for the pilot), and the
+file is blocked where it is, not moved. The text readers never run anything inside a document,
+and every download is sent as an attachment, never opened in the browser.
+
 ## Lost phone (two-step sign-in)
 
 Not an emergency on its own (the phone alone cannot sign in without the password), but act the

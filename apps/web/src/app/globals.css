@@ -9,7 +9,9 @@
   --color-navy-950: #071426;
   --color-navy-900: #0b1f3a;
   --color-navy-700: #1a3a63;
-  --color-teal-600: #138a8a;
+  /* Darkened in Stage 13 so teal text meets WCAG AA contrast (≥ 4.5:1) on white, ivory and
+     teal-100 backgrounds. Teal on navy uses teal-500. */
+  --color-teal-600: #0e6f6f;
   --color-teal-500: #1ba6a6;
   --color-teal-100: #d5f1f0;
   --color-ivory-50: #fbf8f1;

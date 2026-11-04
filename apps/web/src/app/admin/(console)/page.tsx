@@ -47,7 +47,7 @@ export default function OverviewPage() {
       {overview.loading && !overview.data ? <Loading /> : null}
       {overview.data && (
         <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 [&>*]:min-w-0">
             <Stat
               label="Organisations"
               value={formatNumber(overview.data.totals.organisationsTotal)}
@@ -71,7 +71,7 @@ export default function OverviewPage() {
             />
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-3">
+          <div className="grid gap-6 lg:grid-cols-3 [&>*]:min-w-0">
             <Card title="Subscriptions" description="Current subscription of each organisation.">
               <Breakdown
                 items={overview.data.subscriptionsByStatus}
@@ -105,7 +105,7 @@ export default function OverviewPage() {
             </Card>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-3">
+          <div className="grid gap-6 lg:grid-cols-3 [&>*]:min-w-0">
             <Card
               title="Newest organisations"
               className="lg:col-span-2"

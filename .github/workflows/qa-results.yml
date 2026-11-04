@@ -1,0 +1,87 @@
+# QA evidence. Pushing a branch named "tooling/qa-results<anything>" runs every automated test
+# suite (unit, integration/API against a real PostgreSQL, browser) with machine-readable
+# reporters, and commits the results to qa-results/ on that same branch, so the QA report can
+# quote what actually ran. It never runs on main or on pull requests, and never deploys anything.
+name: QA results
+
+on:
+  push:
+    branches: ['tooling/qa-results**']
+
+permissions:
+  contents: write
+
+jobs:
+  qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_DB: ci
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    env:
+      TEST_DATABASE_URL: postgresql://ci@localhost:5432/ci
+      # The browser tests get their own database, separate from the API test databases.
+      DATABASE_URL: postgresql://ci@localhost:5432/e2e
+      STORAGE_LOCAL_DIR: /tmp/ci-e2e-storage
+      API_INTERNAL_URL: http://127.0.0.1:4100
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: pnpm install --frozen-lockfile
+      - name: Build
+        run: |
+          pnpm build:packages
+          pnpm --filter @constitution/api run build
+          pnpm --filter @constitution/web run build
+      - name: Create and migrate the browser-test database
+        run: |
+          psql postgresql://ci@localhost:5432/ci -c 'CREATE DATABASE e2e'
+          pnpm --filter @constitution/db run migrate
+      - name: Unit and API tests (JSON results)
+        run: |
+          mkdir -p qa-results
+          : > qa-results/exit-codes.txt
+          for dir in packages/shared packages/db apps/api apps/web; do
+            name=$(echo "$dir" | tr '/' '-')
+            set +e
+            (cd "$dir" && npx vitest run --reporter=default --reporter=json \
+              --outputFile.json="$GITHUB_WORKSPACE/qa-results/vitest-$name.json")
+            echo "vitest $dir $?" >> qa-results/exit-codes.txt
+            set -e
+          done
+      - name: Install Chromium
+        run: pnpm --filter @constitution/web exec playwright install --with-deps chromium
+      - name: Browser tests (JSON results)
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_FILE: ${{ github.workspace }}/qa-results/playwright.json
+          PLAYWRIGHT_JSON_OUTPUT_NAME: ${{ github.workspace }}/qa-results/playwright.json
+        run: |
+          set +e
+          pnpm --filter @constitution/web exec playwright test --reporter=list,json
+          echo "playwright apps/web $?" >> qa-results/exit-codes.txt
+          set -e
+      - name: Commit results to this branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f qa-results
+          git commit -m "qa: test results from run ${{ github.run_id }}" || exit 0
+          git pull --rebase origin "${GITHUB_REF_NAME}" || true
+          git push origin "HEAD:${GITHUB_REF_NAME}"

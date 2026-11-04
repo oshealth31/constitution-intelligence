@@ -60,7 +60,9 @@ test.describe('error handling', () => {
     await page.getByLabel('Email address').fill('member@sample.test');
     await page.getByLabel('Password').fill('definitely the wrong password');
     await page.getByRole('button', { name: 'Sign in' }).click();
-    await expect(page.getByRole('alert').filter({ hasText: 'Invalid email or password.' })).toBeVisible();
+    await expect(
+      page.getByRole('alert').filter({ hasText: 'Invalid email or password.' }),
+    ).toBeVisible();
     await expect(page).toHaveURL(/\/sign-in$/);
   });
 
@@ -68,9 +70,9 @@ test.describe('error handling', () => {
     await page.goto(portal(CHOIR.slug, '/sign-in'));
     await page.getByRole('button', { name: 'Sign in' }).click();
     await expect(page).toHaveURL(/\/sign-in$/);
-    const valid = await page.getByLabel('Email address').evaluate(
-      (input) => (input as HTMLInputElement).validity.valid,
-    );
+    const valid = await page
+      .getByLabel('Email address')
+      .evaluate((input) => (input as HTMLInputElement).validity.valid);
     expect(valid).toBe(false);
   });
 

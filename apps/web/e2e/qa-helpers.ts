@@ -46,7 +46,10 @@ export async function apiFrom(page: Page, method: 'GET' | 'POST', address: strin
         },
         body: body === undefined ? undefined : JSON.stringify(body),
       });
-      return { status: response.status, body: (await response.json().catch(() => null)) as unknown };
+      return {
+        status: response.status,
+        body: (await response.json().catch(() => null)) as unknown,
+      };
     },
     { method, address, body },
   );
@@ -55,8 +58,9 @@ export async function apiFrom(page: Page, method: 'GET' | 'POST', address: strin
 /** The signed-in person's membership of one organisation, from /auth/me. */
 export async function organisationIdFor(page: Page, slug: string): Promise<string> {
   const me = await apiFrom(page, 'GET', '/auth/me');
-  const memberships = (me.body as { memberships: { organisationSlug: string; organisationId: string }[] })
-    .memberships;
+  const memberships = (
+    me.body as { memberships: { organisationSlug: string; organisationId: string }[] }
+  ).memberships;
   const found = memberships.find((item) => item.organisationSlug === slug);
   if (!found) throw new Error(`Not a member of ${slug}`);
   return found.organisationId;

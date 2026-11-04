@@ -15,8 +15,7 @@ for (const group of PAGE_GROUPS) {
       if (group.signIn) await group.signIn(page);
       const overflowing: string[] = [];
       for (const item of group.pages) {
-        const address =
-          typeof item.address === 'string' ? item.address : await item.address(page);
+        const address = typeof item.address === 'string' ? item.address : await item.address(page);
         await openPage(page, address);
         const sideways = await page.evaluate(
           () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -33,8 +32,7 @@ for (const group of PAGE_GROUPS) {
       if (group.signIn) await group.signIn(page);
       const serious: string[] = [];
       for (const item of group.pages) {
-        const address =
-          typeof item.address === 'string' ? item.address : await item.address(page);
+        const address = typeof item.address === 'string' ? item.address : await item.address(page);
         await openPage(page, address);
         const results = await new AxeBuilder({ page })
           .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])

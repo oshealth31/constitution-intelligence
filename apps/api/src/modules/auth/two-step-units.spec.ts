@@ -132,7 +132,9 @@ describe('otpauth address for the QR code', () => {
   it('names the issuer and account and uses the standard settings', () => {
     const url = new URL(otpauthUrl('ABCDEFGH', 'person@example.test', 'Constitution Intelligence'));
     expect(url.protocol).toBe('otpauth:');
-    expect(decodeURIComponent(url.pathname)).toContain('Constitution Intelligence:person@example.test');
+    expect(decodeURIComponent(url.pathname)).toContain(
+      'Constitution Intelligence:person@example.test',
+    );
     expect(url.searchParams.get('secret')).toBe('ABCDEFGH');
     expect(url.searchParams.get('issuer')).toBe('Constitution Intelligence');
     expect(url.searchParams.get('digits')).toBe('6');
@@ -161,9 +163,7 @@ describe('encryption of authenticator secrets at rest', () => {
     expect(() =>
       crypto.decryptSecret([version, iv, tag, flipped.toString('base64url')].join('.'), userId),
     ).toThrow();
-    expect(() =>
-      crypto.decryptSecret(stored, '7d3c3f4e-1111-4222-8333-000000000000'),
-    ).toThrow();
+    expect(() => crypto.decryptSecret(stored, '7d3c3f4e-1111-4222-8333-000000000000')).toThrow();
     expect(() => new TwoStepCrypto(randomBytes(32)).decryptSecret(stored, userId)).toThrow();
     expect(() => crypto.decryptSecret('plain-text', userId)).toThrow();
   });

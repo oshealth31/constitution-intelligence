@@ -67,54 +67,54 @@ export default function PortalSignInPage() {
             />
           </div>
         ) : (
-        <form
-          onSubmit={onSubmit}
-          aria-label="Sign in"
-          className="h-fit w-full max-w-md space-y-5 rounded-2xl bg-white p-6 shadow-xl sm:p-8"
-        >
-          <div>
-            <h1 className="text-xl font-semibold text-slate-900">Sign in</h1>
-            <p className="mt-1 text-base text-slate-600">
-              Use the email address and password for your {portal.name} account.
+          <form
+            onSubmit={onSubmit}
+            aria-label="Sign in"
+            className="h-fit w-full max-w-md space-y-5 rounded-2xl bg-white p-6 shadow-xl sm:p-8"
+          >
+            <div>
+              <h1 className="text-xl font-semibold text-slate-900">Sign in</h1>
+              <p className="mt-1 text-base text-slate-600">
+                Use the email address and password for your {portal.name} account.
+              </p>
+            </div>
+            {error && <Notice tone="error">{error}</Notice>}
+            <label className="block text-base font-medium text-slate-900">
+              Email address
+              <input
+                type="email"
+                name="email"
+                autoComplete="username"
+                required
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                className={FIELD}
+              />
+            </label>
+            <label className="block text-base font-medium text-slate-900">
+              Password
+              <input
+                type="password"
+                name="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                className={FIELD}
+              />
+            </label>
+            <PortalButton type="submit" busy={busy} className="w-full">
+              Sign in
+            </PortalButton>
+            <p className="text-center text-base">
+              <Link
+                href="/forgot-password"
+                className="font-medium text-[var(--brand-ink)] underline underline-offset-4"
+              >
+                Forgotten your password?
+              </Link>
             </p>
-          </div>
-          {error && <Notice tone="error">{error}</Notice>}
-          <label className="block text-base font-medium text-slate-900">
-            Email address
-            <input
-              type="email"
-              name="email"
-              autoComplete="username"
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              className={FIELD}
-            />
-          </label>
-          <label className="block text-base font-medium text-slate-900">
-            Password
-            <input
-              type="password"
-              name="password"
-              autoComplete="current-password"
-              required
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              className={FIELD}
-            />
-          </label>
-          <PortalButton type="submit" busy={busy} className="w-full">
-            Sign in
-          </PortalButton>
-          <p className="text-center text-base">
-            <Link
-              href="/forgot-password"
-              className="font-medium text-[var(--brand-ink)] underline underline-offset-4"
-            >
-              Forgotten your password?
-            </Link>
-          </p>
-        </form>
+          </form>
         )}
       </div>
       <footer className="px-4 pb-6 text-center text-xs text-slate-500">

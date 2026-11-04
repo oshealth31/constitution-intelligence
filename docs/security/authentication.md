@@ -92,11 +92,11 @@ on their phone (Google Authenticator, Microsoft Authenticator, 2FAS or similar).
 the password still cannot sign in. Added in Task D2. Codes by text message (SMS) are not offered:
 they can be intercepted or moved to another SIM.
 
-| Who                               | Two-step sign-in                                                                                                     |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Platform Super Admins             | **Required.** Until it is set up, a Super Admin can sign in but sees only the setup steps; the API refuses every Control Centre and organisation route (403, reason `TWO_STEP_SETUP_REQUIRED`). Cannot be turned off. |
-| Organisation Owners and Administrators | **Optional**, on the profile page of their portal. Recommended.                                                      |
-| Other roles                       | Not offered.                                                                                                         |
+| Who                                    | Two-step sign-in                                                                                                                                                                                                      |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Platform Super Admins                  | **Required.** Until it is set up, a Super Admin can sign in but sees only the setup steps; the API refuses every Control Centre and organisation route (403, reason `TWO_STEP_SETUP_REQUIRED`). Cannot be turned off. |
+| Organisation Owners and Administrators | **Optional**, on the profile page of their portal. Recommended.                                                                                                                                                       |
+| Other roles                            | Not offered.                                                                                                                                                                                                          |
 
 **How it works**
 
@@ -184,8 +184,8 @@ Written to the append-only `audit_events` table (the database refuses UPDATE, DE
 | `auth.password.reset_requested` / `reset_rate_limited` / `reset_completed` / `reset_failed`      | Password reset                                     |
 | `auth.password.changed` / `auth.password.change_failed`                                          | Password change                                    |
 | `auth.login.two_step_required`                                                                   | Right password; waiting for the code               |
-| `auth.two_step.enabled` / `disabled` / `reset` / `recovery_codes_replaced`                        | Two-step sign-in changes                           |
-| `auth.two_step.failed` / `auth.two_step.recovery_code_used`                                       | Wrong codes; a recovery code used                  |
+| `auth.two_step.enabled` / `disabled` / `reset` / `recovery_codes_replaced`                       | Two-step sign-in changes                           |
+| `auth.two_step.failed` / `auth.two_step.recovery_code_used`                                      | Wrong codes; a recovery code used                  |
 | `invitation.created` / `invitation.revoked` / `invitation.accepted` / `invitation.accept_failed` | Invitations                                        |
 | `membership.role_changed` / `membership.status_changed` / `membership.removed`                   | Member management                                  |
 | `user.created` / `user.status_changed` / `user.super_admin_granted`                              | Accounts                                           |
@@ -197,36 +197,36 @@ They never contain passwords, tokens or session values.
 
 ## API endpoints (Stage 3)
 
-| Method and path                                                   | Who                | Purpose                              |
-| ----------------------------------------------------------------- | ------------------ | ------------------------------------ |
-| `POST /api/v1/auth/login`                                         | Anyone             | Sign in `{ email, password }`; answers `{ user }` or `{ twoStepRequired, challengeToken, expiresAt }` |
-| `POST /api/v1/auth/login/two-step`                                | Anyone with a challenge | `{ challengeToken, code }` or `{ challengeToken, recoveryCode }` |
-| `GET /api/v1/auth/two-step`                                       | Signed in          | Your two-step status                 |
-| `POST /api/v1/auth/two-step/setup`                                | Super Admin, Owner, Administrator | New secret: `{ secret, otpauthUrl, qrCode }` |
-| `POST /api/v1/auth/two-step/confirm`                              | Signed in          | `{ code }`: turns it on, returns `{ recoveryCodes }` once |
-| `POST /api/v1/auth/two-step/recovery-codes`                       | Signed in          | `{ code }`: new recovery codes       |
-| `POST /api/v1/auth/two-step/disable`                              | Owner, Administrator | `{ password, code }`               |
-| `POST /api/v1/platform/two-step/reset`                            | Super Admin        | `{ email, reason }` (not your own)   |
-| `POST /api/v1/auth/logout`                                        | Signed in          | Sign out this device                 |
-| `POST /api/v1/auth/logout-all`                                    | Signed in          | Sign out every device                |
-| `GET /api/v1/auth/me`                                             | Signed in          | Your account and organisation roles  |
-| `POST /api/v1/auth/password/forgot`                               | Anyone             | Request a reset link `{ email }`     |
-| `POST /api/v1/auth/password/reset`                                | Anyone with a link | `{ token, newPassword }`             |
-| `POST /api/v1/auth/password/change`                               | Signed in          | `{ currentPassword, newPassword }`   |
-| `POST /api/v1/invitations/accept`                                 | Invitee            | `{ token, displayName?, password? }` |
-| `GET /api/v1/organisations/:id`                                   | organisation.read  | Organisation and your role           |
-| `GET /api/v1/organisations/:id/members`                           | members.read       | Member list                          |
-| `PATCH /api/v1/organisations/:id/members/:membershipId`           | members.manage     | `{ role?, status? }`                 |
-| `DELETE /api/v1/organisations/:id/members/:membershipId`          | members.manage     | Remove member                        |
-| `GET /api/v1/organisations/:id/invitations`                       | members.read       | Invitation list                      |
-| `POST /api/v1/organisations/:id/invitations`                      | members.invite     | `{ email, role }`                    |
-| `POST /api/v1/organisations/:id/invitations/:invitationId/revoke` | members.invite     | Revoke                               |
-| `GET /api/v1/organisations/:id/audit-events`                      | audit.read         | Organisation audit log               |
-| `POST /api/v1/platform/organisations`                             | Super Admin        | `{ name, slug }`                     |
-| `GET /api/v1/platform/organisations`                              | Super Admin        | List organisations                   |
-| `POST /api/v1/platform/organisations/:id/owner-invitations`       | Super Admin        | `{ email }`                          |
-| `PATCH /api/v1/platform/users/:userId/status`                     | Super Admin        | `{ status }`                         |
-| `GET /api/v1/platform/audit-events`                               | Super Admin        | Platform audit log                   |
+| Method and path                                                   | Who                               | Purpose                                                                                               |
+| ----------------------------------------------------------------- | --------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `POST /api/v1/auth/login`                                         | Anyone                            | Sign in `{ email, password }`; answers `{ user }` or `{ twoStepRequired, challengeToken, expiresAt }` |
+| `POST /api/v1/auth/login/two-step`                                | Anyone with a challenge           | `{ challengeToken, code }` or `{ challengeToken, recoveryCode }`                                      |
+| `GET /api/v1/auth/two-step`                                       | Signed in                         | Your two-step status                                                                                  |
+| `POST /api/v1/auth/two-step/setup`                                | Super Admin, Owner, Administrator | New secret: `{ secret, otpauthUrl, qrCode }`                                                          |
+| `POST /api/v1/auth/two-step/confirm`                              | Signed in                         | `{ code }`: turns it on, returns `{ recoveryCodes }` once                                             |
+| `POST /api/v1/auth/two-step/recovery-codes`                       | Signed in                         | `{ code }`: new recovery codes                                                                        |
+| `POST /api/v1/auth/two-step/disable`                              | Owner, Administrator              | `{ password, code }`                                                                                  |
+| `POST /api/v1/platform/two-step/reset`                            | Super Admin                       | `{ email, reason }` (not your own)                                                                    |
+| `POST /api/v1/auth/logout`                                        | Signed in                         | Sign out this device                                                                                  |
+| `POST /api/v1/auth/logout-all`                                    | Signed in                         | Sign out every device                                                                                 |
+| `GET /api/v1/auth/me`                                             | Signed in                         | Your account and organisation roles                                                                   |
+| `POST /api/v1/auth/password/forgot`                               | Anyone                            | Request a reset link `{ email }`                                                                      |
+| `POST /api/v1/auth/password/reset`                                | Anyone with a link                | `{ token, newPassword }`                                                                              |
+| `POST /api/v1/auth/password/change`                               | Signed in                         | `{ currentPassword, newPassword }`                                                                    |
+| `POST /api/v1/invitations/accept`                                 | Invitee                           | `{ token, displayName?, password? }`                                                                  |
+| `GET /api/v1/organisations/:id`                                   | organisation.read                 | Organisation and your role                                                                            |
+| `GET /api/v1/organisations/:id/members`                           | members.read                      | Member list                                                                                           |
+| `PATCH /api/v1/organisations/:id/members/:membershipId`           | members.manage                    | `{ role?, status? }`                                                                                  |
+| `DELETE /api/v1/organisations/:id/members/:membershipId`          | members.manage                    | Remove member                                                                                         |
+| `GET /api/v1/organisations/:id/invitations`                       | members.read                      | Invitation list                                                                                       |
+| `POST /api/v1/organisations/:id/invitations`                      | members.invite                    | `{ email, role }`                                                                                     |
+| `POST /api/v1/organisations/:id/invitations/:invitationId/revoke` | members.invite                    | Revoke                                                                                                |
+| `GET /api/v1/organisations/:id/audit-events`                      | audit.read                        | Organisation audit log                                                                                |
+| `POST /api/v1/platform/organisations`                             | Super Admin                       | `{ name, slug }`                                                                                      |
+| `GET /api/v1/platform/organisations`                              | Super Admin                       | List organisations                                                                                    |
+| `POST /api/v1/platform/organisations/:id/owner-invitations`       | Super Admin                       | `{ email }`                                                                                           |
+| `PATCH /api/v1/platform/users/:userId/status`                     | Super Admin                       | `{ status }`                                                                                          |
+| `GET /api/v1/platform/audit-events`                               | Super Admin                       | Platform audit log                                                                                    |
 
 All `POST`, `PATCH` and `DELETE` requests must include the header `X-Requested-With: XMLHttpRequest`.
 

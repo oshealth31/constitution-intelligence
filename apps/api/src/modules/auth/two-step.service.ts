@@ -179,10 +179,19 @@ export class TwoStepService {
       .values({ userId: user.id, secretCiphertext: ciphertext })
       .onConflictDoUpdate({
         target: userTwoStep.userId,
-        set: { secretCiphertext: ciphertext, enabledAt: null, lastUsedStep: null, updatedAt: new Date() },
+        set: {
+          secretCiphertext: ciphertext,
+          enabledAt: null,
+          lastUsedStep: null,
+          updatedAt: new Date(),
+        },
       });
     const address = otpauthUrl(secret, user.email, ISSUER);
-    const svg = await QRCode.toString(address, { type: 'svg', errorCorrectionLevel: 'M', margin: 2 });
+    const svg = await QRCode.toString(address, {
+      type: 'svg',
+      errorCorrectionLevel: 'M',
+      margin: 2,
+    });
     return {
       secret,
       otpauthUrl: address,
@@ -324,7 +333,10 @@ export class TwoStepService {
       .where(
         and(
           eq(twoStepChallenges.userId, userId),
-          or(sql`${twoStepChallenges.usedAt} IS NOT NULL`, lt(twoStepChallenges.expiresAt, new Date())),
+          or(
+            sql`${twoStepChallenges.usedAt} IS NOT NULL`,
+            lt(twoStepChallenges.expiresAt, new Date()),
+          ),
         ),
       );
     await this.db.insert(twoStepChallenges).values({
@@ -377,7 +389,14 @@ export class TwoStepService {
 
     let method: 'code' | 'recovery_code' | null = null;
     if ('code' in secondStep) {
-      if (await this.acceptCode(user.id, settings.secretCiphertext, settings.lastUsedStep, secondStep.code)) {
+      if (
+        await this.acceptCode(
+          user.id,
+          settings.secretCiphertext,
+          settings.lastUsedStep,
+          secondStep.code,
+        )
+      ) {
         method = 'code';
       }
     } else if (await this.useRecoveryCode(user.id, secondStep.recoveryCode)) {
@@ -596,9 +615,11 @@ export class TwoStepService {
     const codes = generateRecoveryCodes();
     await this.db.transaction(async (tx) => {
       await tx.delete(twoStepRecoveryCodes).where(eq(twoStepRecoveryCodes.userId, userId));
-      await tx.insert(twoStepRecoveryCodes).values(
-        codes.map((code) => ({ userId, codeHash: this.crypto.hashRecoveryCode(code, userId) })),
-      );
+      await tx
+        .insert(twoStepRecoveryCodes)
+        .values(
+          codes.map((code) => ({ userId, codeHash: this.crypto.hashRecoveryCode(code, userId) })),
+        );
     });
     return codes;
   }

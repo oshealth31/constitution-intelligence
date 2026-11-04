@@ -2,7 +2,16 @@
 // Constraints (checks, uniques, triggers) live in the SQL migration; these definitions
 // give the API type-safe queries.
 import { ORGANISATION_ROLES } from '@constitution/shared';
-import { bigint, boolean, integer, jsonb, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import {
+  bigint,
+  boolean,
+  integer,
+  jsonb,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+} from 'drizzle-orm/pg-core';
 
 const timestamps = {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

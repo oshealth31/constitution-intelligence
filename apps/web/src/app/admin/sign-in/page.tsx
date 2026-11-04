@@ -59,38 +59,38 @@ export default function SignInPage() {
             />
           </div>
         ) : (
-        <form
-          onSubmit={onSubmit}
-          className="space-y-5 rounded-2xl bg-white p-6 shadow-xl sm:p-8"
-          aria-label="Sign in"
-        >
-          <h2 className="text-lg font-semibold text-navy-900">Sign in</h2>
-          {error && <Alert>{error}</Alert>}
-          <TextField
-            label="Email address"
-            type="email"
-            name="email"
-            autoComplete="username"
-            required
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-          />
-          <TextField
-            label="Password"
-            type="password"
-            name="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-          <Button type="submit" busy={busy} className="w-full">
-            Sign in
-          </Button>
-          <p className="text-center text-xs text-muted">
-            Restricted to authorised Constitution Intelligence staff. All access is recorded.
-          </p>
-        </form>
+          <form
+            onSubmit={onSubmit}
+            className="space-y-5 rounded-2xl bg-white p-6 shadow-xl sm:p-8"
+            aria-label="Sign in"
+          >
+            <h2 className="text-lg font-semibold text-navy-900">Sign in</h2>
+            {error && <Alert>{error}</Alert>}
+            <TextField
+              label="Email address"
+              type="email"
+              name="email"
+              autoComplete="username"
+              required
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+            />
+            <TextField
+              label="Password"
+              type="password"
+              name="password"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+            <Button type="submit" busy={busy} className="w-full">
+              Sign in
+            </Button>
+            <p className="text-center text-xs text-muted">
+              Restricted to authorised Constitution Intelligence staff. All access is recorded.
+            </p>
+          </form>
         )}
         <p className="mt-6 text-center text-sm text-ivory-100/70">
           <Link

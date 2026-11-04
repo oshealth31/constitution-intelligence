@@ -134,8 +134,8 @@ export default function ConsoleLayout({ children }: { children: ReactNode }) {
                 </h1>
                 <p className="mt-2 text-sm text-muted">
                   Two-step sign-in is required for Constitution Intelligence staff. After your
-                  password you will also type a code from an app on your phone. The Control
-                  Centre opens once it is set up. Signed in as {user.email}.
+                  password you will also type a code from an app on your phone. The Control Centre
+                  opens once it is set up. Signed in as {user.email}.
                 </p>
               </div>
               <TwoStepSetupSteps

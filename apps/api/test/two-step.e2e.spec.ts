@@ -46,7 +46,9 @@ describe.runIf(Boolean(testDatabaseUrl))('two-step sign-in', () => {
   });
 
   /** Password step only: returns the agent and the challenge token. */
-  async function passwordStep(email: string): Promise<{ agent: TestAgent; challengeToken: string }> {
+  async function passwordStep(
+    email: string,
+  ): Promise<{ agent: TestAgent; challengeToken: string }> {
     const agent = client(context);
     const response = await agent
       .post('/api/v1/auth/login')
@@ -120,9 +122,11 @@ describe.runIf(Boolean(testDatabaseUrl))('two-step sign-in', () => {
       const after = await agent.get('/api/v1/auth/me').expect(200);
       expect(after.body.twoStep).toMatchObject({ enabled: true, recoveryCodesRemaining: 10 });
 
-      expect((await auditEventsFor(context.db, 'auth.two_step.enabled')).some(
-        (event) => event.targetId === admin.id,
-      )).toBe(true);
+      expect(
+        (await auditEventsFor(context.db, 'auth.two_step.enabled')).some(
+          (event) => event.targetId === admin.id,
+        ),
+      ).toBe(true);
       expect(
         context.mail.outbox.some(
           (mail) => mail.to === admin.email && mail.subject === 'Two-step sign-in is now on',
@@ -144,7 +148,10 @@ describe.runIf(Boolean(testDatabaseUrl))('two-step sign-in', () => {
     });
 
     it('cannot be turned off by a Super Admin', async () => {
-      const admin = await createUser(context.db, { email: uniqueEmail('super-off'), superAdmin: true });
+      const admin = await createUser(context.db, {
+        email: uniqueEmail('super-off'),
+        superAdmin: true,
+      });
       const agent = await signIn(context, admin.email);
       await clearReplay(admin.id);
       const refused = await agent
@@ -157,13 +164,19 @@ describe.runIf(Boolean(testDatabaseUrl))('two-step sign-in', () => {
 
   describe('signing in', () => {
     it('asks for the code after the password and creates the session only after it', async () => {
-      const admin = await createUser(context.db, { email: uniqueEmail('super-in'), superAdmin: true });
+      const admin = await createUser(context.db, {
+        email: uniqueEmail('super-in'),
+        superAdmin: true,
+      });
       const { agent, challengeToken } = await passwordStep(admin.email);
       await agent.get('/api/v1/auth/me').expect(401);
 
       const wrong = await agent
         .post('/api/v1/auth/login/two-step')
-        .send({ challengeToken, code: '000000' === totpCode(twoStepSecretFor(admin.email)) ? '111111' : '000000' })
+        .send({
+          challengeToken,
+          code: '000000' === totpCode(twoStepSecretFor(admin.email)) ? '111111' : '000000',
+        })
         .expect(401);
       expect(wrong.body.error.message).toMatch(/not right/);
       expect(
@@ -195,7 +208,10 @@ describe.runIf(Boolean(testDatabaseUrl))('two-step sign-in', () => {
     });
 
     it('refuses a code that was already used (replay)', async () => {
-      const admin = await createUser(context.db, { email: uniqueEmail('super-replay'), superAdmin: true });
+      const admin = await createUser(context.db, {
+        email: uniqueEmail('super-replay'),
+        superAdmin: true,
+      });
       const secret = twoStepSecretFor(admin.email);
       const first = await passwordStep(admin.email);
       const code = totpCode(secret);
@@ -217,7 +233,10 @@ describe.runIf(Boolean(testDatabaseUrl))('two-step sign-in', () => {
     });
 
     it('expires the waiting sign-in after five minutes', async () => {
-      const admin = await createUser(context.db, { email: uniqueEmail('super-expiry'), superAdmin: true });
+      const admin = await createUser(context.db, {
+        email: uniqueEmail('super-expiry'),
+        superAdmin: true,
+      });
       const { agent, challengeToken } = await passwordStep(admin.email);
       const [challenge] = await context.db
         .select()
@@ -238,7 +257,10 @@ describe.runIf(Boolean(testDatabaseUrl))('two-step sign-in', () => {
     });
 
     it('abandons the waiting sign-in after five wrong codes, and limits wrong codes per person', async () => {
-      const admin = await createUser(context.db, { email: uniqueEmail('super-limit'), superAdmin: true });
+      const admin = await createUser(context.db, {
+        email: uniqueEmail('super-limit'),
+        superAdmin: true,
+      });
       const secret = twoStepSecretFor(admin.email);
       const right = () => totpCode(secret);
       const wrongCode = () => (right() === '123456' ? '654321' : '123456');
@@ -312,7 +334,10 @@ describe.runIf(Boolean(testDatabaseUrl))('two-step sign-in', () => {
     });
 
     it('refuses a session that never passed the second step', async () => {
-      const admin = await createUser(context.db, { email: uniqueEmail('super-bypass'), superAdmin: true });
+      const admin = await createUser(context.db, {
+        email: uniqueEmail('super-bypass'),
+        superAdmin: true,
+      });
       const created = await context.app
         .get(SessionService)
         .create(admin.id, { ipAddress: null, userAgent: 'test', requestId: null });
@@ -333,7 +358,11 @@ describe.runIf(Boolean(testDatabaseUrl))('two-step sign-in', () => {
 
       const adminAgent = await signIn(context, admin.email);
       const adminMe = await adminAgent.get('/api/v1/auth/me').expect(200);
-      expect(adminMe.body.twoStep).toMatchObject({ enabled: false, required: false, available: true });
+      expect(adminMe.body.twoStep).toMatchObject({
+        enabled: false,
+        required: false,
+        available: true,
+      });
       // Without it, Administrators work normally.
       await adminAgent.get(`/api/v1/organisations/${organisation.id}/members`).expect(200);
 
@@ -357,7 +386,10 @@ describe.runIf(Boolean(testDatabaseUrl))('two-step sign-in', () => {
         .expect(400);
       await agent
         .post('/api/v1/auth/two-step/disable')
-        .send({ password: TEST_PASSWORD, code: '000000' === totpCode(secret) ? '111111' : '000000' })
+        .send({
+          password: TEST_PASSWORD,
+          code: '000000' === totpCode(secret) ? '111111' : '000000',
+        })
         .expect(400);
       await agent
         .post('/api/v1/auth/two-step/disable')
@@ -368,14 +400,20 @@ describe.runIf(Boolean(testDatabaseUrl))('two-step sign-in', () => {
       const me = await after.get('/api/v1/auth/me').expect(200);
       expect(me.body.twoStep.enabled).toBe(false);
       expect(
-        await context.db.select().from(twoStepRecoveryCodes).where(eq(twoStepRecoveryCodes.userId, owner.id)),
+        await context.db
+          .select()
+          .from(twoStepRecoveryCodes)
+          .where(eq(twoStepRecoveryCodes.userId, owner.id)),
       ).toHaveLength(0);
-      expect((await auditEventsFor(context.db, 'auth.two_step.disabled')).some(
-        (event) => event.targetId === owner.id,
-      )).toBe(true);
+      expect(
+        (await auditEventsFor(context.db, 'auth.two_step.disabled')).some(
+          (event) => event.targetId === owner.id,
+        ),
+      ).toBe(true);
       expect(
         context.mail.outbox.some(
-          (mail) => mail.to === owner.email && mail.subject === 'Two-step sign-in has been turned off',
+          (mail) =>
+            mail.to === owner.email && mail.subject === 'Two-step sign-in has been turned off',
         ),
       ).toBe(true);
     });
@@ -403,7 +441,10 @@ describe.runIf(Boolean(testDatabaseUrl))('two-step sign-in', () => {
 
   describe('reset (lost phone)', () => {
     it('lets another Super Admin reset it, with a reason, and signs the person out', async () => {
-      const resetter = await createUser(context.db, { email: uniqueEmail('super-resetter'), superAdmin: true });
+      const resetter = await createUser(context.db, {
+        email: uniqueEmail('super-resetter'),
+        superAdmin: true,
+      });
       const organisation = await createOrganisation(context.db);
       const owner = await createUser(context.db, { email: uniqueEmail('owner-lost-phone') });
       await addMember(context.db, organisation.id, owner.id, 'owner');
@@ -492,7 +533,10 @@ describe.runIf(Boolean(testDatabaseUrl))('two-step sign-in', () => {
     });
 
     it('cannot be read by the tenant database role', async () => {
-      const admin = await createUser(context.db, { email: uniqueEmail('super-rls'), superAdmin: true });
+      const admin = await createUser(context.db, {
+        email: uniqueEmail('super-rls'),
+        superAdmin: true,
+      });
       await enableTwoStep(context.db, admin);
       await expect(
         context.db.transaction(async (tx) => {

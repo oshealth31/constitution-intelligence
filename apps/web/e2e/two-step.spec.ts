@@ -57,7 +57,9 @@ test('a new Super Admin sets up two-step sign-in, then signs in with it', async 
     axe.violations.filter((item) => item.impact === 'serious' || item.impact === 'critical'),
   ).toEqual([]);
 
-  await page.getByLabel('6-digit code from the app').fill('000000' === codeForStep(key, currentStep()) ? '111111' : '000000');
+  await page
+    .getByLabel('6-digit code from the app')
+    .fill('000000' === codeForStep(key, currentStep()) ? '111111' : '000000');
   await page.getByRole('button', { name: 'Turn on two-step sign-in' }).click();
   await expect(page.getByRole('alert').filter({ hasText: 'not right' })).toBeVisible();
 
@@ -67,7 +69,10 @@ test('a new Super Admin sets up two-step sign-in, then signs in with it', async 
 
   // 3. Recovery codes, shown once.
   await expect(page.getByRole('heading', { name: 'Save your recovery codes' })).toBeVisible();
-  const codes = await page.getByRole('list', { name: 'Recovery codes' }).getByRole('listitem').allTextContents();
+  const codes = await page
+    .getByRole('list', { name: 'Recovery codes' })
+    .getByRole('listitem')
+    .allTextContents();
   expect(codes).toHaveLength(10);
   await fitsThePhone(page);
   await page.getByRole('button', { name: 'I have saved my recovery codes' }).click();

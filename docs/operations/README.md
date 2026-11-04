@@ -10,7 +10,7 @@
 | [backup-and-restore.md](backup-and-restore.md)               | Database and file backups, restore procedure, restore test record                                                      |
 | [rollback.md](rollback.md)                                   | Going back to the previous version                                                                                     |
 | [incident-response.md](incident-response.md)                 | What to do when something goes wrong, including breach notification                                                    |
-| [two-step-sign-in.md](two-step-sign-in.md) | How staff and organisation administrators set up and use two-step sign-in; lost phones |
+| [two-step-sign-in.md](two-step-sign-in.md)                   | How staff and organisation administrators set up and use two-step sign-in; lost phones                                 |
 | [maintenance.md](maintenance.md)                             | Routine tasks and maintenance windows                                                                                  |
 | [onboarding.md](onboarding.md)                               | Setting up a new organisation                                                                                          |
 | [offboarding-and-retention.md](offboarding-and-retention.md) | Leaving, data export, retention periods, deletion                                                                      |

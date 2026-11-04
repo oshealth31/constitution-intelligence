@@ -83,7 +83,10 @@ describe('loadConfig', () => {
     expect(problemsFor({ DATABASE_URL: LOCAL_DB, MFA_ENCRYPTION_KEY: 'too-short' })).toEqual([
       'MFA_ENCRYPTION_KEY must be 64 hexadecimal characters (32 bytes)',
     ]);
-    const env = resolveSecretFiles({ MFA_ENCRYPTION_KEY_FILE: '/run/secrets/mfa' }, () => 'cd'.repeat(32) + '\n');
+    const env = resolveSecretFiles(
+      { MFA_ENCRYPTION_KEY_FILE: '/run/secrets/mfa' },
+      () => 'cd'.repeat(32) + '\n',
+    );
     expect(env.MFA_ENCRYPTION_KEY).toBe('cd'.repeat(32));
   });
 

@@ -33,8 +33,8 @@ fictional data). But a public go-live needs things that do not exist yet:
 | #   | Condition                                                                                                                                   | Type             |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
 | C1  | Hosting chosen and approved by the owner (in Botswana, or a destination the Act allows); server prepared per [deployment.md](deployment.md) | Decision + setup |
-| C2  | ✅ Email: SMTP sending (D1) and Brevo account, authenticated domain, live test (S3). New SMTP key on the real server                         | Setup            |
-| C3  | ✅ Two-step sign-in for Super Admins (D2). `MFA_ENCRYPTION_KEY` created on the real server and kept offline                                   | Development      |
+| C2  | ✅ Email: SMTP sending (D1) and Brevo account, authenticated domain, live test (S3). New SMTP key on the real server                        | Setup            |
+| C3  | ✅ Two-step sign-in for Super Admins (D2). `MFA_ENCRYPTION_KEY` created on the real server and kept offline                                 | Development      |
 | C4  | Pilot agreement with RBPC covering data protection roles, plus a privacy notice for members                                                 | Legal            |
 | C5  | Off-site encrypted backup copy running, **and one restore test on the real server's backup recorded**                                       | Setup + test     |
 | C6  | Uptime monitor and the critical alerts from [logging-and-monitoring.md](logging-and-monitoring.md) running; two named responders            | Setup            |

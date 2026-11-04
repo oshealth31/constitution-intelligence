@@ -3,7 +3,13 @@
 // Two-step sign-in screens, shared by the Control Centre and the organisation portals:
 // the second sign-in step, setting it up (QR code, key, first code, recovery codes) and the
 // profile card. Every rule is enforced by the API; these screens only collect what it asks for.
-import { useEffect, useState, type ButtonHTMLAttributes, type FormEvent, type ReactNode } from 'react';
+import {
+  useEffect,
+  useState,
+  type ButtonHTMLAttributes,
+  type FormEvent,
+  type ReactNode,
+} from 'react';
 import { Alert, Button } from '@/components/ui';
 import { Notice, PortalButton } from '@/components/portal-ui';
 import {
@@ -182,8 +188,8 @@ export function RecoveryCodes({
         Save your recovery codes
       </h2>
       <Message tone="info">
-        If you lose your phone, each of these codes lets you sign in once. They are shown only
-        now. Write them down or print them, and keep them somewhere safe, away from your phone.
+        If you lose your phone, each of these codes lets you sign in once. They are shown only now.
+        Write them down or print them, and keep them somewhere safe, away from your phone.
       </Message>
       <ol
         aria-label="Recovery codes"
@@ -280,7 +286,9 @@ export function TwoStepSetupSteps({
         />
       </div>
       <div>
-        <p className={look.muted}>Cannot scan it? Choose “enter a setup key” in the app and type:</p>
+        <p className={look.muted}>
+          Cannot scan it? Choose “enter a setup key” in the app and type:
+        </p>
         <p
           className="mt-2 rounded-lg bg-slate-100 px-3 py-2 text-center font-mono text-base break-all text-slate-900"
           aria-label="Setup key"
@@ -371,10 +379,13 @@ export function TwoStepCard({
         setMode('idle');
         setMessage({ tone: 'success', text: 'Two-step sign-in has been turned off.' });
       } else {
-        const result = await apiFetch<{ recoveryCodes: string[] }>('/auth/two-step/recovery-codes', {
-          method: 'POST',
-          body: { code: code.replace(/\s/g, '') },
-        });
+        const result = await apiFetch<{ recoveryCodes: string[] }>(
+          '/auth/two-step/recovery-codes',
+          {
+            method: 'POST',
+            body: { code: code.replace(/\s/g, '') },
+          },
+        );
         setCodes(result.recoveryCodes);
         setMode('codes');
       }

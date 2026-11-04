@@ -33,7 +33,8 @@ function code(base32) {
   return String(number % 1_000_000).padStart(6, '0');
 }
 
-if (!email || !password || !/^[A-Z2-7]{16,}$/.test(key ?? '')) fail('usage: <email> <password> <key>');
+if (!email || !password || !/^[A-Z2-7]{16,}$/.test(key ?? ''))
+  fail('usage: <email> <password> <key>');
 
 const login = await fetch(`${base}/auth/login`, {
   method: 'POST',
@@ -56,4 +57,6 @@ if (second.status !== 200) fail(`the code was refused (status ${second.status})`
 const cookie = (second.headers.get('set-cookie') ?? '').split(';')[0];
 const overview = await fetch(`${base}/platform/overview`, { headers: { cookie } });
 if (overview.status !== 200) fail(`the Control Centre answered ${overview.status}`);
-console.log('[two-step-check] ok restored two-step secret works; Control Centre opens after the code');
+console.log(
+  '[two-step-check] ok restored two-step secret works; Control Centre opens after the code',
+);

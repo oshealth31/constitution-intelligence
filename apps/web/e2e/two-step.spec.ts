@@ -76,6 +76,9 @@ test('a new Super Admin sets up two-step sign-in, then signs in with it', async 
   expect(codes).toHaveLength(10);
   await fitsThePhone(page);
   await page.getByRole('button', { name: 'I have saved my recovery codes' }).click();
+  // The Control Centre opens where the person was (the Organisations page, from step 1).
+  await expect(page.getByRole('heading', { name: 'Set up two-step sign-in' })).toHaveCount(0);
+  await page.goto('/admin');
   await expect(page.getByRole('heading', { name: 'Overview', level: 1 })).toBeVisible();
   const me = await apiFrom(page, 'GET', '/auth/me');
   expect((me.body as { twoStep: { enabled: boolean } }).twoStep.enabled).toBe(true);

@@ -81,3 +81,11 @@ These rules are enforced in code (`apps/api/src/config/config.ts`) and covered b
 2. Add it, with a placeholder value and a comment, to `.env.example`.
 3. Add a test in `apps/api/src/config/config.spec.ts` if it has production rules.
 4. Document it in the table above.
+
+## Secrets as files (staging and production)
+
+`DATABASE_URL` and `ANTHROPIC_API_KEY` can be given as files instead: set `DATABASE_URL_FILE`
+(or `ANTHROPIC_API_KEY_FILE`) to the path of a file holding the value, for example a Docker
+secret at `/run/secrets/database_url`. Setting both forms is refused. See
+[operations/secrets.md](operations/secrets.md).
+

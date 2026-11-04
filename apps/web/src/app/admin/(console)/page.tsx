@@ -71,7 +71,7 @@ export default function OverviewPage() {
             />
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-3">
+          <div className="grid gap-6 lg:grid-cols-3 [&>*]:min-w-0">
             <Card title="Subscriptions" description="Current subscription of each organisation.">
               <Breakdown
                 items={overview.data.subscriptionsByStatus}
@@ -105,7 +105,7 @@ export default function OverviewPage() {
             </Card>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-3">
+          <div className="grid gap-6 lg:grid-cols-3 [&>*]:min-w-0">
             <Card
               title="Newest organisations"
               className="lg:col-span-2"

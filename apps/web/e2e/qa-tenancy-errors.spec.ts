@@ -94,7 +94,9 @@ test.describe('error handling', () => {
     await page.getByLabel(/^New password/).fill('a brand new long passphrase');
     await page.getByLabel('Confirm new password').fill('a brand new long passphrase');
     await page.getByRole('button', { name: 'Set password' }).click();
-    await expect(page.getByRole('alert')).toContainText(/link|expired|invalid/i);
+    await expect(
+      page.getByRole('alert').filter({ hasText: 'This password reset link is invalid or has expired.' }),
+    ).toBeVisible();
   });
 
   test('unknown API addresses answer with a structured error, not a stack trace', async ({

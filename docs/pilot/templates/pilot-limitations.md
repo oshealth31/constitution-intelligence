@@ -9,6 +9,7 @@ leadership; reading and searching without internet on the same device; roles for
 administrators, reviewers, members and auditors; an activity log; invoices and receipts.
 
 **Limits:**
+
 1. **No AI answering.** It is switched off (data-protection reasons). Questions get your approved
    answers or the matching clauses. Nothing is legal advice; your constitution's wording counts.
 2. **Your people approve everything** members see. Text extracted from your document may

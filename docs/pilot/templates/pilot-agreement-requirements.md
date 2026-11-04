@@ -5,6 +5,7 @@ It is not a contract and not legal advice.** Every ⚖️ item needs review by a
 professional in Botswana (and the tax items by an accountant) before anything is signed.
 
 ## Parties and scope
+
 - Constitution Intelligence (legal entity name, registration number, address) and the
   organisation (registered name, registration number, address, authorised signatory and their
   authority to sign) ⚖️ (is CI a registered company? who signs for it?)
@@ -16,12 +17,14 @@ professional in Botswana (and the tax items by an accountant) before anything is
   resolution between members.
 
 ## Pilot duration
+
 - 60 days from the portal activation date (written notice of activation).
 - What happens at the end: continuation on a paid plan by new agreement or order form, or
   ending with export (and deletion on request).
 - Can the pilot be extended, and at what price? ⚖️
 
 ## Fees, payment and cancellation ⚖️
+
 - Founding pilot fee (from P1,500; the exact amount per organisation), currency BWP, whether VAT
   is included (accountant).
 - Invoice, due within 7 days; payment by EFT or mobile money with the invoice number as
@@ -33,6 +36,7 @@ professional in Botswana (and the tax items by an accountant) before anything is
 - Post-pilot prices: stated, or "to be offered by day 45".
 
 ## Ownership
+
 - CI owns the platform and all intellectual property in it, including improvements arising from
   pilot feedback ⚖️.
 - The organisation owns its content and grants CI a limited, non-exclusive right to store,
@@ -43,6 +47,7 @@ professional in Botswana (and the tax items by an accountant) before anything is
   permission.
 
 ## Data protection (Data Protection Act, 2024) ⚖️
+
 - Roles: organisation = controller of members' personal data; CI = processor (proposed). Is
   that right for every kind of data, including CI's own billing contacts?
 - Processing instructions: what data, purposes, retention, location (hosting in South Africa or
@@ -60,6 +65,7 @@ professional in Botswana (and the tax items by an accountant) before anything is
 - Registration with the Commission, impact assessment, data protection officer: who needs what.
 
 ## Service, support and responsibility ⚖️
+
 - Support hours and response targets (see [support process](support-process.md)); no uptime
   guarantee during the pilot ("best effort").
 - Organisation responsibilities: named pilot contact, accurate member list, content review and

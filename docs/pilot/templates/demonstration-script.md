@@ -4,17 +4,17 @@ Use the fictional **Sample Community Choir** on a staging copy, never a real org
 data. Show only what exists; when asked about something that does not, say so (see "Honest
 answers" below).
 
-| Time | Show | Say |
-| --- | --- | --- |
-| 0–3 | Their problem | "Members ask the same constitution questions; the paper copy is hard to find; office-bearers spend time explaining." Ask how they handle it today. |
-| 3–6 | Branded sign-in and home page (phone) | "Each organisation gets its own private portal with its own name, logo and colours. Only invited members can enter." |
-| 6–10 | Read: contents, next/previous, text size, reference and "Copy reference" | "The approved constitution, exactly as adopted, clause by clause, with references you can quote." |
-| 10–13 | Search: "meeting", then a clause number ("7") | "Find any word or clause in seconds." |
-| 13–16 | Simple words toggle on a clause | "Plain-language explanations, written and approved by your own leadership. The original wording always counts." |
-| 16–20 | Ask page: an approved answer; then "Find relevant clauses" with a new question | "Common questions get answers your organisation approved. For anything else the system shows the matching clauses. No AI is used, and nothing here is legal advice." |
-| 20–23 | Offline: save, airplane mode, read and search | "Members with weak connections can read the approved constitution without internet. Signing out removes it." |
-| 23–27 | Manage (owner): Documents (draft → review → approve → publish), Approved answers review screen, Members | "Nothing reaches members until your people have checked and approved it. Every step is recorded." |
-| 27–30 | Pilot offer | 60 days, from P1,500, what is included, the [limitations](pilot-limitations.md), next steps (onboarding form). |
+| Time  | Show                                                                                                    | Say                                                                                                                                                                  |
+| ----- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0–3   | Their problem                                                                                           | "Members ask the same constitution questions; the paper copy is hard to find; office-bearers spend time explaining." Ask how they handle it today.                   |
+| 3–6   | Branded sign-in and home page (phone)                                                                   | "Each organisation gets its own private portal with its own name, logo and colours. Only invited members can enter."                                                 |
+| 6–10  | Read: contents, next/previous, text size, reference and "Copy reference"                                | "The approved constitution, exactly as adopted, clause by clause, with references you can quote."                                                                    |
+| 10–13 | Search: "meeting", then a clause number ("7")                                                           | "Find any word or clause in seconds."                                                                                                                                |
+| 13–16 | Simple words toggle on a clause                                                                         | "Plain-language explanations, written and approved by your own leadership. The original wording always counts."                                                      |
+| 16–20 | Ask page: an approved answer; then "Find relevant clauses" with a new question                          | "Common questions get answers your organisation approved. For anything else the system shows the matching clauses. No AI is used, and nothing here is legal advice." |
+| 20–23 | Offline: save, airplane mode, read and search                                                           | "Members with weak connections can read the approved constitution without internet. Signing out removes it."                                                         |
+| 23–27 | Manage (owner): Documents (draft → review → approve → publish), Approved answers review screen, Members | "Nothing reaches members until your people have checked and approved it. Every step is recorded."                                                                    |
+| 27–30 | Pilot offer                                                                                             | 60 days, from P1,500, what is included, the [limitations](pilot-limitations.md), next steps (onboarding form).                                                       |
 
 ## Honest answers to likely questions
 

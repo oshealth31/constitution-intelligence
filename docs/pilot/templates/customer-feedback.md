@@ -3,22 +3,23 @@
 _For the pilot contact and up to 10 members. Answers are anonymous in any summary shared outside
 the organisation. Paper, email or an online form stored in an approved location._
 
-Organisation: [ ]  Your role: ☐ office-bearer ☐ administrator/reviewer ☐ member  Date: [ ]
+Organisation: [ ] Your role: ☐ office-bearer ☐ administrator/reviewer ☐ member Date: [ ]
 
 **1. How often did you use the portal?** ☐ never ☐ once or twice ☐ weekly ☐ more
 
 **2. How easy was it to…** (1 = very hard, 5 = very easy, N/A)
-| Task | 1 | 2 | 3 | 4 | 5 | N/A |
-| --- | --- | --- | --- | --- | --- | --- |
-| sign in | | | | | | |
-| find a clause by reading | | | | | | |
-| find something with Search | | | | | | |
-| get an answer on the Ask page | | | | | | |
-| understand a clause with Simple words | | | | | | |
-| read without internet | | | | | | |
-| (admins) upload, check and publish the constitution | | | | | | |
-| (admins) approve answers and simple words | | | | | | |
-| (admins) invite members | | | | | | |
+
+| Task                                                | 1   | 2   | 3   | 4   | 5   | N/A |
+| --------------------------------------------------- | --- | --- | --- | --- | --- | --- |
+| sign in                                             |     |     |     |     |     |     |
+| find a clause by reading                            |     |     |     |     |     |     |
+| find something with Search                          |     |     |     |     |     |     |
+| get an answer on the Ask page                       |     |     |     |     |     |     |
+| understand a clause with Simple words               |     |     |     |     |     |     |
+| read without internet                               |     |     |     |     |     |     |
+| (admins) upload, check and publish the constitution |     |     |     |     |     |     |
+| (admins) approve answers and simple words           |     |     |     |     |     |     |
+| (admins) invite members                             |     |     |     |     |     |     |
 
 **3. Did the portal answer your question?** Think of the last question you had. ☐ yes, fully
 ☐ partly ☐ no. What was the question (no names, please)? [ ]

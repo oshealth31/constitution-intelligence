@@ -16,23 +16,23 @@ price by changing this document and the agreement template; no code changes are 
 
 ## 1. Organisation onboarding checklist
 
-| # | Step | Who | Done when |
-| --- | --- | --- | --- |
-| 1 | Discovery call: needs, number of members, constitution available, decision-maker | CI | Notes in the client file |
-| 2 | Demonstration ([demo script](templates/demonstration-script.md)) | CI | Organisation wants to proceed |
-| 3 | Pilot limitations shared and acknowledged ([limitations](templates/pilot-limitations.md)) | CI → org | Written acknowledgement |
-| 4 | Pilot agreement signed ([requirements](templates/pilot-agreement-requirements.md)) | Both | Signed copy filed |
-| 5 | Onboarding form completed ([form](templates/customer-onboarding.md)) | Org | All sections filled in |
-| 6 | Organisation created in the Control Centre (name, portal address) | CI | Onboarding checklist appears |
-| 7 | Subscription set: Pilot plan, start date, **end date = start + 60 days** | CI | Subscription page shows "Pilot subscription until …" |
-| 8 | Invoice issued for the agreed fee, due within 7 days | CI | Invoice INV-YYYY-NNNN visible to the owner |
-| 9 | Constitution submitted with permission (process 2) | Org | Files received |
-| 10 | Branding (process 3) | CI or org | Preview approved |
-| 11 | Owner invited (process 7) | CI | Owner signed in |
-| 12 | Extraction and review (process 4); approval and publishing (process 5) | Org (CI assists) | Version published |
-| 13 | Payment verified (process 10) and portal activated (process 6) | CI | Members can sign in |
-| 14 | Members invited (process 7); training session held | Org, CI | Agreed members have access |
-| 15 | Day-30 check-in; day-55 completion review ([report](templates/pilot-completion-report.md)) | Both | Report filed |
+| #   | Step                                                                                       | Who              | Done when                                            |
+| --- | ------------------------------------------------------------------------------------------ | ---------------- | ---------------------------------------------------- |
+| 1   | Discovery call: needs, number of members, constitution available, decision-maker           | CI               | Notes in the client file                             |
+| 2   | Demonstration ([demo script](templates/demonstration-script.md))                           | CI               | Organisation wants to proceed                        |
+| 3   | Pilot limitations shared and acknowledged ([limitations](templates/pilot-limitations.md))  | CI → org         | Written acknowledgement                              |
+| 4   | Pilot agreement signed ([requirements](templates/pilot-agreement-requirements.md))         | Both             | Signed copy filed                                    |
+| 5   | Onboarding form completed ([form](templates/customer-onboarding.md))                       | Org              | All sections filled in                               |
+| 6   | Organisation created in the Control Centre (name, portal address)                          | CI               | Onboarding checklist appears                         |
+| 7   | Subscription set: Pilot plan, start date, **end date = start + 60 days**                   | CI               | Subscription page shows "Pilot subscription until …" |
+| 8   | Invoice issued for the agreed fee, due within 7 days                                       | CI               | Invoice INV-YYYY-NNNN visible to the owner           |
+| 9   | Constitution submitted with permission (process 2)                                         | Org              | Files received                                       |
+| 10  | Branding (process 3)                                                                       | CI or org        | Preview approved                                     |
+| 11  | Owner invited (process 7)                                                                  | CI               | Owner signed in                                      |
+| 12  | Extraction and review (process 4); approval and publishing (process 5)                     | Org (CI assists) | Version published                                    |
+| 13  | Payment verified (process 10) and portal activated (process 6)                             | CI               | Members can sign in                                  |
+| 14  | Members invited (process 7); training session held                                         | Org, CI          | Agreed members have access                           |
+| 15  | Day-30 check-in; day-55 completion review ([report](templates/pilot-completion-report.md)) | Both             | Report filed                                         |
 
 ## 2. Constitution submission and permission
 
@@ -93,14 +93,14 @@ price by changing this document and the agreement template; no code changes are 
 
 The portal is "active" when all of these are true. Check them in this order:
 
-| Check | Where |
-| --- | --- |
-| Organisation status is active | Control Centre → organisation |
-| Subscription is Pilot with the right end date, and the invoice is paid (verified) | Control Centre → organisation → Billing |
-| A version is published | Manage → Documents |
-| Branding approved | Process 3 |
-| Owner can sign in; one test member account can sign in, read, search, and use Find clauses | Portal |
-| Organisation told the address and the activation date (= day 1 of 60) | Email to the pilot contact |
+| Check                                                                                      | Where                                   |
+| ------------------------------------------------------------------------------------------ | --------------------------------------- |
+| Organisation status is active                                                              | Control Centre → organisation           |
+| Subscription is Pilot with the right end date, and the invoice is paid (verified)          | Control Centre → organisation → Billing |
+| A version is published                                                                     | Manage → Documents                      |
+| Branding approved                                                                          | Process 3                               |
+| Owner can sign in; one test member account can sign in, read, search, and use Find clauses | Portal                                  |
+| Organisation told the address and the activation date (= day 1 of 60)                      | Email to the pilot contact              |
 
 Record the activation date. The 60 days count from it; if activation is later than the
 subscription start, CI moves the subscription end date accordingly.

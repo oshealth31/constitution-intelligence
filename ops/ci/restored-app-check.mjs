@@ -24,7 +24,9 @@ const choir = me.memberships?.find((item) => item.organisationSlug === 'sample-c
 if (!choir) fail('the restored account is not a member of the choir');
 const api = `${base}/organisations/${choir.organisationId}`;
 const constitutions = await (await fetch(`${api}/constitutions`, { headers: { cookie } })).json();
-const count = Array.isArray(constitutions) ? constitutions.length : (constitutions.items ?? constitutions.constitutions ?? []).length;
+const count = Array.isArray(constitutions)
+  ? constitutions.length
+  : (constitutions.items ?? constitutions.constitutions ?? []).length;
 if (!count) fail('no constitutions visible after restore');
 const search = await (await fetch(`${api}/search?q=meeting`, { headers: { cookie } })).json();
 const hits = (search.results ?? []).length;

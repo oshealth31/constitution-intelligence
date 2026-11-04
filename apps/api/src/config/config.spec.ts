@@ -152,9 +152,8 @@ describe('loadConfig', () => {
 
   describe('secrets from files', () => {
     it('reads DATABASE_URL from the file named by DATABASE_URL_FILE', () => {
-      const env = resolveSecretFiles(
-        { DATABASE_URL_FILE: '/run/secrets/database_url' },
-        (path) => (path === '/run/secrets/database_url' ? 'postgresql://app:s3cret@db/app\n' : ''),
+      const env = resolveSecretFiles({ DATABASE_URL_FILE: '/run/secrets/database_url' }, (path) =>
+        path === '/run/secrets/database_url' ? 'postgresql://app:s3cret@db/app\n' : '',
       );
       expect(env.DATABASE_URL).toBe('postgresql://app:s3cret@db/app');
       expect(env.DATABASE_URL_FILE).toBeUndefined();
@@ -175,7 +174,9 @@ describe('loadConfig', () => {
         return undefined;
       })();
       expect(error).toBeInstanceOf(ConfigValidationError);
-      expect(error?.message).toContain('ANTHROPIC_API_KEY_FILE points to a file that cannot be read');
+      expect(error?.message).toContain(
+        'ANTHROPIC_API_KEY_FILE points to a file that cannot be read',
+      );
       expect(error?.message).not.toContain('/no/such/file');
     });
   });

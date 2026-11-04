@@ -13,9 +13,9 @@ fictional data). But a public go-live needs things that do not exist yet:
 
 1. **No hosting.** No server, provider or location is chosen, so nothing about the real
    environment (network, firewall, provider access, in-country storage) has been checked.
-2. **No email.** Invitations and password resets are sent by email, and no email provider is
-   integrated (`MAIL_TRANSPORT=disabled`). Without it, organisation owners and members
-   cannot be invited and nobody can reset a forgotten password. Onboarding cannot work.
+2. **Email is built but not connected.** Sending through an SMTP provider (Brevo) was added in
+   task D1 and tested against a test mail server. A real Brevo account, a verified sending
+   domain and a live test are still needed (setup task S3).
 3. **Legal and data-protection groundwork is missing**: the agreements, privacy notice,
    impact assessment, controller/processor roles and breach procedure under the Data
    Protection Act, 2024. Church membership can reveal religious belief, which the Act treats
@@ -29,7 +29,7 @@ fictional data). But a public go-live needs things that do not exist yet:
 | #   | Condition                                                                                                                                   | Type             |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
 | C1  | Hosting chosen and approved by the owner (in Botswana, or a destination the Act allows); server prepared per [deployment.md](deployment.md) | Decision + setup |
-| C2  | Email provider integrated and tested (SMTP or API, sending domain with SPF/DKIM/DMARC)                                                      | Development      |
+| C2  | Email: SMTP sending built and tested (D1, done); Brevo account, sending domain with SPF/DKIM/DMARC, link tracking off, live test (S3) | Setup |
 | C3  | Two-factor sign-in for Super Admins                                                                                                         | Development      |
 | C4  | Pilot agreement with RBPC covering data protection roles, plus a privacy notice for members                                                 | Legal            |
 | C5  | Off-site encrypted backup copy running, **and one restore test on the real server's backup recorded**                                       | Setup + test     |
@@ -56,7 +56,7 @@ items below.
 - ✅ Structured logs without secrets or query strings; rotation configured
 - ✅ Health checks (web, API live, API ready) with Docker health checks
 - ⏳ Separate migration and runtime database accounts (U3)
-- ❌ Email provider (C2)
+- ⏳ Email sending through SMTP built and tested against a test mail server (D1); Brevo account, domain authentication and a live test still to do (S3)
 - ❌ Two-factor sign-in (C3)
 
 ### Data

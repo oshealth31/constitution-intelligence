@@ -42,9 +42,16 @@ export default function MembersPage() {
     setInviting(true);
     setMessage(null);
     try {
-      await apiFetch(`${api}/invitations`, { method: 'POST', body: { email, role } });
+      const created = await apiFetch<{ emailDelivered?: boolean }>(`${api}/invitations`, {
+        method: 'POST',
+        body: { email, role },
+      });
       setEmail('');
-      setMessage({ tone: 'success', text: `Invitation sent to ${email}.` });
+      setMessage(
+        created?.emailDelivered === false
+          ? { tone: 'error', text: `${email}: The invitation was created, but the email could not be sent. Check the address and invite again, which sends a new email.` }
+          : { tone: 'success', text: `Invitation sent to ${email}.` },
+      );
       await invitations.reload();
     } catch (error) {
       setMessage({ tone: 'error', text: describeError(error) });

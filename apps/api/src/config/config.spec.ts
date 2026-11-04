@@ -97,7 +97,11 @@ describe('loadConfig', () => {
       LOG_PRETTY: 'false',
       CORS_ORIGINS: 'https://admin.example.com,https://example.com',
       WEB_BASE_URL: 'https://app.example.com',
-      MAIL_TRANSPORT: 'disabled',
+      MAIL_TRANSPORT: 'smtp',
+      SMTP_HOST: 'smtp-relay.example.com',
+      SMTP_USER: 'apikey-user',
+      SMTP_PASSWORD: 'not-a-real-password',
+      MAIL_FROM: 'Constitution Intelligence <no-reply@example.com>',
       STORAGE_LOCAL_DIR: '/var/lib/constitution/storage',
     });
     expect(config.DATABASE_SSL).toBe(true);
@@ -148,6 +152,61 @@ describe('loadConfig', () => {
     expect(problemsFor({ DATABASE_URL: LOCAL_DB, TRUST_PROXY: 'yes' })).toEqual([
       'TRUST_PROXY must be "true", "false" or a number of proxies (0-9)',
     ]);
+  });
+
+  describe('email settings', () => {
+    it('requires the SMTP server, account, password and sender for "smtp"', () => {
+      expect(problemsFor({ DATABASE_URL: LOCAL_DB, MAIL_TRANSPORT: 'smtp' })).toEqual(
+        expect.arrayContaining([
+          'SMTP_HOST is required when MAIL_TRANSPORT is "smtp"',
+          'SMTP_USER is required when MAIL_TRANSPORT is "smtp"',
+          'SMTP_PASSWORD is required when MAIL_TRANSPORT is "smtp"',
+          'MAIL_FROM is required when MAIL_TRANSPORT is "smtp"',
+        ]),
+      );
+    });
+
+    it('defaults to STARTTLS on port 587 and offers no unencrypted mode', () => {
+      const config = loadConfig({
+        DATABASE_URL: LOCAL_DB,
+        MAIL_TRANSPORT: 'smtp',
+        SMTP_HOST: 'smtp.example.com',
+        SMTP_USER: 'user',
+        SMTP_PASSWORD: 'secret',
+        MAIL_FROM: 'no-reply@example.com',
+      });
+      expect(config.SMTP_PORT).toBe(587);
+      expect(config.SMTP_SECURITY).toBe('starttls');
+      expect(problemsFor({ DATABASE_URL: LOCAL_DB, SMTP_SECURITY: 'none' })).toHaveLength(1);
+    });
+
+    it('refuses a sender that is not an email address, or that could add lines', () => {
+      for (const sender of ['Constitution Intelligence', 'a <b@c.d', 'x\nBcc: <a@b.co>']) {
+        expect(problemsFor({ DATABASE_URL: LOCAL_DB, MAIL_FROM: sender })).toEqual([
+          'MAIL_FROM must be an email address, optionally with a name: Name <address@domain>',
+        ]);
+      }
+    });
+
+    it('requires real email in production', () => {
+      expect(
+        problemsFor({
+          NODE_ENV: 'production',
+          APP_ENV: 'production',
+          DATABASE_URL: 'postgresql://user:x@db.internal:5432/app',
+          MAIL_TRANSPORT: 'disabled',
+        }),
+      ).toEqual(
+        expect.arrayContaining([
+          'MAIL_TRANSPORT must be "smtp" in production (invitations and password resets are sent by email)',
+        ]),
+      );
+    });
+
+    it('reads the SMTP password from a file', () => {
+      const env = resolveSecretFiles({ SMTP_PASSWORD_FILE: '/run/secrets/smtp_password' }, () => 'k3y\n');
+      expect(env.SMTP_PASSWORD).toBe('k3y');
+    });
   });
 
   describe('secrets from files', () => {

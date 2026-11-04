@@ -39,7 +39,15 @@ and refuses to start if anything is missing or unsafe, listing the problem setti
 | `API_RATE_LIMIT_PER_MINUTE`                                          | No                            | `600`                    | Requests per minute from one network address, per copy of the API (health checks not counted). Over the limit: 429. |
 | `SUPER_ADMIN_SESSION_IDLE_MINUTES`                                   | No                            | `30`                     | Platform Super Admins are signed out after this long without activity.                                              |
 | `SUPER_ADMIN_SESSION_ABSOLUTE_HOURS`                                 | No                            | `12`                     | Platform Super Admins are always signed out after this long.                                                        |
-| `MAIL_TRANSPORT`                                                     | No                            | `log`                    | `log` (local/test only) or `disabled`. A real provider comes later.                                                 |
+| `MAIL_TRANSPORT` | In production (`smtp`) | `log` | `smtp` (real email, required in production), `log` (local/test only: written to the log), `disabled` (dropped). |
+| `SMTP_HOST` | With `smtp` | — | The provider's SMTP server, e.g. `smtp-relay.brevo.com`. |
+| `SMTP_PORT` | No | `587` | 587 with `starttls`, 465 with `tls`. |
+| `SMTP_SECURITY` | No | `starttls` | `starttls` (upgrade required, refused if the server cannot encrypt) or `tls`. There is no unencrypted option. The server certificate is always checked. |
+| `SMTP_USER` | With `smtp` | — | SMTP login. |
+| `SMTP_PASSWORD` / `SMTP_PASSWORD_FILE` | With `smtp` | — | SMTP password or key. **Secret**: use the file form in staging and production. |
+| `SMTP_CA_FILE` | No | — | Extra certificate authority for a private SMTP relay (not needed for Brevo). |
+| `MAIL_FROM` | With `smtp` | — | Sender: `Name <address@domain>` or an address; the domain must be verified with the provider. |
+| `MAIL_REPLY_TO` | No | — | Where replies go, for example the support mailbox. |
 | `STORAGE_DRIVER`, `STORAGE_LOCAL_DIR`                                | No                            | `local`, `.data/storage` | Where uploaded files are kept (private; never served directly).                                                     |
 | `DOCUMENT_MAX_BYTES`                                                 | No                            | `10485760` (10 MB)       | Largest constitution document (PDF or DOCX) accepted for upload. Up to 50 MB.                                       |
 | `AI_PROVIDER`                                                        | No                            | `disabled`               | `disabled`, `anthropic`, or `offline` (local/test only: no AI model, quotes the best passage).                      |
@@ -84,7 +92,7 @@ These rules are enforced in code (`apps/api/src/config/config.ts`) and covered b
 
 ## Secrets as files (staging and production)
 
-`DATABASE_URL` and `ANTHROPIC_API_KEY` can be given as files instead: set `DATABASE_URL_FILE`
+`DATABASE_URL`, `ANTHROPIC_API_KEY` and `SMTP_PASSWORD` can be given as files instead: set `DATABASE_URL_FILE`
 (or `ANTHROPIC_API_KEY_FILE`) to the path of a file holding the value, for example a Docker
 secret at `/run/secrets/database_url`. Setting both forms is refused. See
 [operations/secrets.md](operations/secrets.md).

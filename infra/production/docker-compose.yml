@@ -54,15 +54,18 @@ services:
     environment:
       NODE_ENV: production
       DATABASE_URL_FILE: /run/secrets/database_url
+      SMTP_PASSWORD_FILE: /run/secrets/smtp_password
       # The database's certificate authority, so the API can verify the database it talks to.
       NODE_EXTRA_CA_CERTS: /run/secrets/database_ca.crt
-    secrets: [database_url, database_ca.crt]
+    secrets: [database_url, database_ca.crt, smtp_password]
     volumes:
       - storage:/var/lib/constitution/storage
     depends_on:
       postgres:
         condition: service_healthy
-    networks: [app, data]
+    # "egress": outbound connections only (the email provider's SMTP server). Nothing is
+    # published from it. Restrict it further with the server firewall if wanted.
+    networks: [app, data, egress]
 
   # One-off: apply database migrations with the OWNER account, before starting a new version.
   #   docker compose --profile migrate run --rm migrate
@@ -149,6 +152,8 @@ secrets:
     file: ./secrets/app_db_password
   backup_passphrase:
     file: ./secrets/backup_passphrase
+  smtp_password:
+    file: ./secrets/smtp_password
   database_ca.crt:
     file: ./secrets/database_ca.crt
   database_server.crt:
@@ -168,3 +173,4 @@ networks:
     internal: true
   data:
     internal: true
+  egress: {}

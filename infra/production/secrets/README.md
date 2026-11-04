@@ -13,3 +13,4 @@ Docker (`chmod 600`, owner root). Create them as described in `docs/operations/s
 | `database_ca.crt`                            | Certificate authority that signed the database certificate                                                                  |
 | `database_server.crt`, `database_server.key` | The database server's TLS certificate and key                                                                               |
 | `backup_passphrase`                          | Passphrase that encrypts backups and exports. **Also kept offline in a sealed place**: without it no backup can be restored |
+| `smtp_password` | The email provider's SMTP password (Brevo: an SMTP key) |

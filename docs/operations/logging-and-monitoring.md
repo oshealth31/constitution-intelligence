@@ -53,6 +53,7 @@ organisation goes live:
 | Request flood      | More than 200 responses with status 429 in 5 minutes                                         | Medium   | Same as above                                                         |
 | Disk               | Above 80%                                                                                    | High     | Old backups, logs; grow the disk                                      |
 | Certificate        | Fewer than 14 days left                                                                      | High     | Check Caddy logs; port 80 reachable                                   |
+| Email failing | Any `Email could not be sent` in the API log, or more than 3 in an hour | High | Check the provider's status and quota (Brevo free: 300 a day), the SMTP key, the domain authentication |
 | Backup missing     | No new backup folder in 26 hours, or the backup job exits non-zero                           | High     | Run it by hand; see [backup-and-restore.md](backup-and-restore.md)    |
 | Support access     | Any `support.content_accessed` audit event                                                   | Info     | Confirm it matches a support ticket                                   |
 

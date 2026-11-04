@@ -1,7 +1,9 @@
 import 'reflect-metadata';
 import { RequestMethod } from '@nestjs/common';
 import { METHOD_METADATA, PATH_METADATA } from '@nestjs/common/constants';
-import { describe, expect, it } from 'vitest';
+import { readdirSync } from 'node:fs';
+import path from 'node:path';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { IS_PUBLIC, REQUIRED_ORG_PERMISSION, REQUIRES_SUPER_ADMIN } from './decorators';
 
 /**
@@ -22,10 +24,19 @@ const SIGNED_IN_SELF_ROUTES = new Set([
   'POST auth/password/change',
 ]);
 
-const modules = {
-  ...import.meta.glob('../**/*.controller.ts', { eager: true }),
-  ...import.meta.glob('../../health/*.controller.ts', { eager: true }),
-} as Record<string, Record<string, unknown>>;
+/** Every *.controller.ts file under src/, loaded so its decorators can be read. */
+async function loadControllerModules(): Promise<Record<string, Record<string, unknown>>> {
+  const root = path.resolve(process.cwd(), 'src');
+  const files = readdirSync(root, { recursive: true, encoding: 'utf8' })
+    .filter((file) => file.endsWith('.controller.ts'))
+    .sort();
+  const loaded: Record<string, Record<string, unknown>> = {};
+  for (const file of files) {
+    // Vitest compiles each file (with its decorators) on import.
+    loaded[file] = (await import(path.join(root, file))) as Record<string, unknown>;
+  }
+  return loaded;
+}
 
 interface Route {
   key: string;
@@ -42,7 +53,7 @@ function join(...parts: string[]): string {
     .join('/');
 }
 
-function collectRoutes(): Route[] {
+function collectRoutes(modules: Record<string, Record<string, unknown>>): Route[] {
   const routes: Route[] = [];
   for (const [file, exports] of Object.entries(modules)) {
     for (const value of Object.values(exports)) {
@@ -72,7 +83,11 @@ function collectRoutes(): Route[] {
 }
 
 describe('route access rules', () => {
-  const routes = collectRoutes();
+  let routes: Route[] = [];
+
+  beforeAll(async () => {
+    routes = collectRoutes(await loadControllerModules());
+  });
 
   it('finds the application routes', () => {
     expect(routes.length).toBeGreaterThan(100);

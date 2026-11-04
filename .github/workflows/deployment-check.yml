@@ -7,7 +7,9 @@
 #  4. backup and restore test: fictional data -> encrypted backup -> restore into a NEW
 #     database and storage -> row counts, file checksums, security rules and a real sign-in
 #     on the restored copy;
-#  5. exports one organisation and checks the export contains only that organisation.
+#  5. exports one organisation and checks the export contains only that organisation;
+#  6. off-site copy (Task D7) to a throwaway SFTP server with an add-only account, then the
+#     restore test uses the copy downloaded back from it.
 name: Deployment check
 
 on:
@@ -87,6 +89,17 @@ jobs:
           openssl rand -hex 32 > secrets/backup_passphrase
           openssl rand -hex 24 > secrets/smtp_password
           openssl rand -hex 32 > secrets/mfa_encryption_key
+          # Throwaway SFTP server standing in for the off-site location: "copier" (add and read
+          # only, used by the nightly copy) and "keeper" (may delete, used for pruning).
+          mkdir -p ci-offsite-keys
+          ssh-keygen -q -t ed25519 -N '' -f copier.key && cp copier.key.pub ci-offsite-keys/copier
+          ssh-keygen -q -t ed25519 -N '' -f keeper.key && cp keeper.key.pub ci-offsite-keys/keeper
+          chmod 0644 ci-offsite-keys/*
+          echo "OFFSITE_REMOTE=offsite:/data/backups/prod" >> "$GITHUB_ENV"
+          conf() { printf '[offsite]\ntype = sftp\nhost = offsite\nuser = %s\ndisable_hashcheck = true\nkey_pem = %s\n' "$1" "$(awk '{printf "%s\\n", $0}' "$2")"; }
+          conf copier copier.key > secrets/rclone.conf
+          conf keeper keeper.key > secrets/rclone-admin.conf
+          docker compose build offsite
           # Throwaway mail server certificate, signed by the same throwaway CA the API trusts.
           mkdir -p ci-mail
           openssl req -newkey rsa:2048 -nodes -subj "/CN=mailpit" \
@@ -230,6 +243,50 @@ jobs:
           ! sudo grep -aq 'Sample Community Choir' "$backup/database.dump.gpg"
           echo "[restore-test] ok backup written and encrypted"
 
+      - name: Off-site copy with an add-only account, checked, and downloaded back
+        run: |
+          set -e
+          folder="$(basename "$BACKUP")"
+          keeper() { docker compose --profile ops run --rm -T -v "$PWD/secrets/rclone-admin.conf:/admin.conf:ro" -e RCLONE_CONFIG=/admin.conf "$@"; }
+          docker compose --profile ops run --rm -T ops /ops/offsite-copy.sh | sed 's/^/[offsite-test] /'
+          docker compose --profile ops run --rm -T ops /ops/offsite-copy.sh | tee second.txt
+          grep -q 'nothing new to copy' second.txt
+          sudo test -s backups/.offsite-last-success
+          # The copy account cannot delete what is off-site.
+          set +e
+          docker compose --profile ops run --rm -T ops sh -c "rclone deletefile \"\$OFFSITE_REMOTE/$folder/manifest.txt\"" > del.txt 2>&1; deleted=$?
+          set -e
+          tail -n 3 del.txt
+          test "$deleted" -ne 0
+          keeper ops sh -c "rclone lsf \"\$OFFSITE_REMOTE/$folder\"" | tee held.txt
+          grep -qx 'manifest.txt' held.txt
+          grep -qx 'database.dump.gpg' held.txt
+          echo "[offsite-test] ok the add-only account cannot delete off-site backups"
+          # Download it back into an empty folder (as after losing the server) and check it.
+          mkdir -p fetched
+          docker compose --profile ops run --rm -T -v "$PWD/fetched:/fetched" -e BACKUP_DIR=/fetched ops \
+            /ops/offsite-fetch.sh "$folder" | sed 's/^/[offsite-test] /'
+          sudo cmp "fetched/$folder/database.dump.gpg" "$BACKUP/database.dump.gpg"
+          sudo cmp "fetched/$folder/storage.tar.gz.gpg" "$BACKUP/storage.tar.gz.gpg"
+          echo "RESTORE_SOURCE=fetched" >> "$GITHUB_ENV"
+          echo "[offsite-test] ok copied, checked, and downloaded back identical; the restore below uses the downloaded copy"
+
+      - name: Thinning out old off-site backups (separate account that may delete)
+        run: |
+          set -e
+          keeper() { docker compose --profile ops run --rm -T -v "$PWD/secrets/rclone-admin.conf:/admin.conf:ro" -e RCLONE_CONFIG=/admin.conf "$@"; }
+          for old in 20250101T013000Z 20250102T013000Z 20250201T013000Z; do
+            keeper ops sh -c "echo test | rclone rcat \"\$OFFSITE_REMOTE/$old/SHA256SUMS\""
+          done
+          keeper -e OFFSITE_KEEP_DAILY=2 -e OFFSITE_KEEP_MONTHLY=1 ops /ops/offsite-prune.sh | tee plan.txt
+          grep -q 'would remove 20250101T013000Z' plan.txt
+          grep -q 'would remove 20250102T013000Z' plan.txt
+          keeper -e OFFSITE_KEEP_DAILY=2 -e OFFSITE_KEEP_MONTHLY=1 ops /ops/offsite-prune.sh --yes
+          left="$(keeper ops sh -c 'rclone lsf --dirs-only "$OFFSITE_REMOTE"' | tr -d '/' | sort | tr '\n' ' ')"
+          echo "[offsite-test] left off-site: $left"
+          test "$left" = "20250201T013000Z $(basename "$BACKUP") "
+          echo "[offsite-test] ok old backups removed, the newest kept"
+
       - name: Restore into a NEW database and NEW storage
         run: |
           set -e
@@ -239,7 +296,7 @@ jobs:
             -c 'CREATE EXTENSION IF NOT EXISTS vector' -c 'ALTER SCHEMA public OWNER TO constitution_migrator'
           docker volume create ci-restored-storage
           docker run --rm --network constitution-intelligence_data \
-            -v "$PWD/backups:/backups:ro" -v "$PWD/secrets:/s:ro" -v ci-restored-storage:/restored \
+            -v "$PWD/${RESTORE_SOURCE:-backups}:/backups:ro" -v "$PWD/secrets:/s:ro" -v ci-restored-storage:/restored \
             -e TARGET_DATABASE_URL_FILE=/s/restore_migrator_url -e TARGET_STORAGE_DIR=/restored \
             -e BACKUP_PASSPHRASE_FILE=/s/backup_passphrase \
             -e PGSSLMODE=verify-full -e PGSSLROOTCERT=/s/database_ca.crt \

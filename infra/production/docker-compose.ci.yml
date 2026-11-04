@@ -1,7 +1,18 @@
 # CI ONLY (Deployment check workflow): adds a throwaway mail server (Mailpit) in place of the
 # real email provider, so the test can check that an email really leaves the API over
-# encrypted SMTP. Never used on a real server.
+# encrypted SMTP, and a throwaway SFTP server in place of the off-site backup location
+# (Task D7). Never used on a real server.
 services:
+  offsite:
+    build: ./ci-offsite
+    image: constitution-ci-offsite:ci
+    volumes:
+      - ./ci-offsite-keys:/keys-in:ro
+    networks: [egress]
+  ops:
+    depends_on:
+      offsite:
+        condition: service_started
   mailpit:
     image: axllent/mailpit:v1.21
     environment:

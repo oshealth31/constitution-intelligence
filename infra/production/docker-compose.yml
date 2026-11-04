@@ -100,10 +100,14 @@ services:
       BACKUP_DIR: /backups
       EXPORT_DIR: /exports
       BACKUP_KEEP_DAYS: '35'
+      # Off-site copy (Task D7): an rclone destination such as "offsite:constitution-backups/prod",
+      # set in ./.env as OFFSITE_REMOTE. The account in secrets/rclone.conf may only ADD files.
+      OFFSITE_REMOTE: ${OFFSITE_REMOTE:-}
+      RCLONE_CONFIG: /run/secrets/rclone.conf
       # Verify the database's certificate (libpq settings).
       PGSSLMODE: verify-full
       PGSSLROOTCERT: /run/secrets/database_ca.crt
-    secrets: [database_url, database_ca.crt, backup_passphrase]
+    secrets: [database_url, database_ca.crt, backup_passphrase, rclone.conf]
     volumes:
       - storage:/storage:ro
       - ./backups:/backups
@@ -111,7 +115,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    networks: [data]
+    # "egress": to reach the off-site backup location.
+    networks: [data, egress]
 
   # Leave this out (and change the URLs) when using a managed database service.
   postgres:
@@ -166,6 +171,8 @@ secrets:
     file: ./secrets/backup_passphrase
   smtp_password:
     file: ./secrets/smtp_password
+  rclone.conf:
+    file: ./secrets/rclone.conf
   mfa_encryption_key:
     file: ./secrets/mfa_encryption_key
   database_ca.crt:

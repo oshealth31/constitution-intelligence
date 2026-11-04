@@ -68,7 +68,7 @@ items below.
 - ✅ Encrypted backup of database and files, with manifest and checksums
 - ✅ Restore procedure; **restore tested** on fictional data in a throwaway environment ([record](backup-and-restore.md#restore-test-record)); repeats weekly in CI
 - ❌ Restore test on the real server's backups (C5)
-- ❌ Off-site backup copy (C5)
+- ⏳ Off-site backup copy (C5): script, checks, pruning and nightly timer built and tested against a test object store (D7); the location (S6) is not chosen and nothing runs on a real server yet
 - ✅ Organisation export (tested: contains only that organisation, no password or token hashes)
 - ✅ Organisation deletion tool with second-person approval or a 24-hour wait; tested in CI and in the deployment check, not yet on the real server ([offboarding-and-retention.md](offboarding-and-retention.md#deletion-task-d3))
 - ⏳ Retention periods proposed, not confirmed by the data-protection review

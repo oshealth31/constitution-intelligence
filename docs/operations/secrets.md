@@ -39,6 +39,7 @@ openssl rand -hex 32 > app_db_password        # application account constitution
 openssl rand -hex 32 > migrator_db_password   # migration account constitution_migrator (owns the tables)
 openssl rand -hex 32 > backup_passphrase      # encrypts backups and exports
 openssl rand -hex 32 > mfa_encryption_key     # encrypts two-step sign-in secrets (D2)
+touch rclone.conf                             # off-site backup account (D7); fill in per backup-and-restore.md
 read -rs smtp_key && printf '%s' "$smtp_key" > smtp_password && unset smtp_key  # paste the Brevo SMTP key (not echoed, not in history)
 printf 'postgresql://constitution_app:%s@postgres:5432/constitution' "$(cat app_db_password)" > database_url
 printf 'postgresql://constitution_migrator:%s@postgres:5432/constitution' "$(cat migrator_db_password)" > database_migrator_url
@@ -52,7 +53,7 @@ openssl x509 -req -in server.csr -CA database_ca.crt -CAkey /secure/offline/data
   -CAcreateserial -days 825 -extfile san.ext -out database_server.crt
 rm server.csr san.ext
 chown root:999 database_server.key && chmod 0640 database_server.key
-chmod 0600 postgres_password app_db_password migrator_db_password backup_passphrase database_url database_migrator_url smtp_password mfa_encryption_key
+chmod 0600 postgres_password app_db_password migrator_db_password backup_passphrase database_url database_migrator_url smtp_password mfa_encryption_key rclone.conf
 ```
 
 Write the backup passphrase on paper (or a password manager the owner controls), seal it, and

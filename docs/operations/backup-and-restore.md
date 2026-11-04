@@ -20,9 +20,9 @@ cd /srv/constitution/infra/production
 docker compose --profile ops run --rm ops     # -> backups/<UTC time>/
 ```
 
-Schedule: **daily** from cron (for example 01:30), plus by hand **before every release** and
-before any risky change. Local backups older than `BACKUP_KEEP_DAYS` (35) are removed by the
-script. The job exits non-zero on any failure: alert on it
+Schedule: **nightly** with the off-site copy (see "Schedule" below), plus by hand **before every
+release** and before any risky change. Local backups older than `BACKUP_KEEP_DAYS` (35) are
+removed by the script. The job exits non-zero on any failure: alert on it
 ([logging-and-monitoring.md](logging-and-monitoring.md)).
 
 ### File storage backups
@@ -34,13 +34,80 @@ always match its rows. Files are never overwritten by the application (new versi
 files), which makes the archive simple to check. If storage moves to an object-storage service
 later, its versioning and a separate copy replace the `tar` step.
 
-### Off-site copy (required, not yet set up)
+### Off-site copy (Task D7: built and tested; the location is still to be chosen, setup S6)
 
-A backup on the same server does not survive losing the server. After each backup, copy the
-new folder to a second location **in Botswana** (or wherever the data-protection review
-allows), for example with `rsync` over SSH or `rclone` to an in-country object store, using
-an account that can add files but not delete them. Keep 35 daily and 12 monthly copies. This
-needs the hosting decision (production-readiness.md).
+A backup on the same server does not survive losing the server. Every night the backup is
+copied to a second location by `ops/offsite-copy.sh`, using [rclone](https://rclone.org), which
+works with almost every storage service (S3-compatible object storage such as Oracle Object
+Storage, Backblaze B2, Cloudflare R2 or an in-country provider; SFTP to another server).
+
+- **Already encrypted before it leaves.** The provider only ever stores the gpg-encrypted files
+  (AES-256). Without `backup_passphrase` they are unreadable, so the provider never sees data.
+- **Checked twice.** Before sending, the local checksums are verified (a damaged backup is never
+  sent). After sending, the off-site `SHA256SUMS` is downloaded and compared, and every file's
+  size and checksum is compared (`rclone check`). Any difference fails the job.
+- **Add-only account.** Files are copied with `--immutable` (never overwritten). The account in
+  `secrets/rclone.conf` should be allowed to **add and read**, not delete: then someone who takes
+  over the server cannot wipe the off-site copies. Also turn on **versioning** (or object lock)
+  in the bucket, so an overwritten file keeps its earlier version.
+- **Keeping 35 daily and 12 monthly copies.** `ops/offsite-prune.sh` keeps the newest 35 and the
+  newest of each of the last 12 months. It only prints its plan unless run with `--yes`, and must
+  be run with a **separate** rclone configuration whose account may delete (a person, monthly).
+  Alternatively set an expiry rule in the provider.
+- **Getting a backup back** (lost server): `ops/offsite-fetch.sh` lists the off-site backups;
+  `ops/offsite-fetch.sh <folder>` downloads one into an empty folder and checks its checksums,
+  then restore it as below.
+
+**Choosing the location (S6)**: in Botswana if possible, or wherever the data-protection review
+allows (the backups contain personal data, even though encrypted); a different provider or at
+least a different region from the server; and a provider whose accounts can be limited to
+add-and-read. Record the choice in production-readiness.md.
+
+**Setting it up**
+
+1. Create the bucket (versioning on) and an **add-and-read** key; and separately an admin key for
+   pruning, kept off the server.
+2. Write `secrets/rclone.conf` (`chmod 600`), for example for an S3-compatible service:
+   ```ini
+   [offsite]
+   type = s3
+   provider = Other
+   access_key_id = <add-and-read key id>
+   secret_access_key = <secret>
+   endpoint = https://<provider endpoint>
+   ```
+3. Put `OFFSITE_REMOTE=offsite:<bucket>/prod` in `infra/production/.env`.
+4. Test it: `docker compose --profile ops run --rm -T ops /ops/backup-and-copy.sh`.
+5. Schedule it (below).
+
+### Schedule (Task D7)
+
+The nightly job `ops/backup-and-copy.sh` takes the backup and then the off-site copy; it exits
+non-zero if either fails (and with status 2 if no off-site location is set). Install the systemd
+timer on the server (runs at 01:30 server time; set the server to Africa/Gaborone first):
+
+```bash
+sudo timedatectl set-timezone Africa/Gaborone
+sudo cp /srv/constitution/infra/production/systemd/constitution-backup.{service,timer} /etc/systemd/system/
+sudo systemctl daemon-reload && sudo systemctl enable --now constitution-backup.timer
+systemctl list-timers constitution-backup.timer      # next run
+sudo systemctl start constitution-backup.service     # run once now
+journalctl -u constitution-backup.service -n 50      # what happened
+```
+
+`infra/production/systemd/check-backups.sh` reports how old the newest backup and the last good
+off-site copy are, and fails if either is older than 26 hours: the monitoring (task S5) should
+run it and alert. Also take a backup by hand **before every release** and before any risky change.
+
+**Tested** (Deployment check, on every change and weekly): the backup is copied to a throwaway
+SFTP server with an add-only account (removing files is refused by the server); a second run
+copies nothing new; the account is refused when it tries to delete; the copy is downloaded back
+into an empty folder, is byte-for-byte identical, and **the restore test then restores that
+downloaded copy**; pruning with the separate account keeps the right backups. **Not tested yet:
+an object-storage provider (S3), its versioning and add-only keys, and the timer on a real
+server.** For an SFTP destination of your own, the same add-only setup is
+`ForceCommand internal-sftp -P remove,rmdir` for the copy account
+(see `infra/production/ci-offsite/sshd_config`).
 
 ## Restoring
 

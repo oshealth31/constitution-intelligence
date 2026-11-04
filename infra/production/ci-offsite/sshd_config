@@ -1,0 +1,14 @@
+# CI ONLY. See Dockerfile.
+Port 22
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitRootLogin no
+AuthorizedKeysFile /etc/ssh/keys/%u
+AllowTcpForwarding no
+X11Forwarding no
+Subsystem sftp internal-sftp
+Match User copier
+  # Add and read only: removing files or folders is refused.
+  ForceCommand internal-sftp -u 0002 -P remove,rmdir
+Match User keeper
+  ForceCommand internal-sftp -u 0002

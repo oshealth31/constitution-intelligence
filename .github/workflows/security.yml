@@ -32,6 +32,8 @@ jobs:
         run: pnpm audit || true
       - name: Fail on high or critical problems in anything that ships
         run: pnpm audit --prod --audit-level high
+      - name: Fail on critical problems in any package, development tools included (task D10)
+        run: pnpm audit --audit-level critical
 
   secrets:
     name: Secret scan (whole history)

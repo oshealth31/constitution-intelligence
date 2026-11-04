@@ -59,7 +59,7 @@ items below.
 - ✅ Application database account is not a superuser (tested)
 - ✅ Structured logs without secrets or query strings; rotation configured
 - ✅ Health checks (web, API live, API ready) with Docker health checks
-- ⏳ Separate migration and runtime database accounts (U3)
+- ✅ Separate migration and runtime database accounts (U3, D4; tested in the deployment check)
 - ✅ Email sending through SMTP (D1), Brevo domain authenticated and a live test delivered to an inbox (S3)
 - ✅ Two-step sign-in: required for Super Admins, offered to Owners and Administrators (D2; tested in CI, Chromium only)
 
@@ -112,7 +112,7 @@ items below.
 
 ### Security (from docs/security/security-review.md)
 
-- ~~U1 two-step sign-in~~ (done, D2) · U3 separate database accounts · U4 document parsing in an
+- ~~U1 two-step sign-in~~ (done, D2) · ~~U3 separate database accounts~~ (done, D4) · U4 document parsing in an
   isolated process · U6 breached-password check · U8 tamper-evident audit copy ·
   U11 independent penetration test before general availability · U12 development-tool
   vulnerabilities (Vitest upgrade).

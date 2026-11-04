@@ -30,7 +30,7 @@ and open risks are in [security-review.md](security-review.md).
 - [ ] HTTPS on every address; HSTS confirmed in a browser.
 - [ ] `TRUST_PROXY` matches the real proxy chain (load balancer → web app → API), checked by signing in from two networks and confirming the audit log shows two different addresses. (U5)
 - [ ] Firewall or CDN in front of the site for large-scale attack protection. (U5)
-- [ ] Separate database accounts: migrations/owner vs. the API's runtime account (cannot alter tables or disable triggers). (U3)
+- [x] Separate database accounts: migrations/owner vs. the API's runtime account (cannot alter tables or disable triggers). (U3, done in D4; tested in CI and the deployment check)
 - [ ] Secrets (database password, email provider key, any AI key) kept in the host's secret manager; nobody keeps copies in chat, email or documents.
 - [ ] Real email provider configured (`MAIL_TRANSPORT`), with SPF/DKIM/DMARC for the sending domain.
 - [ ] Backups: encrypted, in-country, access limited to named people, restore tested, retention agreed. (U7)

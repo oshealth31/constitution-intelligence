@@ -49,7 +49,9 @@ test('organisation deletion, step by step', async ({ browser }) => {
 
   // 2. Access is ended first (here: suspended, with a reason).
   const suspend = first.getByRole('form', { name: 'Suspend organisation' });
-  await suspend.getByLabel(/Reason/).fill('Pilot ended; the club asked to leave in writing (fictional)');
+  await suspend
+    .getByLabel(/Reason/)
+    .fill('Pilot ended; the club asked to leave in writing (fictional)');
   await suspend.scrollIntoViewIfNeeded();
   await shot(suspend, '02-suspend-first');
   await suspend.getByRole('button', { name: 'Suspend organisation' }).click();

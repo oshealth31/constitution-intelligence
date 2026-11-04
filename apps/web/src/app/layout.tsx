@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { connection } from 'next/server';
 import type { ReactNode } from 'react';
 import { brand } from '@/lib/brand';
 import './globals.css';
@@ -16,7 +17,10 @@ export const viewport: Viewport = {
   themeColor: '#0b1f3a',
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  // Render every page per request, so each one gets its own Content Security Policy nonce
+  // (see src/proxy.ts). Pages here are small; the cost is negligible.
+  await connection();
   return (
     <html lang="en">
       <body className="min-h-dvh font-sans antialiased">{children}</body>

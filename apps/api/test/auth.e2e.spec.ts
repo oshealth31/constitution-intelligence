@@ -13,6 +13,7 @@ import {
   uniqueEmail,
   type TestContext,
 } from './support/test-app';
+import { maskEmail } from '../src/modules/auth/auth.service';
 import { testDatabaseUrl } from './support/test-database';
 
 const NEW_PASSWORD = 'a brand new passphrase for testing';
@@ -53,9 +54,10 @@ describe.runIf(Boolean(testDatabaseUrl))('authentication', () => {
         .post('/api/v1/auth/login')
         .send({ email: user.email, password: 'not the right password' })
         .expect(401);
+      const unknownAddress = uniqueEmail('nobody');
       const unknownEmail = await client(context)
         .post('/api/v1/auth/login')
-        .send({ email: uniqueEmail('nobody'), password: 'not the right password' })
+        .send({ email: unknownAddress, password: 'not the right password' })
         .expect(401);
 
       expect(wrongPassword.body.error.message).toBe('Invalid email or password.');
@@ -65,6 +67,9 @@ describe.runIf(Boolean(testDatabaseUrl))('authentication', () => {
       const failures = await auditEventsFor(context.db, 'auth.login.failed');
       expect(failures.some((event) => event.targetId === user.email)).toBe(true);
       expect(JSON.stringify(failures)).not.toContain('not the right password');
+      // An address with no account is only kept masked (it may be a mistyped password).
+      expect(JSON.stringify(failures)).not.toContain(unknownAddress);
+      expect(failures.some((event) => event.targetId === maskEmail(unknownAddress))).toBe(true);
     });
 
     it('refuses suspended and deactivated accounts even with the right password', async () => {
@@ -196,7 +201,7 @@ describe.runIf(Boolean(testDatabaseUrl))('authentication', () => {
       expect(blocked.body.error.code).toBe('TOO_MANY_REQUESTS');
 
       const events = await auditEventsFor(context.db, 'auth.login.rate_limited');
-      expect(events.some((event) => event.targetId === user.email)).toBe(true);
+      expect(events.some((event) => event.targetId === maskEmail(user.email))).toBe(true);
     });
 
     it('limits attempts from one network address across many accounts', async () => {

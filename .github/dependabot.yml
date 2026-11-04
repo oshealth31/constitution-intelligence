@@ -1,4 +1,5 @@
-# Weekly automated pull requests for security and version updates.
+# Dependency updates. Dependabot opens pull requests for outdated or vulnerable packages;
+# CI runs on each one and nothing is merged automatically.
 version: 2
 updates:
   - package-ecosystem: npm
@@ -6,6 +7,9 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
   - package-ecosystem: github-actions
     directory: /
     schedule:

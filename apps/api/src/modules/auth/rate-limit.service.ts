@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { authRateLimits, type Database } from '@constitution/db';
 import { eq, sql } from 'drizzle-orm';
 import { DRIZZLE } from '../../database/database.constants';
@@ -30,6 +30,22 @@ export class RateLimitService {
     `);
     const row = result.rows[0] as { attempts?: number | string } | undefined;
     return Number(row?.attempts ?? 1);
+  }
+
+  /**
+   * Counts one attempt and refuses with 429 once `max` attempts were made in the window.
+   * The refusal carries reason RATE_LIMITED so the web app can explain it.
+   */
+  async assertWithin(
+    key: string,
+    windowSeconds: number,
+    max: number,
+    message = 'Too many attempts. Please wait a while and try again.',
+  ): Promise<void> {
+    const attempts = await this.hit(key, windowSeconds);
+    if (attempts > max) {
+      throw new HttpException({ message, reason: 'RATE_LIMITED' }, HttpStatus.TOO_MANY_REQUESTS);
+    }
   }
 
   async reset(key: string): Promise<void> {

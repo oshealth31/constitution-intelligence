@@ -27,6 +27,8 @@ import { RequireOrgPermission, Tenant } from '../access/decorators';
 import type { TenantScope } from '../tenancy/tenant-scope';
 import { LimitsService } from '../subscriptions/limits.service';
 import { DocumentsService } from './documents.service';
+import { RateLimitService } from '../auth/rate-limit.service';
+import { ABUSE_LIMITS, HOUR_SECONDS } from '../auth/abuse-limits';
 
 // eslint-disable-next-line no-control-regex -- refusing control characters is the point
 const CONTROL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/;
@@ -130,6 +132,7 @@ export class DocumentsController {
     @Inject(APP_CONFIG) private readonly config: AppConfig,
     private readonly documents: DocumentsService,
     private readonly limits: LimitsService,
+    private readonly rateLimits: RateLimitService,
   ) {}
 
   @Post('constitutions')
@@ -169,6 +172,11 @@ export class DocumentsController {
     if (!fileName) {
       throw new BadRequestException('The file name is missing (X-File-Name header).');
     }
+    await this.rateLimits.assertWithin(
+      `upload:org:${tenant.organisationId}`,
+      HOUR_SECONDS,
+      ABUSE_LIMITS.documentUploadsPerOrganisationPerHour,
+    );
     const content = await readRawBody(request, this.config.DOCUMENT_MAX_BYTES);
     await this.limits.assertWithinLimit(tenant, 'storageMb', content.length);
     return this.documents.uploadVersion(

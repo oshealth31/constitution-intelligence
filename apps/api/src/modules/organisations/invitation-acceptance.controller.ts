@@ -8,6 +8,7 @@ import { APP_CONFIG } from '../../config/config.module';
 import { Public } from '../access/decorators';
 import { setSessionCookie } from '../auth/session-cookie';
 import { SessionService } from '../auth/session.service';
+import { RateLimitService } from '../auth/rate-limit.service';
 import { InvitationsService } from './invitations.service';
 
 const acceptSchema = z.object({
@@ -23,6 +24,7 @@ export class InvitationAcceptanceController {
     @Inject(APP_CONFIG) private readonly config: AppConfig,
     private readonly invitations: InvitationsService,
     private readonly sessions: SessionService,
+    private readonly rateLimits: RateLimitService,
   ) {}
 
   /**
@@ -37,8 +39,14 @@ export class InvitationAcceptanceController {
     @Req() request: AppRequest,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const input = parseInput(acceptSchema, body);
     const meta = requestMeta(request);
+    // Public route: stop scripts from trying invitation links (or creating accounts) at speed.
+    await this.rateLimits.assertWithin(
+      `invite-accept:ip:${meta.ipAddress ?? 'unknown'}`,
+      this.config.AUTH_RATE_LIMIT_WINDOW_MINUTES * 60,
+      this.config.LOGIN_MAX_ATTEMPTS_PER_IP,
+    );
+    const input = parseInput(acceptSchema, body);
     const result = await this.invitations.accept(input, request.auth, meta);
     if (result.newUserId) {
       const session = await this.sessions.create(result.newUserId, meta);

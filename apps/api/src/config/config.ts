@@ -66,6 +66,14 @@ export const configSchema = z
     LOGIN_MAX_ATTEMPTS_PER_EMAIL: z.coerce.number().int().min(1).max(100).default(5),
     LOGIN_MAX_ATTEMPTS_PER_IP: z.coerce.number().int().min(1).max(10_000).default(50),
 
+    // General abuse protection: requests allowed from one network address per minute, per
+    // running copy of the API (health checks are not counted). See docs/security/security-review.md.
+    API_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().min(30).max(1_000_000).default(600),
+
+    // Platform Super Admin accounts can affect every organisation, so their sessions are shorter.
+    SUPER_ADMIN_SESSION_IDLE_MINUTES: z.coerce.number().int().min(5).max(1_440).default(30),
+    SUPER_ADMIN_SESSION_ABSOLUTE_HOURS: z.coerce.number().int().min(1).max(72).default(12),
+
     // "log" writes emails to the server log (local development only).
     // "disabled" drops them. A real email provider is added in a later stage.
     MAIL_TRANSPORT: z.enum(['log', 'disabled']).default('log'),
@@ -161,6 +169,20 @@ export const configSchema = z
         code: 'custom',
         path: ['WEB_BASE_URL'],
         message: 'must use https:// in staging and production',
+      });
+    }
+    if (config.APP_ENV === 'production' && ['debug', 'trace'].includes(config.LOG_LEVEL)) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['LOG_LEVEL'],
+        message: 'must not be "debug" or "trace" in production (too much detail in the logs)',
+      });
+    }
+    if (!config.STORAGE_LOCAL_DIR.startsWith('/')) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['STORAGE_LOCAL_DIR'],
+        message: 'must be an absolute path in staging and production',
       });
     }
     if (config.CORS_ORIGINS.some((origin) => !origin.startsWith('https://'))) {

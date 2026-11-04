@@ -42,6 +42,8 @@ import { MembershipsService } from './memberships.service';
 import { brandingChangeSchema, logoUploadSchema, slugSchema } from './branding-input';
 import { OrganisationProfileService } from './organisation-profile.service';
 import { LimitsService } from '../subscriptions/limits.service';
+import { RateLimitService } from '../auth/rate-limit.service';
+import { ABUSE_LIMITS, HOUR_SECONDS } from '../auth/abuse-limits';
 
 const inviteSchema = z.object({ email: emailSchema, role: z.enum(ORGANISATION_ROLES) });
 const updateMemberSchema = z
@@ -69,6 +71,7 @@ export class OrganisationsController {
     private readonly audit: AuditService,
     private readonly profile: OrganisationProfileService,
     private readonly limits: LimitsService,
+    private readonly rateLimits: RateLimitService,
   ) {}
 
   @Get()
@@ -144,6 +147,12 @@ export class OrganisationsController {
     @Req() request: AppRequest,
   ) {
     const { email, role } = parseInput(inviteSchema, body);
+    await this.rateLimits.assertWithin(
+      `invitations:org:${membership.organisationId}`,
+      HOUR_SECONDS,
+      ABUSE_LIMITS.invitationsPerOrganisationPerHour,
+      'Many invitations were sent in the last hour. Please wait a while and try again.',
+    );
     await this.limits.assertWithinLimit(membership.tenant, 'members');
     return this.invitations.create(
       membership.organisationId,
@@ -199,8 +208,17 @@ export class OrganisationsController {
   @Put('branding/logo')
   @RequireOrgPermission('branding.manage')
   @RequireFeature('custom_branding')
-  uploadLogo(@Tenant() tenant: TenantScope, @Body() body: unknown, @Req() request: AppRequest) {
+  async uploadLogo(
+    @Tenant() tenant: TenantScope,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
     const { fileName, dataBase64 } = parseInput(logoUploadSchema, body);
+    await this.rateLimits.assertWithin(
+      `logo:org:${tenant.organisationId}`,
+      HOUR_SECONDS,
+      ABUSE_LIMITS.logoUploadsPerOrganisationPerHour,
+    );
     return this.profile.setLogo(
       tenant,
       fileName,

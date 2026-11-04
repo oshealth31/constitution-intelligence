@@ -18,6 +18,8 @@ import { parseInput } from '../../common/validation';
 import { RequireFeature, RequireOrgPermission, Tenant } from '../access/decorators';
 import type { TenantScope } from '../tenancy/tenant-scope';
 import { APPROVED_ANSWER_DISCLAIMER, ApprovedAnswersService } from './approved-answers.service';
+import { RateLimitService } from '../auth/rate-limit.service';
+import { ABUSE_LIMITS, HOUR_SECONDS } from '../auth/abuse-limits';
 
 // eslint-disable-next-line no-control-regex -- refusing control characters is the point
 const CONTROL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/;
@@ -97,7 +99,10 @@ export class ApprovedAnswersController {
 @Controller('organisations/:organisationId/manage/answers')
 @RequireFeature('approved_answers')
 export class ManageAnswersController {
-  constructor(private readonly answers: ApprovedAnswersService) {}
+  constructor(
+    private readonly answers: ApprovedAnswersService,
+    private readonly rateLimits: RateLimitService,
+  ) {}
 
   @Get()
   @RequireOrgPermission('content.edit')
@@ -114,7 +119,12 @@ export class ManageAnswersController {
   @Post('import')
   @RequireOrgPermission('content.edit')
   @HttpCode(HttpStatus.OK)
-  import(@Tenant() tenant: TenantScope, @Body() body: unknown, @Req() request: AppRequest) {
+  async import(@Tenant() tenant: TenantScope, @Body() body: unknown, @Req() request: AppRequest) {
+    await this.rateLimits.assertWithin(
+      `import:org:${tenant.organisationId}`,
+      HOUR_SECONDS,
+      ABUSE_LIMITS.importsPerOrganisationPerHour,
+    );
     const { answers } = parseInput(importSchema, body);
     return this.answers.import(tenant, answers, requestMeta(request));
   }

@@ -7,6 +7,8 @@ import { parseInput } from '../../common/validation';
 import { AllowInactiveSubscription, RequireOrgPermission, Tenant } from '../access/decorators';
 import type { TenantScope } from '../tenancy/tenant-scope';
 import { BillingService } from './billing.service';
+import { RateLimitService } from '../auth/rate-limit.service';
+import { ABUSE_LIMITS, HOUR_SECONDS } from '../auth/abuse-limits';
 
 // eslint-disable-next-line no-control-regex -- refusing control characters is the point
 const CONTROL = /[\u0000-\u001F\u007F]/;
@@ -38,7 +40,10 @@ export const paymentReportSchema = z.object({
 @Controller('organisations/:organisationId/billing')
 @AllowInactiveSubscription()
 export class BillingController {
-  constructor(private readonly billing: BillingService) {}
+  constructor(
+    private readonly billing: BillingService,
+    private readonly rateLimits: RateLimitService,
+  ) {}
 
   @Get()
   @RequireOrgPermission('billing.read')
@@ -49,12 +54,17 @@ export class BillingController {
   /** Owners report a payment they made. It is checked by hand before it counts. */
   @Post('invoices/:invoiceId/payments')
   @RequireOrgPermission('billing.manage')
-  reportPayment(
+  async reportPayment(
     @Tenant() tenant: TenantScope,
     @Param('invoiceId') invoiceId: string,
     @Body() body: unknown,
     @Req() request: AppRequest,
   ) {
+    await this.rateLimits.assertWithin(
+      `payment-report:org:${tenant.organisationId}`,
+      HOUR_SECONDS,
+      ABUSE_LIMITS.paymentReportsPerOrganisationPerHour,
+    );
     return this.billing.reportPayment(
       tenant,
       parseId(invoiceId, 'Invoice'),

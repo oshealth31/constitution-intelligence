@@ -1,0 +1,3325 @@
+{
+  "config": {
+    "argv": [
+      "/opt/hostedtoolcache/node/22.23.4/x64/bin/node",
+      "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/node_modules/@playwright/test/cli.js",
+      "test",
+      "--reporter=list,json"
+    ],
+    "configFile": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/playwright.config.ts",
+    "rootDir": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/global-setup.ts",
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "ci": {
+        "commitHref": "https://github.com/oshealth31/constitution-intelligence/commit/ce0f6b198a3134ff23a7c02293dae274fd8799ea",
+        "commitHash": "ce0f6b198a3134ff23a7c02293dae274fd8799ea",
+        "buildHref": "https://github.com/oshealth31/constitution-intelligence/actions/runs/41761959247"
+      },
+      "gitCommit": {
+        "shortHash": "ce0f6b1",
+        "hash": "ce0f6b198a3134ff23a7c02293dae274fd8799ea",
+        "subject": "tooling: refresh lockfile and formatting",
+        "body": "tooling: refresh lockfile and formatting\n",
+        "author": {
+          "name": "github-actions[bot]",
+          "email": "41898282+github-actions[bot]@users.noreply.github.com",
+          "time": 1793759829000
+        },
+        "committer": {
+          "name": "github-actions[bot]",
+          "email": "41898282+github-actions[bot]@users.noreply.github.com",
+          "time": 1793759829000
+        },
+        "branch": "tooling/qa-results-1"
+      },
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "ci": {
+            "commitHref": "https://github.com/oshealth31/constitution-intelligence/commit/ce0f6b198a3134ff23a7c02293dae274fd8799ea",
+            "commitHash": "ce0f6b198a3134ff23a7c02293dae274fd8799ea",
+            "buildHref": "https://github.com/oshealth31/constitution-intelligence/actions/runs/41761959247"
+          },
+          "gitCommit": {
+            "shortHash": "ce0f6b1",
+            "hash": "ce0f6b198a3134ff23a7c02293dae274fd8799ea",
+            "subject": "tooling: refresh lockfile and formatting",
+            "body": "tooling: refresh lockfile and formatting\n",
+            "author": {
+              "name": "github-actions[bot]",
+              "email": "41898282+github-actions[bot]@users.noreply.github.com",
+              "time": 1793759829000
+            },
+            "committer": {
+              "name": "github-actions[bot]",
+              "email": "41898282+github-actions[bot]@users.noreply.github.com",
+              "time": 1793759829000
+            },
+            "branch": "tooling/qa-results-1"
+          },
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "ci": {
+            "commitHref": "https://github.com/oshealth31/constitution-intelligence/commit/ce0f6b198a3134ff23a7c02293dae274fd8799ea",
+            "commitHash": "ce0f6b198a3134ff23a7c02293dae274fd8799ea",
+            "buildHref": "https://github.com/oshealth31/constitution-intelligence/actions/runs/41761959247"
+          },
+          "gitCommit": {
+            "shortHash": "ce0f6b1",
+            "hash": "ce0f6b198a3134ff23a7c02293dae274fd8799ea",
+            "subject": "tooling: refresh lockfile and formatting",
+            "body": "tooling: refresh lockfile and formatting\n",
+            "author": {
+              "name": "github-actions[bot]",
+              "email": "41898282+github-actions[bot]@users.noreply.github.com",
+              "time": 1793759829000
+            },
+            "committer": {
+              "name": "github-actions[bot]",
+              "email": "41898282+github-actions[bot]@users.noreply.github.com",
+              "time": 1793759829000
+            },
+            "branch": "tooling/qa-results-1"
+          },
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e",
+        "snapshotDir": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 60000,
+        "use": {
+          "baseURL": "http://127.0.0.1:3100",
+          "trace": "retain-on-failure",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.8078.4 Safari/537.36",
+          "viewport": {
+            "width": 1280,
+            "height": 720
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": false,
+          "hasTouch": false,
+          "defaultBrowserType": "chromium"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "approved-answers.spec.ts",
+      "file": "approved-answers.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "an administrator writes, studies and approves an answer; members then see it",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3989,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:39:46.454Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5fdac231a737402313f6-01d60ad52d0ec8bf48d0",
+          "file": "approved-answers.spec.ts",
+          "line": 21,
+          "column": 5
+        },
+        {
+          "title": "imported AI drafts are labelled and wait for approval",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2459,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:39:50.707Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5fdac231a737402313f6-360889d4d6bafed61f97",
+          "file": "approved-answers.spec.ts",
+          "line": 76,
+          "column": 5
+        },
+        {
+          "title": "content reviewers can write drafts but not approve them",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1122,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:39:53.188Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5fdac231a737402313f6-4b8a86bff7ec81a01579",
+          "file": "approved-answers.spec.ts",
+          "line": 122,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "ask.spec.ts",
+      "file": "ask.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "asks a question and shows the explanation apart from the original source text",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2445,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:39:54.334Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "af9604f7b4d03676e8c1-0a989e6c1a2197220543",
+          "file": "ask.spec.ts",
+          "line": 21,
+          "column": 5
+        },
+        {
+          "title": "says clearly when the constitution does not answer the question",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1089,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:39:56.795Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "af9604f7b4d03676e8c1-2b00c2eeb9d3ac320b47",
+          "file": "ask.spec.ts",
+          "line": 58,
+          "column": 5
+        },
+        {
+          "title": "offers suggested questions taken from the constitution’s own titles",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1087,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:39:57.899Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "af9604f7b4d03676e8c1-e628a1f385e9dba6b06f",
+          "file": "ask.spec.ts",
+          "line": 69,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "billing.spec.ts",
+      "file": "billing.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "invoice → owner reports payment → Super Admin verifies by hand → receipt",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3764,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:39:59.003Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "d4578388efe8f23c8f70-07d9cd5f1bb58bd49991",
+          "file": "billing.spec.ts",
+          "line": 40,
+          "column": 5
+        },
+        {
+          "title": "members of a suspended organisation are told the portal is unavailable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2069,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:40:02.804Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "d4578388efe8f23c8f70-3b531f6f9546eb0bb572",
+          "file": "billing.spec.ts",
+          "line": 85,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "clause-finder.spec.ts",
+      "file": "clause-finder.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "with AI off, finds the matching clauses word for word instead of asking an AI",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1198,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:40:04.941Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "cb5e6496dc654afaab78-03bce98bbc9115c74df2",
+          "file": "clause-finder.spec.ts",
+          "line": 38,
+          "column": 5
+        },
+        {
+          "title": "with AI off, says clearly when no clause matches",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1184,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:40:06.179Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "cb5e6496dc654afaab78-7c01ba2f574c9cf8a700",
+          "file": "clause-finder.spec.ts",
+          "line": 69,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "control-centre.spec.ts",
+      "file": "control-centre.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "rejects a wrong password with a clear message",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 395,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:40:07.403Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "49f0a7f6f0b2ae1c17b5-3d742ff18670ecb32caf",
+          "file": "control-centre.spec.ts",
+          "line": 20,
+          "column": 5
+        },
+        {
+          "title": "sends signed-out visitors to the sign-in page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 410,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:40:07.823Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "49f0a7f6f0b2ae1c17b5-ce345be8e581bfa8321e",
+          "file": "control-centre.spec.ts",
+          "line": 31,
+          "column": 5
+        },
+        {
+          "title": "super admin sees live overview figures and system health",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 700,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:40:08.260Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "49f0a7f6f0b2ae1c17b5-853a9acfdbc816647e0f",
+          "file": "control-centre.spec.ts",
+          "line": 36,
+          "column": 5
+        },
+        {
+          "title": "super admin creates an organisation and manages subscription, branding and status",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1532,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:40:08.984Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "49f0a7f6f0b2ae1c17b5-a84d38ede84ef32b35cd",
+          "file": "control-centre.spec.ts",
+          "line": 47,
+          "column": 5
+        },
+        {
+          "title": "support access to content requires a reason and is recorded",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1301,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:40:10.554Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "49f0a7f6f0b2ae1c17b5-d5c7c8cd8d6101292268",
+          "file": "control-centre.spec.ts",
+          "line": 89,
+          "column": 5
+        },
+        {
+          "title": "an organisation administrator cannot use the control centre",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 470,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:40:11.885Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "49f0a7f6f0b2ae1c17b5-f6ad0a9b8af65d80b4c8",
+          "file": "control-centre.spec.ts",
+          "line": 110,
+          "column": 5
+        }
+      ],
+      "suites": [
+        {
+          "title": "on a phone",
+          "file": "control-centre.spec.ts",
+          "line": 120,
+          "column": 6,
+          "specs": [
+            {
+              "title": "the control centre is usable on a small screen",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 634,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:40:12.385Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "49f0a7f6f0b2ae1c17b5-d74fc1dea72d2bbd311f",
+              "file": "control-centre.spec.ts",
+              "line": 123,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "documents.spec.ts",
+      "file": "documents.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "upload, check, approve and publish a document; members only see it once published",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5980,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:40:13.053Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9111b41e0f82b685c9ea-7615d4e4fa1c59594d9b",
+          "file": "documents.spec.ts",
+          "line": 26,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "offline.spec.ts",
+      "file": "offline.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "save for offline reading, read and search offline, then sync when back online",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1540,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:40:19.082Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "586fc5283fd8ec7c7982-54defa8b340a3e59109e",
+          "file": "offline.spec.ts",
+          "line": 56,
+          "column": 5
+        },
+        {
+          "title": "the Ask page explains that live AI does not work offline",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 786,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:40:20.659Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "586fc5283fd8ec7c7982-832c67997d45635dbfb6",
+          "file": "offline.spec.ts",
+          "line": 119,
+          "column": 5
+        },
+        {
+          "title": "signing out removes the saved copy from the device",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1299,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:40:21.490Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "586fc5283fd8ec7c7982-41758e1a8bf5c71a0b99",
+          "file": "offline.spec.ts",
+          "line": 135,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "portal.spec.ts",
+      "file": "portal.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "each organisation has its own branded sign-in page from the same code",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 754,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:40:22.822Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "291f6c0e7fe47579f0c2-327cf69da3d50586380f",
+          "file": "portal.spec.ts",
+          "line": 40,
+          "column": 5
+        },
+        {
+          "title": "a member reads, navigates and searches the constitution",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1447,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:40:23.615Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "291f6c0e7fe47579f0c2-31e4af202210bba0d5d1",
+          "file": "portal.spec.ts",
+          "line": 55,
+          "column": 5
+        },
+        {
+          "title": "members of one organisation cannot open another organisation's portal",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1247,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:40:25.099Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "291f6c0e7fe47579f0c2-10047516b81b9fc5bde0",
+          "file": "portal.spec.ts",
+          "line": 93,
+          "column": 5
+        },
+        {
+          "title": "members do not get the manage area, and the API refuses their changes",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 900,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:40:26.379Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "291f6c0e7fe47579f0c2-29495095f1cddc2bca8e",
+          "file": "portal.spec.ts",
+          "line": 116,
+          "column": 5
+        },
+        {
+          "title": "an administrator changes branding, and unsafe content stays harmless",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1439,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:40:27.313Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "291f6c0e7fe47579f0c2-fa1181cc04417a675a5f",
+          "file": "portal.spec.ts",
+          "line": 130,
+          "column": 5
+        },
+        {
+          "title": "a content reviewer sees the approval status of every version",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1352,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:40:28.781Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "291f6c0e7fe47579f0c2-253106f29246940a0732",
+          "file": "portal.spec.ts",
+          "line": 193,
+          "column": 5
+        }
+      ],
+      "suites": [
+        {
+          "title": "on a phone",
+          "file": "portal.spec.ts",
+          "line": 207,
+          "column": 6,
+          "specs": [
+            {
+              "title": "large bottom navigation and a Contents button make the portal easy to use",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 986,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:40:30.167Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "291f6c0e7fe47579f0c2-455664d5ac6b1b576e26",
+              "file": "portal.spec.ts",
+              "line": 210,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "qa-mobile-accessibility.spec.ts",
+      "file": "qa-mobile-accessibility.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "not signed in: phone layout",
+          "file": "qa-mobile-accessibility.spec.ts",
+          "line": 11,
+          "column": 8,
+          "specs": [
+            {
+              "title": "not signed in pages fit a phone screen",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3198,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[qa-mobile] not signed in: []\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:40:31.230Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d96860bd1c04efbd4204-1a34a4efdefc41625550",
+              "file": "qa-mobile-accessibility.spec.ts",
+              "line": 14,
+              "column": 9
+            }
+          ]
+        },
+        {
+          "title": "not signed in: accessibility",
+          "file": "qa-mobile-accessibility.spec.ts",
+          "line": 30,
+          "column": 8,
+          "specs": [
+            {
+              "title": "not signed in pages have no serious accessibility problems",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 5568,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 5\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Forgot password: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .text-xs\",\u001b[39m\n\u001b[31m+   \"Unknown portal: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. a\",\u001b[39m\n\u001b[31m+   \"Portal finder: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .mt-4\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 5\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Forgot password: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .text-xs\",\u001b[39m\n\u001b[31m+   \"Unknown portal: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. a\",\u001b[39m\n\u001b[31m+   \"Portal finder: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .mt-4\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:51:23",
+                        "location": {
+                          "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                          "column": 23,
+                          "line": 51
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 49 |\u001b[39m         }\n \u001b[90m 50 |\u001b[39m       }\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 51 |\u001b[39m       expect(serious)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                       \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 52 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 53 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 54 |\u001b[39m }\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                            "column": 23,
+                            "line": 51
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 5\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Forgot password: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .text-xs\",\u001b[39m\n\u001b[31m+   \"Unknown portal: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. a\",\u001b[39m\n\u001b[31m+   \"Portal finder: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .mt-4\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  49 |         }\n  50 |       }\n> 51 |       expect(serious).toEqual([]);\n     |                       ^\n  52 |     });\n  53 |   });\n  54 | }\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:51:23"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "[qa-a11y] not signed in: Portal sign-in: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] not signed in: Control Centre sign-in: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] not signed in: Forgot password: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .text-xs\n"
+                        },
+                        {
+                          "text": "[qa-a11y] not signed in: Unknown portal: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. a\n"
+                        },
+                        {
+                          "text": "[qa-a11y] not signed in: Portal finder: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .mt-4\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:40:34.455Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-no-31beb-ious-accessibility-problems/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-no-31beb-ious-accessibility-problems/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                        "column": 23,
+                        "line": 51
+                      }
+                    },
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 5602,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 5\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Forgot password: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .text-xs\",\u001b[39m\n\u001b[31m+   \"Unknown portal: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. a\",\u001b[39m\n\u001b[31m+   \"Portal finder: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .mt-4\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 5\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Forgot password: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .text-xs\",\u001b[39m\n\u001b[31m+   \"Unknown portal: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. a\",\u001b[39m\n\u001b[31m+   \"Portal finder: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .mt-4\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:51:23",
+                        "location": {
+                          "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                          "column": 23,
+                          "line": 51
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 49 |\u001b[39m         }\n \u001b[90m 50 |\u001b[39m       }\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 51 |\u001b[39m       expect(serious)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                       \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 52 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 53 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 54 |\u001b[39m }\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                            "column": 23,
+                            "line": 51
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 5\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Forgot password: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .text-xs\",\u001b[39m\n\u001b[31m+   \"Unknown portal: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. a\",\u001b[39m\n\u001b[31m+   \"Portal finder: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .mt-4\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  49 |         }\n  50 |       }\n> 51 |       expect(serious).toEqual([]);\n     |                       ^\n  52 |     });\n  53 |   });\n  54 | }\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:51:23"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "[qa-a11y] not signed in: Portal sign-in: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] not signed in: Control Centre sign-in: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] not signed in: Forgot password: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .text-xs\n"
+                        },
+                        {
+                          "text": "[qa-a11y] not signed in: Unknown portal: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. a\n"
+                        },
+                        {
+                          "text": "[qa-a11y] not signed in: Portal finder: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .mt-4\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-11-04T02:40:41.323Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-no-31beb-ious-accessibility-problems-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-no-31beb-ious-accessibility-problems-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                        "column": 23,
+                        "line": 51
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "d96860bd1c04efbd4204-4afff08525d9852499a6",
+              "file": "qa-mobile-accessibility.spec.ts",
+              "line": 31,
+              "column": 9
+            }
+          ]
+        },
+        {
+          "title": "member: phone layout",
+          "file": "qa-mobile-accessibility.spec.ts",
+          "line": 11,
+          "column": 8,
+          "specs": [
+            {
+              "title": "member pages fit a phone screen",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5473,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[qa-mobile] member: []\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:40:47.921Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d96860bd1c04efbd4204-e6fa708baa91feeb1b88",
+              "file": "qa-mobile-accessibility.spec.ts",
+              "line": 14,
+              "column": 9
+            }
+          ]
+        },
+        {
+          "title": "member: accessibility",
+          "file": "qa-mobile-accessibility.spec.ts",
+          "line": 30,
+          "column": 8,
+          "specs": [
+            {
+              "title": "member pages have no serious accessibility problems",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 8645,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Reader: label-content-name-mismatch [serious] ×2 – Elements must have their visible text as part of their accessible name – e.g. button[aria-label=\\\"Smaller text\\\"]\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Reader: label-content-name-mismatch [serious] ×2 – Elements must have their visible text as part of their accessible name – e.g. button[aria-label=\\\"Smaller text\\\"]\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:51:23",
+                        "location": {
+                          "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                          "column": 23,
+                          "line": 51
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 49 |\u001b[39m         }\n \u001b[90m 50 |\u001b[39m       }\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 51 |\u001b[39m       expect(serious)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                       \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 52 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 53 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 54 |\u001b[39m }\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                            "column": 23,
+                            "line": 51
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Reader: label-content-name-mismatch [serious] ×2 – Elements must have their visible text as part of their accessible name – e.g. button[aria-label=\\\"Smaller text\\\"]\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  49 |         }\n  50 |       }\n> 51 |       expect(serious).toEqual([]);\n     |                       ^\n  52 |     });\n  53 |   });\n  54 | }\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:51:23"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "[qa-a11y] member: Home: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] member: Library: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] member: Reader: label-content-name-mismatch [serious] ×2 – Elements must have their visible text as part of their accessible name – e.g. button[aria-label=\"Smaller text\"]\n"
+                        },
+                        {
+                          "text": "[qa-a11y] member: Search results: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] member: Ask: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] member: Profile: no violations\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:40:53.512Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-me-20f85-ious-accessibility-problems/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-me-20f85-ious-accessibility-problems/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                        "column": 23,
+                        "line": 51
+                      }
+                    },
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 8881,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Reader: label-content-name-mismatch [serious] ×2 – Elements must have their visible text as part of their accessible name – e.g. button[aria-label=\\\"Smaller text\\\"]\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Reader: label-content-name-mismatch [serious] ×2 – Elements must have their visible text as part of their accessible name – e.g. button[aria-label=\\\"Smaller text\\\"]\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:51:23",
+                        "location": {
+                          "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                          "column": 23,
+                          "line": 51
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 49 |\u001b[39m         }\n \u001b[90m 50 |\u001b[39m       }\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 51 |\u001b[39m       expect(serious)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                       \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 52 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 53 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 54 |\u001b[39m }\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                            "column": 23,
+                            "line": 51
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Reader: label-content-name-mismatch [serious] ×2 – Elements must have their visible text as part of their accessible name – e.g. button[aria-label=\\\"Smaller text\\\"]\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  49 |         }\n  50 |       }\n> 51 |       expect(serious).toEqual([]);\n     |                       ^\n  52 |     });\n  53 |   });\n  54 | }\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:51:23"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "[qa-a11y] member: Home: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] member: Library: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] member: Reader: label-content-name-mismatch [serious] ×2 – Elements must have their visible text as part of their accessible name – e.g. button[aria-label=\"Smaller text\"]\n"
+                        },
+                        {
+                          "text": "[qa-a11y] member: Search results: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] member: Ask: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] member: Profile: no violations\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-11-04T02:41:03.207Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-me-20f85-ious-accessibility-problems-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-me-20f85-ious-accessibility-problems-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                        "column": 23,
+                        "line": 51
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "d96860bd1c04efbd4204-89198e633d2d6ac1c990",
+              "file": "qa-mobile-accessibility.spec.ts",
+              "line": 31,
+              "column": 9
+            }
+          ]
+        },
+        {
+          "title": "owner: phone layout",
+          "file": "qa-mobile-accessibility.spec.ts",
+          "line": 11,
+          "column": 8,
+          "specs": [
+            {
+              "title": "owner pages fit a phone screen",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 7100,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Branding (8px too wide)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Branding (8px too wide)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:26:27",
+                        "location": {
+                          "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                          "column": 27,
+                          "line": 26
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 24 |\u001b[39m       }\n \u001b[90m 25 |\u001b[39m       console\u001b[33m.\u001b[39mlog(\u001b[32m`[qa-mobile] ${group.who}: ${JSON.stringify(overflowing)}`\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 26 |\u001b[39m       expect(overflowing)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                           \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 27 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 28 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 29 |\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                            "column": 27,
+                            "line": 26
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Branding (8px too wide)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  24 |       }\n  25 |       console.log(`[qa-mobile] ${group.who}: ${JSON.stringify(overflowing)}`);\n> 26 |       expect(overflowing).toEqual([]);\n     |                           ^\n  27 |     });\n  28 |   });\n  29 |\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:26:27"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "[qa-mobile] owner: [\"Branding (8px too wide)\"]\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:41:13.267Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-ow-70eb6-er-pages-fit-a-phone-screen/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-ow-70eb6-er-pages-fit-a-phone-screen/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                        "column": 27,
+                        "line": 26
+                      }
+                    },
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 7191,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Branding (8px too wide)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Branding (8px too wide)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:26:27",
+                        "location": {
+                          "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                          "column": 27,
+                          "line": 26
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 24 |\u001b[39m       }\n \u001b[90m 25 |\u001b[39m       console\u001b[33m.\u001b[39mlog(\u001b[32m`[qa-mobile] ${group.who}: ${JSON.stringify(overflowing)}`\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 26 |\u001b[39m       expect(overflowing)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                           \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 27 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 28 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 29 |\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                            "column": 27,
+                            "line": 26
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Branding (8px too wide)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  24 |       }\n  25 |       console.log(`[qa-mobile] ${group.who}: ${JSON.stringify(overflowing)}`);\n> 26 |       expect(overflowing).toEqual([]);\n     |                           ^\n  27 |     });\n  28 |   });\n  29 |\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:26:27"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "[qa-mobile] owner: [\"Branding (8px too wide)\"]\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-11-04T02:41:21.172Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-ow-70eb6-er-pages-fit-a-phone-screen-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-ow-70eb6-er-pages-fit-a-phone-screen-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                        "column": 27,
+                        "line": 26
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "d96860bd1c04efbd4204-bb0742106129b75b3b97",
+              "file": "qa-mobile-accessibility.spec.ts",
+              "line": 14,
+              "column": 9
+            }
+          ]
+        },
+        {
+          "title": "owner: accessibility",
+          "file": "qa-mobile-accessibility.spec.ts",
+          "line": 30,
+          "column": 8,
+          "specs": [
+            {
+              "title": "owner pages have no serious accessibility problems",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 6,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 12135,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 4\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Approved answers: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\",\u001b[39m\n\u001b[31m+   \"Subscription: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 4\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Approved answers: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\",\u001b[39m\n\u001b[31m+   \"Subscription: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:51:23",
+                        "location": {
+                          "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                          "column": 23,
+                          "line": 51
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 49 |\u001b[39m         }\n \u001b[90m 50 |\u001b[39m       }\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 51 |\u001b[39m       expect(serious)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                       \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 52 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 53 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 54 |\u001b[39m }\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                            "column": 23,
+                            "line": 51
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 4\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Approved answers: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\",\u001b[39m\n\u001b[31m+   \"Subscription: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  49 |         }\n  50 |       }\n> 51 |       expect(serious).toEqual([]);\n     |                       ^\n  52 |     });\n  53 |   });\n  54 | }\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:51:23"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "[qa-a11y] owner: Manage: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] owner: Documents: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] owner: Members: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] owner: Branding: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] owner: Approved answers: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\n"
+                        },
+                        {
+                          "text": "[qa-a11y] owner: Simple words: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] owner: Subscription: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\n"
+                        },
+                        {
+                          "text": "[qa-a11y] owner: Portal address: no violations\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:41:29.121Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-ow-bbd16-ious-accessibility-problems/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-ow-bbd16-ious-accessibility-problems/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                        "column": 23,
+                        "line": 51
+                      }
+                    },
+                    {
+                      "workerIndex": 7,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 12068,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 4\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Approved answers: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\",\u001b[39m\n\u001b[31m+   \"Subscription: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 4\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Approved answers: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\",\u001b[39m\n\u001b[31m+   \"Subscription: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:51:23",
+                        "location": {
+                          "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                          "column": 23,
+                          "line": 51
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 49 |\u001b[39m         }\n \u001b[90m 50 |\u001b[39m       }\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 51 |\u001b[39m       expect(serious)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                       \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 52 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 53 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 54 |\u001b[39m }\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                            "column": 23,
+                            "line": 51
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 4\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Approved answers: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\",\u001b[39m\n\u001b[31m+   \"Subscription: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  49 |         }\n  50 |       }\n> 51 |       expect(serious).toEqual([]);\n     |                       ^\n  52 |     });\n  53 |   });\n  54 | }\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:51:23"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "[qa-a11y] owner: Manage: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] owner: Documents: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] owner: Members: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] owner: Branding: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] owner: Approved answers: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\n"
+                        },
+                        {
+                          "text": "[qa-a11y] owner: Simple words: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] owner: Subscription: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\n"
+                        },
+                        {
+                          "text": "[qa-a11y] owner: Portal address: no violations\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-11-04T02:41:42.587Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-ow-bbd16-ious-accessibility-problems-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-ow-bbd16-ious-accessibility-problems-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                        "column": 23,
+                        "line": 51
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "d96860bd1c04efbd4204-72616b930bf4ea3db8a8",
+              "file": "qa-mobile-accessibility.spec.ts",
+              "line": 31,
+              "column": 9
+            }
+          ]
+        },
+        {
+          "title": "super admin: phone layout",
+          "file": "qa-mobile-accessibility.spec.ts",
+          "line": 11,
+          "column": 8,
+          "specs": [
+            {
+              "title": "super admin pages fit a phone screen",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 8,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 4483,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Overview (96px too wide)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Overview (96px too wide)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:26:27",
+                        "location": {
+                          "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                          "column": 27,
+                          "line": 26
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 24 |\u001b[39m       }\n \u001b[90m 25 |\u001b[39m       console\u001b[33m.\u001b[39mlog(\u001b[32m`[qa-mobile] ${group.who}: ${JSON.stringify(overflowing)}`\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 26 |\u001b[39m       expect(overflowing)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                           \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 27 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 28 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 29 |\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                            "column": 27,
+                            "line": 26
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Overview (96px too wide)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  24 |       }\n  25 |       console.log(`[qa-mobile] ${group.who}: ${JSON.stringify(overflowing)}`);\n> 26 |       expect(overflowing).toEqual([]);\n     |                           ^\n  27 |     });\n  28 |   });\n  29 |\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:26:27"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "[qa-mobile] super admin: [\"Overview (96px too wide)\"]\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:41:55.995Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-su-82a6f-in-pages-fit-a-phone-screen/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-su-82a6f-in-pages-fit-a-phone-screen/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                        "column": 27,
+                        "line": 26
+                      }
+                    },
+                    {
+                      "workerIndex": 9,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 4588,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Overview (96px too wide)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Overview (96px too wide)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:26:27",
+                        "location": {
+                          "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                          "column": 27,
+                          "line": 26
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 24 |\u001b[39m       }\n \u001b[90m 25 |\u001b[39m       console\u001b[33m.\u001b[39mlog(\u001b[32m`[qa-mobile] ${group.who}: ${JSON.stringify(overflowing)}`\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 26 |\u001b[39m       expect(overflowing)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                           \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 27 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 28 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 29 |\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                            "column": 27,
+                            "line": 26
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Overview (96px too wide)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  24 |       }\n  25 |       console.log(`[qa-mobile] ${group.who}: ${JSON.stringify(overflowing)}`);\n> 26 |       expect(overflowing).toEqual([]);\n     |                           ^\n  27 |     });\n  28 |   });\n  29 |\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:26:27"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "[qa-mobile] super admin: [\"Overview (96px too wide)\"]\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-11-04T02:42:01.172Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-su-82a6f-in-pages-fit-a-phone-screen-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-su-82a6f-in-pages-fit-a-phone-screen-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                        "column": 27,
+                        "line": 26
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "d96860bd1c04efbd4204-20359162e5552de12881",
+              "file": "qa-mobile-accessibility.spec.ts",
+              "line": 14,
+              "column": 9
+            }
+          ]
+        },
+        {
+          "title": "super admin: accessibility",
+          "file": "qa-mobile-accessibility.spec.ts",
+          "line": 30,
+          "column": 8,
+          "specs": [
+            {
+              "title": "super admin pages have no serious accessibility problems",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 10,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 8887,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 6\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Overview: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .text-teal-600.hover\\\\:underline[href$=\\\"organisations\\\"]\",\u001b[39m\n\u001b[31m+   \"Organisations: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .align-top:nth-child(2) > td:nth-child(3) > .space-y-1 > .bg-teal-100.text-teal-600.ring-teal-500\\\\/30\",\u001b[39m\n\u001b[31m+   \"Plans: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .rounded-full\",\u001b[39m\n\u001b[31m+   \"System health: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 6\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Overview: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .text-teal-600.hover\\\\:underline[href$=\\\"organisations\\\"]\",\u001b[39m\n\u001b[31m+   \"Organisations: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .align-top:nth-child(2) > td:nth-child(3) > .space-y-1 > .bg-teal-100.text-teal-600.ring-teal-500\\\\/30\",\u001b[39m\n\u001b[31m+   \"Plans: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .rounded-full\",\u001b[39m\n\u001b[31m+   \"System health: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:51:23",
+                        "location": {
+                          "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                          "column": 23,
+                          "line": 51
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 49 |\u001b[39m         }\n \u001b[90m 50 |\u001b[39m       }\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 51 |\u001b[39m       expect(serious)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                       \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 52 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 53 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 54 |\u001b[39m }\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                            "column": 23,
+                            "line": 51
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 6\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Overview: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .text-teal-600.hover\\\\:underline[href$=\\\"organisations\\\"]\",\u001b[39m\n\u001b[31m+   \"Organisations: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .align-top:nth-child(2) > td:nth-child(3) > .space-y-1 > .bg-teal-100.text-teal-600.ring-teal-500\\\\/30\",\u001b[39m\n\u001b[31m+   \"Plans: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .rounded-full\",\u001b[39m\n\u001b[31m+   \"System health: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  49 |         }\n  50 |       }\n> 51 |       expect(serious).toEqual([]);\n     |                       ^\n  52 |     });\n  53 |   });\n  54 | }\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:51:23"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "[qa-a11y] super admin: Overview: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .text-teal-600.hover\\:underline[href$=\"organisations\"]\n"
+                        },
+                        {
+                          "text": "[qa-a11y] super admin: Organisations: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .align-top:nth-child(2) > td:nth-child(3) > .space-y-1 > .bg-teal-100.text-teal-600.ring-teal-500\\/30\n"
+                        },
+                        {
+                          "text": "[qa-a11y] super admin: Billing: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] super admin: Plans: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .rounded-full\n"
+                        },
+                        {
+                          "text": "[qa-a11y] super admin: Audit log: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] super admin: System health: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:42:06.417Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-su-73596-ious-accessibility-problems/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-su-73596-ious-accessibility-problems/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                        "column": 23,
+                        "line": 51
+                      }
+                    },
+                    {
+                      "workerIndex": 11,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 8809,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 6\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Overview: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .text-teal-600.hover\\\\:underline[href$=\\\"organisations\\\"]\",\u001b[39m\n\u001b[31m+   \"Organisations: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .align-top:nth-child(2) > td:nth-child(3) > .space-y-1 > .bg-teal-100.text-teal-600.ring-teal-500\\\\/30\",\u001b[39m\n\u001b[31m+   \"Plans: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .rounded-full\",\u001b[39m\n\u001b[31m+   \"System health: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 6\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Overview: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .text-teal-600.hover\\\\:underline[href$=\\\"organisations\\\"]\",\u001b[39m\n\u001b[31m+   \"Organisations: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .align-top:nth-child(2) > td:nth-child(3) > .space-y-1 > .bg-teal-100.text-teal-600.ring-teal-500\\\\/30\",\u001b[39m\n\u001b[31m+   \"Plans: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .rounded-full\",\u001b[39m\n\u001b[31m+   \"System health: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:51:23",
+                        "location": {
+                          "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                          "column": 23,
+                          "line": 51
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 49 |\u001b[39m         }\n \u001b[90m 50 |\u001b[39m       }\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 51 |\u001b[39m       expect(serious)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                       \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 52 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 53 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 54 |\u001b[39m }\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                            "column": 23,
+                            "line": 51
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 6\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Overview: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .text-teal-600.hover\\\\:underline[href$=\\\"organisations\\\"]\",\u001b[39m\n\u001b[31m+   \"Organisations: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .align-top:nth-child(2) > td:nth-child(3) > .space-y-1 > .bg-teal-100.text-teal-600.ring-teal-500\\\\/30\",\u001b[39m\n\u001b[31m+   \"Plans: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .rounded-full\",\u001b[39m\n\u001b[31m+   \"System health: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  49 |         }\n  50 |       }\n> 51 |       expect(serious).toEqual([]);\n     |                       ^\n  52 |     });\n  53 |   });\n  54 | }\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:51:23"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "[qa-a11y] super admin: Overview: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .text-teal-600.hover\\:underline[href$=\"organisations\"]\n"
+                        },
+                        {
+                          "text": "[qa-a11y] super admin: Organisations: color-contrast [serious] ×2 – Elements must meet minimum color contrast ratio thresholds – e.g. .align-top:nth-child(2) > td:nth-child(3) > .space-y-1 > .bg-teal-100.text-teal-600.ring-teal-500\\/30\n"
+                        },
+                        {
+                          "text": "[qa-a11y] super admin: Billing: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] super admin: Plans: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .rounded-full\n"
+                        },
+                        {
+                          "text": "[qa-a11y] super admin: Audit log: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] super admin: System health: color-contrast [serious] ×1 – Elements must meet minimum color contrast ratio thresholds – e.g. .bg-teal-100\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-11-04T02:42:16.443Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-su-73596-ious-accessibility-problems-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-su-73596-ious-accessibility-problems-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                        "column": 23,
+                        "line": 51
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "d96860bd1c04efbd4204-f2435190609ff09f1e3a",
+              "file": "qa-mobile-accessibility.spec.ts",
+              "line": 31,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "qa-roles.spec.ts",
+      "file": "qa-roles.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "owner sees only the Manage sections the role allows",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 12,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1188,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:42:26.408Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b084af77b21d9cfcdc78-bedc6c9fd905ce47f756",
+          "file": "qa-roles.spec.ts",
+          "line": 27,
+          "column": 7
+        },
+        {
+          "title": "admin sees only the Manage sections the role allows",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 12,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 913,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:42:27.741Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b084af77b21d9cfcdc78-a040556454a26e776a98",
+          "file": "qa-roles.spec.ts",
+          "line": 27,
+          "column": 7
+        },
+        {
+          "title": "reviewer sees only the Manage sections the role allows",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 12,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 996,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:42:28.666Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b084af77b21d9cfcdc78-d64c69494f985c3006b8",
+          "file": "qa-roles.spec.ts",
+          "line": 27,
+          "column": 7
+        },
+        {
+          "title": "auditor sees only the Manage sections the role allows",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 12,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 807,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:42:29.675Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b084af77b21d9cfcdc78-4ab6f4334851bfde0ae2",
+          "file": "qa-roles.spec.ts",
+          "line": 27,
+          "column": 7
+        },
+        {
+          "title": "member sees only the Manage sections the role allows",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 12,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 838,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:42:30.496Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b084af77b21d9cfcdc78-ced48b7f5b74fe154478",
+          "file": "qa-roles.spec.ts",
+          "line": 27,
+          "column": 7
+        },
+        {
+          "title": "a section opened by its address is refused when the role does not include it",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 12,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1217,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:42:31.365Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b084af77b21d9cfcdc78-a337eada1ce91a811b4d",
+          "file": "qa-roles.spec.ts",
+          "line": 49,
+          "column": 5
+        },
+        {
+          "title": "the API refuses actions outside the role, even without the page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 12,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 626,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:42:32.595Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b084af77b21d9cfcdc78-92e220b2d4d76b6ee99b",
+          "file": "qa-roles.spec.ts",
+          "line": 59,
+          "column": 5
+        },
+        {
+          "title": "an auditor can read but not change anything",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 12,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 642,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:42:33.230Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b084af77b21d9cfcdc78-43829de29263424b28f0",
+          "file": "qa-roles.spec.ts",
+          "line": 76,
+          "column": 5
+        },
+        {
+          "title": "an administrator cannot grant the Owner role",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 12,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 560,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:42:33.885Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b084af77b21d9cfcdc78-760ff7b3f6f5eb37bc99",
+          "file": "qa-roles.spec.ts",
+          "line": 92,
+          "column": 5
+        },
+        {
+          "title": "organisation roles give no access to the Control Centre",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 12,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 605,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:42:34.463Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b084af77b21d9cfcdc78-6e64e3122fae5151ebaa",
+          "file": "qa-roles.spec.ts",
+          "line": 102,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "qa-tenancy-errors.spec.ts",
+      "file": "qa-tenancy-errors.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "tenant isolation",
+          "file": "qa-tenancy-errors.spec.ts",
+          "line": 7,
+          "column": 6,
+          "specs": [
+            {
+              "title": "a choir member cannot open the netball club portal",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 12,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 656,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:42:35.094Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0d48dae7737032b66e96-99dbddf36488ea3d1f08",
+              "file": "qa-tenancy-errors.spec.ts",
+              "line": 8,
+              "column": 7
+            },
+            {
+              "title": "a netball member cannot open the choir portal",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 12,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 623,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:42:35.760Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0d48dae7737032b66e96-3fa7e2c0f7fcb0a8b0e0",
+              "file": "qa-tenancy-errors.spec.ts",
+              "line": 17,
+              "column": 7
+            },
+            {
+              "title": "the API refuses another organisation’s data with \"not found\"",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 12,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1335,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:42:36.395Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0d48dae7737032b66e96-e077570cb1318242ab9d",
+              "file": "qa-tenancy-errors.spec.ts",
+              "line": 25,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "error handling",
+          "file": "qa-tenancy-errors.spec.ts",
+          "line": 57,
+          "column": 6,
+          "specs": [
+            {
+              "title": "a wrong password shows a clear message and does not sign in",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 12,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 480,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:42:37.742Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0d48dae7737032b66e96-d8b5802a2d93ecdac134",
+              "file": "qa-tenancy-errors.spec.ts",
+              "line": 58,
+              "column": 7
+            },
+            {
+              "title": "an empty sign-in form is not sent",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 12,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 392,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:42:38.237Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0d48dae7737032b66e96-777c326de2ffacc10dea",
+              "file": "qa-tenancy-errors.spec.ts",
+              "line": 69,
+              "column": 7
+            },
+            {
+              "title": "an unknown portal address says so",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 12,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 284,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:42:38.639Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0d48dae7737032b66e96-35368b48bb2bf9bcf4e9",
+              "file": "qa-tenancy-errors.spec.ts",
+              "line": 79,
+              "column": 7
+            },
+            {
+              "title": "when the session ends, the next page asks to sign in again",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 12,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 772,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:42:38.937Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0d48dae7737032b66e96-c385e889b34cf87fd4f2",
+              "file": "qa-tenancy-errors.spec.ts",
+              "line": 84,
+              "column": 7
+            },
+            {
+              "title": "a made-up password-reset link is refused politely",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 12,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 60035,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 60000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 60000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 60000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-tenancy-errors.spec.ts",
+                            "column": 60,
+                            "line": 94
+                          },
+                          "message": "Error: locator.fill: Test timeout of 60000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByLabel('New password', { exact: true })\u001b[22m\n\n\n  92 |   test('a made-up password-reset link is refused politely', async ({ page }) => {\n  93 |     await page.goto('/reset-password?token=this-is-not-a-real-reset-token-at-all');\n> 94 |     await page.getByLabel('New password', { exact: true }).fill('a brand new long passphrase');\n     |                                                            ^\n  95 |     await page.getByLabel('Confirm new password').fill('a brand new long passphrase');\n  96 |     await page.getByRole('button', { name: 'Set password' }).click();\n  97 |     await expect(page.getByRole('alert')).toContainText(/link|expired|invalid/i);\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-tenancy-errors.spec.ts:94:60"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:42:39.719Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-tenancy-errors-error-ha-18b6c-et-link-is-refused-politely/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-tenancy-errors-error-ha-18b6c-et-link-is-refused-politely/trace.zip"
+                        }
+                      ]
+                    },
+                    {
+                      "workerIndex": 13,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 60043,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 60000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 60000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 60000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-tenancy-errors.spec.ts",
+                            "column": 60,
+                            "line": 94
+                          },
+                          "message": "Error: locator.fill: Test timeout of 60000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByLabel('New password', { exact: true })\u001b[22m\n\n\n  92 |   test('a made-up password-reset link is refused politely', async ({ page }) => {\n  93 |     await page.goto('/reset-password?token=this-is-not-a-real-reset-token-at-all');\n> 94 |     await page.getByLabel('New password', { exact: true }).fill('a brand new long passphrase');\n     |                                                            ^\n  95 |     await page.getByLabel('Confirm new password').fill('a brand new long passphrase');\n  96 |     await page.getByRole('button', { name: 'Set password' }).click();\n  97 |     await expect(page.getByRole('alert')).toContainText(/link|expired|invalid/i);\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-tenancy-errors.spec.ts:94:60"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-11-04T02:43:40.253Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-tenancy-errors-error-ha-18b6c-et-link-is-refused-politely-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-tenancy-errors-error-ha-18b6c-et-link-is-refused-politely-retry1/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "0d48dae7737032b66e96-7980f0e8ce74e6fe3e7a",
+              "file": "qa-tenancy-errors.spec.ts",
+              "line": 92,
+              "column": 7
+            },
+            {
+              "title": "unknown API addresses answer with a structured error, not a stack trace",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 14,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 45,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:44:40.861Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0d48dae7737032b66e96-2156cf475a6d1334059c",
+              "file": "qa-tenancy-errors.spec.ts",
+              "line": 100,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "search-reader.spec.ts",
+      "file": "search-reader.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "finds a clause by number and shows its reference, version and neighbours",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 14,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2796,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:44:40.964Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "fe99064342059dbd31fc-6ae97d9d252a7f3993e8",
+          "file": "search-reader.spec.ts",
+          "line": 26,
+          "column": 5
+        },
+        {
+          "title": "finds lettered sub-clauses by reference",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 14,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1294,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:44:43.845Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "fe99064342059dbd31fc-0e53bf1363f5cc4d380a",
+          "file": "search-reader.spec.ts",
+          "line": 54,
+          "column": 5
+        },
+        {
+          "title": "gives helpful messages when nothing is found",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 14,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1546,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:44:45.159Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "fe99064342059dbd31fc-9ecc073316035e736c22",
+          "file": "search-reader.spec.ts",
+          "line": 66,
+          "column": 5
+        }
+      ],
+      "suites": [
+        {
+          "title": "on a phone",
+          "file": "search-reader.spec.ts",
+          "line": 79,
+          "column": 6,
+          "specs": [
+            {
+              "title": "moves between sections with large buttons",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 14,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1173,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:44:46.722Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fe99064342059dbd31fc-3c87edacda161452fc0b",
+              "file": "search-reader.spec.ts",
+              "line": 82,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "security-headers.spec.ts",
+      "file": "security-headers.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "pages carry a strict policy with a fresh nonce each time",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 14,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 370,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:44:47.911Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9e3ea47c3dd308804f1b-58fd59dcdadf1662442b",
+          "file": "security-headers.spec.ts",
+          "line": 29,
+          "column": 5
+        },
+        {
+          "title": "the member and admin pages work with no policy violations",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 14,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1585,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:44:48.299Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9e3ea47c3dd308804f1b-c72046aa809984414e82",
+          "file": "security-headers.spec.ts",
+          "line": 43,
+          "column": 5
+        },
+        {
+          "title": "injected markup cannot run code",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 14,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 561,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:44:49.896Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9e3ea47c3dd308804f1b-a6ec34c4af34a48bbebd",
+          "file": "security-headers.spec.ts",
+          "line": 63,
+          "column": 5
+        },
+        {
+          "title": "API responses are not stored by the browser",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 14,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 12,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:44:50.475Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9e3ea47c3dd308804f1b-02debb3deaceafe83803",
+          "file": "security-headers.spec.ts",
+          "line": 84,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "simple-words.spec.ts",
+      "file": "simple-words.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "write, study and approve simple words; members see them under the original",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 14,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2656,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:44:50.501Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6b53ad96dba4241da99a-0aae1a52217e0d77a26d",
+          "file": "simple-words.spec.ts",
+          "line": 22,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-04T02:39:43.570Z",
+    "duration": 309691.464,
+    "expected": 57,
+    "skipped": 0,
+    "unexpected": 7,
+    "flaky": 0
+  }
+}

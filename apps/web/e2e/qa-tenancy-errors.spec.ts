@@ -91,7 +91,7 @@ test.describe('error handling', () => {
 
   test('a made-up password-reset link is refused politely', async ({ page }) => {
     await page.goto('/reset-password?token=this-is-not-a-real-reset-token-at-all');
-    await page.getByLabel('New password', { exact: true }).fill('a brand new long passphrase');
+    await page.getByLabel(/^New password/).fill('a brand new long passphrase');
     await page.getByLabel('Confirm new password').fill('a brand new long passphrase');
     await page.getByRole('button', { name: 'Set password' }).click();
     await expect(page.getByRole('alert')).toContainText(/link|expired|invalid/i);

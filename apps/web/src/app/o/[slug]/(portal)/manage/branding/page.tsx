@@ -135,7 +135,7 @@ export default function BrandingPage() {
   const warnings = colourWarnings({ primary, secondary, accent });
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[1fr_22rem]">
+    <div className="grid gap-5 lg:grid-cols-[1fr_22rem] [&>*]:min-w-0">
       <div className="space-y-5">
         <Panel
           title="Logo"

@@ -339,7 +339,7 @@ function Reader() {
                 className="px-4"
                 onClick={() => changeSize(size - 1)}
                 disabled={size === 0}
-                aria-label="Smaller text"
+                aria-label="A− Smaller text"
               >
                 A−
               </PortalButton>
@@ -348,7 +348,7 @@ function Reader() {
                 className="px-4 text-lg"
                 onClick={() => changeSize(size + 1)}
                 disabled={size === TEXT_SIZES.length - 1}
-                aria-label="Larger text"
+                aria-label="A+ Larger text"
               >
                 A+
               </PortalButton>

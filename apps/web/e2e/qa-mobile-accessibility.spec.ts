@@ -20,7 +20,22 @@ for (const group of PAGE_GROUPS) {
         const sideways = await page.evaluate(
           () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
         );
-        if (sideways > 1) overflowing.push(`${item.name} (${sideways}px too wide)`);
+        if (sideways > 1) {
+          // Name the widest elements, so the cause can be found from the report.
+          const culprits = await page.evaluate(() => {
+            const limit = document.documentElement.clientWidth;
+            return [...document.querySelectorAll('body *')]
+              .map((element) => ({ element, right: element.getBoundingClientRect().right }))
+              .filter((item) => item.right > limit + 1)
+              .sort((a, b) => b.right - a.right)
+              .slice(0, 4)
+              .map(
+                ({ element, right }) =>
+                  `${element.tagName.toLowerCase()}.${String(element.className).slice(0, 60)} (right ${Math.round(right)})`,
+              );
+          });
+          overflowing.push(`${item.name} (${sideways}px too wide: ${culprits.join(' | ')})`);
+        }
       }
       console.log(`[qa-mobile] ${group.who}: ${JSON.stringify(overflowing)}`);
       expect(overflowing).toEqual([]);

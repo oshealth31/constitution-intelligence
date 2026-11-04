@@ -7,7 +7,7 @@ services:
     build: ./ci-offsite
     image: constitution-ci-offsite:ci
     volumes:
-      - ./ci-offsite-keys:/etc/ssh/keys:ro
+      - ./ci-offsite-keys:/keys-in:ro
     networks: [egress]
   ops:
     depends_on:

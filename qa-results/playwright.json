@@ -1,0 +1,2843 @@
+{
+  "config": {
+    "argv": [
+      "/opt/hostedtoolcache/node/22.23.4/x64/bin/node",
+      "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/node_modules/@playwright/test/cli.js",
+      "test",
+      "--reporter=list,json"
+    ],
+    "configFile": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/playwright.config.ts",
+    "rootDir": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/global-setup.ts",
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "ci": {
+        "commitHref": "https://github.com/oshealth31/constitution-intelligence/commit/f7969c79337e93086b4c1f7785520e688f16d3fc",
+        "commitHash": "f7969c79337e93086b4c1f7785520e688f16d3fc",
+        "buildHref": "https://github.com/oshealth31/constitution-intelligence/actions/runs/41762925363"
+      },
+      "gitCommit": {
+        "shortHash": "f7969c7",
+        "hash": "f7969c79337e93086b4c1f7785520e688f16d3fc",
+        "subject": "Stage 13: fix contrast, button names and phone layout found by QA; report overflow causes",
+        "body": "Stage 13: fix contrast, button names and phone layout found by QA; report overflow causes\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Pd22wQCLcbc7o2TdStqjL6\n",
+        "author": {
+          "name": "Claude",
+          "email": "noreply@anthropic.com",
+          "time": 1793760396000
+        },
+        "committer": {
+          "name": "Claude",
+          "email": "noreply@anthropic.com",
+          "time": 1793760396000
+        },
+        "branch": "tooling/qa-results-2"
+      },
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "ci": {
+            "commitHref": "https://github.com/oshealth31/constitution-intelligence/commit/f7969c79337e93086b4c1f7785520e688f16d3fc",
+            "commitHash": "f7969c79337e93086b4c1f7785520e688f16d3fc",
+            "buildHref": "https://github.com/oshealth31/constitution-intelligence/actions/runs/41762925363"
+          },
+          "gitCommit": {
+            "shortHash": "f7969c7",
+            "hash": "f7969c79337e93086b4c1f7785520e688f16d3fc",
+            "subject": "Stage 13: fix contrast, button names and phone layout found by QA; report overflow causes",
+            "body": "Stage 13: fix contrast, button names and phone layout found by QA; report overflow causes\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Pd22wQCLcbc7o2TdStqjL6\n",
+            "author": {
+              "name": "Claude",
+              "email": "noreply@anthropic.com",
+              "time": 1793760396000
+            },
+            "committer": {
+              "name": "Claude",
+              "email": "noreply@anthropic.com",
+              "time": 1793760396000
+            },
+            "branch": "tooling/qa-results-2"
+          },
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "filteredProjects": [
+      {
+        "grep": {},
+        "grepInvert": null,
+        "outputDir": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "ci": {
+            "commitHref": "https://github.com/oshealth31/constitution-intelligence/commit/f7969c79337e93086b4c1f7785520e688f16d3fc",
+            "commitHash": "f7969c79337e93086b4c1f7785520e688f16d3fc",
+            "buildHref": "https://github.com/oshealth31/constitution-intelligence/actions/runs/41762925363"
+          },
+          "gitCommit": {
+            "shortHash": "f7969c7",
+            "hash": "f7969c79337e93086b4c1f7785520e688f16d3fc",
+            "subject": "Stage 13: fix contrast, button names and phone layout found by QA; report overflow causes",
+            "body": "Stage 13: fix contrast, button names and phone layout found by QA; report overflow causes\n\nCo-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>\nClaude-Session: https://claude.ai/code/session_01Pd22wQCLcbc7o2TdStqjL6\n",
+            "author": {
+              "name": "Claude",
+              "email": "noreply@anthropic.com",
+              "time": 1793760396000
+            },
+            "committer": {
+              "name": "Claude",
+              "email": "noreply@anthropic.com",
+              "time": 1793760396000
+            },
+            "branch": "tooling/qa-results-2"
+          },
+          "actualWorkers": 1
+        },
+        "name": "",
+        "testDir": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e",
+        "snapshotDir": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e",
+        "testIgnore": [],
+        "testMatch": "**/*.@(spec|test).?(c|m)[jt]s?(x)",
+        "timeout": 60000,
+        "use": {
+          "baseURL": "http://127.0.0.1:3100",
+          "trace": "retain-on-failure",
+          "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.8078.4 Safari/537.36",
+          "viewport": {
+            "width": 1280,
+            "height": 720
+          },
+          "screen": {
+            "width": 1920,
+            "height": 1080
+          },
+          "deviceScaleFactor": 1,
+          "isMobile": false,
+          "hasTouch": false,
+          "defaultBrowserType": "chromium"
+        },
+        "dependencies": [],
+        "ignoreSnapshots": false,
+        "__projectId": ""
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "default",
+    "updateSourceMethod": "patch",
+    "version": "1.64.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "approved-answers.spec.ts",
+      "file": "approved-answers.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "an administrator writes, studies and approves an answer; members then see it",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3939,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:49:22.178Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5fdac231a737402313f6-01d60ad52d0ec8bf48d0",
+          "file": "approved-answers.spec.ts",
+          "line": 21,
+          "column": 5
+        },
+        {
+          "title": "imported AI drafts are labelled and wait for approval",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3286,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:49:26.539Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5fdac231a737402313f6-360889d4d6bafed61f97",
+          "file": "approved-answers.spec.ts",
+          "line": 76,
+          "column": 5
+        },
+        {
+          "title": "content reviewers can write drafts but not approve them",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1379,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:49:29.849Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "5fdac231a737402313f6-4b8a86bff7ec81a01579",
+          "file": "approved-answers.spec.ts",
+          "line": 122,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "ask.spec.ts",
+      "file": "ask.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "asks a question and shows the explanation apart from the original source text",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1535,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:49:31.254Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "af9604f7b4d03676e8c1-0a989e6c1a2197220543",
+          "file": "ask.spec.ts",
+          "line": 21,
+          "column": 5
+        },
+        {
+          "title": "says clearly when the constitution does not answer the question",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1306,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:49:32.819Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "af9604f7b4d03676e8c1-2b00c2eeb9d3ac320b47",
+          "file": "ask.spec.ts",
+          "line": 58,
+          "column": 5
+        },
+        {
+          "title": "offers suggested questions taken from the constitution’s own titles",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1246,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:49:34.148Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "af9604f7b4d03676e8c1-e628a1f385e9dba6b06f",
+          "file": "ask.spec.ts",
+          "line": 69,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "billing.spec.ts",
+      "file": "billing.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "invoice → owner reports payment → Super Admin verifies by hand → receipt",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4167,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:49:35.419Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "d4578388efe8f23c8f70-07d9cd5f1bb58bd49991",
+          "file": "billing.spec.ts",
+          "line": 40,
+          "column": 5
+        },
+        {
+          "title": "members of a suspended organisation are told the portal is unavailable",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2425,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:49:39.619Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "d4578388efe8f23c8f70-3b531f6f9546eb0bb572",
+          "file": "billing.spec.ts",
+          "line": 85,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "clause-finder.spec.ts",
+      "file": "clause-finder.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "with AI off, finds the matching clauses word for word instead of asking an AI",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1661,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:49:42.123Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "cb5e6496dc654afaab78-03bce98bbc9115c74df2",
+          "file": "clause-finder.spec.ts",
+          "line": 38,
+          "column": 5
+        },
+        {
+          "title": "with AI off, says clearly when no clause matches",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1535,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:49:43.839Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "cb5e6496dc654afaab78-7c01ba2f574c9cf8a700",
+          "file": "clause-finder.spec.ts",
+          "line": 69,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "control-centre.spec.ts",
+      "file": "control-centre.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "rejects a wrong password with a clear message",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 483,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:49:45.421Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "49f0a7f6f0b2ae1c17b5-3d742ff18670ecb32caf",
+          "file": "control-centre.spec.ts",
+          "line": 20,
+          "column": 5
+        },
+        {
+          "title": "sends signed-out visitors to the sign-in page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 418,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:49:45.939Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "49f0a7f6f0b2ae1c17b5-ce345be8e581bfa8321e",
+          "file": "control-centre.spec.ts",
+          "line": 31,
+          "column": 5
+        },
+        {
+          "title": "super admin sees live overview figures and system health",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 796,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:49:46.393Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "49f0a7f6f0b2ae1c17b5-853a9acfdbc816647e0f",
+          "file": "control-centre.spec.ts",
+          "line": 36,
+          "column": 5
+        },
+        {
+          "title": "super admin creates an organisation and manages subscription, branding and status",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1890,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:49:47.238Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "49f0a7f6f0b2ae1c17b5-a84d38ede84ef32b35cd",
+          "file": "control-centre.spec.ts",
+          "line": 47,
+          "column": 5
+        },
+        {
+          "title": "support access to content requires a reason and is recorded",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1433,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:49:49.166Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "49f0a7f6f0b2ae1c17b5-d5c7c8cd8d6101292268",
+          "file": "control-centre.spec.ts",
+          "line": 89,
+          "column": 5
+        },
+        {
+          "title": "an organisation administrator cannot use the control centre",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 541,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:49:50.657Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "49f0a7f6f0b2ae1c17b5-f6ad0a9b8af65d80b4c8",
+          "file": "control-centre.spec.ts",
+          "line": 110,
+          "column": 5
+        }
+      ],
+      "suites": [
+        {
+          "title": "on a phone",
+          "file": "control-centre.spec.ts",
+          "line": 120,
+          "column": 6,
+          "specs": [
+            {
+              "title": "the control centre is usable on a small screen",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 850,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:49:51.236Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "49f0a7f6f0b2ae1c17b5-d74fc1dea72d2bbd311f",
+              "file": "control-centre.spec.ts",
+              "line": 123,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "documents.spec.ts",
+      "file": "documents.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "upload, check, approve and publish a document; members only see it once published",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6113,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:49:52.125Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9111b41e0f82b685c9ea-7615d4e4fa1c59594d9b",
+          "file": "documents.spec.ts",
+          "line": 26,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "offline.spec.ts",
+      "file": "offline.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "save for offline reading, read and search offline, then sync when back online",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1983,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:49:58.294Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "586fc5283fd8ec7c7982-54defa8b340a3e59109e",
+          "file": "offline.spec.ts",
+          "line": 56,
+          "column": 5
+        },
+        {
+          "title": "the Ask page explains that live AI does not work offline",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 979,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:50:00.315Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "586fc5283fd8ec7c7982-832c67997d45635dbfb6",
+          "file": "offline.spec.ts",
+          "line": 119,
+          "column": 5
+        },
+        {
+          "title": "signing out removes the saved copy from the device",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1463,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:50:01.340Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "586fc5283fd8ec7c7982-41758e1a8bf5c71a0b99",
+          "file": "offline.spec.ts",
+          "line": 135,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "portal.spec.ts",
+      "file": "portal.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "each organisation has its own branded sign-in page from the same code",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 785,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:50:02.846Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "291f6c0e7fe47579f0c2-327cf69da3d50586380f",
+          "file": "portal.spec.ts",
+          "line": 40,
+          "column": 5
+        },
+        {
+          "title": "a member reads, navigates and searches the constitution",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1708,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:50:03.676Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "291f6c0e7fe47579f0c2-31e4af202210bba0d5d1",
+          "file": "portal.spec.ts",
+          "line": 55,
+          "column": 5
+        },
+        {
+          "title": "members of one organisation cannot open another organisation's portal",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1742,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:50:05.431Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "291f6c0e7fe47579f0c2-10047516b81b9fc5bde0",
+          "file": "portal.spec.ts",
+          "line": 93,
+          "column": 5
+        },
+        {
+          "title": "members do not get the manage area, and the API refuses their changes",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1121,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:50:07.206Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "291f6c0e7fe47579f0c2-29495095f1cddc2bca8e",
+          "file": "portal.spec.ts",
+          "line": 116,
+          "column": 5
+        },
+        {
+          "title": "an administrator changes branding, and unsafe content stays harmless",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1883,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:50:08.375Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "291f6c0e7fe47579f0c2-fa1181cc04417a675a5f",
+          "file": "portal.spec.ts",
+          "line": 130,
+          "column": 5
+        },
+        {
+          "title": "a content reviewer sees the approval status of every version",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1651,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:50:10.298Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "291f6c0e7fe47579f0c2-253106f29246940a0732",
+          "file": "portal.spec.ts",
+          "line": 193,
+          "column": 5
+        }
+      ],
+      "suites": [
+        {
+          "title": "on a phone",
+          "file": "portal.spec.ts",
+          "line": 207,
+          "column": 6,
+          "specs": [
+            {
+              "title": "large bottom navigation and a Contents button make the portal easy to use",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1178,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:50:11.998Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "291f6c0e7fe47579f0c2-455664d5ac6b1b576e26",
+              "file": "portal.spec.ts",
+              "line": 210,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "qa-mobile-accessibility.spec.ts",
+      "file": "qa-mobile-accessibility.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "not signed in: phone layout",
+          "file": "qa-mobile-accessibility.spec.ts",
+          "line": 11,
+          "column": 8,
+          "specs": [
+            {
+              "title": "not signed in pages fit a phone screen",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3382,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[qa-mobile] not signed in: []\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:50:13.272Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d96860bd1c04efbd4204-1a34a4efdefc41625550",
+              "file": "qa-mobile-accessibility.spec.ts",
+              "line": 14,
+              "column": 9
+            }
+          ]
+        },
+        {
+          "title": "not signed in: accessibility",
+          "file": "qa-mobile-accessibility.spec.ts",
+          "line": 45,
+          "column": 8,
+          "specs": [
+            {
+              "title": "not signed in pages have no serious accessibility problems",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5738,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[qa-a11y] not signed in: Portal sign-in: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] not signed in: Control Centre sign-in: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] not signed in: Forgot password: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] not signed in: Unknown portal: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] not signed in: Portal finder: no violations\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:50:16.692Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d96860bd1c04efbd4204-4afff08525d9852499a6",
+              "file": "qa-mobile-accessibility.spec.ts",
+              "line": 46,
+              "column": 9
+            }
+          ]
+        },
+        {
+          "title": "member: phone layout",
+          "file": "qa-mobile-accessibility.spec.ts",
+          "line": 11,
+          "column": 8,
+          "specs": [
+            {
+              "title": "member pages fit a phone screen",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5722,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[qa-mobile] member: []\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:50:22.469Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d96860bd1c04efbd4204-e6fa708baa91feeb1b88",
+              "file": "qa-mobile-accessibility.spec.ts",
+              "line": 14,
+              "column": 9
+            }
+          ]
+        },
+        {
+          "title": "member: accessibility",
+          "file": "qa-mobile-accessibility.spec.ts",
+          "line": 45,
+          "column": 8,
+          "specs": [
+            {
+              "title": "member pages have no serious accessibility problems",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 9420,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[qa-a11y] member: Home: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] member: Library: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] member: Reader: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] member: Search results: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] member: Ask: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] member: Profile: no violations\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:50:28.235Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d96860bd1c04efbd4204-89198e633d2d6ac1c990",
+              "file": "qa-mobile-accessibility.spec.ts",
+              "line": 46,
+              "column": 9
+            }
+          ]
+        },
+        {
+          "title": "owner: phone layout",
+          "file": "qa-mobile-accessibility.spec.ts",
+          "line": 11,
+          "column": 8,
+          "specs": [
+            {
+              "title": "owner pages fit a phone screen",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 7507,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[qa-mobile] owner: []\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:50:37.691Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d96860bd1c04efbd4204-bb0742106129b75b3b97",
+              "file": "qa-mobile-accessibility.spec.ts",
+              "line": 14,
+              "column": 9
+            }
+          ]
+        },
+        {
+          "title": "owner: accessibility",
+          "file": "qa-mobile-accessibility.spec.ts",
+          "line": 45,
+          "column": 8,
+          "specs": [
+            {
+              "title": "owner pages have no serious accessibility problems",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 12989,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[qa-a11y] owner: Manage: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] owner: Documents: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] owner: Members: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] owner: Branding: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] owner: Approved answers: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] owner: Simple words: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] owner: Subscription: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] owner: Portal address: no violations\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:50:45.248Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d96860bd1c04efbd4204-72616b930bf4ea3db8a8",
+              "file": "qa-mobile-accessibility.spec.ts",
+              "line": 46,
+              "column": 9
+            }
+          ]
+        },
+        {
+          "title": "super admin: phone layout",
+          "file": "qa-mobile-accessibility.spec.ts",
+          "line": 11,
+          "column": 8,
+          "specs": [
+            {
+              "title": "super admin pages fit a phone screen",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 4603,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Overview (96px too wide: section.rounded-2xl border border-ivory-100 bg-white p-5 shadow-[0_1 (right 456) | section.rounded-2xl border border-ivory-100 bg-white p-5 shadow-[0_1 (right 456) | header.mb-4 flex flex-wrap items-start justify-between gap-3 (right 435) | a.text-sm font-medium text-teal-600 hover:underline (right 435))\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Overview (96px too wide: section.rounded-2xl border border-ivory-100 bg-white p-5 shadow-[0_1 (right 456) | section.rounded-2xl border border-ivory-100 bg-white p-5 shadow-[0_1 (right 456) | header.mb-4 flex flex-wrap items-start justify-between gap-3 (right 435) | a.text-sm font-medium text-teal-600 hover:underline (right 435))\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:41:27",
+                        "location": {
+                          "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                          "column": 27,
+                          "line": 41
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 39 |\u001b[39m       }\n \u001b[90m 40 |\u001b[39m       console\u001b[33m.\u001b[39mlog(\u001b[32m`[qa-mobile] ${group.who}: ${JSON.stringify(overflowing)}`\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 41 |\u001b[39m       expect(overflowing)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                           \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 42 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 43 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 44 |\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                            "column": 27,
+                            "line": 41
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Overview (96px too wide: section.rounded-2xl border border-ivory-100 bg-white p-5 shadow-[0_1 (right 456) | section.rounded-2xl border border-ivory-100 bg-white p-5 shadow-[0_1 (right 456) | header.mb-4 flex flex-wrap items-start justify-between gap-3 (right 435) | a.text-sm font-medium text-teal-600 hover:underline (right 435))\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  39 |       }\n  40 |       console.log(`[qa-mobile] ${group.who}: ${JSON.stringify(overflowing)}`);\n> 41 |       expect(overflowing).toEqual([]);\n     |                           ^\n  42 |     });\n  43 |   });\n  44 |\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:41:27"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "[qa-mobile] super admin: [\"Overview (96px too wide: section.rounded-2xl border border-ivory-100 bg-white p-5 shadow-[0_1 (right 456) | section.rounded-2xl border border-ivory-100 bg-white p-5 shadow-[0_1 (right 456) | header.mb-4 flex flex-wrap items-start justify-between gap-3 (right 435) | a.text-sm font-medium text-teal-600 hover:underline (right 435))\"]\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:50:58.288Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-su-82a6f-in-pages-fit-a-phone-screen/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-su-82a6f-in-pages-fit-a-phone-screen/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                        "column": 27,
+                        "line": 41
+                      }
+                    },
+                    {
+                      "workerIndex": 1,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 4836,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Overview (96px too wide: section.rounded-2xl border border-ivory-100 bg-white p-5 shadow-[0_1 (right 456) | section.rounded-2xl border border-ivory-100 bg-white p-5 shadow-[0_1 (right 456) | header.mb-4 flex flex-wrap items-start justify-between gap-3 (right 435) | a.text-sm font-medium text-teal-600 hover:underline (right 435))\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Overview (96px too wide: section.rounded-2xl border border-ivory-100 bg-white p-5 shadow-[0_1 (right 456) | section.rounded-2xl border border-ivory-100 bg-white p-5 shadow-[0_1 (right 456) | header.mb-4 flex flex-wrap items-start justify-between gap-3 (right 435) | a.text-sm font-medium text-teal-600 hover:underline (right 435))\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:41:27",
+                        "location": {
+                          "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                          "column": 27,
+                          "line": 41
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 39 |\u001b[39m       }\n \u001b[90m 40 |\u001b[39m       console\u001b[33m.\u001b[39mlog(\u001b[32m`[qa-mobile] ${group.who}: ${JSON.stringify(overflowing)}`\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 41 |\u001b[39m       expect(overflowing)\u001b[33m.\u001b[39mtoEqual([])\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                           \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 42 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 43 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m 44 |\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                            "column": 27,
+                            "line": 41
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Overview (96px too wide: section.rounded-2xl border border-ivory-100 bg-white p-5 shadow-[0_1 (right 456) | section.rounded-2xl border border-ivory-100 bg-white p-5 shadow-[0_1 (right 456) | header.mb-4 flex flex-wrap items-start justify-between gap-3 (right 435) | a.text-sm font-medium text-teal-600 hover:underline (right 435))\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  39 |       }\n  40 |       console.log(`[qa-mobile] ${group.who}: ${JSON.stringify(overflowing)}`);\n> 41 |       expect(overflowing).toEqual([]);\n     |                           ^\n  42 |     });\n  43 |   });\n  44 |\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts:41:27"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "[qa-mobile] super admin: [\"Overview (96px too wide: section.rounded-2xl border border-ivory-100 bg-white p-5 shadow-[0_1 (right 456) | section.rounded-2xl border border-ivory-100 bg-white p-5 shadow-[0_1 (right 456) | header.mb-4 flex flex-wrap items-start justify-between gap-3 (right 435) | a.text-sm font-medium text-teal-600 hover:underline (right 435))\"]\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-11-04T02:51:04.174Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-su-82a6f-in-pages-fit-a-phone-screen-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-mobile-accessibility-su-82a6f-in-pages-fit-a-phone-screen-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-mobile-accessibility.spec.ts",
+                        "column": 27,
+                        "line": 41
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "d96860bd1c04efbd4204-20359162e5552de12881",
+              "file": "qa-mobile-accessibility.spec.ts",
+              "line": 14,
+              "column": 9
+            }
+          ]
+        },
+        {
+          "title": "super admin: accessibility",
+          "file": "qa-mobile-accessibility.spec.ts",
+          "line": 45,
+          "column": 8,
+          "specs": [
+            {
+              "title": "super admin pages have no serious accessibility problems",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 9820,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[qa-a11y] super admin: Overview: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] super admin: Organisations: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] super admin: Billing: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] super admin: Plans: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] super admin: Audit log: no violations\n"
+                        },
+                        {
+                          "text": "[qa-a11y] super admin: System health: no violations\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:51:09.878Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "d96860bd1c04efbd4204-f2435190609ff09f1e3a",
+              "file": "qa-mobile-accessibility.spec.ts",
+              "line": 46,
+              "column": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "qa-roles.spec.ts",
+      "file": "qa-roles.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "owner sees only the Manage sections the role allows",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1210,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:51:19.860Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b084af77b21d9cfcdc78-bedc6c9fd905ce47f756",
+          "file": "qa-roles.spec.ts",
+          "line": 27,
+          "column": 7
+        },
+        {
+          "title": "admin sees only the Manage sections the role allows",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1197,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:51:21.094Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b084af77b21d9cfcdc78-a040556454a26e776a98",
+          "file": "qa-roles.spec.ts",
+          "line": 27,
+          "column": 7
+        },
+        {
+          "title": "reviewer sees only the Manage sections the role allows",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1053,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:51:22.309Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b084af77b21d9cfcdc78-d64c69494f985c3006b8",
+          "file": "qa-roles.spec.ts",
+          "line": 27,
+          "column": 7
+        },
+        {
+          "title": "auditor sees only the Manage sections the role allows",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1059,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:51:23.383Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b084af77b21d9cfcdc78-4ab6f4334851bfde0ae2",
+          "file": "qa-roles.spec.ts",
+          "line": 27,
+          "column": 7
+        },
+        {
+          "title": "member sees only the Manage sections the role allows",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1143,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:51:24.460Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b084af77b21d9cfcdc78-ced48b7f5b74fe154478",
+          "file": "qa-roles.spec.ts",
+          "line": 27,
+          "column": 7
+        },
+        {
+          "title": "a section opened by its address is refused when the role does not include it",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1595,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:51:25.620Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b084af77b21d9cfcdc78-a337eada1ce91a811b4d",
+          "file": "qa-roles.spec.ts",
+          "line": 49,
+          "column": 5
+        },
+        {
+          "title": "the API refuses actions outside the role, even without the page",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 847,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:51:27.238Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b084af77b21d9cfcdc78-92e220b2d4d76b6ee99b",
+          "file": "qa-roles.spec.ts",
+          "line": 59,
+          "column": 5
+        },
+        {
+          "title": "an auditor can read but not change anything",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 777,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:51:28.101Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b084af77b21d9cfcdc78-43829de29263424b28f0",
+          "file": "qa-roles.spec.ts",
+          "line": 76,
+          "column": 5
+        },
+        {
+          "title": "an administrator cannot grant the Owner role",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 867,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:51:28.898Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b084af77b21d9cfcdc78-760ff7b3f6f5eb37bc99",
+          "file": "qa-roles.spec.ts",
+          "line": 92,
+          "column": 5
+        },
+        {
+          "title": "organisation roles give no access to the Control Centre",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 2,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 878,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:51:29.789Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "b084af77b21d9cfcdc78-6e64e3122fae5151ebaa",
+          "file": "qa-roles.spec.ts",
+          "line": 102,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "qa-tenancy-errors.spec.ts",
+      "file": "qa-tenancy-errors.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "tenant isolation",
+          "file": "qa-tenancy-errors.spec.ts",
+          "line": 7,
+          "column": 6,
+          "specs": [
+            {
+              "title": "a choir member cannot open the netball club portal",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 786,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:51:30.693Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0d48dae7737032b66e96-99dbddf36488ea3d1f08",
+              "file": "qa-tenancy-errors.spec.ts",
+              "line": 8,
+              "column": 7
+            },
+            {
+              "title": "a netball member cannot open the choir portal",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 851,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:51:31.494Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0d48dae7737032b66e96-3fa7e2c0f7fcb0a8b0e0",
+              "file": "qa-tenancy-errors.spec.ts",
+              "line": 17,
+              "column": 7
+            },
+            {
+              "title": "the API refuses another organisation’s data with \"not found\"",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1659,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:51:32.362Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0d48dae7737032b66e96-e077570cb1318242ab9d",
+              "file": "qa-tenancy-errors.spec.ts",
+              "line": 25,
+              "column": 7
+            }
+          ]
+        },
+        {
+          "title": "error handling",
+          "file": "qa-tenancy-errors.spec.ts",
+          "line": 57,
+          "column": 6,
+          "specs": [
+            {
+              "title": "a wrong password shows a clear message and does not sign in",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 557,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:51:34.034Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0d48dae7737032b66e96-d8b5802a2d93ecdac134",
+              "file": "qa-tenancy-errors.spec.ts",
+              "line": 58,
+              "column": 7
+            },
+            {
+              "title": "an empty sign-in form is not sent",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 532,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:51:34.605Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0d48dae7737032b66e96-777c326de2ffacc10dea",
+              "file": "qa-tenancy-errors.spec.ts",
+              "line": 69,
+              "column": 7
+            },
+            {
+              "title": "an unknown portal address says so",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 361,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:51:35.162Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0d48dae7737032b66e96-35368b48bb2bf9bcf4e9",
+              "file": "qa-tenancy-errors.spec.ts",
+              "line": 79,
+              "column": 7
+            },
+            {
+              "title": "when the session ends, the next page asks to sign in again",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 967,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:51:35.539Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0d48dae7737032b66e96-c385e889b34cf87fd4f2",
+              "file": "qa-tenancy-errors.spec.ts",
+              "line": 84,
+              "column": 7
+            },
+            {
+              "title": "a made-up password-reset link is refused politely",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 454,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('alert')\nExpected pattern: \u001b[32m/link|expired|invalid/i\u001b[39m\nError: strict mode violation: getByRole('alert') resolved to 2 elements:\n    1) <div role=\"alert\" class=\"rounded-lg border px-4 py-3 text-sm border-rose-200 bg-rose-50 text-rose-900\">This password reset link is invalid or has expire…</div> aka getByText('This password reset link is')\n    2) <div role=\"alert\" aria-live=\"assertive\" id=\"__next-route-announcer__\"></div> aka locator('[id=\"__next-route-announcer__\"]')\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" getByRole('alert') with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('alert')\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('alert')\nExpected pattern: \u001b[32m/link|expired|invalid/i\u001b[39m\nError: strict mode violation: getByRole('alert') resolved to 2 elements:\n    1) <div role=\"alert\" class=\"rounded-lg border px-4 py-3 text-sm border-rose-200 bg-rose-50 text-rose-900\">This password reset link is invalid or has expire…</div> aka getByText('This password reset link is')\n    2) <div role=\"alert\" aria-live=\"assertive\" id=\"__next-route-announcer__\"></div> aka locator('[id=\"__next-route-announcer__\"]')\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" getByRole('alert') with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('alert')\u001b[22m\n\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-tenancy-errors.spec.ts:97:43",
+                        "location": {
+                          "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-tenancy-errors.spec.ts",
+                          "column": 43,
+                          "line": 97
+                        },
+                        "snippet": "\u001b[0m \u001b[90m  95 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByLabel(\u001b[32m'Confirm new password'\u001b[39m)\u001b[33m.\u001b[39mfill(\u001b[32m'a brand new long passphrase'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m  96 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Set password'\u001b[39m })\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m  97 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'alert'\u001b[39m))\u001b[33m.\u001b[39mtoContainText(\u001b[35m/link|expired|invalid/i\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                           \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m  98 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m  99 |\u001b[39m\n \u001b[90m 100 |\u001b[39m   test(\u001b[32m'unknown API addresses answer with a structured error, not a stack trace'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-tenancy-errors.spec.ts",
+                            "column": 43,
+                            "line": 97
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('alert')\nExpected pattern: \u001b[32m/link|expired|invalid/i\u001b[39m\nError: strict mode violation: getByRole('alert') resolved to 2 elements:\n    1) <div role=\"alert\" class=\"rounded-lg border px-4 py-3 text-sm border-rose-200 bg-rose-50 text-rose-900\">This password reset link is invalid or has expire…</div> aka getByText('This password reset link is')\n    2) <div role=\"alert\" aria-live=\"assertive\" id=\"__next-route-announcer__\"></div> aka locator('[id=\"__next-route-announcer__\"]')\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" getByRole('alert') with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('alert')\u001b[22m\n\n\n   95 |     await page.getByLabel('Confirm new password').fill('a brand new long passphrase');\n   96 |     await page.getByRole('button', { name: 'Set password' }).click();\n>  97 |     await expect(page.getByRole('alert')).toContainText(/link|expired|invalid/i);\n      |                                           ^\n   98 |   });\n   99 |\n  100 |   test('unknown API addresses answer with a structured error, not a stack trace', async ({\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-tenancy-errors.spec.ts:97:43"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:51:36.523Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-tenancy-errors-error-ha-18b6c-et-link-is-refused-politely/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-tenancy-errors-error-ha-18b6c-et-link-is-refused-politely/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-tenancy-errors.spec.ts",
+                        "column": 43,
+                        "line": 97
+                      }
+                    },
+                    {
+                      "workerIndex": 3,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 787,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('alert')\nExpected pattern: \u001b[32m/link|expired|invalid/i\u001b[39m\nError: strict mode violation: getByRole('alert') resolved to 2 elements:\n    1) <div role=\"alert\" class=\"rounded-lg border px-4 py-3 text-sm border-rose-200 bg-rose-50 text-rose-900\">This password reset link is invalid or has expire…</div> aka getByText('This password reset link is')\n    2) <div role=\"alert\" aria-live=\"assertive\" id=\"__next-route-announcer__\"></div> aka locator('[id=\"__next-route-announcer__\"]')\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" getByRole('alert') with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('alert')\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('alert')\nExpected pattern: \u001b[32m/link|expired|invalid/i\u001b[39m\nError: strict mode violation: getByRole('alert') resolved to 2 elements:\n    1) <div role=\"alert\" class=\"rounded-lg border px-4 py-3 text-sm border-rose-200 bg-rose-50 text-rose-900\">This password reset link is invalid or has expire…</div> aka getByText('This password reset link is')\n    2) <div role=\"alert\" aria-live=\"assertive\" id=\"__next-route-announcer__\"></div> aka locator('[id=\"__next-route-announcer__\"]')\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" getByRole('alert') with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('alert')\u001b[22m\n\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-tenancy-errors.spec.ts:97:43",
+                        "location": {
+                          "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-tenancy-errors.spec.ts",
+                          "column": 43,
+                          "line": 97
+                        },
+                        "snippet": "\u001b[0m \u001b[90m  95 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByLabel(\u001b[32m'Confirm new password'\u001b[39m)\u001b[33m.\u001b[39mfill(\u001b[32m'a brand new long passphrase'\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m  96 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Set password'\u001b[39m })\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m  97 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'alert'\u001b[39m))\u001b[33m.\u001b[39mtoContainText(\u001b[35m/link|expired|invalid/i\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m     |\u001b[39m                                           \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m  98 |\u001b[39m   })\u001b[33m;\u001b[39m\n \u001b[90m  99 |\u001b[39m\n \u001b[90m 100 |\u001b[39m   test(\u001b[32m'unknown API addresses answer with a structured error, not a stack trace'\u001b[39m\u001b[33m,\u001b[39m \u001b[36masync\u001b[39m ({\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-tenancy-errors.spec.ts",
+                            "column": 43,
+                            "line": 97
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('alert')\nExpected pattern: \u001b[32m/link|expired|invalid/i\u001b[39m\nError: strict mode violation: getByRole('alert') resolved to 2 elements:\n    1) <div role=\"alert\" class=\"rounded-lg border px-4 py-3 text-sm border-rose-200 bg-rose-50 text-rose-900\">This password reset link is invalid or has expire…</div> aka getByText('This password reset link is')\n    2) <div role=\"alert\" aria-live=\"assertive\" id=\"__next-route-announcer__\"></div> aka locator('[id=\"__next-route-announcer__\"]')\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" getByRole('alert') with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('alert')\u001b[22m\n\n\n   95 |     await page.getByLabel('Confirm new password').fill('a brand new long passphrase');\n   96 |     await page.getByRole('button', { name: 'Set password' }).click();\n>  97 |     await expect(page.getByRole('alert')).toContainText(/link|expired|invalid/i);\n      |                                           ^\n   98 |   });\n   99 |\n  100 |   test('unknown API addresses answer with a structured error, not a stack trace', async ({\n    at /home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-tenancy-errors.spec.ts:97:43"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 1,
+                      "startTime": "2026-11-04T02:51:37.612Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-tenancy-errors-error-ha-18b6c-et-link-is-refused-politely-retry1/error-context.md"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/test-results/qa-tenancy-errors-error-ha-18b6c-et-link-is-refused-politely-retry1/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/home/runner/work/constitution-intelligence/constitution-intelligence/apps/web/e2e/qa-tenancy-errors.spec.ts",
+                        "column": 43,
+                        "line": 97
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "0d48dae7737032b66e96-7980f0e8ce74e6fe3e7a",
+              "file": "qa-tenancy-errors.spec.ts",
+              "line": 92,
+              "column": 7
+            },
+            {
+              "title": "unknown API addresses answer with a structured error, not a stack trace",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 65,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:51:39.096Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "0d48dae7737032b66e96-2156cf475a6d1334059c",
+              "file": "qa-tenancy-errors.spec.ts",
+              "line": 100,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "search-reader.spec.ts",
+      "file": "search-reader.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "finds a clause by number and shows its reference, version and neighbours",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2974,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:51:39.248Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "fe99064342059dbd31fc-6ae97d9d252a7f3993e8",
+          "file": "search-reader.spec.ts",
+          "line": 26,
+          "column": 5
+        },
+        {
+          "title": "finds lettered sub-clauses by reference",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1630,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:51:42.351Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "fe99064342059dbd31fc-0e53bf1363f5cc4d380a",
+          "file": "search-reader.spec.ts",
+          "line": 54,
+          "column": 5
+        },
+        {
+          "title": "gives helpful messages when nothing is found",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1958,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:51:44.006Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "fe99064342059dbd31fc-9ecc073316035e736c22",
+          "file": "search-reader.spec.ts",
+          "line": 66,
+          "column": 5
+        }
+      ],
+      "suites": [
+        {
+          "title": "on a phone",
+          "file": "search-reader.spec.ts",
+          "line": 79,
+          "column": 6,
+          "specs": [
+            {
+              "title": "moves between sections with large buttons",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1475,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-11-04T02:51:45.985Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fe99064342059dbd31fc-3c87edacda161452fc0b",
+              "file": "search-reader.spec.ts",
+              "line": 82,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "security-headers.spec.ts",
+      "file": "security-headers.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "pages carry a strict policy with a fresh nonce each time",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 589,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:51:47.486Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9e3ea47c3dd308804f1b-58fd59dcdadf1662442b",
+          "file": "security-headers.spec.ts",
+          "line": 29,
+          "column": 5
+        },
+        {
+          "title": "the member and admin pages work with no policy violations",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 2006,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:51:48.094Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9e3ea47c3dd308804f1b-c72046aa809984414e82",
+          "file": "security-headers.spec.ts",
+          "line": 43,
+          "column": 5
+        },
+        {
+          "title": "injected markup cannot run code",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 621,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:51:50.123Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9e3ea47c3dd308804f1b-a6ec34c4af34a48bbebd",
+          "file": "security-headers.spec.ts",
+          "line": 63,
+          "column": 5
+        },
+        {
+          "title": "API responses are not stored by the browser",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 11,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:51:50.774Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "9e3ea47c3dd308804f1b-02debb3deaceafe83803",
+          "file": "security-headers.spec.ts",
+          "line": 84,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "title": "simple-words.spec.ts",
+      "file": "simple-words.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "write, study and approve simple words; members see them under the original",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 60000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 4,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3383,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-11-04T02:51:50.798Z",
+                  "annotations": [],
+                  "attachments": []
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "6b53ad96dba4241da99a-0aae1a52217e0d77a26d",
+          "file": "simple-words.spec.ts",
+          "line": 22,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-11-04T02:49:18.673Z",
+    "duration": 155638.36500000002,
+    "expected": 62,
+    "skipped": 0,
+    "unexpected": 2,
+    "flaky": 0
+  }
+}

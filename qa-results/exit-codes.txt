@@ -1,0 +1,5 @@
+vitest packages/shared 0
+vitest packages/db 0
+vitest apps/api 0
+vitest apps/web 0
+playwright apps/web 0

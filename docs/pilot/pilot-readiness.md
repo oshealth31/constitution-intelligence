@@ -29,7 +29,7 @@ mean charging for something that cannot be delivered.
 ### Not blocking a small pilot, but tell clients (already in the limitations template)
 
 AI answering off; Chrome-only testing; no self-service deletion; manual payment checks; no
-uptime guarantee; the 14.1.3-style nesting needs manual review.
+uptime guarantee. (The 14.1.3-style nesting was fixed in task D9 for new uploads.)
 
 ## What _is_ ready (and tested)
 

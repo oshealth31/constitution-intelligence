@@ -136,7 +136,7 @@ items below.
 
 Everything above, plus: penetration test; a self-service tool for individual people's data requests (D11); separate database accounts;
 a load test; a tested Safari/iOS offline experience; screen-reader
-testing; payment-provider decision; the 14.1.3 parser fix.
+testing; payment-provider decision. (The 14.1.3 parser fix is done: task D9.)
 
 ## Sources
 

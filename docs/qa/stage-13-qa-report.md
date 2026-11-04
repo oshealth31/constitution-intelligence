@@ -108,7 +108,7 @@ were fixed and passed in run 3.
 
 - **Clause 14.1.3 nesting:** lettered items under a roman-numeral item can be nested under the
   wrong parent by the text parser (found in the RBPC document). Reviewers can correct it by hand
-  before approval. Not fixed in this stage.
+  before approval. Not fixed in this stage. **Fixed later in task D9** (lists nest to any depth).
 - **AI is off at launch:** members get approved answers and "Find relevant clauses" instead.
 - **Two-factor sign-in, hosting, backups, separate database accounts, isolated document parsing**:
   open security items from Stage 12 (`docs/security/security-review.md`, U1–U12).

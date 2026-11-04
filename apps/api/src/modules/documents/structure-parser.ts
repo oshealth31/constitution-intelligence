@@ -105,6 +105,26 @@ function splitHeading(rest: string): { heading: string | null; body: string } {
   return { heading: null, body: rest };
 }
 
+type ListStyle = 'letter' | 'roman' | 'number';
+
+/** One way of reading a list item's label: "(i)" can be the letter i (9th) or roman one. */
+interface ListReading {
+  style: ListStyle;
+  value: number;
+}
+
+/** A list that is open at some depth, e.g. the (a), (b) items inside clause 14.1.3 (i). */
+interface OpenList {
+  style: ListStyle;
+  /** The last item's value and label, to recognise the next one ("(ii)" after "(i)"). */
+  value: number;
+  number: string;
+  /** The section the list's items belong to. */
+  owner: ParsedSection | null;
+  /** The list's latest item: a new list that starts now goes inside it. */
+  last: ParsedSection;
+}
+
 interface Marker {
   kind: SectionKind;
   number: string;
@@ -112,10 +132,25 @@ interface Marker {
   value: number | null;
   /** For decimal numbers: "3.2" → ["3","2"]. */
   path?: string[];
-  /** Nesting for bracketed items: 1 = letter/number, 2 = roman. */
-  bracketLevel?: number;
-  roman?: boolean;
+  /** For list items such as (a), (ii), (3): every possible reading of the label. */
+  readings?: ListReading[];
   rest: string;
+}
+
+function letterValue(token: string): number {
+  // (a)–(z), then (aa), (bb), ... as some documents continue long lists.
+  if (token.length === 1) return token.charCodeAt(0) - 96;
+  if (token.length === 2 && token[0] === token[1]) return 26 + token.charCodeAt(0) - 96;
+  return 0;
+}
+
+function listReadings(token: string): ListReading[] {
+  if (/^\d+$/.test(token)) return [{ style: 'number', value: Number(token) }];
+  const readings: ListReading[] = [];
+  const letter = letterValue(token);
+  if (letter > 0) readings.push({ style: 'letter', value: letter });
+  if (/^[ivx]+$/.test(token)) readings.push({ style: 'roman', value: romanValue(token) });
+  return readings;
 }
 
 export function parseStructure(input: ExtractedLine[]): ParseResult {
@@ -170,9 +205,19 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
   let clause: ParsedSection | null = null; // top-level numbered clause
   const decimalChain = new Map<string, ParsedSection>(); // "3", "3.2" → section
   let bracketParent: ParsedSection | null = null; // clause or sub-clause that owns (a), (b)
-  let lastLetter: ParsedSection | null = null;
-  let lastLetterValue: number | null = null;
-  let level1Roman = false;
+  // Lists open under bracketParent, outermost first: e.g. [(i), (ii) list] then [(a), (b) list].
+  let lists: OpenList[] = [];
+  /** The open list a reading would continue ("(ii)" after "(i)"), searching from the innermost. */
+  const continuing = (readings: ListReading[]) => {
+    for (let depth = lists.length - 1; depth >= 0; depth -= 1) {
+      const list = lists[depth]!;
+      const reading = readings.find(
+        (candidate) => candidate.style === list.style && candidate.value === list.value + 1,
+      );
+      if (reading) return { depth, reading };
+    }
+    return null;
+  };
   // Assigned inside add(); the type assertion stops TypeScript assuming it is always null.
   let current = null as ParsedSection | null;
   let title: string | null = null;
@@ -254,39 +299,29 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
     match = BRACKETED.exec(text);
     if (match) {
       const token = match[1]!.toLowerCase();
-      const expectedLetter = String.fromCharCode(97 + (lastLetterValue ?? 0));
-      let value: number;
-      let level = 1;
-      let roman = false;
-      if (/^\d+$/.test(token)) {
-        value = Number(token);
-      } else if (token.length === 1 && token === expectedLetter) {
-        value = token.charCodeAt(0) - 96; // the next letter in a running (a), (b), ... list
-      } else if (/^[ivx]+$/.test(token)) {
-        value = romanValue(token);
-        roman = true;
-        level = lastLetter && !level1Roman ? 2 : 1; // (i), (ii) inside a lettered item
-      } else {
-        value = token.length === 1 ? token.charCodeAt(0) - 96 : 0;
-      }
+      const readings = listReadings(token);
       return {
         kind: 'subclause',
         number: `(${token})`,
-        value,
-        bracketLevel: level,
-        roman,
+        value: readings[0]?.value ?? 0,
+        readings,
         rest: match[2]!.trim(),
       };
     }
+    // "a. text": only when it starts a list or continues an open lettered list, so ordinary
+    // sentences beginning with "a." are not mistaken for items.
     match = LETTER_DOT.exec(text);
-    if (match && match[1] === String.fromCharCode(97 + (lastLetterValue ?? 0))) {
-      return {
-        kind: 'subclause',
-        number: `(${match[1]})`,
-        value: match[1]!.charCodeAt(0) - 96,
-        bracketLevel: 1,
-        rest: match[2]!.trim(),
-      };
+    if (match) {
+      const readings: ListReading[] = [{ style: 'letter', value: letterValue(match[1]!) }];
+      if (match[1] === 'a' || continuing(readings)) {
+        return {
+          kind: 'subclause',
+          number: `(${match[1]})`,
+          value: readings[0]!.value,
+          readings,
+          rest: match[2]!.trim(),
+        };
+      }
     }
     return null;
   };
@@ -315,8 +350,6 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
           `${label} ${section.number} comes after ${previous.number}, which is out of order.`,
         );
       }
-    } else if (value > 1 && scope.startsWith('bracket')) {
-      flag(section, `This list starts at ${section.number} instead of the first item.`);
     }
     lastValue.set(scope, { value, number: section.number ?? '' });
   };
@@ -367,8 +400,7 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
         });
         clause = null;
         bracketParent = null;
-        lastLetter = null;
-        lastLetterValue = null;
+        lists = [];
         decimalChain.clear();
         lastValue.delete('clause');
         continue;
@@ -429,8 +461,7 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
       );
       clause = null;
       bracketParent = null;
-      lastLetter = null;
-      lastLetterValue = null;
+      lists = [];
       decimalChain.clear();
       continue;
     }
@@ -448,7 +479,7 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
       const deeper =
         following !== null &&
         (following.path === undefined
-          ? following.bracketLevel !== undefined
+          ? following.readings !== undefined
           : following.path.length > marker.path.length);
       if (following === null || deeper) {
         heading = body;
@@ -487,17 +518,63 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
       }
       if (depth === 1) clause = created;
       bracketParent = created;
-      lastLetter = null;
-      lastLetterValue = null;
-      for (const key of [...lastValue.keys()]) {
-        if (key.startsWith('bracket')) lastValue.delete(key);
-      }
+      lists = [];
       continue;
     }
 
-    // Lettered / roman sub-items.
-    const level = marker.bracketLevel ?? 1;
-    const owner = level === 2 && lastLetter ? lastLetter : (bracketParent ?? clause ?? division);
+    // Lettered, roman and numbered list items, nested to any depth.
+    const readings = marker.readings ?? [];
+    const base = bracketParent ?? clause ?? division;
+    let owner: ParsedSection | null;
+    let reading: ListReading | undefined;
+    let problem: string | null = null;
+    let listIndex: number; // where this item's list sits in `lists` afterwards
+    const continued = continuing(readings);
+    // A new list of the same kind as one already open is a repeated number, not a deeper list.
+    const opening = readings.find(
+      (candidate) =>
+        candidate.value === 1 && !lists.some((list) => list.style === candidate.style),
+    );
+    if (continued) {
+      // The next item of an open list, e.g. (ii) after (i)'s own (a), (b): back out to (i)'s list.
+      listIndex = continued.depth;
+      reading = continued.reading;
+      owner = lists[listIndex]!.owner;
+    } else if (opening) {
+      // The first item of a new list: it belongs to the item just above it.
+      reading = opening;
+      owner = lists.length > 0 ? lists[lists.length - 1]!.last : base;
+      listIndex = lists.length;
+    } else {
+      // Neither: place it with the nearest list of the same kind and ask a person to check.
+      let depth = -1;
+      for (let candidateDepth = lists.length - 1; candidateDepth >= 0; candidateDepth -= 1) {
+        const sameKind = readings.find(
+          (candidate) => candidate.style === lists[candidateDepth]!.style,
+        );
+        if (sameKind) {
+          depth = candidateDepth;
+          reading = sameKind;
+          break;
+        }
+      }
+      if (depth >= 0) {
+        const list = lists[depth]!;
+        listIndex = depth;
+        owner = list.owner;
+        problem =
+          reading!.value === list.value
+            ? `The number ${marker.number} appears more than once here.`
+            : reading!.value > list.value
+              ? `Item ${marker.number} follows ${list.number}. Something in between may be missing or was not recognised.`
+              : `Item ${marker.number} comes after ${list.number}, which is out of order.`;
+      } else {
+        reading = readings[0];
+        owner = lists.length > 0 ? lists[lists.length - 1]!.last : base;
+        listIndex = lists.length;
+        problem = `This list starts at ${marker.number} instead of the first item.`;
+      }
+    }
     const created = add({
       keyBase: `${owner?.key ?? 'item'}-${marker.number.replace(/[()]/g, '')}`,
       parentKey: owner?.key ?? null,
@@ -507,18 +584,16 @@ export function parseStructure(input: ExtractedLine[]): ParseResult {
       body,
       page: line.page ?? null,
     });
-    if (!owner) {
-      flag(created, 'This item is not under any numbered clause.');
-    }
-    checkOrder(`bracket-${owner?.key ?? 'none'}-${level}`, created, marker.value, 'Item');
-    if (level === 1) {
-      lastLetter = created;
-      lastLetterValue = marker.value;
-      level1Roman = marker.roman ?? false;
-      for (const key of [...lastValue.keys()]) {
-        if (key.startsWith(`bracket-${created.key}`)) lastValue.delete(key);
-      }
-    }
+    if (!owner) flag(created, 'This item is not under any numbered clause.');
+    if (problem) flag(created, problem);
+    lists = lists.slice(0, listIndex);
+    lists.push({
+      style: reading?.style ?? 'letter',
+      value: reading?.value ?? 0,
+      number: marker.number,
+      owner,
+      last: created,
+    });
   }
 
   // Checks on the finished structure.

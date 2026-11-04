@@ -352,9 +352,14 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation deletion', () => {
         .select()
         .from(auditEvents)
         .where(eq(auditEvents.organisationId, a.organisation.id));
-      expect(events.map((event) => event.action)).toEqual(['organisation.deleted']);
-      expect(JSON.stringify(events[0])).not.toContain(ownerEmail);
-      expect(events[0]!.metadata).toMatchObject({ approvalMode: 'second_person', reason: REASON });
+      // (plus the invoice voided above, after the deletion: financial actions are still recorded).
+      expect(events.map((event) => event.action).sort()).toEqual([
+        'invoice.voided',
+        'organisation.deleted',
+      ]);
+      const deletionEvent = events.find((event) => event.action === 'organisation.deleted')!;
+      expect(JSON.stringify(deletionEvent)).not.toContain(ownerEmail);
+      expect(deletionEvent.metadata).toMatchObject({ approvalMode: 'second_person', reason: REASON });
 
       // Accounts: A's owner deleted with their sign-in events; shared member and staff kept.
       expect(

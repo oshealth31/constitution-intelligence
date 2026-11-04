@@ -65,7 +65,11 @@ describe.runIf(Boolean(testDatabaseUrl))('separate database accounts', () => {
     await admin.query(`CREATE DATABASE "${databaseName}" OWNER ${MIGRATOR}`);
 
     const setup = createPool({
-      connectionString: urlFor(new URL(testDatabaseUrl!).username, new URL(testDatabaseUrl!).password, databaseName),
+      connectionString: urlFor(
+        new URL(testDatabaseUrl!).username,
+        new URL(testDatabaseUrl!).password,
+        databaseName,
+      ),
       maxConnections: 1,
     });
     await setup.query(`ALTER SCHEMA public OWNER TO ${MIGRATOR}`);
@@ -80,7 +84,10 @@ describe.runIf(Boolean(testDatabaseUrl))('separate database accounts', () => {
     await runMigrations(migrator);
     await migrator.end();
 
-    runtime = createPool({ connectionString: urlFor(RUNTIME, password, databaseName), maxConnections: 1 });
+    runtime = createPool({
+      connectionString: urlFor(RUNTIME, password, databaseName),
+      maxConnections: 1,
+    });
   });
 
   afterAll(async () => {
@@ -104,11 +111,22 @@ describe.runIf(Boolean(testDatabaseUrl))('separate database accounts', () => {
 
   it('the application account can do its work', async () => {
     expect(
-      await outcome(runtime, `INSERT INTO organisations (slug, name) VALUES ('accounts-test', 'Accounts Test (fictional)')`),
+      await outcome(
+        runtime,
+        `INSERT INTO organisations (slug, name) VALUES ('accounts-test', 'Accounts Test (fictional)')`,
+      ),
     ).toBe('ok');
-    expect(await outcome(runtime, `UPDATE organisations SET name = 'Renamed (fictional)' WHERE slug = 'accounts-test'`)).toBe('ok');
     expect(
-      await outcome(runtime, `INSERT INTO audit_events (action, outcome) VALUES ('test.event', 'success')`),
+      await outcome(
+        runtime,
+        `UPDATE organisations SET name = 'Renamed (fictional)' WHERE slug = 'accounts-test'`,
+      ),
+    ).toBe('ok');
+    expect(
+      await outcome(
+        runtime,
+        `INSERT INTO audit_events (action, outcome) VALUES ('test.event', 'success')`,
+      ),
     ).toBe('ok');
     expect(await outcome(runtime, 'SELECT count(*) FROM audit_events')).toBe('ok');
     expect(await outcome(runtime, 'SELECT count(*) FROM drizzle.__drizzle_migrations')).toBe('ok');
@@ -117,7 +135,9 @@ describe.runIf(Boolean(testDatabaseUrl))('separate database accounts', () => {
     try {
       await client.query('BEGIN');
       await client.query('SET LOCAL ROLE app_tenant');
-      const visible = await client.query<{ n: number }>('SELECT count(*)::int AS n FROM organisations');
+      const visible = await client.query<{ n: number }>(
+        'SELECT count(*)::int AS n FROM organisations',
+      );
       expect(visible.rows[0]!.n).toBe(0); // no organisation set: row-level security shows nothing
       await client.query('ROLLBACK');
     } finally {
@@ -126,16 +146,25 @@ describe.runIf(Boolean(testDatabaseUrl))('separate database accounts', () => {
   });
 
   it('the application account cannot change the audit log, the structure or the rules', async () => {
-    expect(await outcome(runtime, `UPDATE audit_events SET action = 'changed'`)).toMatch(/permission denied/);
+    expect(await outcome(runtime, `UPDATE audit_events SET action = 'changed'`)).toMatch(
+      /permission denied/,
+    );
     expect(await outcome(runtime, 'DELETE FROM audit_events')).toMatch(/append-only/);
     expect(await outcome(runtime, 'TRUNCATE audit_events')).toMatch(/permission denied/);
     expect(
-      await outcome(runtime, 'ALTER TABLE audit_events DISABLE TRIGGER audit_events_no_update_or_delete'),
+      await outcome(
+        runtime,
+        'ALTER TABLE audit_events DISABLE TRIGGER audit_events_no_update_or_delete',
+      ),
     ).toMatch(/must be owner/);
     expect(await outcome(runtime, 'DROP TABLE organisations CASCADE')).toMatch(/must be owner/);
-    expect(await outcome(runtime, 'ALTER TABLE users DISABLE ROW LEVEL SECURITY')).toMatch(/must be owner/);
+    expect(await outcome(runtime, 'ALTER TABLE users DISABLE ROW LEVEL SECURITY')).toMatch(
+      /must be owner/,
+    );
     expect(await outcome(runtime, 'CREATE TABLE sneaky (id int)')).toMatch(/permission denied/);
-    expect(await outcome(runtime, 'DROP FUNCTION prevent_audit_event_changes() CASCADE')).toMatch(/must be owner/);
+    expect(await outcome(runtime, 'DROP FUNCTION prevent_audit_event_changes() CASCADE')).toMatch(
+      /must be owner/,
+    );
     expect(await outcome(runtime, 'CREATE ROLE sneaky_role')).toMatch(/permission denied/);
   });
 

@@ -2,10 +2,10 @@
 
 ## Database accounts (Task D4)
 
-| Account                 | Used by                                | Can                                                                                                                       |
-| ----------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `constitution_owner`    | A person, for administration only      | Everything (superuser). Never put its password in an application setting.                                                 |
-| `constitution_migrator` | The `migrate` service, and restores    | Owns the database and every table; applies migrations. Not a superuser.                                                    |
+| Account                 | Used by                                 | Can                                                                                                                                                                                                                                                                                         |
+| ----------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `constitution_owner`    | A person, for administration only       | Everything (superuser). Never put its password in an application setting.                                                                                                                                                                                                                   |
+| `constitution_migrator` | The `migrate` service, and restores     | Owns the database and every table; applies migrations. Not a superuser.                                                                                                                                                                                                                     |
 | `constitution_app`      | The API, backups, exports, the commands | Read and write data (rights through the `app_runtime` role). Owns nothing: cannot alter, empty or drop tables, or switch off triggers; cannot change audit events. Sees every organisation for platform work (`BYPASSRLS`); organisation work runs as `app_tenant` with row-level security. |
 
 The accounts are created on the database's first start by
@@ -71,8 +71,8 @@ authority file as `database_ca.crt` and the provider's connection string in `dat
 
 | Secret                                    | How often                                  | How                                                                                                                                                                                                          |
 | ----------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `app_db_password`                         | Yearly, and when anyone with access leaves | `ALTER ROLE constitution_app PASSWORD '...'` as the administrator, update `app_db_password` and `database_url`, then `docker compose up -d api` |
-| `migrator_db_password`                    | Yearly, and when anyone with access leaves | `ALTER ROLE constitution_migrator PASSWORD '...'` as the administrator, update `migrator_db_password` and `database_migrator_url` |
+| `app_db_password`                         | Yearly, and when anyone with access leaves | `ALTER ROLE constitution_app PASSWORD '...'` as the administrator, update `app_db_password` and `database_url`, then `docker compose up -d api`                                                              |
+| `migrator_db_password`                    | Yearly, and when anyone with access leaves | `ALTER ROLE constitution_migrator PASSWORD '...'` as the administrator, update `migrator_db_password` and `database_migrator_url`                                                                            |
 | `postgres_password`                       | Yearly                                     | `ALTER ROLE constitution_owner PASSWORD '...'`, update the file                                                                                                                                              |
 | Database certificate                      | Before it expires (825 days)               | Issue a new one with the same CA; restart `postgres`                                                                                                                                                         |
 | `backup_passphrase`                       | When someone who knew it leaves            | New file; **keep the old passphrase** until every backup made with it has expired                                                                                                                            |
@@ -91,4 +91,3 @@ organisations and is not secret either.
 
 - A dedicated secret manager (for example HashiCorp Vault, or the hosting provider's) with
   access logs. Files on one server are acceptable for a controlled pilot, not long term.
-

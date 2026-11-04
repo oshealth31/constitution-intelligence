@@ -133,7 +133,13 @@ services:
       - log_connections=on
     # The key file must be owned by root, group 999 (postgres), mode 0640 on the server.
     secrets:
-      [postgres_password, app_db_password, migrator_db_password, database_server.crt, database_server.key]
+      [
+        postgres_password,
+        app_db_password,
+        migrator_db_password,
+        database_server.crt,
+        database_server.key,
+      ]
     volumes:
       - postgres-data:/var/lib/postgresql/data
       # First start only: creates the application's own (non-superuser) database account.

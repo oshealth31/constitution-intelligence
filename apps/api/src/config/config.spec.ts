@@ -74,8 +74,17 @@ describe('loadConfig', () => {
         'CORS_ORIGINS must use https:// origins in staging and production',
         'MAIL_TRANSPORT must not be "log" in staging and production (emails contain one-time links)',
         'WEB_BASE_URL must use https:// in staging and production',
+        'MFA_ENCRYPTION_KEY is required in staging and production (it protects two-step sign-in secrets); give it as MFA_ENCRYPTION_KEY_FILE',
       ]),
     );
+  });
+
+  it('accepts only a 32-byte hexadecimal two-step key, and reads it from a file', () => {
+    expect(problemsFor({ DATABASE_URL: LOCAL_DB, MFA_ENCRYPTION_KEY: 'too-short' })).toEqual([
+      'MFA_ENCRYPTION_KEY must be 64 hexadecimal characters (32 bytes)',
+    ]);
+    const env = resolveSecretFiles({ MFA_ENCRYPTION_KEY_FILE: '/run/secrets/mfa' }, () => 'cd'.repeat(32) + '\n');
+    expect(env.MFA_ENCRYPTION_KEY).toBe('cd'.repeat(32));
   });
 
   it('applies secure authentication defaults', () => {
@@ -103,6 +112,7 @@ describe('loadConfig', () => {
       SMTP_PASSWORD: 'not-a-real-password',
       MAIL_FROM: 'Constitution Intelligence <no-reply@example.com>',
       STORAGE_LOCAL_DIR: '/var/lib/constitution/storage',
+      MFA_ENCRYPTION_KEY: 'ab'.repeat(32),
     });
     expect(config.DATABASE_SSL).toBe(true);
     expect(config.CORS_ORIGINS).toHaveLength(2);

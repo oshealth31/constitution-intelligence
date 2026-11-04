@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { Notice, Panel, PortalButton, PortalHeading, UserIcon } from '@/components/portal-ui';
 import { OfflineCard } from '@/components/offline-ui';
+import { PORTAL_LOOK, TwoStepCard } from '@/components/two-step';
 import { apiFetch, describeError } from '@/lib/api';
 import { clearAllOfflineData } from '@/lib/offline-store';
 import { portalPath } from '@/lib/portal';
@@ -148,6 +149,16 @@ export default function ProfilePage() {
           </PortalButton>
         </form>
       </Panel>
+
+      {/* Shown only to Owners and Administrators (the API decides). */}
+      <TwoStepCard
+        look={PORTAL_LOOK}
+        wrap={({ title, description, children }) => (
+          <Panel title={title} description={description}>
+            {children}
+          </Panel>
+        )}
+      />
 
       <Panel title="Sign out">
         <div className="flex flex-col gap-3 sm:flex-row">

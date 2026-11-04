@@ -14,3 +14,4 @@ Docker (`chmod 600`, owner root). Create them as described in `docs/operations/s
 | `database_server.crt`, `database_server.key` | The database server's TLS certificate and key                                                                               |
 | `backup_passphrase`                          | Passphrase that encrypts backups and exports. **Also kept offline in a sealed place**: without it no backup can be restored |
 | `smtp_password`                              | The email provider's SMTP password (Brevo: an SMTP key)                                                                     |
+| `mfa_encryption_key`                         | 64 hexadecimal characters (`openssl rand -hex 32`) that encrypt two-step sign-in secrets. **Also kept offline with the backup passphrase**: without it everyone must set up two-step sign-in again |

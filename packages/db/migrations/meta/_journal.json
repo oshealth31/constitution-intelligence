@@ -64,6 +64,13 @@
       "when": 1793850000000,
       "tag": "0008_subscriptions",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793860000000,
+      "tag": "0009_two_step_sign_in",
+      "breakpoints": true
     }
   ]
 }

@@ -117,6 +117,17 @@ export const configSchema = z
     // Optional address replies go to (for example the support mailbox).
     MAIL_REPLY_TO: z.email({ error: 'must be an email address' }).optional(),
 
+    // Two-step sign-in: the 32-byte key (64 hexadecimal characters, e.g. `openssl rand -hex 32`)
+    // that encrypts authenticator secrets and keys the recovery-code hashes. Required in staging
+    // and production (give it as a secret file: MFA_ENCRYPTION_KEY_FILE). If it is lost, everyone
+    // has to set up two-step sign-in again; keep a copy offline with the backup passphrase.
+    // Local development and tests use a fixed, publicly known key when it is not set.
+    MFA_ENCRYPTION_KEY: z
+      .string()
+      .trim()
+      .regex(/^[0-9a-fA-F]{64}$/, { error: 'must be 64 hexadecimal characters (32 bytes)' })
+      .optional(),
+
     // Where uploaded files are kept. "local" = a folder on this computer (development and tests).
     // A cloud object-storage driver is added in the deployment stage.
     STORAGE_DRIVER: z.enum(['local']).default('local'),
@@ -185,6 +196,14 @@ export const configSchema = z
     }
     if (!deployed) {
       return;
+    }
+    if (!config.MFA_ENCRYPTION_KEY) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['MFA_ENCRYPTION_KEY'],
+        message:
+          'is required in staging and production (it protects two-step sign-in secrets); give it as MFA_ENCRYPTION_KEY_FILE',
+      });
     }
     if (!config.DATABASE_SSL) {
       ctx.addIssue({
@@ -265,7 +284,12 @@ export class ConfigValidationError extends Error {
  * the path of a file holding the value (for example a Docker or Kubernetes secret mounted at
  * /run/secrets/...). Keeps secrets out of process listings, crash dumps and `docker inspect`.
  */
-export const SECRET_SETTINGS = ['DATABASE_URL', 'ANTHROPIC_API_KEY', 'SMTP_PASSWORD'] as const;
+export const SECRET_SETTINGS = [
+  'DATABASE_URL',
+  'ANTHROPIC_API_KEY',
+  'SMTP_PASSWORD',
+  'MFA_ENCRYPTION_KEY',
+] as const;
 
 /** Replaces NAME_FILE entries with the file's contents. Errors name the setting, never the value. */
 export function resolveSecretFiles(

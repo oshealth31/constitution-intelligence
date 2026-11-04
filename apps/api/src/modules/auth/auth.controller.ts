@@ -26,10 +26,16 @@ import { CurrentAuth, Public } from '../access/decorators';
 import { AuthService } from './auth.service';
 import { clearSessionCookie, setSessionCookie } from './session-cookie';
 import { UsersService, toPublicUser } from './users.service';
+import { TwoStepService } from './two-step.service';
 
 const loginSchema = z.object({ email: emailSchema, password: passwordInputSchema });
 const forgotSchema = z.object({ email: emailSchema });
 const tokenSchema = z.string({ error: 'is required' }).min(20).max(200);
+
+const secondStepSchema = z.union([
+  z.object({ challengeToken: tokenSchema, code: z.string().trim().min(6).max(12) }),
+  z.object({ challengeToken: tokenSchema, recoveryCode: z.string().trim().min(10).max(20) }),
+]);
 
 const resetSchema = z.object({ token: tokenSchema, newPassword: passwordInputSchema });
 const profileSchema = z.object({
@@ -54,6 +60,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly usersService: UsersService,
     private readonly audit: AuditService,
+    private readonly twoStep: TwoStepService,
   ) {}
 
   @Public()
@@ -65,7 +72,34 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     const { email, password } = parseInput(loginSchema, body);
-    const { session, user } = await this.authService.login(email, password, requestMeta(request));
+    const result = await this.authService.login(email, password, requestMeta(request));
+    if (result.kind === 'two_step_required') {
+      // No session yet: the web app asks for the code and sends it with this token.
+      return {
+        twoStepRequired: true,
+        challengeToken: result.challengeToken,
+        expiresAt: result.expiresAt.toISOString(),
+      };
+    }
+    setSessionCookie(response, result.session.token, result.session.expiresAt, this.config);
+    return { user: result.user };
+  }
+
+  /** Second step of a sign-in: `{ challengeToken, code }` or `{ challengeToken, recoveryCode }`. */
+  @Public()
+  @Post('login/two-step')
+  @HttpCode(HttpStatus.OK)
+  async loginTwoStep(
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const input = parseInput(secondStepSchema, body);
+    const { session, user } = await this.authService.completeTwoStepLogin(
+      input.challengeToken,
+      'code' in input ? { code: input.code } : { recoveryCode: input.recoveryCode },
+      requestMeta(request),
+    );
     setSessionCookie(response, session.token, session.expiresAt, this.config);
     return { user };
   }
@@ -96,7 +130,11 @@ export class AuthController {
   async me(@CurrentAuth() auth: AuthContext) {
     const user = await this.usersService.findById(auth.userId);
     const memberships = await this.usersService.listActiveMemberships(auth.userId);
-    return { user: user ? toPublicUser(user) : null, memberships };
+    return {
+      user: user ? toPublicUser(user) : null,
+      memberships,
+      twoStep: user ? await this.twoStep.status(user) : null,
+    };
   }
 
   /** Lets a signed-in person change their own display name (nothing else). */

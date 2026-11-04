@@ -42,6 +42,7 @@ export class AuthGuard implements CanActivate {
           email: valid.user.email,
           displayName: valid.user.displayName,
           isPlatformSuperAdmin: valid.user.isPlatformSuperAdmin,
+          twoStepEnabled: valid.twoStepEnabled,
         };
       }
     }

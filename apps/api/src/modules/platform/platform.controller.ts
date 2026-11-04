@@ -24,6 +24,7 @@ import { InvitationsService } from '../organisations/invitations.service';
 import { PlatformDashboardService } from './platform-dashboard.service';
 import { PlatformService } from './platform.service';
 import { PlatformBillingService } from '../subscriptions/platform-billing.service';
+import { TwoStepService } from '../auth/two-step.service';
 
 const nameSchema = z.string().trim().min(2).max(200);
 const createOrganisationSchema = z.object({ name: nameSchema, slug: slugSchema });
@@ -72,6 +73,7 @@ const administratorInvitationSchema = z.object({
 const administratorStatusSchema = z.object({ status: z.enum(['active', 'suspended']) });
 const supportAccessSchema = z.object({ reason: reasonSchema });
 const userStatusSchema = z.object({ status: z.enum(USER_STATUSES) });
+const twoStepResetSchema = z.object({ email: emailSchema, reason: reasonSchema });
 const organisationQuerySchema = z.object({
   status: z.enum(ORGANISATION_STATUSES).optional(),
   search: z.string().trim().max(100).optional(),
@@ -100,6 +102,7 @@ export class PlatformController {
     private readonly dashboard: PlatformDashboardService,
     private readonly invitations: InvitationsService,
     private readonly billing: PlatformBillingService,
+    private readonly twoStep: TwoStepService,
   ) {}
 
   @Get('overview')
@@ -316,6 +319,21 @@ export class PlatformController {
       auth.userId,
       requestMeta(request),
     );
+  }
+
+  /**
+   * Removes someone's two-step sign-in (lost phone, no recovery codes) and signs them out
+   * everywhere. Needs a reason; audited; the person is told by email. Not for your own account.
+   */
+  @Post('two-step/reset')
+  @HttpCode(HttpStatus.OK)
+  resetTwoStep(
+    @CurrentAuth() auth: AuthContext,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
+    const { email, reason } = parseInput(twoStepResetSchema, body);
+    return this.twoStep.reset(email, auth.userId, reason, requestMeta(request));
   }
 
   @Get('audit-events')

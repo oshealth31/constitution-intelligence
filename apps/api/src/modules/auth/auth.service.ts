@@ -7,7 +7,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { passwordResetTokens, users, type Database } from '@constitution/db';
+import { passwordResetTokens, users, type Database, type User } from '@constitution/db';
 import { and, eq, gt, isNull } from 'drizzle-orm';
 import type { RequestMeta } from '../../common/request-context';
 import type { AppConfig } from '../../config/config';
@@ -20,11 +20,17 @@ import { RateLimitService } from './rate-limit.service';
 import { SessionService, type CreatedSession } from './session.service';
 import { generateToken, hashToken } from './tokens';
 import { UsersService, toPublicUser, type PublicUser } from './users.service';
+import { TwoStepService, type SecondStep } from './two-step.service';
 import { oneLine, renderEmail } from '../mail/templates';
 
 export const INVALID_CREDENTIALS = 'Invalid email or password.';
 export const TOO_MANY_ATTEMPTS = 'Too many attempts. Please wait a few minutes and try again.';
 export const INVALID_RESET_LINK = 'This password reset link is invalid or has expired.';
+
+/** Result of checking the password: signed in, or a second step is needed first. */
+export type LoginResult =
+  | { kind: 'signed_in'; session: CreatedSession; user: PublicUser }
+  | { kind: 'two_step_required'; challengeToken: string; expiresAt: Date };
 
 const RESET_MAX_PER_EMAIL = 3;
 const RESET_MAX_PER_IP = 20;
@@ -40,17 +46,14 @@ export class AuthService {
     private readonly rateLimits: RateLimitService,
     private readonly audit: AuditService,
     private readonly mail: MailService,
+    private readonly twoStep: TwoStepService,
   ) {}
 
   private get windowSeconds(): number {
     return this.config.AUTH_RATE_LIMIT_WINDOW_MINUTES * 60;
   }
 
-  async login(
-    email: string,
-    password: string,
-    meta: RequestMeta,
-  ): Promise<{ session: CreatedSession; user: PublicUser }> {
+  async login(email: string, password: string, meta: RequestMeta): Promise<LoginResult> {
     const emailKey = `login:email:${hashToken(email)}`;
     const ipKey = `login:ip:${meta.ipAddress ?? 'unknown'}`;
     const [emailAttempts, ipAttempts] = await Promise.all([
@@ -101,8 +104,44 @@ export class AuthService {
       );
     }
 
+    if (await this.twoStep.isEnabled(user.id)) {
+      // The password was right; the sign-in waits for the code. The per-email counter is NOT
+      // reset until the second step succeeds.
+      const challenge = await this.twoStep.startChallenge(user.id, meta);
+      await this.audit.record({
+        action: 'auth.login.two_step_required',
+        outcome: 'success',
+        actorUserId: user.id,
+        targetType: 'user',
+        targetId: user.id,
+        meta,
+      });
+      return { kind: 'two_step_required', ...challenge };
+    }
+
     await this.rateLimits.reset(emailKey);
-    const session = await this.sessions.create(user.id, meta);
+    return { kind: 'signed_in', ...(await this.finishSignIn(user, meta, null)) };
+  }
+
+  /** Second step of a sign-in: a code from the authenticator app, or a recovery code. */
+  async completeTwoStepLogin(
+    challengeToken: string,
+    secondStep: SecondStep,
+    meta: RequestMeta,
+  ): Promise<{ session: CreatedSession; user: PublicUser }> {
+    const { user, method } = await this.twoStep.completeChallenge(challengeToken, secondStep, meta);
+    await this.rateLimits.reset(`login:email:${hashToken(user.email)}`);
+    return this.finishSignIn(user, meta, method);
+  }
+
+  private async finishSignIn(
+    user: User,
+    meta: RequestMeta,
+    twoStepMethod: 'code' | 'recovery_code' | null,
+  ): Promise<{ session: CreatedSession; user: PublicUser }> {
+    const session = await this.sessions.create(user.id, meta, {
+      twoStepVerified: twoStepMethod !== null,
+    });
     await this.db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, user.id));
     await this.audit.record({
       action: 'auth.login.succeeded',
@@ -110,6 +149,7 @@ export class AuthService {
       actorUserId: user.id,
       targetType: 'session',
       targetId: session.sessionId,
+      metadata: twoStepMethod ? { twoStep: twoStepMethod } : {},
       meta,
     });
     return { session, user: toPublicUser(user) };

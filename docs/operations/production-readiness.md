@@ -1,8 +1,9 @@
 # Production readiness (Stage 14)
 
-Assessment date: 4 November 2026. Based on the code on `main` plus this pull request, the
-Stage 12 security review, the Stage 13 QA report and the Deployment check workflow. **Nothing
-has been deployed**, and nothing may be deployed publicly without the owner's approval.
+Assessment date: 4 November 2026 (updated for tasks D1, S3 and D2 on the same date). Based on
+the code on `main`, the Stage 12 security review, the Stage 13 QA report and the Deployment check
+workflow. **Nothing has been deployed**, and nothing may be deployed publicly without the owner's
+approval.
 
 ## Go-live recommendation: **Not ready**
 
@@ -13,14 +14,17 @@ fictional data). But a public go-live needs things that do not exist yet:
 
 1. **No hosting.** No server, provider or location is chosen, so nothing about the real
    environment (network, firewall, provider access, in-country storage) has been checked.
-2. **Email is built but not connected.** Sending through an SMTP provider (Brevo) was added in
-   task D1 and tested against a test mail server. A real Brevo account, a verified sending
-   domain and a live test are still needed (setup task S3).
+2. ~~Email is built but not connected.~~ **Done:** SMTP sending (D1) and the Brevo account,
+   authenticated domain `constitutionintel.com` and a live test that reached a Gmail inbox, not
+   spam, with the link unchanged (S3, `email-live-test` workflow run 1). On the real server a new
+   SMTP key is still to be made (the live-test key was deleted).
 3. **Legal and data-protection groundwork is missing**: the agreements, privacy notice,
    impact assessment, controller/processor roles and breach procedure under the Data
    Protection Act, 2024. Church membership can reveal religious belief, which the Act treats
    as sensitive data.
-4. **No two-factor sign-in** for Super Admins, whose accounts reach every organisation.
+4. ~~No two-factor sign-in.~~ **Done in task D2:** two-step sign-in with an authenticator app,
+   required for Super Admins and offered to Owners and Administrators; tested in CI (API tests
+   and a phone-sized browser test in Chromium). Not yet tested in Safari or Firefox (T1).
 5. **Operations are documented, not running**: no monitoring, no alerts, no off-site backups,
    no named on-call people, and no restore test on real infrastructure.
 
@@ -29,8 +33,8 @@ fictional data). But a public go-live needs things that do not exist yet:
 | #   | Condition                                                                                                                                   | Type             |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
 | C1  | Hosting chosen and approved by the owner (in Botswana, or a destination the Act allows); server prepared per [deployment.md](deployment.md) | Decision + setup |
-| C2  | Email: SMTP sending built and tested (D1, done); Brevo account, sending domain with SPF/DKIM/DMARC, link tracking off, live test (S3)       | Setup            |
-| C3  | Two-factor sign-in for Super Admins                                                                                                         | Development      |
+| C2  | ✅ Email: SMTP sending (D1) and Brevo account, authenticated domain, live test (S3). New SMTP key on the real server                         | Setup            |
+| C3  | ✅ Two-step sign-in for Super Admins (D2). `MFA_ENCRYPTION_KEY` created on the real server and kept offline                                   | Development      |
 | C4  | Pilot agreement with RBPC covering data protection roles, plus a privacy notice for members                                                 | Legal            |
 | C5  | Off-site encrypted backup copy running, **and one restore test on the real server's backup recorded**                                       | Setup + test     |
 | C6  | Uptime monitor and the critical alerts from [logging-and-monitoring.md](logging-and-monitoring.md) running; two named responders            | Setup            |
@@ -56,8 +60,8 @@ items below.
 - ✅ Structured logs without secrets or query strings; rotation configured
 - ✅ Health checks (web, API live, API ready) with Docker health checks
 - ⏳ Separate migration and runtime database accounts (U3)
-- ⏳ Email sending through SMTP built and tested against a test mail server (D1); Brevo account, domain authentication and a live test still to do (S3)
-- ❌ Two-factor sign-in (C3)
+- ✅ Email sending through SMTP (D1), Brevo domain authenticated and a live test delivered to an inbox (S3)
+- ✅ Two-step sign-in: required for Super Admins, offered to Owners and Administrators (D2; tested in CI, Chromium only)
 
 ### Data
 
@@ -108,7 +112,7 @@ items below.
 
 ### Security (from docs/security/security-review.md)
 
-- U1 two-factor sign-in (C3) · U3 separate database accounts · U4 document parsing in an
+- ~~U1 two-step sign-in~~ (done, D2) · U3 separate database accounts · U4 document parsing in an
   isolated process · U6 breached-password check · U8 tamper-evident audit copy ·
   U11 independent penetration test before general availability · U12 development-tool
   vulnerabilities (Vitest upgrade).

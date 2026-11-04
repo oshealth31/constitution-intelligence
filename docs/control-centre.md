@@ -58,6 +58,6 @@ Plan names and prices are placeholders until confirmed.
 
 - No email delivery yet: invitations sent from the control centre are written to the API log
   (development only). Until email is connected, invitees in deployed environments cannot receive links.
-- Two-factor authentication for super admins is not yet implemented.
+- Two-step sign-in is required for Super Admins: until it is set up, the Control Centre shows only the setup steps (Task D2). The **Support** page has your own two-step settings and the reset for someone who lost their phone (see [authentication](security/authentication.md#two-step-sign-in)).
 - Lists are capped (500 organisations, 500 audit events per query) without pagination.
 - Logos cannot be uploaded yet (arrives with secure uploads).

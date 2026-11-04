@@ -85,6 +85,67 @@ Three guards run on every API request, in order:
 - Wrong password and unknown email produce the same message, and take the same time, so attackers
   cannot discover who has an account.
 
+## Two-step sign-in
+
+After the password, people who have it turned on type a **6-digit code from an authenticator app**
+on their phone (Google Authenticator, Microsoft Authenticator, 2FAS or similar). Someone who learns
+the password still cannot sign in. Added in Task D2. Codes by text message (SMS) are not offered:
+they can be intercepted or moved to another SIM.
+
+| Who                               | Two-step sign-in                                                                                                     |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Platform Super Admins             | **Required.** Until it is set up, a Super Admin can sign in but sees only the setup steps; the API refuses every Control Centre and organisation route (403, reason `TWO_STEP_SETUP_REQUIRED`). Cannot be turned off. |
+| Organisation Owners and Administrators | **Optional**, on the profile page of their portal. Recommended.                                                      |
+| Other roles                       | Not offered.                                                                                                         |
+
+**How it works**
+
+- Standard TOTP (RFC 6238): HMAC-SHA-1, 6 digits, 30-second steps, 160-bit secrets. Written with
+  `node:crypto` only and checked against the RFC 4226 and RFC 6238 published test values. Codes from
+  one step before or after are accepted (phone clocks drift).
+- **Setting up:** a new secret is shown once as a QR code and as a text key. Two-step sign-in is
+  turned on only after the first correct code, which proves the app works. Then **10 recovery
+  codes** are shown once, every other session of that person is signed out, and a confirmation email
+  is sent.
+- **Signing in:** a correct password no longer creates a session for these people. It returns a
+  one-time "challenge" token instead (valid **5 minutes**, single use, only its hash stored). The
+  session is created only after `POST /auth/login/two-step` with a right code or recovery code.
+- **Each code works once:** the time step of the last accepted code is stored, and that code or any
+  older one is refused (replay protection, RFC 6238 §5.2).
+- **Wrong codes:** a waiting sign-in is abandoned after **5 wrong codes**; a person may get at most
+  **10 wrong codes per 15 minutes** in total (then HTTP 429). The per-email sign-in counter is not
+  reset until the second step succeeds. Every wrong code is audited.
+- **Recovery codes:** single use. Using one emails the person ("A recovery code was used to sign
+  in") with how many are left. New codes can be made with a current code (the old ones stop working).
+- **Turning it off** (Owners and Administrators only) needs the password **and** a current code. A
+  confirmation email is sent.
+- **Defence in depth:** a session that never passed the second step is refused for anyone who has
+  two-step sign-in on (the `sessions.two_step_verified_at` column), whatever created it.
+- **No "remember this device".** Every sign-in asks for a code.
+
+**Stored data** (migration `0009_two_step_sign_in.sql`; none of it is readable by the tenant
+database role `app_tenant`):
+
+- `user_two_step`: the secret **encrypted with AES-256-GCM** (a random IV each time; the user id is
+  bound in as authenticated data, so a secret copied onto another row does not decrypt), when it was
+  turned on, and the last used time step.
+- `two_step_recovery_codes`: **HMAC-SHA-256 hashes** only, keyed with a key derived from the master
+  key, so a stolen database copy alone is not enough to try codes offline.
+- `two_step_challenges`: hashes of waiting sign-ins, their expiry and wrong-code count.
+- The master key is `MFA_ENCRYPTION_KEY` (64 hexadecimal characters; `MFA_ENCRYPTION_KEY_FILE` in
+  production). **Required in staging and production.** Two keys are derived from it with HKDF. Local
+  development and tests use a fixed key derived from a public phrase; it protects nothing. See
+  [secrets](../operations/secrets.md).
+
+**Lost phone.** With a recovery code: sign in with it, then (Owners/Administrators) turn two-step
+sign-in off and on again with the new phone, or (Super Admins) ask another Super Admin to reset it.
+Without recovery codes: another Super Admin resets it on the Control Centre **Support** page (email
+address and a reason; audited as `auth.two_step.reset`; the person is signed out everywhere and
+emailed). For the last remaining Super Admin, someone with server access runs
+`node dist/cli/reset-two-step.js --email … --reason "…"` (see
+[incident response](../operations/incident-response.md)). Nobody can reset their own two-step
+sign-in. Always confirm who is asking before a reset.
+
 ## Brute-force protection
 
 Counters are stored in PostgreSQL, so they hold across all running copies of the API.
@@ -95,6 +156,8 @@ Counters are stored in PostgreSQL, so they hold across all running copies of the
 | Sign-in attempts per network address        | 50 per 15 minutes | `LOGIN_MAX_ATTEMPTS_PER_IP`                                      |
 | Password-reset requests per email           | 3 per 15 minutes  | fixed                                                            |
 | Password-reset requests per network address | 20 per 15 minutes | fixed                                                            |
+| Wrong two-step codes per person             | 10 per 15 minutes | fixed (window: `AUTH_RATE_LIMIT_WINDOW_MINUTES`)                 |
+| Wrong codes on one waiting sign-in          | 5                 | fixed                                                            |
 
 Once a limit is reached, further attempts are refused with HTTP 429, even with the right password,
 until the window ends. A successful sign-in resets the per-email counter.
@@ -107,8 +170,8 @@ until the window ends. A successful sign-in resets the per-email counter.
   invitation per email and organisation stays valid. A new person chooses their name and password
   when accepting; someone who already has an account must be signed in as the invited email address.
 - Tokens are 256-bit random values; only their SHA-256 hashes are stored.
-- **Email delivery:** a real email provider is connected in a later stage. Until then, emails are
-  written to the server log (`MAIL_TRANSPORT=log`, allowed only locally and in tests).
+- **Email delivery:** through an SMTP email provider (Task D1; Brevo for the pilot). `MAIL_TRANSPORT=log`
+  (emails written to the server log) is allowed only locally and in tests.
 
 ## Audit events
 
@@ -120,6 +183,9 @@ Written to the append-only `audit_events` table (the database refuses UPDATE, DE
 | `auth.logout` / `auth.logout_all`                                                                | Sign-out                                           |
 | `auth.password.reset_requested` / `reset_rate_limited` / `reset_completed` / `reset_failed`      | Password reset                                     |
 | `auth.password.changed` / `auth.password.change_failed`                                          | Password change                                    |
+| `auth.login.two_step_required`                                                                   | Right password; waiting for the code               |
+| `auth.two_step.enabled` / `disabled` / `reset` / `recovery_codes_replaced`                        | Two-step sign-in changes                           |
+| `auth.two_step.failed` / `auth.two_step.recovery_code_used`                                       | Wrong codes; a recovery code used                  |
 | `invitation.created` / `invitation.revoked` / `invitation.accepted` / `invitation.accept_failed` | Invitations                                        |
 | `membership.role_changed` / `membership.status_changed` / `membership.removed`                   | Member management                                  |
 | `user.created` / `user.status_changed` / `user.super_admin_granted`                              | Accounts                                           |
@@ -133,7 +199,14 @@ They never contain passwords, tokens or session values.
 
 | Method and path                                                   | Who                | Purpose                              |
 | ----------------------------------------------------------------- | ------------------ | ------------------------------------ |
-| `POST /api/v1/auth/login`                                         | Anyone             | Sign in `{ email, password }`        |
+| `POST /api/v1/auth/login`                                         | Anyone             | Sign in `{ email, password }`; answers `{ user }` or `{ twoStepRequired, challengeToken, expiresAt }` |
+| `POST /api/v1/auth/login/two-step`                                | Anyone with a challenge | `{ challengeToken, code }` or `{ challengeToken, recoveryCode }` |
+| `GET /api/v1/auth/two-step`                                       | Signed in          | Your two-step status                 |
+| `POST /api/v1/auth/two-step/setup`                                | Super Admin, Owner, Administrator | New secret: `{ secret, otpauthUrl, qrCode }` |
+| `POST /api/v1/auth/two-step/confirm`                              | Signed in          | `{ code }`: turns it on, returns `{ recoveryCodes }` once |
+| `POST /api/v1/auth/two-step/recovery-codes`                       | Signed in          | `{ code }`: new recovery codes       |
+| `POST /api/v1/auth/two-step/disable`                              | Owner, Administrator | `{ password, code }`               |
+| `POST /api/v1/platform/two-step/reset`                            | Super Admin        | `{ email, reason }` (not your own)   |
 | `POST /api/v1/auth/logout`                                        | Signed in          | Sign out this device                 |
 | `POST /api/v1/auth/logout-all`                                    | Signed in          | Sign out every device                |
 | `GET /api/v1/auth/me`                                             | Signed in          | Your account and organisation roles  |
@@ -184,14 +257,18 @@ pnpm seed:dev
 
 This creates two fictional organisations ("Sample Community Choir (fictional)" and "Sample Netball
 Club (fictional)") with sample constitution content, and accounts: one per role in the choir
-(`superadmin@sample.test`, `owner@sample.test`, `admin@sample.test`, `reviewer@sample.test`,
-`member@sample.test`, `auditor@sample.test`) plus `netball.owner@sample.test` and `netball.member@sample.test`. Each run sets **new random passwords**, printed once.
+(`superadmin@sample.test`, `newstaff@sample.test`, `owner@sample.test`, `admin@sample.test`, `reviewer@sample.test`,
+`member@sample.test`, `auditor@sample.test`) plus `netball.owner@sample.test` and `netball.member@sample.test`. Each run sets **new random passwords**, printed once. `superadmin@sample.test` gets a new two-step
+key each run (printed once; add it to an authenticator app as a "setup key"), and
+`newstaff@sample.test` is a second fictional Super Admin with no two-step sign-in, to try the setup steps.
 The `.test` domain is reserved and can never receive real email.
 
 ## Known limitations (planned)
 
-- Two-factor authentication for privileged roles (Stage 1 requirement) is not yet implemented.
-- Breached-password checking is not yet implemented.
-- Email is not yet delivered (log transport only).
+- Two-step sign-in is optional (not required) for organisation Owners and Administrators. Making it
+  required for them is a business decision; the code supports it.
+- Breached-password checking is not yet implemented (Task D5).
+- Two-step sign-in has been tested in Chromium only (desktop and a phone-sized screen); Safari and
+  Firefox checks are Task T1.
 - Database-level tenant isolation is described in [tenant-isolation.md](tenant-isolation.md).
 - Web sign-in screens are built with the portal user interface.

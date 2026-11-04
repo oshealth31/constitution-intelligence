@@ -25,7 +25,7 @@ and open risks are in [security-review.md](security-review.md).
 
 ## Decisions and work needed before launch
 
-- [ ] **Two-factor sign-in** for Super Admins (required) and Owners/Administrators (offered). (U1)
+- [x] **Two-step sign-in** for Super Admins (required) and Owners/Administrators (offered). (U1, done in D2)
 - [ ] Hosting chosen and approved, in Botswana or meeting the Data Protection Act's transfer rules. (U2)
 - [ ] HTTPS on every address; HSTS confirmed in a browser.
 - [ ] `TRUST_PROXY` matches the real proxy chain (load balancer → web app → API), checked by signing in from two networks and confirming the audit log shows two different addresses. (U5)

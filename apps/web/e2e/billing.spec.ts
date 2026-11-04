@@ -4,6 +4,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test, type Browser, type Page } from '@playwright/test';
+import { enterTwoStepCodeIfNeeded } from './qa-helpers';
 
 const accounts = JSON.parse(
   readFileSync(path.join(__dirname, '.auth', 'accounts.json'), 'utf8'),
@@ -17,6 +18,7 @@ async function superAdminPage(browser: Browser): Promise<Page> {
   await page.getByLabel('Email address').fill('superadmin@sample.test');
   await page.getByLabel('Password').fill(accounts['superadmin@sample.test'] ?? '');
   await page.getByRole('button', { name: 'Sign in' }).click();
+  await enterTwoStepCodeIfNeeded(page, 'superadmin@sample.test');
   await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible();
   return page;
 }

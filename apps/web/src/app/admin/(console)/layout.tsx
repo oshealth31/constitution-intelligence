@@ -6,6 +6,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Button, Loading } from '@/components/ui';
 import { ApiError, apiFetch, type CurrentUser } from '@/lib/api';
 import { brand } from '@/lib/brand';
+import { CONSOLE_LOOK, RecoveryCodes, TwoStepSetupSteps } from '@/components/two-step';
 import { ConsoleUserContext, type ConsoleUser } from './console-context';
 
 const NAVIGATION = [
@@ -22,6 +23,8 @@ type GateState =
   | { kind: 'loading' }
   | { kind: 'allowed'; user: ConsoleUser }
   | { kind: 'forbidden'; user: ConsoleUser }
+  // A Super Admin who has not set up two-step sign-in yet (the API refuses everything else).
+  | { kind: 'setup'; user: ConsoleUser; recoveryCodes: string[] | null }
   | { kind: 'error' };
 
 /**
@@ -48,6 +51,8 @@ export default function ConsoleLayout({ children }: { children: ReactNode }) {
         if (cancelled) return;
         if (!me.user) {
           router.replace('/admin/sign-in');
+        } else if (me.user.isPlatformSuperAdmin && !me.twoStep?.enabled) {
+          setGate({ kind: 'setup', user: me.user, recoveryCodes: null });
         } else if (me.user.isPlatformSuperAdmin) {
           setGate({ kind: 'allowed', user: me.user });
         } else {
@@ -102,6 +107,46 @@ export default function ConsoleLayout({ children }: { children: ReactNode }) {
           <Button variant="secondary" className="mt-6" busy={signingOut} onClick={signOut}>
             Sign out
           </Button>
+        </div>
+      </main>
+    );
+  }
+
+  if (gate.kind === 'setup') {
+    const user = gate.user;
+    return (
+      <main className="flex min-h-dvh justify-center bg-ivory-50 px-4 py-10">
+        <div className="w-full max-w-lg space-y-6 rounded-2xl border border-ivory-100 bg-white p-6 shadow-sm sm:p-8">
+          {gate.recoveryCodes ? (
+            <RecoveryCodes
+              codes={gate.recoveryCodes}
+              look={CONSOLE_LOOK}
+              onDone={() => setGate({ kind: 'allowed', user })}
+            />
+          ) : (
+            <>
+              <div>
+                <p className="text-xs font-semibold tracking-[0.2em] text-teal-600 uppercase">
+                  Control centre
+                </p>
+                <h1 className="mt-2 text-xl font-semibold text-navy-900">
+                  Set up two-step sign-in
+                </h1>
+                <p className="mt-2 text-sm text-muted">
+                  Two-step sign-in is required for Constitution Intelligence staff. After your
+                  password you will also type a code from an app on your phone. The Control
+                  Centre opens once it is set up. Signed in as {user.email}.
+                </p>
+              </div>
+              <TwoStepSetupSteps
+                look={CONSOLE_LOOK}
+                onEnabled={(recoveryCodes) => setGate({ kind: 'setup', user, recoveryCodes })}
+              />
+              <Button variant="ghost" busy={signingOut} onClick={signOut}>
+                Sign out
+              </Button>
+            </>
+          )}
         </div>
       </main>
     );

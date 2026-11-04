@@ -28,6 +28,8 @@ import type { PlanFeature } from '@constitution/shared';
 
 export const ORGANISATION_NOT_FOUND = 'Organisation not found.';
 export const NOT_PERMITTED = 'You do not have permission to do this.';
+export const TWO_STEP_SETUP_REQUIRED =
+  'Set up two-step sign-in before using the Control Centre. It is required for Platform Super Admins.';
 
 /** Refusals caused by the subscription carry a machine-readable reason. */
 function subscriptionRefusal(reason: string, message: string) {
@@ -68,6 +70,22 @@ export class PermissionGuard implements CanActivate {
     const auth = request.auth;
     if (!auth) {
       return false; // AuthGuard has already refused unauthenticated access to protected routes.
+    }
+
+    // A Super Admin who has not set up two-step sign-in can reach only their own account and
+    // the setup steps (the /auth routes), never the Control Centre or an organisation.
+    if (auth.isPlatformSuperAdmin && !auth.twoStepEnabled) {
+      await this.audit.record({
+        action: 'permission.denied',
+        outcome: 'denied',
+        actorUserId: auth.userId,
+        metadata: { required: 'two_step_sign_in', route: request.route?.path },
+        meta: requestMeta(request),
+      });
+      throw new ForbiddenException({
+        message: TWO_STEP_SETUP_REQUIRED,
+        reason: 'TWO_STEP_SETUP_REQUIRED',
+      });
     }
 
     if (needsSuperAdmin && !auth.isPlatformSuperAdmin) {

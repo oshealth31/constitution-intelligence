@@ -85,6 +85,7 @@ jobs:
           openssl rand -hex 24 > secrets/app_db_password
           openssl rand -hex 32 > secrets/backup_passphrase
           openssl rand -hex 24 > secrets/smtp_password
+          openssl rand -hex 32 > secrets/mfa_encryption_key
           # Throwaway mail server certificate, signed by the same throwaway CA the API trusts.
           mkdir -p ci-mail
           openssl req -newkey rsa:2048 -nodes -subj "/CN=mailpit" \
@@ -167,6 +168,7 @@ jobs:
           test "$status" -ne 0
           echo "$out" | grep -q 'DATABASE_SSL must be true'
           echo "$out" | grep -q 'CORS_ORIGINS must list the allowed web origins'
+          echo "$out" | grep -q 'MFA_ENCRYPTION_KEY is required in staging and production'
           set +e
           seed="$(docker compose run --rm -T api node dist/cli/seed-dev.js 2>&1)"; status=$?
           set -e
@@ -258,7 +260,7 @@ jobs:
           password="$(grep 'member@sample.test' seed-output.txt | head -n 1 | awk '{print $NF}')"
           docker run -d --name api-restored --network constitution-intelligence_data \
             --env-file api.env -e DATABASE_URL_FILE=/s/restore_url -e NODE_EXTRA_CA_CERTS=/s/database_ca.crt \
-            -e SMTP_PASSWORD_FILE=/s/smtp_password \
+            -e SMTP_PASSWORD_FILE=/s/smtp_password -e MFA_ENCRYPTION_KEY_FILE=/s/mfa_encryption_key \
             -v "$PWD/secrets:/s:ro" -v ci-restored-storage:/var/lib/constitution/storage \
             -v "$PWD/../../ops/ci:/check:ro" "$API_IMAGE"
           for i in $(seq 1 30); do
@@ -266,6 +268,10 @@ jobs:
             sleep 2
           done
           docker exec api-restored node /check/restored-app-check.mjs member@sample.test "$password"
+          # Two-step sign-in survives backup and restore with the kept MFA_ENCRYPTION_KEY.
+          sa_password="$(grep ' superadmin@sample.test ' seed-output.txt | head -n 1 | awk '{print $NF}')"
+          sa_key="$(grep 'superadmin@sample.test two-step key:' seed-output.txt | awk '{print $NF}')"
+          docker exec api-restored node /check/two-step-check.mjs superadmin@sample.test "$sa_password" "$sa_key"
 
       - name: Export one organisation and check it holds only that organisation
         run: |

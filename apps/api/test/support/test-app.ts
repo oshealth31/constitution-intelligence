@@ -9,6 +9,7 @@ import {
   memberships,
   organisations,
   subscriptions,
+  userTwoStep,
   users,
   type AuditEvent,
   type Database,
@@ -23,6 +24,8 @@ import { loadConfig } from '../../src/config/config';
 import { DRIZZLE } from '../../src/database/database.constants';
 import { AI_PROVIDER, type AiProvider } from '../../src/modules/ai/ai-provider';
 import { MailService } from '../../src/modules/mail/mail.service';
+import { generateTotpSecret, totpCode } from '../../src/modules/auth/totp';
+import { TwoStepCrypto, developmentOnlyTwoStepKey } from '../../src/modules/auth/two-step-crypto';
 import { createTestDatabase, type TestDatabase } from './test-database';
 
 /** Fictional test password. Every test account is created with it, inside throwaway databases. */
@@ -89,6 +92,43 @@ export function uniqueEmail(label: string): string {
   return `${label}.${Date.now()}.${counter}@example.test`;
 }
 
+/** Authenticator secrets of test accounts with two-step sign-in, by email (this process only). */
+const twoStepSecrets = new Map<string, string>();
+const testTwoStepCrypto = new TwoStepCrypto(developmentOnlyTwoStepKey());
+
+/** The authenticator secret of a test account created with two-step sign-in. */
+export function twoStepSecretFor(email: string): string {
+  const secret = twoStepSecrets.get(email);
+  if (!secret) throw new Error(`${email} has no two-step sign-in in this test run`);
+  return secret;
+}
+
+/** Turns two-step sign-in on for a test account directly in the database. Returns the secret. */
+export async function enableTwoStep(db: Database, user: { id: string; email: string }) {
+  const secret = generateTotpSecret();
+  await db
+    .insert(userTwoStep)
+    .values({
+      userId: user.id,
+      secretCiphertext: testTwoStepCrypto.encryptSecret(secret, user.id),
+      enabledAt: new Date(),
+    })
+    .onConflictDoUpdate({
+      target: userTwoStep.userId,
+      set: {
+        secretCiphertext: testTwoStepCrypto.encryptSecret(secret, user.id),
+        enabledAt: new Date(),
+        lastUsedStep: null,
+      },
+    });
+  twoStepSecrets.set(user.email, secret);
+  return secret;
+}
+
+/**
+ * Super Admins are created with two-step sign-in already on (it is required for them), so tests
+ * about other things can use the Control Centre. Pass `twoStep: false` for one without it.
+ */
 export async function createUser(
   db: Database,
   options: {
@@ -97,6 +137,7 @@ export async function createUser(
     password?: string | null;
     superAdmin?: boolean;
     status?: 'active' | 'suspended' | 'deactivated';
+    twoStep?: boolean;
   } = {},
 ) {
   const password = options.password === undefined ? TEST_PASSWORD : options.password;
@@ -110,6 +151,9 @@ export async function createUser(
       status: options.status ?? 'active',
     })
     .returning();
+  if (options.twoStep ?? options.superAdmin ?? false) {
+    await enableTwoStep(db, user!);
+  }
   return user!;
 }
 
@@ -175,9 +219,26 @@ export async function signedInMember(
   return { user, membership, agent };
 }
 
+/**
+ * Signs in like the web app, including the two-step code for accounts that have it. The
+ * "last used code" record is cleared first, so a test may sign the same person in several times
+ * within one 30-second step (in real use each code works once).
+ */
 export async function signIn(context: TestContext, email: string, password = TEST_PASSWORD) {
   const agent = client(context);
-  await agent.post('/api/v1/auth/login').send({ email, password }).expect(200);
+  const response = await agent.post('/api/v1/auth/login').send({ email, password }).expect(200);
+  const body = response.body as { twoStepRequired?: boolean; challengeToken?: string };
+  if (body.twoStepRequired) {
+    const [user] = await context.db.select().from(users).where(eq(users.email, email)).limit(1);
+    await context.db
+      .update(userTwoStep)
+      .set({ lastUsedStep: null })
+      .where(eq(userTwoStep.userId, user!.id));
+    await agent
+      .post('/api/v1/auth/login/two-step')
+      .send({ challengeToken: body.challengeToken, code: totpCode(twoStepSecretFor(email)) })
+      .expect(200);
+  }
   return agent;
 }
 

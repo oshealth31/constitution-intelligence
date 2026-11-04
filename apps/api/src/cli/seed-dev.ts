@@ -5,11 +5,19 @@
 //
 // Refuses to run unless APP_ENV=local. Every run gives each account a NEW random password,
 // printed once to this terminal. There is no shared or default password.
+//
+// Two-step sign-in: the Sample Super Admin gets a NEW authenticator key each run (printed once;
+// add it to an authenticator app by hand). The Sample New Staff Member is a second Super Admin
+// with two-step sign-in NOT set up, to try the setup steps; each run removes it again.
 import {
   constitutions,
   memberships,
   organisationBranding,
   organisations,
+  sessions,
+  twoStepChallenges,
+  twoStepRecoveryCodes,
+  userTwoStep,
   users,
   type Database,
 } from '@constitution/db';
@@ -26,6 +34,8 @@ import { createSampleTenantContent } from '../dev/sample-tenant';
 import { OrganisationProfileService } from '../modules/organisations/organisation-profile.service';
 import { PasswordService } from '../modules/auth/password.service';
 import { generateRandomPassword } from '../modules/auth/tokens';
+import { generateTotpSecret } from '../modules/auth/totp';
+import { TwoStepCrypto, twoStepMasterKey } from '../modules/auth/two-step-crypto';
 import { FilesService } from '../modules/files/files.service';
 import { createTenantScope } from '../modules/tenancy/tenant-scope';
 import { createCliContext } from './cli-app';
@@ -54,6 +64,11 @@ const ACCOUNTS: {
   organisation?: SampleSlug;
 }[] = [
   { email: 'superadmin@sample.test', name: 'Sample Super Admin', role: 'platform_super_admin' },
+  {
+    email: 'newstaff@sample.test',
+    name: 'Sample New Staff Member',
+    role: 'platform_super_admin',
+  },
   {
     email: 'owner@sample.test',
     name: 'Choir Owner',
@@ -127,6 +142,8 @@ async function main(): Promise<void> {
     }
 
     const printed: string[] = [];
+    const twoStepPrinted: string[] = [];
+    const twoStepCrypto = new TwoStepCrypto(twoStepMasterKey(config));
     const ownerIds = new Map<SampleSlug, string>();
     for (const account of ACCOUNTS) {
       const password = generateRandomPassword();
@@ -151,6 +168,22 @@ async function main(): Promise<void> {
           },
         })
         .returning();
+      if (isSuperAdmin) {
+        // Start from a clean two-step state every run.
+        await db.delete(twoStepRecoveryCodes).where(eq(twoStepRecoveryCodes.userId, user!.id));
+        await db.delete(twoStepChallenges).where(eq(twoStepChallenges.userId, user!.id));
+        await db.delete(userTwoStep).where(eq(userTwoStep.userId, user!.id));
+        await db.delete(sessions).where(eq(sessions.userId, user!.id));
+        if (account.email === 'superadmin@sample.test') {
+          const secret = generateTotpSecret();
+          await db.insert(userTwoStep).values({
+            userId: user!.id,
+            secretCiphertext: twoStepCrypto.encryptSecret(secret, user!.id),
+            enabledAt: new Date(),
+          });
+          twoStepPrinted.push(`  ${account.email} two-step key: ${secret}`);
+        }
+      }
       if (account.organisation && !isSuperAdmin) {
         const role = account.role as OrganisationRole;
         await db
@@ -230,6 +263,10 @@ async function main(): Promise<void> {
         '',
         '  Role                             Email                        Password (this run only)',
         ...printed,
+        '',
+        'Two-step sign-in key (add it to an authenticator app as a "setup key"; this run only):',
+        ...twoStepPrinted,
+        '  newstaff@sample.test has no two-step sign-in yet: sign in to try setting it up.',
         '',
         'These accounts are fictional and for local development only. Run again to get new passwords.',
         '',

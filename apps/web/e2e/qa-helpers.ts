@@ -3,6 +3,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { expect, type Page } from '@playwright/test';
+import { freshCode, twoStepKeys } from './totp';
 
 export const accounts = JSON.parse(
   readFileSync(path.join(__dirname, '.auth', 'accounts.json'), 'utf8'),
@@ -24,12 +25,22 @@ export async function signInPortal(page: Page, email: string, slug: string = CHO
   await page.waitForURL((url) => !url.pathname.endsWith('/sign-in'));
 }
 
+/** The second sign-in step, for seeded accounts that have two-step sign-in. */
+export async function enterTwoStepCodeIfNeeded(page: Page, email: string) {
+  if (!twoStepKeys()[email]) return;
+  const field = page.getByLabel('Authenticator code');
+  await expect(field).toBeVisible();
+  await field.fill(await freshCode(email));
+  await page.getByRole('button', { name: 'Continue' }).click();
+}
+
 /** Signs in to the Control Centre as the Super Admin. */
 export async function signInControlCentre(page: Page, email = 'superadmin@sample.test') {
   await page.goto('/admin/sign-in');
   await page.getByLabel('Email address').fill(email);
   await page.getByLabel('Password').fill(accounts[email] ?? '');
   await page.getByRole('button', { name: 'Sign in' }).click();
+  await enterTwoStepCodeIfNeeded(page, email);
   await expect(page.getByRole('heading', { name: 'Overview', level: 1 })).toBeVisible();
 }
 

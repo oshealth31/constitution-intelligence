@@ -538,12 +538,20 @@ describe.runIf(Boolean(testDatabaseUrl))('two-step sign-in', () => {
         superAdmin: true,
       });
       await enableTwoStep(context.db, admin);
-      await expect(
-        context.db.transaction(async (tx) => {
-          await tx.execute(sql`SET LOCAL ROLE app_tenant`);
-          await tx.select().from(userTwoStep);
-        }),
-      ).rejects.toThrow(/permission denied/);
+      for (const table of ['user_two_step', 'two_step_recovery_codes', 'two_step_challenges']) {
+        let message = 'no error';
+        try {
+          await context.db.transaction(async (tx) => {
+            await tx.execute(sql`SET LOCAL ROLE app_tenant`);
+            await tx.execute(sql.raw(`SELECT count(*) FROM ${table}`));
+          });
+        } catch (error) {
+          // Drizzle wraps the database error; the database's own message is the cause.
+          const cause = (error as { cause?: { message?: string } }).cause;
+          message = cause?.message ?? (error as Error).message;
+        }
+        expect(message, table).toMatch(/permission denied/);
+      }
     });
   });
 });

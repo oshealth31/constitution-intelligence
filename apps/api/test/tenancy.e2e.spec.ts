@@ -414,6 +414,11 @@ describe.runIf(Boolean(testDatabaseUrl))('tenant isolation', () => {
         'auth_rate_limits',
         // The product's plans (names, prices, features): the same for everyone, no organisation data.
         'plans',
+        // Two-step sign-in belongs to the person, not to an organisation (one account can be in
+        // several). Not granted to app_tenant at all (checked in two-step.e2e.spec.ts).
+        'user_two_step',
+        'two_step_recovery_codes',
+        'two_step_challenges',
       ];
       const result = await context.db.execute(sql`
         SELECT c.relname AS name,

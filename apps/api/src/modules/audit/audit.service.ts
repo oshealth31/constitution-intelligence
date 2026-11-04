@@ -90,6 +90,7 @@ export type AuditAction =
   | 'payment.verified'
   | 'payment.rejected'
   | 'support.content_accessed'
+  | 'maintenance.cleanup'
   | 'permission.denied';
 
 export interface AuditEntry {

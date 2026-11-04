@@ -158,6 +158,9 @@ export const configSchema = z
     // How long a copy downloaded for offline reading may be shown without being refreshed.
     // After this the device hides it until it can sync again (see docs/offline.md).
     OFFLINE_COPY_MAX_AGE_DAYS: z.coerce.number().int().min(1).max(90).default(30),
+    // How often the API removes ended sessions, old reset links, rate-limit counters and expired
+    // two-step challenges (Task D6). 0 turns the timer off (`node dist/cli/cleanup.js` still works).
+    CLEANUP_INTERVAL_HOURS: z.coerce.number().int().min(0).max(168).default(6),
   })
   .superRefine((config, ctx) => {
     if (config.MAIL_TRANSPORT === 'smtp') {

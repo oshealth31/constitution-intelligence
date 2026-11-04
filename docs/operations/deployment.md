@@ -157,6 +157,7 @@ to organisations in advance for releases with migrations.
 The **Deployment check** workflow (`.github/workflows/deployment-check.yml`) does steps 2–4 on
 a throwaway runner with generated secrets, on every pull request and weekly, then checks:
 HTTPS and the redirect, security headers, both health checks, the visitor address through
-both proxies, that the application's database account is not a superuser, that unsafe
+both proxies, that migrations run as the migration account and the application's account is
+not a superuser, owns no table and cannot alter or empty the audit log, that unsafe
 settings stop the API, that the development seed refuses, and the backup and restore test.
 It does **not** prove anything about a real server, its network or its hosting provider.

@@ -1,5 +1,17 @@
 # Secret management
 
+## Database accounts (Task D4)
+
+| Account                 | Used by                                | Can                                                                                                                       |
+| ----------------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `constitution_owner`    | A person, for administration only      | Everything (superuser). Never put its password in an application setting.                                                 |
+| `constitution_migrator` | The `migrate` service, and restores    | Owns the database and every table; applies migrations. Not a superuser.                                                    |
+| `constitution_app`      | The API, backups, exports, the commands | Read and write data (rights through the `app_runtime` role). Owns nothing: cannot alter, empty or drop tables, or switch off triggers; cannot change audit events. Sees every organisation for platform work (`BYPASSRLS`); organisation work runs as `app_tenant` with row-level security. |
+
+The accounts are created on the database's first start by
+`infra/production/postgres-init/01-application-accounts.sh`. The deployment check verifies
+the layout on every change.
+
 ## Rules
 
 1. **Production secrets are generated for production.** Never reuse a development or test
@@ -23,12 +35,13 @@ On the server, as root, in `/srv/constitution/infra/production/secrets/`:
 ```bash
 umask 077
 openssl rand -hex 32 > postgres_password      # administrator account (superuser) – admin only
-openssl rand -hex 32 > app_db_password        # application account constitution_app
+openssl rand -hex 32 > app_db_password        # application account constitution_app (owns nothing)
+openssl rand -hex 32 > migrator_db_password   # migration account constitution_migrator (owns the tables)
 openssl rand -hex 32 > backup_passphrase      # encrypts backups and exports
 openssl rand -hex 32 > mfa_encryption_key     # encrypts two-step sign-in secrets (D2)
 read -rs smtp_key && printf '%s' "$smtp_key" > smtp_password && unset smtp_key  # paste the Brevo SMTP key (not echoed, not in history)
 printf 'postgresql://constitution_app:%s@postgres:5432/constitution' "$(cat app_db_password)" > database_url
-cp database_url database_owner_url            # migrations; separate account planned (U3)
+printf 'postgresql://constitution_migrator:%s@postgres:5432/constitution' "$(cat migrator_db_password)" > database_migrator_url
 
 # Database TLS certificate, signed by a private certificate authority kept OFF the server.
 openssl req -x509 -newkey rsa:4096 -nodes -days 3650 -subj "/CN=Constitution DB CA" \
@@ -39,7 +52,7 @@ openssl x509 -req -in server.csr -CA database_ca.crt -CAkey /secure/offline/data
   -CAcreateserial -days 825 -extfile san.ext -out database_server.crt
 rm server.csr san.ext
 chown root:999 database_server.key && chmod 0640 database_server.key
-chmod 0600 postgres_password app_db_password backup_passphrase database_url database_owner_url smtp_password mfa_encryption_key
+chmod 0600 postgres_password app_db_password migrator_db_password backup_passphrase database_url database_migrator_url smtp_password mfa_encryption_key
 ```
 
 Write the backup passphrase on paper (or a password manager the owner controls), seal it, and
@@ -58,7 +71,8 @@ authority file as `database_ca.crt` and the provider's connection string in `dat
 
 | Secret                                    | How often                                  | How                                                                                                                                                                                                          |
 | ----------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `app_db_password`                         | Yearly, and when anyone with access leaves | `ALTER ROLE constitution_app PASSWORD '...'` as the administrator, update `app_db_password`, `database_url`, `database_owner_url`, then `docker compose up -d api`                                           |
+| `app_db_password`                         | Yearly, and when anyone with access leaves | `ALTER ROLE constitution_app PASSWORD '...'` as the administrator, update `app_db_password` and `database_url`, then `docker compose up -d api` |
+| `migrator_db_password`                    | Yearly, and when anyone with access leaves | `ALTER ROLE constitution_migrator PASSWORD '...'` as the administrator, update `migrator_db_password` and `database_migrator_url` |
 | `postgres_password`                       | Yearly                                     | `ALTER ROLE constitution_owner PASSWORD '...'`, update the file                                                                                                                                              |
 | Database certificate                      | Before it expires (825 days)               | Issue a new one with the same CA; restart `postgres`                                                                                                                                                         |
 | `backup_passphrase`                       | When someone who knew it leaves            | New file; **keep the old passphrase** until every backup made with it has expired                                                                                                                            |
@@ -77,6 +91,4 @@ organisations and is not secret either.
 
 - A dedicated secret manager (for example HashiCorp Vault, or the hosting provider's) with
   access logs. Files on one server are acceptable for a controlled pilot, not long term.
-- A separate database account for migrations (owner) and for the running API (U3 in
-  docs/security/security-review.md). Today both use `constitution_app`, which is **not** a
-  superuser (checked by the deployment check workflow).
+

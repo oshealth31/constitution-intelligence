@@ -78,6 +78,13 @@
       "when": 1793870000000,
       "tag": "0010_organisation_deletion",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1793880000000,
+      "tag": "0011_runtime_account",
+      "breakpoints": true
     }
   ]
 }

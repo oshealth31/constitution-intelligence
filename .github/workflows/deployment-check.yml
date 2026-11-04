@@ -83,6 +83,7 @@ jobs:
           sudo chown 0:999 secrets/database_server.key && sudo chmod 0640 secrets/database_server.key
           openssl rand -hex 24 > secrets/postgres_password
           openssl rand -hex 24 > secrets/app_db_password
+          openssl rand -hex 24 > secrets/migrator_db_password
           openssl rand -hex 32 > secrets/backup_passphrase
           openssl rand -hex 24 > secrets/smtp_password
           openssl rand -hex 32 > secrets/mfa_encryption_key
@@ -95,14 +96,17 @@ jobs:
             -days 2 -extfile mail.ext -out ci-mail/mail.crt 2>/dev/null
           chmod 0644 ci-mail/mail.key
           printf 'postgresql://constitution_app:%s@postgres:5432/constitution' "$(cat secrets/app_db_password)" > secrets/database_url
-          cp secrets/database_url secrets/database_owner_url
+          printf 'postgresql://constitution_migrator:%s@postgres:5432/constitution' "$(cat secrets/migrator_db_password)" > secrets/database_migrator_url
+          # Restores run with the migration account (it will own the restored tables); the
+          # restored API uses the application account, as in production.
+          printf 'postgresql://constitution_migrator:%s@postgres:5432/constitution_restore' "$(cat secrets/migrator_db_password)" > secrets/restore_migrator_url
           printf 'postgresql://constitution_app:%s@postgres:5432/constitution_restore' "$(cat secrets/app_db_password)" > secrets/restore_url
           cp api.env.example api.env
           sed -i 's#https://portal.example.co.bw#https://localhost#g; s#^APP_VERSION=.*#APP_VERSION=ci#' api.env
           sed -i 's#^SMTP_HOST=.*#SMTP_HOST=mailpit#; s#^SMTP_PORT=.*#SMTP_PORT=1025#; s#^SMTP_USER=.*#SMTP_USER=ci-sender#' api.env
           sed -i 's#^MAIL_FROM=.*#MAIL_FROM=Constitution Intelligence <no-reply@example.test>#; s#^MAIL_REPLY_TO=.*#MAIL_REPLY_TO=support@example.test#' api.env
 
-      - name: Start the database (TLS on) and apply migrations with the application account
+      - name: Start the database (TLS on) and apply migrations with the migration account
         run: |
           docker compose up -d --wait postgres
           docker compose --profile migrate run --rm migrate
@@ -149,15 +153,26 @@ jobs:
           for proxy in $caddy_ip $web_ip; do test "$seen" != "$proxy"; done
           echo "[deploy-test] ok the recorded address is the visitor's, not a proxy's"
 
-      - name: The application's database account is not a superuser
+      - name: Two database accounts; the application's owns nothing and cannot change the rules
         run: |
           set -e
           url="$(sed 's#@postgres:#@localhost:#' secrets/database_url)"
-          flags="$(docker compose exec -T postgres psql "$url" -Atc \
-            "SELECT rolsuper::text || ',' || rolbypassrls::text FROM pg_roles WHERE rolname = current_user")"
-          echo "[deploy-test] constitution_app superuser,bypassrls = $flags"
-          test "$flags" = "false,false"
-
+          app() { docker compose exec -T postgres psql "$url" -Atq -c "$1" 2>&1 || true; }
+          flags="$(app "SELECT rolsuper::text || ',' || rolcreaterole::text || ',' || rolbypassrls::text FROM pg_roles WHERE rolname = current_user")"
+          echo "[deploy-test] constitution_app superuser,createrole,bypassrls = $flags"
+          test "$flags" = "false,false,true"
+          owners="$(docker compose exec -T postgres psql -U constitution_owner -d constitution -Atc \
+            "SELECT DISTINCT pg_get_userbyid(c.relowner) FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'public' AND c.relkind = 'r'")"
+          echo "[deploy-test] tables owned by: $owners"
+          test "$owners" = "constitution_migrator"
+          test "$(docker compose exec -T postgres psql -U constitution_owner -d constitution -Atc \
+            "SELECT rolsuper::text FROM pg_roles WHERE rolname = 'constitution_migrator'")" = "false"
+          app "UPDATE audit_events SET action = 'x'" | grep -q 'permission denied'
+          app "TRUNCATE audit_events" | grep -q 'permission denied'
+          app "ALTER TABLE audit_events DISABLE TRIGGER audit_events_no_update_or_delete" | grep -q 'must be owner'
+          app "DROP TABLE organisations CASCADE" | grep -q 'must be owner'
+          app "CREATE TABLE sneaky (id int)" | grep -q 'permission denied'
+          echo "[deploy-test] ok migrations by constitution_migrator; constitution_app is not a superuser, owns no table and cannot alter, empty or un-protect the audit log"
       - name: Unsafe production settings and the development seed are refused
         run: |
           set +e
@@ -219,13 +234,13 @@ jobs:
         run: |
           set -e
           admin() { docker compose exec -T postgres psql -U constitution_owner -v ON_ERROR_STOP=1 "$@"; }
-          admin -d constitution -c 'CREATE DATABASE constitution_restore OWNER constitution_app'
+          admin -d constitution -c 'CREATE DATABASE constitution_restore OWNER constitution_migrator'
           admin -d constitution_restore -c 'CREATE EXTENSION IF NOT EXISTS pg_trgm' \
-            -c 'CREATE EXTENSION IF NOT EXISTS vector' -c 'ALTER SCHEMA public OWNER TO constitution_app'
+            -c 'CREATE EXTENSION IF NOT EXISTS vector' -c 'ALTER SCHEMA public OWNER TO constitution_migrator'
           docker volume create ci-restored-storage
           docker run --rm --network constitution-intelligence_data \
             -v "$PWD/backups:/backups:ro" -v "$PWD/secrets:/s:ro" -v ci-restored-storage:/restored \
-            -e TARGET_DATABASE_URL_FILE=/s/restore_url -e TARGET_STORAGE_DIR=/restored \
+            -e TARGET_DATABASE_URL_FILE=/s/restore_migrator_url -e TARGET_STORAGE_DIR=/restored \
             -e BACKUP_PASSPHRASE_FILE=/s/backup_passphrase \
             -e PGSSLMODE=verify-full -e PGSSLROOTCERT=/s/database_ca.crt \
             "$OPS_IMAGE" /ops/restore.sh "/backups/$(basename "$BACKUP")" | sed 's/^/[restore-test] /'

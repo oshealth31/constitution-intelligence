@@ -60,11 +60,12 @@ refuses anything else, so a mistake cannot overwrite live data. It:
 ```bash
 cd /srv/constitution/infra/production
 admin() { docker compose exec -T postgres psql -U constitution_owner -v ON_ERROR_STOP=1 "$@"; }
-admin -d constitution -c 'CREATE DATABASE constitution_restored OWNER constitution_app'
+admin -d constitution -c 'CREATE DATABASE constitution_restored OWNER constitution_migrator'
 admin -d constitution_restored -c 'CREATE EXTENSION IF NOT EXISTS pg_trgm' \
-  -c 'CREATE EXTENSION IF NOT EXISTS vector' -c 'ALTER SCHEMA public OWNER TO constitution_app'
-printf 'postgresql://constitution_app:%s@postgres:5432/constitution_restored' \
-  "$(cat secrets/app_db_password)" > secrets/restore_url && chmod 600 secrets/restore_url
+  -c 'CREATE EXTENSION IF NOT EXISTS vector' -c 'ALTER SCHEMA public OWNER TO constitution_migrator'
+# The restore runs as the MIGRATION account, which then owns the restored tables.
+printf 'postgresql://constitution_migrator:%s@postgres:5432/constitution_restored' \
+  "$(cat secrets/migrator_db_password)" > secrets/restore_url && chmod 600 secrets/restore_url
 docker volume create constitution-intelligence_storage_restored
 docker run --rm --network constitution-intelligence_data \
   -v "$PWD/backups:/backups:ro" -v "$PWD/secrets:/s:ro" \
@@ -75,8 +76,8 @@ docker run --rm --network constitution-intelligence_data \
   "$OPS_IMAGE" /ops/restore.sh /backups/<backup folder>
 ```
 
-Then check it (sign in, open a constitution, search), switch `database_url` to the restored
-database and the `storage` volume to the restored one, and restart `api`. Keep the old
+Then check it (sign in, open a constitution, search), switch `database_url` (application
+account, `constitution_app`) and `database_migrator_url` to the restored database and the `storage` volume to the restored one, and restart `api`. Keep the old
 database untouched until the restored one has run for a while. If the server itself is lost:
 new server ([deployment.md](deployment.md)), the secrets from their safe copy, the backup from
 the off-site copy, then the same steps.

@@ -14,7 +14,8 @@ docker compose up -d --wait api web                       # 3. start the new ver
 ```
 
 - The `migrate` service runs `node dist/cli/migrate.js` from the **new** API image with the
-  `database_owner_url` secret, over TLS.
+  `database_migrator_url` secret (the `constitution_migrator` account, which owns the tables),
+  over TLS. The API itself never uses this account.
 - It prints "Database migrations applied successfully." or the error message (never the
   connection string) and exits non-zero on failure.
 - All pending migrations run inside one transaction: if one fails, none of them is applied and
@@ -32,13 +33,23 @@ docker compose up -d --wait api web                       # 3. start the new ver
    policy for `app_tenant`; the tenancy tests list every such table and fail if one is missing.
 5. Long operations on big tables (new indexes) use `CREATE INDEX CONCURRENTLY` in their own
    migration, and are announced as maintenance.
-6. Test: CI applies all migrations to an empty database on every change, and the Deployment
-   check applies them with the non-superuser application account.
+6. Test: CI applies all migrations to an empty database on every change, also as a
+   non-superuser migration account with a separate application account
+   (`packages/db/test/accounts.test.ts`), and the Deployment check does the same on the
+   production stack.
+7. New tables automatically give the application role (`app_runtime`) SELECT, INSERT, UPDATE and
+   DELETE (migration 0011). If the application must not change or delete a table's rows (like
+   `audit_events`), REVOKE those rights in the same migration and update the expected rights in
+   `accounts.test.ts`, which checks every table.
 
 ## First installation
 
 The first `migrate` run creates everything, including the restricted `app_tenant` role used for
-row-level security. The extensions it needs (`pg_trgm`, `vector`) are created beforehand by the
+row-level security, and grants the application role its rights. The three accounts
+(`constitution_owner`, `constitution_migrator`, `constitution_app`) and the `app_runtime` role
+are created by the database start-up script on its first start ([secrets](secrets.md#database-accounts-task-d4)).
+This is for a **new** database: no production database exists yet, so there is no upgrade
+procedure from the earlier single-account layout. The extensions it needs (`pg_trgm`, `vector`) are created beforehand by the
 database start-up script (`infra/production/postgres-init/`) or, on a managed service, by its
 administrator.
 

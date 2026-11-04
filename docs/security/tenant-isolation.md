@@ -104,9 +104,11 @@ so the refusals are real. A guardrail test checks every table's tenant column an
 
 ## Known limitations
 
-1. **RLS is defence in depth for tenant data paths, not yet for the whole API.** The platform-level
-   paths listed above run as the table owner, which bypasses RLS. A later hardening step can move the
-   API to a non-owner account and run platform work through narrowly granted functions.
+1. **RLS is defence in depth for tenant data paths, not for the whole API.** The platform-level
+   paths listed above run as the application account, which may see every organisation
+   (`BYPASSRLS`). Since Task D4 that account no longer owns the tables, so it cannot switch off
+   RLS, triggers or constraints; a further step could run platform work through narrowly granted
+   functions instead.
 2. **Cloud object storage** (an S3-compatible service with per-tenant prefixes and short-lived signed
    links) replaces local-disk storage in the deployment stage. The tenant-prefix rule carries over.
 3. **Uploads** through the API (with malware scanning) arrive in the secure-upload stage; until then

@@ -69,53 +69,53 @@ export function BillingCard({
     <Card
       title="Billing"
       description="Access is worked out by the server from the subscription, its invoices and today’s date."
-      actions={
-        <Badge tone={tone}>{deleted ? 'Ended' : ACCESS_STATE_LABELS[access.state]}</Badge>
-      }
+      actions={<Badge tone={tone}>{deleted ? 'Ended' : ACCESS_STATE_LABELS[access.state]}</Badge>}
     >
       <div className="space-y-5" aria-label="Billing">
         {notice && <Alert tone={notice.tone}>{notice.text}</Alert>}
         {deleted ? (
           <p data-testid="platform-access-message" className="text-sm text-navy-900">
             The organisation’s data was deleted on {formatDate(organisation.deletedAt)}, so its
-            subscription has ended and nothing will renew. Existing invoices can still be settled
-            or voided; no new invoices can be issued.
+            subscription has ended and nothing will renew. Existing invoices can still be settled or
+            voided; no new invoices can be issued.
           </p>
         ) : (
-        <div>
-          <p data-testid="platform-access-message" className="text-sm text-navy-900">
-            {access.message}
-          </p>
-          <p className="mt-1 text-sm text-muted">
-            Payment status: {PAYMENT_STATUS_LABELS[access.paymentStatus]}
-            {access.graceEndsAt ? ` · grace period ends ${formatDate(access.graceEndsAt)}` : ''}
-            {access.dataRetainedUntil
-              ? ` · data kept until at least ${formatDate(access.dataRetainedUntil)}`
-              : ''}
-          </p>
-          {subscription?.suspensionReason && (
-            <p className="mt-1 text-sm text-rose-800">Suspended: {subscription.suspensionReason}</p>
-          )}
-          {subscription?.cancellationReason && (
-            <p className="mt-1 text-sm text-rose-800">
-              Cancelled: {subscription.cancellationReason}
+          <div>
+            <p data-testid="platform-access-message" className="text-sm text-navy-900">
+              {access.message}
             </p>
-          )}
-        </div>
+            <p className="mt-1 text-sm text-muted">
+              Payment status: {PAYMENT_STATUS_LABELS[access.paymentStatus]}
+              {access.graceEndsAt ? ` · grace period ends ${formatDate(access.graceEndsAt)}` : ''}
+              {access.dataRetainedUntil
+                ? ` · data kept until at least ${formatDate(access.dataRetainedUntil)}`
+                : ''}
+            </p>
+            {subscription?.suspensionReason && (
+              <p className="mt-1 text-sm text-rose-800">
+                Suspended: {subscription.suspensionReason}
+              </p>
+            )}
+            {subscription?.cancellationReason && (
+              <p className="mt-1 text-sm text-rose-800">
+                Cancelled: {subscription.cancellationReason}
+              </p>
+            )}
+          </div>
         )}
 
         {!deleted && (
-        <dl className="grid gap-2 text-sm sm:grid-cols-2">
-          {PLAN_LIMITS.map((limit) => (
-            <div key={limit} className="flex justify-between gap-3">
-              <dt className="text-muted">{LIMIT_LABELS[limit]}</dt>
-              <dd className="font-medium text-navy-900">
-                {usage[limit]}
-                {access.limits[limit] === null ? ' / no limit' : ` / ${access.limits[limit]}`}
-              </dd>
-            </div>
-          ))}
-        </dl>
+          <dl className="grid gap-2 text-sm sm:grid-cols-2">
+            {PLAN_LIMITS.map((limit) => (
+              <div key={limit} className="flex justify-between gap-3">
+                <dt className="text-muted">{LIMIT_LABELS[limit]}</dt>
+                <dd className="font-medium text-navy-900">
+                  {usage[limit]}
+                  {access.limits[limit] === null ? ' / no limit' : ` / ${access.limits[limit]}`}
+                </dd>
+              </div>
+            ))}
+          </dl>
         )}
 
         {subscription && !deleted && (

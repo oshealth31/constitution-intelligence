@@ -175,7 +175,11 @@ until the window ends. A successful sign-in resets the per-email counter.
 
 ## Audit events
 
-Written to the append-only `audit_events` table (the database refuses UPDATE, DELETE and TRUNCATE):
+Written to the append-only `audit_events` table (the database refuses UPDATE, DELETE and TRUNCATE).
+The one exception is the organisation deletion procedure (Task D3): inside its transaction it may
+remove the events of an organisation already marked deleted, and the platform-level events of an
+account already deleted, and then records the deletion as a new event
+([offboarding](../operations/offboarding-and-retention.md#deletion-task-d3)).
 
 | Event                                                                                            | When                                               |
 | ------------------------------------------------------------------------------------------------ | -------------------------------------------------- |
@@ -190,6 +194,7 @@ Written to the append-only `audit_events` table (the database refuses UPDATE, DE
 | `membership.role_changed` / `membership.status_changed` / `membership.removed`                   | Member management                                  |
 | `user.created` / `user.status_changed` / `user.super_admin_granted`                              | Accounts                                           |
 | `organisation.created`                                                                           | Platform                                           |
+| `organisation.deletion_requested` / `deletion_cancelled` / `organisation.deleted`                | Organisation deletion (Task D3)                    |
 | `permission.denied`                                                                              | Any refused permission check or escalation attempt |
 
 Events record who, what, when, the organisation, network address, browser and request ID.

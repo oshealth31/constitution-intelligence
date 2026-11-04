@@ -179,6 +179,8 @@ export interface OrganisationListItem {
   slug: string;
   status: string;
   createdAt: string;
+  /** Set when the organisation's data was deleted (Task D3). */
+  deletedAt: string | null;
   subscription: { planCode: string; status: string; currentPeriodEnd: string | null } | null;
   activeMembers: number;
   publishedVersions: number;
@@ -194,6 +196,8 @@ export interface OrganisationDetail {
     status: string;
     createdAt: string;
     updatedAt: string;
+    /** Set when the organisation's data was deleted (Task D3). */
+    deletedAt: string | null;
   };
   branding: {
     displayName: string | null;

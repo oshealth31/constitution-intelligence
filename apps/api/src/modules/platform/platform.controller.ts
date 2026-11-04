@@ -25,6 +25,7 @@ import { PlatformDashboardService } from './platform-dashboard.service';
 import { PlatformService } from './platform.service';
 import { PlatformBillingService } from '../subscriptions/platform-billing.service';
 import { TwoStepService } from '../auth/two-step.service';
+import { OrganisationDeletionService } from './organisation-deletion.service';
 
 const nameSchema = z.string().trim().min(2).max(200);
 const createOrganisationSchema = z.object({ name: nameSchema, slug: slugSchema });
@@ -73,6 +74,14 @@ const administratorInvitationSchema = z.object({
 const administratorStatusSchema = z.object({ status: z.enum(['active', 'suspended']) });
 const supportAccessSchema = z.object({ reason: reasonSchema });
 const userStatusSchema = z.object({ status: z.enum(USER_STATUSES) });
+const deletionRequestSchema = z.object({
+  confirmSlug: z.string().trim().max(60),
+  reason: reasonSchema,
+  exportConfirmed: z.literal(true, {
+    error: 'must be ticked: the data was exported, or the owner declined an export',
+  }),
+});
+const deletionApprovalSchema = z.object({ confirmSlug: z.string().trim().max(60) });
 const twoStepResetSchema = z.object({ email: emailSchema, reason: reasonSchema });
 const organisationQuerySchema = z.object({
   status: z.enum(ORGANISATION_STATUSES).optional(),
@@ -103,6 +112,7 @@ export class PlatformController {
     private readonly invitations: InvitationsService,
     private readonly billing: PlatformBillingService,
     private readonly twoStep: TwoStepService,
+    private readonly deletion: OrganisationDeletionService,
   ) {}
 
   @Get('overview')
@@ -319,6 +329,73 @@ export class PlatformController {
       auth.userId,
       requestMeta(request),
     );
+  }
+
+  /** What deleting this organisation would remove and keep, and any waiting request. */
+  @Get('organisations/:organisationId/deletion')
+  deletionPreview(@Param('organisationId') organisationId: string) {
+    return this.deletion.preview(parseId(organisationId, 'Organisation'));
+  }
+
+  /** Step 1: ask for the organisation's data to be deleted (see the approval rules in the service). */
+  @Post('organisations/:organisationId/deletion-requests')
+  requestDeletion(
+    @CurrentAuth() auth: AuthContext,
+    @Param('organisationId') organisationId: string,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
+    const input = parseInput(deletionRequestSchema, body);
+    return this.deletion.request(
+      parseId(organisationId, 'Organisation'),
+      input,
+      auth.userId,
+      requestMeta(request),
+    );
+  }
+
+  /** Step 2: approve and delete. A different Super Admin, or the same one after 24 hours if alone. */
+  @Post('organisations/:organisationId/deletion-requests/:requestId/approve')
+  @HttpCode(HttpStatus.OK)
+  approveDeletion(
+    @CurrentAuth() auth: AuthContext,
+    @Param('organisationId') organisationId: string,
+    @Param('requestId') requestId: string,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
+    const { confirmSlug } = parseInput(deletionApprovalSchema, body);
+    return this.deletion.approve(
+      parseId(organisationId, 'Organisation'),
+      parseId(requestId, 'Deletion request'),
+      confirmSlug,
+      auth.userId,
+      requestMeta(request),
+    );
+  }
+
+  @Post('organisations/:organisationId/deletion-requests/:requestId/cancel')
+  @HttpCode(HttpStatus.OK)
+  cancelDeletion(
+    @CurrentAuth() auth: AuthContext,
+    @Param('organisationId') organisationId: string,
+    @Param('requestId') requestId: string,
+    @Req() request: AppRequest,
+  ) {
+    return this.deletion.cancel(
+      parseId(organisationId, 'Organisation'),
+      parseId(requestId, 'Deletion request'),
+      auth.userId,
+      requestMeta(request),
+    );
+  }
+
+  /** Tries again to remove a deleted organisation's files from storage. */
+  @Post('organisations/:organisationId/deletion/remove-files')
+  @HttpCode(HttpStatus.OK)
+  async removeDeletedFiles(@Param('organisationId') organisationId: string) {
+    const id = parseId(organisationId, 'Organisation');
+    return { filesRemoved: await this.deletion.removeFiles(id) };
   }
 
   /**

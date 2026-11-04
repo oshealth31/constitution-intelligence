@@ -117,6 +117,9 @@ export class InvitationsService {
     if (!organisation) {
       throw new NotFoundException('Organisation not found.');
     }
+    if (organisation.deletedAt) {
+      throw new ConflictException('This organisation’s data has been deleted.');
+    }
 
     const [existingMember] = await this.db
       .select({ id: memberships.id })

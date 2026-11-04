@@ -30,7 +30,32 @@ export const organisations = pgTable('organisations', {
   status: text('status', { enum: ORGANISATION_STATUSES }).notNull().default('active'),
   /** The organisation's current subscription (must belong to the same organisation). */
   currentSubscriptionId: uuid('current_subscription_id'),
+  /** Set when the organisation's data was deleted (migration 0010); the row stays as a marker. */
+  deletedAt: timestamp('deleted_at', { withTimezone: true }),
   ...timestamps,
+});
+
+export const DELETION_REQUEST_STATUSES = ['pending', 'cancelled', 'completed'] as const;
+export const DELETION_APPROVAL_MODES = ['second_person', 'waiting_period', 'command_line'] as const;
+
+export const organisationDeletionRequests = pgTable('organisation_deletion_requests', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organisationId: uuid('organisation_id')
+    .notNull()
+    .references(() => organisations.id, { onDelete: 'cascade' }),
+  status: text('status', { enum: DELETION_REQUEST_STATUSES }).notNull().default('pending'),
+  reason: text('reason').notNull(),
+  exportConfirmed: boolean('export_confirmed').notNull(),
+  requestedByUserId: uuid('requested_by_user_id'),
+  requestedAt: timestamp('requested_at', { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  approvedByUserId: uuid('approved_by_user_id'),
+  approvalMode: text('approval_mode', { enum: DELETION_APPROVAL_MODES }),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
+  cancelledByUserId: uuid('cancelled_by_user_id'),
+  cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
+  deletedCounts: jsonb('deleted_counts').$type<Record<string, number>>(),
+  filesRemovedAt: timestamp('files_removed_at', { withTimezone: true }),
 });
 
 export const users = pgTable('users', {
@@ -161,6 +186,7 @@ export const auditEvents = pgTable('audit_events', {
 });
 
 export type Organisation = typeof organisations.$inferSelect;
+export type OrganisationDeletionRequest = typeof organisationDeletionRequests.$inferSelect;
 export type User = typeof users.$inferSelect;
 export type Membership = typeof memberships.$inferSelect;
 export type Invitation = typeof invitations.$inferSelect;

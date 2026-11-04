@@ -29,6 +29,7 @@ import {
   statusLabel,
 } from '@/lib/format';
 import { BillingCard } from '@/components/admin-billing';
+import { DeletionCard } from '@/components/admin-deletion';
 import type { Plan } from '@/lib/billing';
 import { useApi } from '@/lib/use-api';
 
@@ -102,6 +103,31 @@ export default function OrganisationDetailPage() {
   if (!detail.data) return <Loading />;
   const data = detail.data;
 
+  // A deleted organisation: only what was deleted, and the financial records that were kept.
+  if (data.organisation.deletedAt) {
+    return (
+      <>
+        <p className="mb-2 text-sm">
+          <Link href="/admin/organisations" className="text-teal-600 hover:underline">
+            ← Organisations
+          </Link>
+        </p>
+        <PageHeader
+          title={
+            <span className="flex flex-wrap items-center gap-3">
+              {data.organisation.name} <Badge tone="critical">Deleted</Badge>
+            </span>
+          }
+          description={`Data deleted ${formatDate(data.organisation.deletedAt)}`}
+        />
+        <div className="grid gap-6 xl:grid-cols-2 [&>*]:min-w-0">
+          <DeletionCard organisationId={organisationId} onDeleted={detail.reload} />
+          <BillingCard organisationId={organisationId} onChanged={detail.reload} />
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <p className="mb-2 text-sm">
@@ -144,6 +170,7 @@ export default function OrganisationDetailPage() {
           <BillingCard organisationId={organisationId} onChanged={detail.reload} />
           <BrandingCard data={data} busy={busy} run={run} />
           <SupportAccessCard organisationId={organisationId} />
+          <DeletionCard organisationId={organisationId} onDeleted={detail.reload} />
         </div>
         <div className="space-y-6">
           <Card title="Onboarding" description="How far this organisation has got.">

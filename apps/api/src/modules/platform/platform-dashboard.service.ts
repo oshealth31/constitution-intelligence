@@ -29,6 +29,9 @@ import { createTenantScope } from '../tenancy/tenant-scope';
 import { maskEmail, onboardingProgress } from './onboarding';
 
 type Row = Record<string, unknown>;
+
+export const ORGANISATION_DELETED =
+  'This organisation’s data has been deleted. Only its financial records are kept.';
 const rowsOf = <T>(result: { rows: unknown[] }) => result.rows as T[];
 
 export interface OrganisationFilter {
@@ -150,7 +153,7 @@ export class PlatformDashboardService {
     }
     const rows = rowsOf<Row & OnboardingRow>(
       await this.db.execute(sql`
-        SELECT o.id, o.name, o.slug, o.status, o.created_at AS "createdAt",
+        SELECT o.id, o.name, o.slug, o.status, o.created_at AS "createdAt", o.deleted_at AS "deletedAt",
                s.plan_code AS "planCode", s.status AS "subscriptionStatus",
                s.current_period_end AS "currentPeriodEnd",
                ${ONBOARDING_COLUMNS}
@@ -166,6 +169,7 @@ export class PlatformDashboardService {
       slug: row.slug,
       status: row.status,
       createdAt: row.createdAt,
+      deletedAt: row.deletedAt ?? null,
       subscription: row.planCode
         ? {
             planCode: row.planCode,
@@ -184,7 +188,7 @@ export class PlatformDashboardService {
     const [organisation] = rowsOf<Row & OnboardingRow>(
       await this.db.execute(sql`
         SELECT o.id, o.name, o.slug, o.status, o.created_at AS "createdAt", o.updated_at AS "updatedAt",
-               s.status AS "subscriptionStatus",
+               o.deleted_at AS "deletedAt", s.status AS "subscriptionStatus",
                ${ONBOARDING_COLUMNS}
         FROM organisations o
         LEFT JOIN subscriptions s ON s.id = o.current_subscription_id AND s.organisation_id = o.id
@@ -269,6 +273,7 @@ export class PlatformDashboardService {
         status: organisation.status,
         createdAt: organisation.createdAt,
         updatedAt: organisation.updatedAt,
+        deletedAt: organisation.deletedAt ?? null,
       },
       branding: branding ?? null,
       subscription: subscription ?? null,
@@ -299,6 +304,9 @@ export class PlatformDashboardService {
       .limit(1);
     if (!before) {
       throw new NotFoundException('Organisation not found.');
+    }
+    if (before.deletedAt) {
+      throw new ConflictException(ORGANISATION_DELETED);
     }
     if (change.slug && change.slug !== before.slug) {
       const [taken] = await this.db
@@ -343,12 +351,15 @@ export class PlatformDashboardService {
     meta: RequestMeta,
   ) {
     const [before] = await this.db
-      .select({ status: organisations.status })
+      .select({ status: organisations.status, deletedAt: organisations.deletedAt })
       .from(organisations)
       .where(eq(organisations.id, organisationId))
       .limit(1);
     if (!before) {
       throw new NotFoundException('Organisation not found.');
+    }
+    if (before.deletedAt) {
+      throw new ConflictException(ORGANISATION_DELETED);
     }
     if (before.status === status) {
       throw new BadRequestException(`The organisation is already ${status}.`);
@@ -650,14 +661,18 @@ export class PlatformDashboardService {
     }
   }
 
+  /** Also refuses changes to an organisation whose data was deleted (Task D3). */
   private async assertOrganisationExists(organisationId: string): Promise<void> {
     const [found] = await this.db
-      .select({ id: organisations.id })
+      .select({ id: organisations.id, deletedAt: organisations.deletedAt })
       .from(organisations)
       .where(eq(organisations.id, organisationId))
       .limit(1);
     if (!found) {
       throw new NotFoundException('Organisation not found.');
+    }
+    if (found.deletedAt) {
+      throw new ConflictException(ORGANISATION_DELETED);
     }
   }
 }

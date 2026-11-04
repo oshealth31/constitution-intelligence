@@ -50,22 +50,76 @@ built yet.
 These periods are proposals. The data-protection review must confirm them (see the open
 requirements in production-readiness.md).
 
-## Deletion: not yet supported by a tool
+## Deletion (Task D3)
 
-There is **no deletion tool yet**, and hand-written SQL is deliberately hard: the audit log
-cannot be deleted (database triggers), and the tables are linked. Deleting an organisation
-safely needs a reviewed, tested procedure that:
+Deletion is permanent. It is done in the Control Centre: **Organisations → the organisation →
+"Delete this organisation's data"** (at the bottom of the page).
 
-1. exports the data first (above) and keeps the export for the agreed period;
-2. deletes, in one transaction and in dependency order, the organisation's rows from every
-   organisation table except invoices, payments and receipts;
-3. handles the audit log by an approved method (for example a controlled function that removes
-   one organisation's events, used only by the deletion procedure and itself recorded);
-4. removes `tenants/<organisation id>/` from file storage;
-5. records the deletion (who, when, which organisation) in the platform audit log;
-6. accepts that the data stays in backups until they expire (35 days), and says so to the
-   organisation.
+**Before you start**
 
-Until that tool exists and is tested, the honest answer to a deletion request is: access is
-blocked, the data is exported and handed over, and deletion is completed by a manual,
-two-person procedure agreed case by case. This is a **go-live requirement** (production-readiness.md).
+1. The organisation's access has ended: it is **suspended**, or its subscription was cancelled
+   and access is **restricted**. An active organisation cannot be deleted.
+2. The data was **exported** and handed over (above), or the Owner declined an export in
+   writing. Keep the Owner's written request.
+3. Take a **backup** (`docker compose --profile ops run --rm ops`).
+
+**Who approves**
+
+| Super Admins on the platform | Rule                                                                                                                |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Two or more                  | One requests; a **different** Super Admin approves. The requester cannot approve their own request.                 |
+| Only one                     | The same person may confirm **24 hours** after requesting, and may cancel before then.                              |
+| Either (server backup)       | `delete-organisation.js --approve` on the server command line, also only 24 hours after the request (see below).    |
+
+Every request needs a reason (no members' names, please), the tick that the data was exported,
+and the organisation's web address typed exactly. Requests expire after **7 days**. Any Super
+Admin can cancel a waiting request.
+
+**What is deleted**, in one database transaction (if anything fails, nothing is deleted):
+constitutions with every version, clause, extracted text and search index; uploaded files'
+records; approved answers; simple words; AI conversations, answers and feedback; approvals;
+branding and logo; usage records; invitations; memberships; **the organisation's audit log**;
+and the **accounts** of people who belong to no other organisation and are not staff, together
+with their platform-level sign-in records. After the transaction, the organisation's folder in
+file storage (`tenants/<id>/`) is removed; if that fails, use **Remove files again** (or
+`--remove-files`).
+
+**What is kept**: invoices, payments, receipts, the subscription and its history, as financial
+records (period to be confirmed by an accountant). The organisation's row stays as a marker:
+its name, "Deleted" status and the date, with its web address freed for reuse. Links from
+payments to the people who reported or verified them become empty when those accounts are
+deleted. People who belong to another organisation keep their account; only their membership
+here is removed.
+
+**The record of the deletion**: an `organisation.deleted` audit event and the request itself,
+with who requested and approved it, the reason and **counts only** (no names, emails or
+content). The audit log stays append-only: the database lets the deletion procedure remove
+only the events of an organisation already marked deleted, or the platform-level events of an
+account already deleted (migration `0010_organisation_deletion.sql`).
+
+**Backups**: the deleted data stays inside encrypted backups until they expire (35 days by
+default), then it is gone. Tell the organisation this. A restore from an older backup would
+bring it back: if you ever restore, delete the organisation again before reopening the site.
+
+**Afterwards**: send the confirmation letter
+([template](../pilot/templates/deletion-confirmation.md)) to the Owner and record the deletion
+in the change log.
+
+**Server command line** (when the Control Centre cannot be used; a request must already exist):
+
+```bash
+cd /srv/constitution/infra/production
+docker compose run --rm -T api node dist/cli/delete-organisation.js --organisation <id> --preview
+docker compose run --rm -T api node dist/cli/delete-organisation.js --organisation <id> \
+  --approve --confirm <web address>
+docker compose run --rm -T api node dist/cli/delete-organisation.js --organisation <id> --remove-files
+```
+
+**Tested**: API tests with two fictional organisations (one deleted, the other compared before
+and after: unchanged), the approval rules, the audit-log rule, and every table with an
+organisation column is accounted for; the deployment check deletes a fictional organisation
+with the command line on the production stack and checks the other is untouched; a browser test
+requests and cancels a deletion. **Not yet tested on the real server.**
+
+Not covered: a single person's request to delete their own data while their organisation
+stays (Task D11).

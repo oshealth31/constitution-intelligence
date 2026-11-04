@@ -18,7 +18,7 @@ and open risks are in [security-review.md](security-review.md).
 - [x] Uploads: type checked by content, size, page, ZIP-expansion, time and text limits; tenant folder checks; downloads sent as attachments.
 - [x] AI: provider key server-side only; answers checked against the passages given; off by default.
 - [x] Subscription rules enforced on the server.
-- [x] Audit log append-only (database triggers; tested).
+- [x] Audit log append-only (database triggers; tested). Only the approved organisation deletion may remove a deleted organisation's events (tested).
 - [x] Logs exclude headers, cookies, passwords, tokens and query strings; unknown sign-in emails masked.
 - [x] Production refuses to start with unsafe settings (no TLS to the database, plain-HTTP addresses, test AI mode, log-only email, debug logging, relative storage path).
 - [x] Dependency audit and secret scan in CI, plus weekly; Dependabot update pull requests.

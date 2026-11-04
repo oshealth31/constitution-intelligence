@@ -23,7 +23,7 @@ mean charging for something that cannot be delivered.
 
 | #   | Item                                                                      |
 | --- | ------------------------------------------------------------------------- |
-| L1  | Data deletion tool, reviewed and tested (process 12 is manual until then) |
+| L1  | ✅ Data deletion tool built and tested in CI (D3); still to try once on the real server |
 | L2  | Post-pilot prices set in Control Centre → Plans (currently "not set")     |
 
 ### Not blocking a small pilot, but tell clients (already in the limitations template)

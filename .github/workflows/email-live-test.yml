@@ -1,0 +1,57 @@
+# Live email test: sends ONE real email through Brevo, using the application's own email code
+# and template, to the address typed in when the workflow is started.
+#
+# Only runs when started by hand (Actions -> "Email live test" -> Run workflow).
+# Needs two repository secrets (Settings -> Secrets and variables -> Actions):
+#   BREVO_SMTP_LOGIN  the SMTP login shown on Brevo's SMTP page (xxxx@smtp-brevo.com)
+#   BREVO_SMTP_KEY    an SMTP key created for this test; delete it in Brevo afterwards
+# No member or organisation data is involved: the email is a fixed test message.
+name: Email live test
+
+on:
+  workflow_dispatch:
+    inputs:
+      to:
+        description: 'Send the test email to (your own address)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  send:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: pnpm install --frozen-lockfile
+      - name: Build
+        run: |
+          pnpm build:packages
+          pnpm --filter @constitution/api run build
+      - name: Send the test email through Brevo
+        working-directory: apps/api
+        env:
+          NODE_ENV: test
+          APP_ENV: test
+          WEB_BASE_URL: https://constitutionintel.com
+          MAIL_TRANSPORT: smtp
+          SMTP_HOST: smtp-relay.brevo.com
+          SMTP_PORT: '587'
+          SMTP_SECURITY: starttls
+          SMTP_USER: ${{ secrets.BREVO_SMTP_LOGIN }}
+          SMTP_PASSWORD: ${{ secrets.BREVO_SMTP_KEY }}
+          MAIL_FROM: Constitution Intelligence <no-reply@constitutionintel.com>
+          MAIL_REPLY_TO: support@constitutionintel.com
+          # Passed through the environment, never pasted into the command.
+          TEST_RECIPIENT: ${{ inputs.to }}
+        run: |
+          if [ -z "$SMTP_USER" ] || [ -z "$SMTP_PASSWORD" ]; then
+            echo "Add the BREVO_SMTP_LOGIN and BREVO_SMTP_KEY secrets first."; exit 1
+          fi
+          node dist/cli/send-test-email.js --to "$TEST_RECIPIENT"

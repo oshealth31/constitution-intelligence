@@ -250,6 +250,13 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation deletion', () => {
       ]);
       const aKeptBefore = await countsFor(a.organisation.id, KEPT_TABLES);
       const aBefore = await countsFor(a.organisation.id, DELETED_TABLES);
+      const openSubscriptionsBefore = (
+        await context.db
+          .select()
+          .from(subscriptions)
+          .where(eq(subscriptions.organisationId, a.organisation.id))
+      ).filter((subscription) => subscription.status !== 'cancelled').length;
+      expect(openSubscriptionsBefore).toBeGreaterThan(0);
       expect(aBefore.sections).toBeGreaterThan(0);
       expect(aBefore.files).toBeGreaterThan(0);
 
@@ -283,17 +290,20 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation deletion', () => {
       // A: every organisation record gone; financial records kept.
       const aAfter = await countsFor(a.organisation.id, DELETED_TABLES);
       expect(Object.values(aAfter).every((count) => count === 0)).toBe(true);
-      // Kept, plus one subscription-history entry: the subscription was ended by the deletion.
+      // Kept, plus one subscription-history entry per subscription the deletion ended.
       expect(await countsFor(a.organisation.id, KEPT_TABLES)).toEqual({
         ...aKeptBefore,
-        subscription_events: aKeptBefore.subscription_events! + 1,
+        subscription_events: aKeptBefore.subscription_events! + openSubscriptionsBefore,
       });
-      const [ended] = await context.db
+      const ended = await context.db
         .select()
         .from(subscriptions)
         .where(eq(subscriptions.organisationId, a.organisation.id));
-      expect(ended).toMatchObject({ status: 'cancelled', autoRenew: false });
-      expect(ended!.cancellationReason).toMatch(/data was deleted/);
+      expect(ended.length).toBeGreaterThan(0);
+      for (const subscription of ended) {
+        expect(subscription).toMatchObject({ status: 'cancelled', autoRenew: false });
+        expect(subscription.cancellationReason).toMatch(/data was deleted/);
+      }
       const billing = await firstAgent.get(platform(a.organisation.id, '/billing')).expect(200);
       expect(billing.body.organisation.deletedAt).toBeTruthy();
       // Nothing can renew or be invoiced; existing invoices can still be settled or voided.

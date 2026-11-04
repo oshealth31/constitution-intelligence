@@ -88,4 +88,3 @@ These rules are enforced in code (`apps/api/src/config/config.ts`) and covered b
 (or `ANTHROPIC_API_KEY_FILE`) to the path of a file holding the value, for example a Docker
 secret at `/run/secrets/database_url`. Setting both forms is refused. See
 [operations/secrets.md](operations/secrets.md).
-

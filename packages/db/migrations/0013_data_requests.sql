@@ -55,9 +55,10 @@ BEGIN
     RAISE EXCEPTION 'A section cannot be moved to another version.' USING ERRCODE = 'check_violation';
   END IF;
   -- Only a person's name being removed (their account was deleted): always allowed.
+  -- (search_vector is a generated column: not yet computed in NEW inside this trigger.)
   IF TG_OP = 'UPDATE'
-     AND (to_jsonb(NEW) - 'edited_by_user_id' - 'reviewed_by_user_id')
-         = (to_jsonb(OLD) - 'edited_by_user_id' - 'reviewed_by_user_id')
+     AND (to_jsonb(NEW) - 'edited_by_user_id' - 'reviewed_by_user_id' - 'search_vector')
+         = (to_jsonb(OLD) - 'edited_by_user_id' - 'reviewed_by_user_id' - 'search_vector')
      AND (NEW.edited_by_user_id IS NULL OR NEW.edited_by_user_id = OLD.edited_by_user_id)
      AND (NEW.reviewed_by_user_id IS NULL OR NEW.reviewed_by_user_id = OLD.reviewed_by_user_id) THEN
     RETURN NEW;

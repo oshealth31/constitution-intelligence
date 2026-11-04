@@ -15,7 +15,11 @@ describe('leaked-password check (offline list)', () => {
   it('loads the shipped list: about 738,000 entries, sorted, no duplicates', () => {
     const data = loadBreachedPasswordList();
     expect(breachedPasswordCount()).toBeGreaterThan(700_000);
-    for (let offset = BREACHED_PREFIX_BYTES; offset < data.length; offset += BREACHED_PREFIX_BYTES) {
+    for (
+      let offset = BREACHED_PREFIX_BYTES;
+      offset < data.length;
+      offset += BREACHED_PREFIX_BYTES
+    ) {
       const previous = data.subarray(offset - BREACHED_PREFIX_BYTES, offset);
       const current = data.subarray(offset, offset + BREACHED_PREFIX_BYTES);
       if (Buffer.compare(previous, current) >= 0) {

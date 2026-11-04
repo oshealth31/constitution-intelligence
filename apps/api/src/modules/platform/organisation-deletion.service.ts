@@ -513,8 +513,14 @@ export class OrganisationDeletionService {
         targetId: organisationId,
         metadata: {
           requestId,
-          requestedBy: request!.requestedByUserId,
-          approvedBy: actorUserId ?? 'command_line',
+          // Staff names, so the audit log reads plainly. (The approver's id is the event's
+          // actor; both ids stay on the deletion request record.)
+          requestedBy:
+            (await this.staffLabel(tx, request!.requestedByUserId)) ?? 'a former Super Admin',
+          approvedBy:
+            actorUserId === null
+              ? 'the server command line'
+              : ((await this.staffLabel(tx, actorUserId)) ?? 'a former Super Admin'),
           approvalMode: mode,
           reason: request!.reason,
           counts: deletedCounts,
@@ -623,6 +629,16 @@ export class OrganisationDeletionService {
       SELECT count(*)::int AS n FROM users
       WHERE is_platform_super_admin AND status = 'active'`);
     return Number((result.rows[0] as { n: number }).n);
+  }
+
+  /** "Name (email)" of a Super Admin, read inside the deletion transaction. */
+  private async staffLabel(executor: Executor, userId: string | null): Promise<string | null> {
+    if (!userId) return null;
+    const result = await executor.execute(
+      sql`SELECT display_name AS name, email FROM users WHERE id = ${userId}`,
+    );
+    const row = result.rows[0] as { name: string; email: string } | undefined;
+    return row ? `${row.name} (${row.email})` : null;
   }
 
   private async displayName(userId: string | null): Promise<string | null> {

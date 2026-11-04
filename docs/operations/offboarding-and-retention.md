@@ -96,8 +96,8 @@ deleted. People who belong to another organisation keep their account; only thei
 here is removed.
 
 **The record of the deletion**: an `organisation.deleted` audit event and the request itself,
-with who requested and approved it, the reason and **counts only** (no names, emails or
-content). The audit log stays append-only: the database lets the deletion procedure remove
+with who requested and approved it (staff names and emails), the reason and **counts only** of
+what was deleted (no members' names or emails, and no content). The audit log stays append-only: the database lets the deletion procedure remove
 only the events of an organisation already marked deleted, or the platform-level events of an
 account already deleted (migration `0010_organisation_deletion.sql`).
 

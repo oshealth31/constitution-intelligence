@@ -27,7 +27,7 @@ export function escapeHtml(value: string): string {
 
 /** Removes line breaks, so a name or organisation can never add lines to an email or subject. */
 export function oneLine(value: string): string {
-  return value.replace(/[\r\n  ]+/g, ' ').trim();
+  return value.replace(/[\r\n\u2028\u2029]+/g, ' ').trim();
 }
 
 const FOOTER =

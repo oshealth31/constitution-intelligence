@@ -34,6 +34,12 @@ It lives in the web app at **`/admin`** and talks to the real API and database.
   reason (at least 10 characters). The access is recorded as `support.content_accessed`, with the
   reason, in both the platform audit log and **the organisation's own audit log**, so customers can
   see when and why their content was viewed. Drafts are never shown.
+- **File quarantine:** the organisation page's **Uploaded files** card lists each file with its
+  status, how often it was downloaded and by whom, and lets a Super Admin quarantine, release or
+  permanently remove it, each with a reason (`GET …/files`, `GET …/files/:fileId/downloads`,
+  `POST …/files/:fileId/quarantine|release|remove`). File names are shown so the right file can
+  be found; content is never shown. Audited as `file.quarantined`, `file.released` and
+  `file.content_removed`.
 - **Every privileged action is audited:** organisation created, updated, suspended or activated;
   branding updated; subscription changed (with before and after values); administrators invited,
   suspended or reactivated; invitations revoked; account status changed; support content accessed.
@@ -50,6 +56,9 @@ Plan names and prices are placeholders until confirmed.
 
 - `apps/api/test/platform-dashboard.e2e.spec.ts`: server-side access control for every control-centre
   route, workflows against a real database, audit records, data minimisation, audited content access.
+- `apps/api/test/file-quarantine.e2e.spec.ts`: downloads recorded and counted, Super Admin only,
+  every download path blocked, tenant role refused by the database, release, permanent removal,
+  quarantined logo no longer served.
 - `apps/web/e2e/control-centre.spec.ts` (Playwright): real browser against the real API and database:
   sign-in errors, redirects, overview and health, creating and managing an organisation, audited
   content access, refusal for organisation administrators, and the phone layout.

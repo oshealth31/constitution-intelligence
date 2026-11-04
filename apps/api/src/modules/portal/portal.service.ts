@@ -79,6 +79,7 @@ export class PortalService {
     const result = await this.db.execute(sql`
       SELECT storage_key AS "storageKey", content_type AS "contentType"
       FROM files WHERE id = ${row.logoFileId} AND organisation_id = ${row.id}
+        AND quarantined_at IS NULL
     `);
     const file = result.rows[0] as { storageKey: string; contentType: string } | undefined;
     if (!file || !(LOGO_TYPES as readonly string[]).includes(file.contentType)) {

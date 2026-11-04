@@ -66,9 +66,14 @@ q "SELECT coalesce(json_agg(json_build_object('id', u.id, 'email', u.email,
       FROM memberships m JOIN users u ON u.id = m.user_id WHERE m.organisation_id = :'org'" \
   > "$root/data/people.json"
 
-# Original files, from the organisation's own storage folder only.
+# Original files, from the organisation's own storage folder only. Files held in quarantine
+# (a suspected virus or other unsafe content) are left out; files.json still lists them.
 if [[ -d "$STORAGE_DIR/tenants/$organisation_id" ]]; then
   cp -R "$STORAGE_DIR/tenants/$organisation_id/." "$root/files/"
+  while IFS= read -r key; do
+    [[ -n "$key" ]] || continue
+    rm -f "$root/files/${key#tenants/$organisation_id/}"
+  done < <(q "SELECT storage_key FROM files WHERE organisation_id = :'org' AND quarantined_at IS NOT NULL")
 fi
 
 cat > "$root/README.txt" <<TXT
@@ -77,7 +82,8 @@ Created (UTC): $stamp
 
 data/*.json  - this organisation's records, one JSON array per table (people.json: members'
                names, email addresses and roles).
-files/       - original uploaded documents and the logo, as stored.
+files/       - original uploaded documents and the logo, as stored (files held in quarantine
+               after a safety check are left out; data/files.json still lists them).
 
 Not included, on purpose: passwords and password hashes, sign-in sessions, one-time link
 tokens, rate-limit counters, search indexes (rebuilt from the text), and members' private AI

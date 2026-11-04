@@ -137,7 +137,11 @@ export class ConstitutionsService {
           label: constitutionVersions.label,
           status: constitutionVersions.status,
           publishedAt: constitutionVersions.publishedAt,
-          hasOriginal: sql<boolean>`${constitutionVersions.sourceFileId} IS NOT NULL`,
+          // Not offered while the original is quarantined or removed after a safety check.
+          hasOriginal: sql<boolean>`${constitutionVersions.sourceFileId} IS NOT NULL AND NOT EXISTS (
+            SELECT 1 FROM files f WHERE f.id = ${constitutionVersions.sourceFileId}
+              AND f.organisation_id = ${constitutionVersions.organisationId}
+              AND f.quarantined_at IS NOT NULL)`,
         })
         .from(constitutionVersions)
         .where(and(...conditions))

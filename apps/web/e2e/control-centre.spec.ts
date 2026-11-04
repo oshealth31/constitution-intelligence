@@ -109,6 +109,32 @@ test('support access to content requires a reason and is recorded', async ({ pag
   await expect(page.getByText('Support · content accessed').first()).toBeVisible();
 });
 
+test('a super admin can quarantine an uploaded file and release it again', async ({ page }) => {
+  await signIn(page, SUPER_ADMIN);
+  await page.getByRole('link', { name: 'Organisations' }).first().click();
+  await page.getByRole('link', { name: 'Sample Community Choir (fictional)' }).click();
+  const card = page.locator('section').filter({
+    has: page.getByRole('heading', { name: 'Uploaded files' }),
+  });
+  const file = card.getByTestId('staff-file').first();
+  await expect(file.getByText('Available')).toBeVisible();
+
+  await file.getByRole('button', { name: 'Quarantine' }).click();
+  await file
+    .getByLabel(/Reason/)
+    .fill('Browser test: suspected virus (fictional), released straight after');
+  await file.getByRole('button', { name: 'Confirm: quarantine' }).click();
+  await expect(page.getByText('File quarantined. Nobody can download it now.')).toBeVisible();
+  await expect(file.getByText('Quarantined', { exact: true })).toBeVisible();
+
+  // Put it back, so other tests can still download the sample document.
+  await file.getByRole('button', { name: 'Release' }).click();
+  await file.getByLabel(/Reason/).fill('Browser test: false alarm (fictional)');
+  await file.getByRole('button', { name: 'Confirm: release' }).click();
+  await expect(page.getByText('File released. It can be downloaded again.')).toBeVisible();
+  await expect(file.getByText('Available')).toBeVisible();
+});
+
 test('an organisation administrator cannot use the control centre', async ({ page }) => {
   await signIn(page, ORG_ADMIN);
   await expect(page.getByRole('heading', { name: 'This area is restricted' })).toBeVisible();

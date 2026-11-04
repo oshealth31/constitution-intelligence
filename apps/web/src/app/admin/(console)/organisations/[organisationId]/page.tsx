@@ -30,6 +30,7 @@ import {
 } from '@/lib/format';
 import { BillingCard } from '@/components/admin-billing';
 import { DeletionCard } from '@/components/admin-deletion';
+import { FilesCard } from '@/components/admin-files';
 import type { Plan } from '@/lib/billing';
 import { useApi } from '@/lib/use-api';
 
@@ -170,6 +171,7 @@ export default function OrganisationDetailPage() {
           <BillingCard organisationId={organisationId} onChanged={detail.reload} />
           <BrandingCard data={data} busy={busy} run={run} />
           <SupportAccessCard organisationId={organisationId} />
+          <FilesCard organisationId={organisationId} />
           <DeletionCard organisationId={organisationId} onDeleted={detail.reload} />
         </div>
         <div className="space-y-6">

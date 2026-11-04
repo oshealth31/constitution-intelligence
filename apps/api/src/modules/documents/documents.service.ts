@@ -36,6 +36,8 @@ import {
 } from './extraction-types';
 import { ParserBusyError } from './document-parser';
 import { DocumentParserService } from './document-parser.service';
+import { FilesService } from '../files/files.service';
+import { assertDownloadable } from '../files/quarantine';
 import { parseStructure, type SectionKind } from './structure-parser';
 
 type VersionStatus = ConstitutionVersion['status'];
@@ -70,6 +72,7 @@ export class DocumentsService {
     private readonly storage: StorageService,
     private readonly audit: AuditService,
     private readonly parser: DocumentParserService,
+    private readonly files: FilesService,
   ) {}
 
   // ----- Constitutions ------------------------------------------------------------------------
@@ -268,7 +271,9 @@ export class DocumentsService {
         ? await tx.execute(sql`
             SELECT f.id, f.original_filename AS "fileName", f.content_type AS "contentType",
                    f.size_bytes::int AS "sizeBytes", f.sha256, f.created_at AS "uploadedAt",
-                   u.display_name AS "uploadedBy"
+                   u.display_name AS "uploadedBy",
+                   (f.quarantined_at IS NOT NULL) AS quarantined,
+                   (f.content_removed_at IS NOT NULL) AS "contentRemoved"
             FROM files f LEFT JOIN users u ON u.id = f.uploaded_by_user_id
             WHERE f.id = ${version.sourceFileId} AND f.organisation_id = ${scope.organisationId}`)
         : { rows: [] };
@@ -601,7 +606,7 @@ export class DocumentsService {
    * The original uploaded document (the authoritative source). Members may download the
    * original of the published version; reviewers and administrators any version's.
    */
-  async readSource(scope: TenantScope, versionId: string) {
+  async readSource(scope: TenantScope, versionId: string, meta?: RequestMeta) {
     const file = await this.tenantDb.run(scope, async (tx) => {
       const version = await this.findVersion(tx, scope, versionId);
       if (version.status !== 'published' && !canSeeUnpublished(scope)) {
@@ -618,7 +623,9 @@ export class DocumentsService {
       if (!row) throw new NotFoundException('This version has no original document.');
       return row;
     });
+    assertDownloadable(file);
     const content = await this.storage.get(scope, file.storageKey);
+    await this.files.recordDownload(scope, file.id, 'version_source', meta, { versionId });
     return { fileName: file.originalFilename, contentType: file.contentType, content };
   }
 

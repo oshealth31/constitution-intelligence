@@ -157,6 +157,14 @@ superseded, archived), with who did it, when, and any comment.
   organisation administrators, are checked for type, structure and active content, are read only
   by the text readers inside a limited worker, and are only ever downloaded as attachments. A
   virus scanner (for example ClamAV) can be added later.
+- **Quarantine (staff tool):** a Super Admin can quarantine any uploaded file from the Control
+  Centre (organisation page → Uploaded files). A quarantined file cannot be downloaded by any
+  route (403, `FILE_QUARANTINED`), its "Download the original" link is replaced by a notice, and
+  it is left out of exports. Staff can release it, or remove the stored file permanently (410,
+  `FILE_REMOVED`; the record and extracted text stay). Every download is now recorded as
+  `file.downloaded`, so staff can see who has a copy. Organisation users cannot change a
+  quarantine: a database trigger refuses it for the tenant role. See
+  `docs/operations/incident-response.md` ("Suspected unsafe file").
 - Extraction runs during the upload request. Large documents may take a few seconds. A
   background job queue comes later.
 - The structure reader uses patterns, so unusual layouts (tables, two columns, numbering written

@@ -1,6 +1,7 @@
-import { Controller, Get, Param, Res } from '@nestjs/common';
+import { Controller, Get, Param, Req, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { parseId } from '../../common/ids';
+import { requestMeta, type AppRequest } from '../../common/request-context';
 import { RequireOrgPermission, Tenant } from '../access/decorators';
 import type { TenantScope } from '../tenancy/tenant-scope';
 import { FilesService } from './files.service';
@@ -21,9 +22,14 @@ export class FilesController {
   async download(
     @Tenant() tenant: TenantScope,
     @Param('fileId') fileId: string,
+    @Req() request: AppRequest,
     @Res() response: Response,
   ): Promise<void> {
-    const { file, content } = await this.filesService.read(tenant, parseId(fileId, 'File'));
+    const { file, content } = await this.filesService.read(
+      tenant,
+      parseId(fileId, 'File'),
+      requestMeta(request),
+    );
     const safeName = file.originalFilename.replace(/[^A-Za-z0-9._ -]/g, '_');
     response
       .status(200)

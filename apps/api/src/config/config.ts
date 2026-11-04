@@ -84,9 +84,38 @@ export const configSchema = z
     SUPER_ADMIN_SESSION_IDLE_MINUTES: z.coerce.number().int().min(5).max(1_440).default(30),
     SUPER_ADMIN_SESSION_ABSOLUTE_HOURS: z.coerce.number().int().min(1).max(72).default(12),
 
-    // "log" writes emails to the server log (local development only).
-    // "disabled" drops them. A real email provider is added in a later stage.
-    MAIL_TRANSPORT: z.enum(['log', 'disabled']).default('log'),
+    // How emails (invitations, password resets) are sent:
+    //   smtp     - through an email provider's SMTP server (for example Brevo); encrypted only
+    //   log      - written to the server log (local development and tests only)
+    //   disabled - dropped (a warning is logged); not allowed in production
+    MAIL_TRANSPORT: z.enum(['smtp', 'log', 'disabled']).default('log'),
+    SMTP_HOST: z.string().trim().min(1).optional(),
+    SMTP_PORT: z.coerce.number().int().min(1).max(65_535).default(587),
+    // "starttls" (port 587: the connection is upgraded to TLS, and refused if it cannot be) or
+    // "tls" (port 465: TLS from the start). Unencrypted SMTP is not offered.
+    SMTP_SECURITY: z.enum(['starttls', 'tls']).default('starttls'),
+    SMTP_USER: z.string().trim().min(1).optional(),
+    SMTP_PASSWORD: z.string().min(1).optional(),
+    // Extra certificate authority to trust for the SMTP server (private relays and tests only).
+    SMTP_CA_FILE: z.string().min(1).optional(),
+    // Sender shown to recipients, e.g. "Constitution Intelligence <no-reply@portal.example.co.bw>".
+    MAIL_FROM: z
+      .string()
+      .trim()
+      .min(3)
+      .max(200)
+      .refine(
+        (value) =>
+          /^(?:[^<>@\r\n]+<[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+>|[^\s<>@]+@[^\s<>@]+\.[^\s<>@]+)$/.test(
+            value,
+          ),
+        {
+          error: 'must be an email address, optionally with a name: Name <address@domain>',
+        },
+      )
+      .optional(),
+    // Optional address replies go to (for example the support mailbox).
+    MAIL_REPLY_TO: z.email({ error: 'must be an email address' }).optional(),
 
     // Where uploaded files are kept. "local" = a folder on this computer (development and tests).
     // A cloud object-storage driver is added in the deployment stage.
@@ -120,6 +149,24 @@ export const configSchema = z
     OFFLINE_COPY_MAX_AGE_DAYS: z.coerce.number().int().min(1).max(90).default(30),
   })
   .superRefine((config, ctx) => {
+    if (config.MAIL_TRANSPORT === 'smtp') {
+      for (const name of ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASSWORD', 'MAIL_FROM'] as const) {
+        if (!config[name]) {
+          ctx.addIssue({
+            code: 'custom',
+            path: [name],
+            message: 'is required when MAIL_TRANSPORT is "smtp"',
+          });
+        }
+      }
+    }
+    if (config.APP_ENV === 'production' && config.MAIL_TRANSPORT !== 'smtp') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['MAIL_TRANSPORT'],
+        message: 'must be "smtp" in production (invitations and password resets are sent by email)',
+      });
+    }
     if (config.AI_PROVIDER === 'anthropic' && !config.ANTHROPIC_API_KEY) {
       ctx.addIssue({
         code: 'custom',
@@ -218,7 +265,7 @@ export class ConfigValidationError extends Error {
  * the path of a file holding the value (for example a Docker or Kubernetes secret mounted at
  * /run/secrets/...). Keeps secrets out of process listings, crash dumps and `docker inspect`.
  */
-export const SECRET_SETTINGS = ['DATABASE_URL', 'ANTHROPIC_API_KEY'] as const;
+export const SECRET_SETTINGS = ['DATABASE_URL', 'ANTHROPIC_API_KEY', 'SMTP_PASSWORD'] as const;
 
 /** Replaces NAME_FILE entries with the file's contents. Errors name the setting, never the value. */
 export function resolveSecretFiles(

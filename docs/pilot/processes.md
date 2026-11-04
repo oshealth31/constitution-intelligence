@@ -113,9 +113,10 @@ subscription start, CI moves the subscription end date accordingly.
 2. CI invites the first Owner from the Control Centre; Owners and Administrators invite
    everyone else (Manage → Members). Invitations are valid for 7 days; at most 50 per hour per
    organisation.
-3. **Invitations and password resets are sent by email. No email provider is integrated yet**, so
-   until it is, invitations cannot reach people. See the readiness assessment. This must be
-   fixed before the first pilot starts.
+3. **Invitations and password resets are sent by email** through the email provider (SMTP, set
+   up in deployment.md §5a). If an invitation email cannot be sent, the Owner sees a warning and
+   invites the same address again to resend. Until the provider account is connected on the
+   live server, emails cannot reach people.
 4. People leaving: an Owner or Administrator removes them from the organisation (Manage →
    Members); their access to it ends at once. CI checks each organisation's Owners monthly.
 5. Lost access: "Forgot password" on the sign-in page (needs email, as above). CI never sets or

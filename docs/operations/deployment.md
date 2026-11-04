@@ -106,6 +106,33 @@ development, and its fictional accounts must never exist in production.
 - Check after any change: `ops/check-health.sh https://<address>` (redirect, HSTS, certificate
   expiry) and an external test such as SSL Labs (grade A expected).
 
+## 5a. Email (invitations and password resets)
+
+Production refuses to start without real email (`MAIL_TRANSPORT=smtp`). With Brevo (free plan:
+300 emails a day):
+
+1. Create the Brevo account (owner's decision on the provider and data transfer: see
+   production-readiness.md). In **Senders, domains**: add the sending domain and publish the
+   DNS records Brevo shows (DKIM, and the Brevo code), plus SPF and a DMARC record
+   (start with `v=DMARC1; p=none; rua=mailto:<your address>`). Wait until Brevo shows the domain
+   as authenticated.
+2. **SMTP & API → SMTP**: note the login and create an SMTP key. Put the key in
+   `secrets/smtp_password` ([secrets.md](secrets.md)); put the login in `SMTP_USER` and the
+   sender (`MAIL_FROM`, on the verified domain) in `api.env`.
+3. `docker compose up -d --wait api`. Then **test**: use "Forgot password" for a test account,
+   and check that the email arrives (inbox, not spam), that both the plain-text and formatted
+   versions look right, and that **the link points directly to `https://<your address>/…`**. If
+   the link has been rewritten to go through the provider (link tracking), one-time links pass
+   through a third party: turn link and open tracking off in the Brevo account before go-live,
+   and test again.
+4. If sending fails, the action still completes: the invitation exists and the Owner sees
+   "the email could not be sent" (invite again to resend); password resets answer the same as
+   always. The API log shows `Email could not be sent` with an error code, never the message,
+   the address or the password.
+
+The API reaches the SMTP server through the `egress` network, its only route to the internet.
+Optionally limit outgoing traffic on the server firewall to the SMTP host on port 587.
+
 ## 6. Releasing a new version
 
 1. CI is green for the commit, including **Deployment check**; the release notes say whether

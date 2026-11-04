@@ -25,6 +25,7 @@ umask 077
 openssl rand -hex 32 > postgres_password      # administrator account (superuser) – admin only
 openssl rand -hex 32 > app_db_password        # application account constitution_app
 openssl rand -hex 32 > backup_passphrase      # encrypts backups and exports
+read -rs smtp_key && printf '%s' "$smtp_key" > smtp_password && unset smtp_key  # paste the Brevo SMTP key (not echoed, not in history)
 printf 'postgresql://constitution_app:%s@postgres:5432/constitution' "$(cat app_db_password)" > database_url
 cp database_url database_owner_url            # migrations; separate account planned (U3)
 
@@ -37,7 +38,7 @@ openssl x509 -req -in server.csr -CA database_ca.crt -CAkey /secure/offline/data
   -CAcreateserial -days 825 -extfile san.ext -out database_server.crt
 rm server.csr san.ext
 chown root:999 database_server.key && chmod 0640 database_server.key
-chmod 0600 postgres_password app_db_password backup_passphrase database_url database_owner_url
+chmod 0600 postgres_password app_db_password backup_passphrase database_url database_owner_url smtp_password
 ```
 
 Write the backup passphrase on paper (or a password manager the owner controls), seal it, and
@@ -54,6 +55,7 @@ authority file as `database_ca.crt` and the provider's connection string in `dat
 | `postgres_password`                       | Yearly                                     | `ALTER ROLE constitution_owner PASSWORD '...'`, update the file                                                                                                    |
 | Database certificate                      | Before it expires (825 days)               | Issue a new one with the same CA; restart `postgres`                                                                                                               |
 | `backup_passphrase`                       | When someone who knew it leaves            | New file; **keep the old passphrase** until every backup made with it has expired                                                                                  |
+| `smtp_password` (Brevo SMTP key)          | Yearly, and when anyone with access leaves | Create a new SMTP key in Brevo, write it to `smtp_password`, `docker compose up -d api`, send a test (Forgot password), then delete the old key in Brevo           |
 | AI provider key (if AI is ever turned on) | Every 90 days                              | Provider console; `ANTHROPIC_API_KEY_FILE`                                                                                                                         |
 | Session tokens                            | Automatic                                  | Users can "sign out everywhere"; suspending a user ends their sessions                                                                                             |
 

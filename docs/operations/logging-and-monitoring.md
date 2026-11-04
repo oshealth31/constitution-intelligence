@@ -44,17 +44,18 @@ organisation goes live:
 3. **Server metrics**: disk, memory and CPU, from the host or the provider's console.
 4. **Log alerts** in the log store, with these starting thresholds:
 
-| Alert              | Condition                                                                                    | Severity | First response                                                        |
-| ------------------ | -------------------------------------------------------------------------------------------- | -------- | --------------------------------------------------------------------- |
-| Site down          | Uptime check fails 3 times in a row                                                          | Critical | [incident-response.md](incident-response.md)                          |
-| Database not ready | `/health/ready` 503 for 2 minutes                                                            | Critical | Check `postgres` container, disk space                                |
-| Server errors      | More than 5 responses with status ≥ 500 in 5 minutes                                         | High     | Find the request IDs in the API log                                   |
-| Sign-in attack     | More than 50 `auth.login.failed` or any `auth.login.rate_limited` burst (> 20 in 10 minutes) | High     | Check addresses in the audit log; block at the firewall if one source |
-| Request flood      | More than 200 responses with status 429 in 5 minutes                                         | Medium   | Same as above                                                         |
-| Disk               | Above 80%                                                                                    | High     | Old backups, logs; grow the disk                                      |
-| Certificate        | Fewer than 14 days left                                                                      | High     | Check Caddy logs; port 80 reachable                                   |
-| Backup missing     | No new backup folder in 26 hours, or the backup job exits non-zero                           | High     | Run it by hand; see [backup-and-restore.md](backup-and-restore.md)    |
-| Support access     | Any `support.content_accessed` audit event                                                   | Info     | Confirm it matches a support ticket                                   |
+| Alert              | Condition                                                                                    | Severity | First response                                                                                         |
+| ------------------ | -------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| Site down          | Uptime check fails 3 times in a row                                                          | Critical | [incident-response.md](incident-response.md)                                                           |
+| Database not ready | `/health/ready` 503 for 2 minutes                                                            | Critical | Check `postgres` container, disk space                                                                 |
+| Server errors      | More than 5 responses with status ≥ 500 in 5 minutes                                         | High     | Find the request IDs in the API log                                                                    |
+| Sign-in attack     | More than 50 `auth.login.failed` or any `auth.login.rate_limited` burst (> 20 in 10 minutes) | High     | Check addresses in the audit log; block at the firewall if one source                                  |
+| Request flood      | More than 200 responses with status 429 in 5 minutes                                         | Medium   | Same as above                                                                                          |
+| Disk               | Above 80%                                                                                    | High     | Old backups, logs; grow the disk                                                                       |
+| Certificate        | Fewer than 14 days left                                                                      | High     | Check Caddy logs; port 80 reachable                                                                    |
+| Email failing      | Any `Email could not be sent` in the API log, or more than 3 in an hour                      | High     | Check the provider's status and quota (Brevo free: 300 a day), the SMTP key, the domain authentication |
+| Backup missing     | No new backup folder in 26 hours, or the backup job exits non-zero                           | High     | Run it by hand; see [backup-and-restore.md](backup-and-restore.md)                                     |
+| Support access     | Any `support.content_accessed` audit event                                                   | Info     | Confirm it matches a support ticket                                                                    |
 
 Alerts go to two named people by email and SMS/WhatsApp. Somebody must be able to act within
 4 hours on working days. That service level is still to be agreed (see production-readiness.md).

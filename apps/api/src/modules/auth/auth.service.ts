@@ -20,6 +20,7 @@ import { RateLimitService } from './rate-limit.service';
 import { SessionService, type CreatedSession } from './session.service';
 import { generateToken, hashToken } from './tokens';
 import { UsersService, toPublicUser, type PublicUser } from './users.service';
+import { oneLine, renderEmail } from '../mail/templates';
 
 export const INVALID_CREDENTIALS = 'Invalid email or password.';
 export const TOO_MANY_ATTEMPTS = 'Too many attempts. Please wait a few minutes and try again.';
@@ -174,21 +175,30 @@ export class AuthService {
     }
 
     const link = await this.issuePasswordResetLink(user.id);
-    await this.mail.send({
+    const content = renderEmail({
+      greeting: `Hello ${oneLine(user.displayName)},`,
+      paragraphs: [
+        'Someone asked to reset the password of your Constitution Intelligence account.',
+      ],
+      action: { label: 'Choose a new password', url: link },
+      afterAction: [
+        `The link expires in ${this.config.PASSWORD_RESET_TTL_MINUTES} minutes and can be used once.`,
+        'If you did not ask for this, you can ignore this email: your password will not change.',
+      ],
+    });
+    const emailDelivered = await this.mail.send({
       to: user.email,
       subject: 'Reset your Constitution Intelligence password',
-      text:
-        `Hello ${user.displayName},\n\n` +
-        `Use this link to choose a new password. It expires in ${this.config.PASSWORD_RESET_TTL_MINUTES} minutes ` +
-        `and can be used once:\n\n${link}\n\n` +
-        'If you did not ask for this, you can ignore this email; your password will not change.',
+      ...content,
     });
+    // The response is the same either way (it never reveals who has an account).
     await this.audit.record({
       action: 'auth.password.reset_requested',
       outcome: 'success',
       actorUserId: user.id,
       targetType: 'user',
       targetId: user.id,
+      metadata: { emailDelivered },
       meta,
     });
   }

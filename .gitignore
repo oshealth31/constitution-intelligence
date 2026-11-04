@@ -41,3 +41,4 @@ infra/production/api.env
 infra/production/.env
 infra/production/backups/
 infra/production/exports/
+infra/production/ci-mail/

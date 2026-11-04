@@ -27,6 +27,7 @@ import { generateToken, hashToken } from '../auth/tokens';
 import { MailService } from '../mail/mail.service';
 import { TenantDatabase } from '../tenancy/tenant-database.service';
 import type { TenantScope } from '../tenancy/tenant-scope';
+import { oneLine, renderEmail } from '../mail/templates';
 
 export const INVALID_INVITATION =
   'This invitation is invalid, has expired or has already been used.';
@@ -89,7 +90,7 @@ export class InvitationsService {
     email: string,
     role: OrganisationRole,
     meta: RequestMeta,
-  ): Promise<InvitationSummary> {
+  ): Promise<InvitationSummary & { emailDelivered: boolean }> {
     // Privilege escalation check: members may only grant roles at or below their own,
     // and only Owners may create Owners. The platform may only invite Owners and Administrators.
     const allowed =
@@ -157,13 +158,22 @@ export class InvitationsService {
     });
 
     const link = `${this.config.WEB_BASE_URL}/invitations/accept?token=${encodeURIComponent(token)}`;
-    await this.mail.send({
+    const organisationName = oneLine(organisation.name);
+    const content = renderEmail({
+      paragraphs: [
+        `You have been invited to join ${organisationName} on Constitution Intelligence as ${ROLE_LABELS[role]}.`,
+        `${organisationName} uses Constitution Intelligence to share its approved constitution with its members.`,
+      ],
+      action: { label: 'Accept the invitation', url: link },
+      afterAction: [
+        `The invitation is valid for ${this.config.INVITATION_TTL_HOURS} hours and can be used once.`,
+        'If you were not expecting this invitation, you can ignore this email.',
+      ],
+    });
+    const emailDelivered = await this.mail.send({
       to: email,
-      subject: `You are invited to ${organisation.name} on Constitution Intelligence`,
-      text:
-        `You have been invited to join ${organisation.name} as ${ROLE_LABELS[role]}.\n\n` +
-        `Accept the invitation here (valid for ${this.config.INVITATION_TTL_HOURS} hours, one use only):\n\n` +
-        `${link}\n\nIf you were not expecting this invitation, you can ignore this email.`,
+      subject: `You are invited to ${organisationName} on Constitution Intelligence`,
+      ...content,
     });
     await this.audit.record({
       action: 'invitation.created',
@@ -172,10 +182,12 @@ export class InvitationsService {
       organisationId,
       targetType: 'invitation',
       targetId: invitation.id,
-      metadata: { email, role, by: inviter.kind },
+      metadata: { email, role, by: inviter.kind, emailDelivered },
       meta,
     });
-    return summarise(invitation);
+    // emailDelivered=false: the invitation exists, but the email could not be sent. Inviting the
+    // same address again sends a new one (and cancels this one).
+    return { ...summarise(invitation), emailDelivered };
   }
 
   /** Invitations of the caller's organisation, read under Row-Level Security. */

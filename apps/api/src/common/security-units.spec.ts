@@ -89,7 +89,11 @@ describe('session cookie name', () => {
       DATABASE_SSL: 'true',
       CORS_ORIGINS: 'https://app.example.com',
       WEB_BASE_URL: 'https://app.example.com',
-      MAIL_TRANSPORT: 'disabled',
+      MAIL_TRANSPORT: 'smtp',
+      SMTP_HOST: 'smtp-relay.example.com',
+      SMTP_USER: 'apikey-user',
+      SMTP_PASSWORD: 'not-a-real-password',
+      MAIL_FROM: 'Constitution Intelligence <no-reply@example.com>',
       STORAGE_LOCAL_DIR: '/var/lib/constitution/storage',
     });
     expect(sessionCookieName(local)).toBe('ci_session');

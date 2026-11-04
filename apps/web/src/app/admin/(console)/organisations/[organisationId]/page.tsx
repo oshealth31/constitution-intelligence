@@ -58,7 +58,19 @@ function useAction(
       );
       if (result && 'organisation' in result) setData(result);
       else if (reload) await reload();
-      setNotice({ tone: 'good', text: success });
+      // Invitations: the API says whether the email actually went out.
+      const emailFailed =
+        typeof result === 'object' &&
+        result !== null &&
+        (result as { emailDelivered?: boolean }).emailDelivered === false;
+      setNotice(
+        emailFailed
+          ? {
+              tone: 'critical',
+              text: 'The invitation was created, but the email could not be sent. Check the address and invite again, which sends a new email.',
+            }
+          : { tone: 'good', text: success },
+      );
       return true;
     } catch (caught) {
       setNotice({ tone: 'critical', text: describeError(caught) });

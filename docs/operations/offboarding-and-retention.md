@@ -85,7 +85,11 @@ file storage (`tenants/<id>/`) is removed; if that fails, use **Remove files aga
 `--remove-files`).
 
 **What is kept**: invoices, payments, receipts, the subscription and its history, as financial
-records (period to be confirmed by an accountant). The organisation's row stays as a marker:
+records (period to be confirmed by an accountant). The deletion **ends the subscription**
+(cancelled, no renewal, with a history entry "Cancelled because the organisation's data was
+deleted"). Afterwards its subscription cannot be renewed, reactivated, suspended or changed and
+no new invoice can be issued; existing invoices can still be settled (payments recorded and
+verified) or voided. The organisation's row stays as a marker:
 its name, "Deleted" status and the date, with its web address freed for reuse. Links from
 payments to the people who reported or verified them become empty when those accounts are
 deleted. People who belong to another organisation keep their account; only their membership

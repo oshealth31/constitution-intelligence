@@ -61,17 +61,27 @@ export function BillingCard({
 
   if (billing.error && !billing.data) return <Alert>{describeError(billing.error)}</Alert>;
   if (!billing.data) return <Loading />;
-  const { access, usage, subscription, invoices, events } = billing.data;
-  const tone = ACCESS_TONE[access.state];
+  const { access, usage, subscription, invoices, events, organisation } = billing.data;
+  const deleted = Boolean(organisation.deletedAt);
+  const tone = deleted ? 'critical' : ACCESS_TONE[access.state];
 
   return (
     <Card
       title="Billing"
       description="Access is worked out by the server from the subscription, its invoices and today’s date."
-      actions={<Badge tone={tone}>{ACCESS_STATE_LABELS[access.state]}</Badge>}
+      actions={
+        <Badge tone={tone}>{deleted ? 'Ended' : ACCESS_STATE_LABELS[access.state]}</Badge>
+      }
     >
       <div className="space-y-5" aria-label="Billing">
         {notice && <Alert tone={notice.tone}>{notice.text}</Alert>}
+        {deleted ? (
+          <p data-testid="platform-access-message" className="text-sm text-navy-900">
+            The organisation’s data was deleted on {formatDate(organisation.deletedAt)}, so its
+            subscription has ended and nothing will renew. Existing invoices can still be settled
+            or voided; no new invoices can be issued.
+          </p>
+        ) : (
         <div>
           <p data-testid="platform-access-message" className="text-sm text-navy-900">
             {access.message}
@@ -92,7 +102,9 @@ export function BillingCard({
             </p>
           )}
         </div>
+        )}
 
+        {!deleted && (
         <dl className="grid gap-2 text-sm sm:grid-cols-2">
           {PLAN_LIMITS.map((limit) => (
             <div key={limit} className="flex justify-between gap-3">
@@ -104,8 +116,9 @@ export function BillingCard({
             </div>
           ))}
         </dl>
+        )}
 
-        {subscription && (
+        {subscription && !deleted && (
           <SubscriptionActions
             status={subscription.status}
             interval={subscription.billingInterval}
@@ -114,7 +127,7 @@ export function BillingCard({
           />
         )}
 
-        {subscription && <IssueInvoice busy={busy} run={run} />}
+        {subscription && !deleted && <IssueInvoice busy={busy} run={run} />}
 
         <div>
           <h3 className="text-sm font-semibold text-navy-900">Invoices</h3>

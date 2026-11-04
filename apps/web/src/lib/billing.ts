@@ -191,7 +191,8 @@ export interface Plan {
 }
 
 export interface PlatformBilling {
-  organisation: { id: string; name: string };
+  /** deletedAt: the organisation's data was deleted (Task D3); only its financial records remain. */
+  organisation: { id: string; name: string; deletedAt: string | null };
   access: SubscriptionAccess;
   usage: Record<PlanLimit, number>;
   subscription: {

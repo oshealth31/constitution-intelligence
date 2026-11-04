@@ -7,6 +7,7 @@ import { PlatformDashboardService } from './platform-dashboard.service';
 import { PlatformService } from './platform.service';
 import { OrganisationDeletionService } from './organisation-deletion.service';
 import { FileQuarantineService } from './file-quarantine.service';
+import { DataRequestsService } from './data-requests.service';
 
 /** Platform Super Admin operations. */
 @Module({
@@ -17,7 +18,8 @@ import { FileQuarantineService } from './file-quarantine.service';
     PlatformDashboardService,
     OrganisationDeletionService,
     FileQuarantineService,
+    DataRequestsService,
   ],
-  exports: [PlatformService, OrganisationDeletionService],
+  exports: [PlatformService, OrganisationDeletionService, DataRequestsService],
 })
 export class PlatformModule {}

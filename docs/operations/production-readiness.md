@@ -107,7 +107,7 @@ items below.
 - **Cross-border transfers**: hosting and backups in Botswana, or only to countries/safeguards
   the Act allows. This also covers outside services such as uptime monitors, email providers and
   GitHub (which holds code and fictional test data only, never production data).
-- Data-subject requests (access, correction, deletion) from individual people: manual procedure only (Task D11). Whole-organisation deletion has a tool (D3).
+- Data-subject requests (access, correction, deletion) from individual people: Control Centre tool (Task D11, [data-requests.md](data-requests.md)); deadlines and who answers still to be confirmed with a lawyer. Whole-organisation deletion has a tool (D3).
 - AI stays off. Any AI provider outside Botswana needs a transfer assessment first (decided earlier).
 
 ### Security (from docs/security/security-review.md)
@@ -134,7 +134,7 @@ items below.
 
 ## Before general availability (beyond the pilot)
 
-Everything above, plus: penetration test; a self-service tool for individual people's data requests (D11); separate database accounts;
+Everything above, plus: penetration test; separate database accounts;
 a load test; a tested Safari/iOS offline experience; screen-reader
 testing; payment-provider decision. (The 14.1.3 parser fix is done: task D9.)
 

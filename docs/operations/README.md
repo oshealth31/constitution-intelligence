@@ -14,6 +14,7 @@
 | [maintenance.md](maintenance.md)                             | Routine tasks and maintenance windows                                                                                  |
 | [onboarding.md](onboarding.md)                               | Setting up a new organisation                                                                                          |
 | [offboarding-and-retention.md](offboarding-and-retention.md) | Leaving, data export, retention periods, deletion                                                                      |
+| [data-requests.md](data-requests.md)                         | One person asking for a copy, correction or deletion of their data                                                     |
 
 Files: `infra/production/` (images, Compose layout, HTTPS proxy, settings template) and `ops/`
 (backup, restore, export, health check). Automated evidence: `.github/workflows/deployment-check.yml`.

@@ -61,6 +61,7 @@ export const PAGE_GROUPS: PageGroup[] = [
       { name: 'Organisations', address: '/admin/organisations' },
       { name: 'Billing', address: '/admin/billing' },
       { name: 'Plans', address: '/admin/plans' },
+      { name: 'Data requests', address: '/admin/data-requests' },
       { name: 'Audit log', address: '/admin/audit' },
       { name: 'System health', address: '/admin/health' },
     ],

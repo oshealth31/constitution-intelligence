@@ -15,6 +15,7 @@ const NAVIGATION = [
   { href: '/admin/billing', label: 'Billing' },
   { href: '/admin/plans', label: 'Plans' },
   { href: '/admin/support', label: 'Support' },
+  { href: '/admin/data-requests', label: 'Data requests' },
   { href: '/admin/audit', label: 'Audit log' },
   { href: '/admin/health', label: 'System health' },
 ];

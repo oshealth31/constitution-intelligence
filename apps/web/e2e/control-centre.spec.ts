@@ -135,6 +135,32 @@ test('a super admin can quarantine an uploaded file and release it again', async
   await expect(file.getByText('Available')).toBeVisible();
 });
 
+test('a super admin records a personal data request and can download the copy', async ({
+  page,
+}) => {
+  await signIn(page, SUPER_ADMIN);
+  await page.getByRole('link', { name: 'Data requests' }).first().click();
+  const form = page.getByRole('form', { name: 'Record a data request' });
+  await form.getByLabel('Their email address').fill(ORG_ADMIN);
+  await form.getByLabel('Respond by').fill('2099-12-31');
+  await form.getByLabel('How it arrived').fill('Email from the person (browser test)');
+  await form
+    .getByLabel('How you confirmed it is them')
+    .fill('Called back on the number on file (fictional)');
+  await form.getByRole('button', { name: 'Record the request' }).click();
+
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Copy of their data');
+  await expect(page.getByText(ORG_ADMIN).first()).toBeVisible();
+  const download = page.waitForEvent('download');
+  await page.getByRole('link', { name: 'Download the copy' }).click();
+  const file = await download;
+  expect(file.suggestedFilename()).toMatch(/^personal-data-.*\.json$/);
+
+  await page.getByLabel('Reason for cancelling').fill('Browser test only, nothing to send');
+  await page.getByRole('button', { name: 'Cancel the request' }).click();
+  await expect(page.getByText('Request cancelled.')).toBeVisible();
+});
+
 test('an organisation administrator cannot use the control centre', async ({ page }) => {
   await signIn(page, ORG_ADMIN);
   await expect(page.getByRole('heading', { name: 'This area is restricted' })).toBeVisible();

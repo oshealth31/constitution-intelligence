@@ -12,13 +12,15 @@ import {
   Put,
   Query,
   Req,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import { ORGANISATION_STATUSES, USER_STATUSES } from '@constitution/db';
 import { BILLING_INTERVALS } from '@constitution/shared';
 import { z } from 'zod';
 import { parseId } from '../../common/ids';
 import { requestMeta, type AppRequest, type AuthContext } from '../../common/request-context';
-import { emailSchema, parseInput, uuidSchema } from '../../common/validation';
+import { displayNameSchema, emailSchema, parseInput, uuidSchema } from '../../common/validation';
 import { CurrentAuth, RequireSuperAdmin } from '../access/decorators';
 import { brandingChangeSchema, slugSchema } from '../organisations/branding-input';
 import { InvitationsService } from '../organisations/invitations.service';
@@ -28,6 +30,7 @@ import { PlatformBillingService } from '../subscriptions/platform-billing.servic
 import { TwoStepService } from '../auth/two-step.service';
 import { OrganisationDeletionService } from './organisation-deletion.service';
 import { FileQuarantineService } from './file-quarantine.service';
+import { DataRequestsService } from './data-requests.service';
 
 const nameSchema = z.string().trim().min(2).max(200);
 const createOrganisationSchema = z.object({ name: nameSchema, slug: slugSchema });
@@ -84,6 +87,34 @@ const deletionRequestSchema = z.object({
   }),
 });
 const deletionApprovalSchema = z.object({ confirmSlug: z.string().trim().max(60) });
+const isoDate = z.iso.date({ error: 'must be a date (YYYY-MM-DD)' });
+const dataRequestSchema = z.object({
+  kind: z.enum(['copy', 'correction', 'deletion']),
+  email: emailSchema,
+  receivedOn: isoDate,
+  respondBy: isoDate,
+  receivedVia: z.string().trim().min(3).max(200),
+  identityCheck: z
+    .string()
+    .trim()
+    .min(10, { error: 'must say how you confirmed who is asking, in at least 10 characters' })
+    .max(500),
+  details: z.string().trim().max(2000).optional(),
+});
+const correctionSchema = z
+  .object({
+    displayName: displayNameSchema.optional(),
+    email: emailSchema.optional(),
+    reason: reasonSchema,
+  })
+  .refine((value) => value.displayName !== undefined || value.email !== undefined, {
+    error: 'Give a new name or a new email address.',
+  });
+const deletePersonSchema = z.object({ confirmEmail: z.string().max(320), reason: reasonSchema });
+const noteSchema = z.object({ note: z.string().trim().min(3).max(1000) });
+const dataRequestStatusSchema = z.object({
+  status: z.enum(['open', 'completed', 'cancelled']).optional(),
+});
 const twoStepResetSchema = z.object({ email: emailSchema, reason: reasonSchema });
 const organisationQuerySchema = z.object({
   status: z.enum(ORGANISATION_STATUSES).optional(),
@@ -116,6 +147,7 @@ export class PlatformController {
     private readonly twoStep: TwoStepService,
     private readonly deletion: OrganisationDeletionService,
     private readonly quarantine: FileQuarantineService,
+    private readonly dataRequests: DataRequestsService,
   ) {}
 
   @Get('overview')
@@ -378,6 +410,124 @@ export class PlatformController {
       default:
         throw new NotFoundException('Unknown action.');
     }
+  }
+
+  // ----- Personal data requests (Task D11) -----
+
+  @Get('data-requests')
+  listDataRequests(@Query() query: unknown) {
+    return this.dataRequests.list(parseInput(dataRequestStatusSchema, query).status);
+  }
+
+  @Post('data-requests')
+  createDataRequest(
+    @CurrentAuth() auth: AuthContext,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
+    return this.dataRequests.create(
+      parseInput(dataRequestSchema, body),
+      auth.userId,
+      requestMeta(request),
+    );
+  }
+
+  @Get('data-requests/:requestId')
+  getDataRequest(@Param('requestId') requestId: string) {
+    return this.dataRequests.get(parseId(requestId, 'Request'));
+  }
+
+  /** The copy of the person's data, as a JSON file to send to them. Audited. */
+  @Get('data-requests/:requestId/copy')
+  async dataRequestCopy(
+    @CurrentAuth() auth: AuthContext,
+    @Param('requestId') requestId: string,
+    @Req() request: AppRequest,
+    @Res() response: Response,
+  ): Promise<void> {
+    const { fileName, content } = await this.dataRequests.copy(
+      parseId(requestId, 'Request'),
+      auth.userId,
+      requestMeta(request),
+    );
+    response
+      .status(200)
+      .set({
+        'Content-Type': 'application/json; charset=utf-8',
+        'Content-Disposition': `attachment; filename="${fileName}"`,
+        'Cache-Control': 'private, no-store',
+        'X-Content-Type-Options': 'nosniff',
+      })
+      .send(content);
+  }
+
+  @Post('data-requests/:requestId/correct')
+  @HttpCode(HttpStatus.OK)
+  correctPerson(
+    @CurrentAuth() auth: AuthContext,
+    @Param('requestId') requestId: string,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
+    const { reason, ...change } = parseInput(correctionSchema, body);
+    return this.dataRequests.correct(
+      parseId(requestId, 'Request'),
+      { ...change, reason },
+      auth.userId,
+      requestMeta(request),
+    );
+  }
+
+  @Post('data-requests/:requestId/delete-person')
+  @HttpCode(HttpStatus.OK)
+  deletePerson(
+    @CurrentAuth() auth: AuthContext,
+    @Param('requestId') requestId: string,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
+    const { confirmEmail, reason } = parseInput(deletePersonSchema, body);
+    return this.dataRequests.deletePerson(
+      parseId(requestId, 'Request'),
+      confirmEmail,
+      reason,
+      auth.userId,
+      requestMeta(request),
+    );
+  }
+
+  @Post('data-requests/:requestId/complete')
+  @HttpCode(HttpStatus.OK)
+  completeDataRequest(
+    @CurrentAuth() auth: AuthContext,
+    @Param('requestId') requestId: string,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
+    const { note } = parseInput(noteSchema, body);
+    return this.dataRequests.complete(
+      parseId(requestId, 'Request'),
+      note,
+      auth.userId,
+      requestMeta(request),
+    );
+  }
+
+  @Post('data-requests/:requestId/cancel')
+  @HttpCode(HttpStatus.OK)
+  cancelDataRequest(
+    @CurrentAuth() auth: AuthContext,
+    @Param('requestId') requestId: string,
+    @Body() body: unknown,
+    @Req() request: AppRequest,
+  ) {
+    const { reason } = parseInput(z.object({ reason: reasonSchema }), body);
+    return this.dataRequests.cancel(
+      parseId(requestId, 'Request'),
+      reason,
+      auth.userId,
+      requestMeta(request),
+    );
   }
 
   /** What deleting this organisation would remove and keep, and any waiting request. */

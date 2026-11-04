@@ -95,6 +95,12 @@ export type AuditAction =
   | 'file.quarantined'
   | 'file.released'
   | 'file.content_removed'
+  | 'data_request.created'
+  | 'data_request.copy_downloaded'
+  | 'data_request.corrected'
+  | 'data_request.person_deleted'
+  | 'data_request.completed'
+  | 'data_request.cancelled'
   | 'permission.denied';
 
 export interface AuditEntry {

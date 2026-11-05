@@ -5,6 +5,7 @@ import { ORGANISATION_ROLES } from '@constitution/shared';
 import {
   bigint,
   boolean,
+  date,
   integer,
   jsonb,
   pgTable,
@@ -56,6 +57,32 @@ export const organisationDeletionRequests = pgTable('organisation_deletion_reque
   cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
   deletedCounts: jsonb('deleted_counts').$type<Record<string, number>>(),
   filesRemovedAt: timestamp('files_removed_at', { withTimezone: true }),
+});
+
+export const DATA_REQUEST_KINDS = ['copy', 'correction', 'deletion'] as const;
+export const DATA_REQUEST_STATUSES = ['open', 'completed', 'cancelled'] as const;
+
+/** One person's request about their own personal data (Task D11, migration 0013). */
+export const dataRequests = pgTable('data_requests', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  kind: text('kind', { enum: DATA_REQUEST_KINDS }).notNull(),
+  status: text('status', { enum: DATA_REQUEST_STATUSES }).notNull().default('open'),
+  subjectEmail: text('subject_email').notNull(),
+  subjectEmailSha256: text('subject_email_sha256').notNull(),
+  subjectUserId: uuid('subject_user_id'),
+  receivedOn: date('received_on', { mode: 'string' }).notNull(),
+  respondBy: date('respond_by', { mode: 'string' }).notNull(),
+  receivedVia: text('received_via').notNull(),
+  identityCheck: text('identity_check').notNull(),
+  details: text('details'),
+  createdByUserId: uuid('created_by_user_id'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  completedAt: timestamp('completed_at', { withTimezone: true }),
+  completedByUserId: uuid('completed_by_user_id'),
+  outcome: jsonb('outcome').$type<Record<string, unknown>>(),
+  cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
+  cancelledByUserId: uuid('cancelled_by_user_id'),
+  cancelReason: text('cancel_reason'),
 });
 
 export const users = pgTable('users', {
@@ -188,6 +215,7 @@ export const auditEvents = pgTable('audit_events', {
 export type Organisation = typeof organisations.$inferSelect;
 export type OrganisationDeletionRequest = typeof organisationDeletionRequests.$inferSelect;
 export type User = typeof users.$inferSelect;
+export type DataRequest = typeof dataRequests.$inferSelect;
 export type Membership = typeof memberships.$inferSelect;
 export type Invitation = typeof invitations.$inferSelect;
 export type Session = typeof sessions.$inferSelect;

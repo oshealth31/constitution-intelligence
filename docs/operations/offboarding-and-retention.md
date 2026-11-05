@@ -125,5 +125,5 @@ organisation column is accounted for; the deployment check deletes a fictional o
 with the command line on the production stack and checks the other is untouched; a browser test
 requests and cancels a deletion. **Not yet tested on the real server.**
 
-Not covered: a single person's request to delete their own data while their organisation
-stays (Task D11).
+A single person's request about their own data (copy, correction, deletion) while their
+organisation stays: see [data-requests.md](data-requests.md) (Task D11).

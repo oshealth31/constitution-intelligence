@@ -34,6 +34,10 @@ It lives in the web app at **`/admin`** and talks to the real API and database.
   reason (at least 10 characters). The access is recorded as `support.content_accessed`, with the
   reason, in both the platform audit log and **the organisation's own audit log**, so customers can
   see when and why their content was viewed. Drafts are never shown.
+- **Data requests (Task D11):** Control Centre → **Data requests** records one person's request
+  for a copy, correction or deletion of their data (identity check and deadline required), and
+  carries it out: a downloadable copy without secrets, a name/email correction, or deletion of
+  the account with the audit entries anonymised. See `docs/operations/data-requests.md`.
 - **File quarantine:** the organisation page's **Uploaded files** card lists each file with its
   status, how often it was downloaded and by whom, and lets a Super Admin quarantine, release or
   permanently remove it, each with a reason (`GET …/files`, `GET …/files/:fileId/downloads`,

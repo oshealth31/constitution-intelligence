@@ -150,6 +150,11 @@ describe.runIf(Boolean(testDatabaseUrl))('separate database accounts', () => {
       /permission denied/,
     );
     expect(await outcome(runtime, 'DELETE FROM audit_events')).toMatch(/append-only/);
+    // The four columns it may update (anonymising a deleted person, Task D11) are still
+    // refused by the append-only rule outside that procedure.
+    expect(
+      await outcome(runtime, `UPDATE audit_events SET ip_address = NULL, user_agent = NULL`),
+    ).toMatch(/append-only/);
     expect(await outcome(runtime, 'TRUNCATE audit_events')).toMatch(/permission denied/);
     expect(
       await outcome(

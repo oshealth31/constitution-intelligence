@@ -2,13 +2,13 @@
 
 Every change runs the browser tests (real API, real database, fictional data) in five browsers:
 
-| Run (CI job)                       | Engine                       | Screen          | Tests                         |
-| ---------------------------------- | ---------------------------- | --------------- | ----------------------------- |
-| Browser tests (control centre)     | Chromium (Chrome, Edge)      | Desktop         | All                           |
-| Browser tests (firefox)            | Firefox                      | Desktop         | All (one skipped, see below)  |
-| Browser tests (webkit)             | WebKit (Safari)              | Desktop         | All                           |
-| Browser tests (mobile-safari)      | WebKit, iPhone 13 emulation  | Phone           | Phone tests (`@phone`)        |
-| Browser tests (mobile-chrome)      | Chromium, Pixel 7 emulation  | Phone           | Phone tests (`@phone`)        |
+| Run (CI job)                   | Engine                      | Screen  | Tests                        |
+| ------------------------------ | --------------------------- | ------- | ---------------------------- |
+| Browser tests (control centre) | Chromium (Chrome, Edge)     | Desktop | All                          |
+| Browser tests (firefox)        | Firefox                     | Desktop | All (one skipped, see below) |
+| Browser tests (webkit)         | WebKit (Safari)             | Desktop | All                          |
+| Browser tests (mobile-safari)  | WebKit, iPhone 13 emulation | Phone   | Phone tests (`@phone`)       |
+| Browser tests (mobile-chrome)  | Chromium, Pixel 7 emulation | Phone   | Phone tests (`@phone`)       |
 
 The phone tests cover sign-in with two-step codes, the phone layout of every main page, the
 reader and search on a phone, the Control Centre on a phone, and saving and reading offline.

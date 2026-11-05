@@ -54,7 +54,10 @@ async function openFromMenu(page: Page, name: string, short: string) {
   if (await bottom.isVisible()) {
     await bottom.getByRole('link', { name: short, exact: true }).click();
   } else {
-    await page.getByRole('navigation', { name: 'Main', exact: true }).getByRole('link', { name }).click();
+    await page
+      .getByRole('navigation', { name: 'Main', exact: true })
+      .getByRole('link', { name })
+      .click();
   }
 }
 

@@ -20,9 +20,10 @@ async function watchViolations(page: Page): Promise<string[]> {
   await page.addInitScript(() => {
     document.addEventListener('securitypolicyviolation', (event) => {
       const target = event.target as Element | null;
-      const where = target && 'tagName' in target
-        ? `${target.tagName.toLowerCase()}${target.getAttribute('type') ? `[type=${target.getAttribute('type')}]` : ''}${target.id ? `#${target.id}` : ''}`
-        : 'document';
+      const where =
+        target && 'tagName' in target
+          ? `${target.tagName.toLowerCase()}${target.getAttribute('type') ? `[type=${target.getAttribute('type')}]` : ''}${target.id ? `#${target.id}` : ''}`
+          : 'document';
       console.error(
         `Content Security Policy violation: ${event.violatedDirective} ${event.blockedURI} on ${where} (${event.sourceFile}:${event.lineNumber})`,
       );

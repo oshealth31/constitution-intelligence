@@ -24,7 +24,8 @@ fictional data). But a public go-live needs things that do not exist yet:
    as sensitive data.
 4. ~~No two-factor sign-in.~~ **Done in task D2:** two-step sign-in with an authenticator app,
    required for Super Admins and offered to Owners and Administrators; tested in CI (API tests
-   and a phone-sized browser test in Chromium). Not yet tested in Safari or Firefox (T1).
+   and phone-sized browser tests). Since task T1 the browser tests also run in Firefox, WebKit
+   (Safari), an emulated iPhone and an emulated Android phone ([browser-support.md](../qa/browser-support.md)); real phones are task T4.
 5. **Operations are documented, not running**: no monitoring, no alerts, no off-site backups,
    no named on-call people, and no restore test on real infrastructure.
 

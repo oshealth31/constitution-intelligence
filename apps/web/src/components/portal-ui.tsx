@@ -4,6 +4,7 @@ import Link from 'next/link';
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode, SVGProps } from 'react';
 import { initials } from '@/lib/branding';
 import { highlightTerms } from '@/lib/portal';
+import { useHydrated } from '@/lib/hydrated';
 
 /**
  * Building blocks for organisation portals. Colours come from the CSS variables set by
@@ -158,10 +159,11 @@ export function PortalButton({
   children,
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; busy?: boolean }) {
+  const hydrated = useHydrated();
   return (
     <button
       {...props}
-      disabled={props.disabled || busy}
+      disabled={props.disabled || busy || (props.type === 'submit' && !hydrated)}
       className={`${BASE} ${VARIANTS[variant]} ${className}`}
     >
       {busy && (

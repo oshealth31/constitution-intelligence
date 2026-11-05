@@ -103,7 +103,7 @@ export function TwoStepSignIn({
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5" aria-label="Two-step sign-in">
+    <form method="post" onSubmit={onSubmit} className="space-y-5" aria-label="Two-step sign-in">
       <div>
         <h2 className={look.heading}>Two-step sign-in</h2>
         <p className={`mt-1 ${look.muted}`}>
@@ -297,7 +297,12 @@ export function TwoStepSetupSteps({
           {groupKey(setup.secret)}
         </p>
       </div>
-      <form onSubmit={confirm} className="space-y-4" aria-label="Confirm two-step sign-in">
+      <form
+        method="post"
+        onSubmit={confirm}
+        className="space-y-4"
+        aria-label="Confirm two-step sign-in"
+      >
         {error && <Message tone="error">{error}</Message>}
         <label className={look.label}>
           6-digit code from the app
@@ -459,6 +464,7 @@ export function TwoStepCard({
         )}
         {(mode === 'disable' || mode === 'new-codes') && (
           <form
+            method="post"
             onSubmit={submit}
             className="space-y-4"
             aria-label={mode === 'disable' ? 'Turn off two-step sign-in' : 'New recovery codes'}

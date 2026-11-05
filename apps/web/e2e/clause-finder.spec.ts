@@ -11,6 +11,10 @@ const accounts = JSON.parse(
 ) as Record<string, string>;
 const CHOIR = '/o/sample-community-choir';
 
+// The page's AI status is answered by the test (page.route). In WebKit and Firefox, requests
+// from a page controlled by the service worker bypass that, so the worker is kept off here.
+test.use({ serviceWorkers: 'block' });
+
 async function signInWithAiOff(page: Page) {
   await page.route('**/organisations/*/ai/status', (route) =>
     route.fulfill({

@@ -3,6 +3,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
+import { phone } from './qa-helpers';
 
 const accounts = JSON.parse(
   readFileSync(path.join(__dirname, '.auth', 'accounts.json'), 'utf8'),
@@ -204,8 +205,8 @@ test('a content reviewer sees the approval status of every version', async ({ pa
   await expect(page.getByText(/This area is for organisation administrators/)).toBeVisible();
 });
 
-test.describe('on a phone', () => {
-  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+test.describe('on a phone', { tag: '@phone' }, () => {
+  test.use(phone(390, 844));
 
   test('large bottom navigation and a Contents button make the portal easy to use', async ({
     page,

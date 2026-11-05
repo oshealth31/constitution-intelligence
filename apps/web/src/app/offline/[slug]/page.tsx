@@ -250,6 +250,7 @@ export default function OfflineReaderPage() {
             )}
 
             <form
+              method="post"
               role="search"
               aria-label="Search the saved copy"
               onSubmit={(event: FormEvent<HTMLFormElement>) => {

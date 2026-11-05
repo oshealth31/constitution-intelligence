@@ -286,6 +286,7 @@ function DetailsCard({ data, busy, run }: SectionProps) {
   return (
     <Card title="Organisation details" description="Name, web address and access status.">
       <form
+        method="post"
         className="grid gap-4 sm:grid-cols-2"
         aria-label="Organisation details"
         onSubmit={(event: FormEvent<HTMLFormElement>) => {
@@ -312,6 +313,7 @@ function DetailsCard({ data, busy, run }: SectionProps) {
       </form>
 
       <form
+        method="post"
         className="mt-6 border-t border-ivory-100 pt-5"
         aria-label={isActive ? 'Suspend organisation' : 'Activate organisation'}
         onSubmit={async (event: FormEvent<HTMLFormElement>) => {
@@ -449,6 +451,7 @@ function AdministratorsCard({
       )}
 
       <form
+        method="post"
         className="mt-6 grid gap-3 border-t border-ivory-100 pt-5 sm:grid-cols-[1fr_180px_auto] sm:items-end"
         aria-label="Invite an administrator"
         onSubmit={async (event: FormEvent<HTMLFormElement>) => {
@@ -520,6 +523,7 @@ function SubscriptionCard({ data, busy, run }: SectionProps) {
         </div>
       )}
       <form
+        method="post"
         className="grid gap-4 sm:grid-cols-3 sm:items-end"
         aria-label="Subscription"
         onSubmit={(event: FormEvent<HTMLFormElement>) => {
@@ -630,6 +634,7 @@ function BrandingCard({ data, busy, run }: SectionProps) {
     >
       <div className="grid gap-6 lg:grid-cols-[1fr_220px]">
         <form
+          method="post"
           className="grid gap-4 sm:grid-cols-2"
           aria-label="Branding"
           onSubmit={(event: FormEvent<HTMLFormElement>) => {
@@ -733,7 +738,12 @@ function SupportAccessCard({ organisationId }: { organisationId: string }) {
       description="Constitution text is hidden by default. Viewing it requires a reason and is recorded in both the platform audit log and this organisation's own audit log."
     >
       {sections === null ? (
-        <form onSubmit={onSubmit} className="space-y-3" aria-label="Request support access">
+        <form
+          method="post"
+          onSubmit={onSubmit}
+          className="space-y-3"
+          aria-label="Request support access"
+        >
           {error && <Alert>{error}</Alert>}
           <TextField
             label="Reason for viewing (for example, a support ticket reference)"

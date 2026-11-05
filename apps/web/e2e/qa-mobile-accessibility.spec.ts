@@ -5,11 +5,12 @@
 //   problems fail the test; every finding is printed so the QA report can list it.
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { phone } from './qa-helpers';
 import { openPage, PAGE_GROUPS } from './qa-pages';
 
 for (const group of PAGE_GROUPS) {
-  test.describe(`${group.who}: phone layout`, () => {
-    test.use({ viewport: { width: 360, height: 740 }, isMobile: true, hasTouch: true });
+  test.describe(`${group.who}: phone layout`, { tag: '@phone' }, () => {
+    test.use(phone(360, 740));
 
     test(`${group.who} pages fit a phone screen`, async ({ page }) => {
       if (group.signIn) await group.signIn(page);

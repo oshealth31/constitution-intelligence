@@ -367,6 +367,7 @@ function WorkflowPanel({
           : null;
     content = canEdit ? (
       <form
+        method="post"
         aria-label="Send for approval"
         className="space-y-3"
         onSubmit={(event: FormEvent<HTMLFormElement>) => {
@@ -419,6 +420,7 @@ function WorkflowPanel({
     content = canApprove ? (
       <div className="space-y-4">
         <form
+          method="post"
           aria-label="Approve"
           className="space-y-3"
           onSubmit={(event: FormEvent<HTMLFormElement>) => {
@@ -447,6 +449,7 @@ function WorkflowPanel({
           </PortalButton>
         </form>
         <form
+          method="post"
           aria-label="Send back for changes"
           className="space-y-3 border-t border-slate-200 pt-4"
           onSubmit={(event: FormEvent<HTMLFormElement>) => {
@@ -490,6 +493,7 @@ function WorkflowPanel({
   } else if (version.status === 'approved') {
     content = canApprove ? (
       <form
+        method="post"
         aria-label="Make this the current version"
         className="space-y-3"
         onSubmit={(event: FormEvent<HTMLFormElement>) => {
@@ -546,6 +550,7 @@ function WorkflowPanel({
             Archive this version
           </summary>
           <form
+            method="post"
             aria-label="Archive this version"
             className="mt-3 space-y-3"
             onSubmit={(event: FormEvent<HTMLFormElement>) => {
@@ -767,6 +772,7 @@ function SectionForm({
   const [body, setBody] = useState(initial.body);
   return (
     <form
+      method="post"
       className="space-y-3"
       aria-label={submitLabel}
       onSubmit={(event: FormEvent<HTMLFormElement>) => {

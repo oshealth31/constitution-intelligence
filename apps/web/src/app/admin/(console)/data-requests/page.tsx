@@ -109,7 +109,12 @@ export default function DataRequestsPage() {
           title="Record a new request"
           description="Confirm who is asking before you record it: for example call them back on a number you already have, or have their organisation's Owner confirm in writing."
         >
-          <form onSubmit={submit} className="space-y-4" aria-label="Record a data request">
+          <form
+            method="post"
+            onSubmit={submit}
+            className="space-y-4"
+            aria-label="Record a data request"
+          >
             {error && <Alert>{error}</Alert>}
             <SelectField
               label="What they ask for"

@@ -72,6 +72,7 @@ function AuditLog() {
       />
       <Card>
         <form
+          method="post"
           className="mb-5 grid gap-3 md:grid-cols-[1fr_220px_160px_auto] md:items-end"
           onSubmit={(event) => {
             event.preventDefault();

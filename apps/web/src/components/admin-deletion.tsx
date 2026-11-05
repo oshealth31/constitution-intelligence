@@ -290,7 +290,12 @@ export function DeletionCard({
         {!preview.eligible && <Alert tone="info">{preview.notEligibleReason}</Alert>}
 
         {preview.eligible && !request && (
-          <form onSubmit={requestDeletion} className="space-y-3" aria-label="Request deletion">
+          <form
+            method="post"
+            onSubmit={requestDeletion}
+            className="space-y-3"
+            aria-label="Request deletion"
+          >
             <TextField
               label="Reason"
               hint="At least 10 characters, for example “Pilot ended; owner asked in writing on 3 Nov”. Do not include members’ names."
@@ -348,7 +353,12 @@ export function DeletionCard({
               </p>
             )}
             {!blockedByRule && (
-              <form onSubmit={approve} className="space-y-3" aria-label="Approve deletion">
+              <form
+                method="post"
+                onSubmit={approve}
+                className="space-y-3"
+                aria-label="Approve deletion"
+              >
                 <TextField
                   label={`Type the web address “${preview.organisation.slug}” to delete permanently`}
                   required

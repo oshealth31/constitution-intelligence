@@ -88,7 +88,12 @@ function Search() {
         title="Search"
         description="Type a word, a clause number (for example “clause 7” or “2(a)”) or the title of a section."
       />
-      <form role="search" onSubmit={onSubmit} className="flex flex-col gap-3 sm:flex-row">
+      <form
+        method="post"
+        role="search"
+        onSubmit={onSubmit}
+        className="flex flex-col gap-3 sm:flex-row"
+      >
         <label htmlFor="search-text" className="sr-only">
           What are you looking for?
         </label>

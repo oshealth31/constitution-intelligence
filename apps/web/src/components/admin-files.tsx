@@ -193,7 +193,7 @@ export function FilesCard({ organisationId }: { organisationId: string }) {
                   </div>
                 )}
                 {open?.fileId === file.id && (
-                  <form onSubmit={submit} className="mt-3 space-y-2">
+                  <form method="post" onSubmit={submit} className="mt-3 space-y-2">
                     <TextField
                       label="Reason (recorded in the audit log)"
                       hint={ACTION_TEXT[open.action].hint}

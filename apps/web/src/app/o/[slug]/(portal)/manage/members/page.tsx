@@ -84,6 +84,7 @@ export default function MembersPage() {
       {canInvite && (
         <Panel title="Invite someone" description="They will receive an email with a link to join.">
           <form
+            method="post"
             onSubmit={invite}
             className="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end"
             aria-label="Invite someone"

@@ -1,5 +1,7 @@
 // Browser tests for the control centre and organisation portals. They run the REAL API and web app against a real
-// PostgreSQL database (in CI) and drive them through Chromium.
+// PostgreSQL database (in CI) and drive them through a browser chosen by E2E_BROWSER (Task T1):
+//   chromium (default) | firefox | webkit (Safari's engine) : the whole suite, desktop size
+//   mobile-safari (iPhone, WebKit) | mobile-chrome (Android) : the phone tests (tagged @phone)
 //
 // Requirements: DATABASE_URL (migrated), API and web built with API_INTERNAL_URL pointing to
 // http://127.0.0.1:4100. See .github/workflows/ci.yml ("Browser tests").
@@ -28,6 +30,17 @@ const apiEnv: Record<string, string> = {
   AI_PROVIDER: 'offline',
 };
 
+const BROWSERS = {
+  chromium: { device: devices['Desktop Chrome'], phoneOnly: false },
+  firefox: { device: devices['Desktop Firefox'], phoneOnly: false },
+  webkit: { device: devices['Desktop Safari'], phoneOnly: false },
+  'mobile-safari': { device: devices['iPhone 13'], phoneOnly: true },
+  'mobile-chrome': { device: devices['Pixel 7'], phoneOnly: true },
+} as const;
+const browserName = (process.env.E2E_BROWSER ?? 'chromium') as keyof typeof BROWSERS;
+const browser = BROWSERS[browserName];
+if (!browser) throw new Error(`Unknown E2E_BROWSER "${browserName}"`);
+
 export default defineConfig({
   testDir: './e2e',
   globalSetup: './e2e/global-setup.ts',
@@ -40,8 +53,9 @@ export default defineConfig({
   use: {
     baseURL: WEB_ORIGIN,
     trace: 'retain-on-failure',
-    ...devices['Desktop Chrome'],
+    ...browser.device,
   },
+  ...(browser.phoneOnly ? { grep: /@phone/ } : {}),
   webServer: [
     {
       command: 'node ../api/dist/main.js',

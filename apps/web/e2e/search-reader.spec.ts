@@ -3,6 +3,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
+import { phone } from './qa-helpers';
 
 const accounts = JSON.parse(
   readFileSync(path.join(__dirname, '.auth', 'accounts.json'), 'utf8'),
@@ -76,8 +77,8 @@ test('gives helpful messages when nothing is found', async ({ page }) => {
   await expect(page.locator('mark').first()).toHaveText(/quorum/i);
 });
 
-test.describe('on a phone', () => {
-  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+test.describe('on a phone', { tag: '@phone' }, () => {
+  test.use(phone(390, 844));
 
   test('moves between sections with large buttons', async ({ page }) => {
     await signIn(page);

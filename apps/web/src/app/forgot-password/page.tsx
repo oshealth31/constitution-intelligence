@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
         {message ? (
           <Alert tone="good">{message}</Alert>
         ) : (
-          <form onSubmit={onSubmit} className="space-y-5">
+          <form method="post" onSubmit={onSubmit} className="space-y-5">
             {error && <Alert>{error}</Alert>}
             <TextField
               label="Email address"

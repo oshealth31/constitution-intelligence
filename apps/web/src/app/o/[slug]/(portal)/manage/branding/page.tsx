@@ -174,7 +174,7 @@ export default function BrandingPage() {
         </Panel>
 
         <Panel title="Name, colours and welcome message">
-          <form onSubmit={save} className="space-y-5" aria-label="Branding">
+          <form method="post" onSubmit={save} className="space-y-5" aria-label="Branding">
             <label className="block text-base font-medium text-slate-900">
               Organisation name (as shown in the portal)
               <input

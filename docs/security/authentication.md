@@ -280,7 +280,7 @@ The `.test` domain is reserved and can never receive real email.
 - The leak list is a fixed copy (SecLists, 2025/26) and is not updated automatically; online
   services such as Have I Been Pwned know more leaks but would send part of a password hash
   abroad, which needs the data-protection review first.
-- Two-step sign-in has been tested in Chromium only (desktop and a phone-sized screen); Safari and
-  Firefox checks are Task T1.
+- Two-step sign-in is tested in Chromium, Firefox and WebKit (Safari), and on emulated iPhone and
+  Android screens (task T1); not yet on a real phone (task T4).
 - Database-level tenant isolation is described in [tenant-isolation.md](tenant-isolation.md).
 - Web sign-in screens are built with the portal user interface.

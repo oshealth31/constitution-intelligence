@@ -151,12 +151,16 @@ export default function DataRequestPage() {
           >
             <a
               href={`/api/v1${base}/copy`}
+              // Safari shows JSON on screen even when the server says "download"; this attribute
+              // makes every browser save it as a file (found by the WebKit tests, task T1).
+              download={`personal-data-${request.id.slice(0, 8)}.json`}
               className="inline-flex min-h-10 items-center justify-center rounded-lg bg-navy-900 px-4 py-2 text-sm font-medium text-ivory-50 hover:bg-navy-700"
             >
               Download the copy
             </a>
             {request.kind === 'copy' && (
               <form
+                method="post"
                 onSubmit={act('complete', 'complete', { note }, 'Request marked as answered.')}
                 className="mt-4 space-y-2"
               >
@@ -183,6 +187,7 @@ export default function DataRequestPage() {
             description="Leave a field empty to keep it. A new email address signs them out everywhere, so they sign in again with it."
           >
             <form
+              method="post"
               onSubmit={act(
                 'correct',
                 'correct',
@@ -235,6 +240,7 @@ export default function DataRequestPage() {
               </div>
             ) : (
               <form
+                method="post"
                 onSubmit={act(
                   'delete',
                   'delete-person',
@@ -295,6 +301,7 @@ export default function DataRequestPage() {
         {open && (
           <Card title="Cancel this request" description="For example if the person withdrew it.">
             <form
+              method="post"
               onSubmit={act('cancel', 'cancel', { reason: cancelReason }, 'Request cancelled.')}
               className="space-y-3"
             >

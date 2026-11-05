@@ -47,7 +47,11 @@ async function measure(network, index) {
     bytes = 0;
     const started = Date.now();
     await work();
-    results.push({ step: name, seconds: (Date.now() - started) / 1000, kilobytes: Math.round(bytes / 1024) });
+    results.push({
+      step: name,
+      seconds: (Date.now() - started) / 1000,
+      kilobytes: Math.round(bytes / 1024),
+    });
   }
   const email = `loadtest-${190 + index}@sample.test`;
   await step('Open the sign-in page (ready to use)', async () => {

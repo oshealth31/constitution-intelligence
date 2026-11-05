@@ -87,7 +87,11 @@ function signIn() {
   const email = `loadtest-${((__VU - 1) % USERS) + 1}@sample.test`;
   const started = Date.now();
   const response = count(
-    http.post(`${BASE}/api/v1/auth/login`, JSON.stringify({ email, password: PASSWORD }), JSON_POST),
+    http.post(
+      `${BASE}/api/v1/auth/login`,
+      JSON.stringify({ email, password: PASSWORD }),
+      JSON_POST,
+    ),
   );
   loginTime.add(Date.now() - started);
   if (response.status !== 200) {

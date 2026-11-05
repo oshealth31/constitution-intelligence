@@ -94,7 +94,16 @@ async function main() {
           await db.query(
             `INSERT INTO sections (organisation_id, version_id, parent_section_id, kind, ref_key, number, heading, body, position)
              VALUES ($1, $2, $3, 'clause', $4, $5, $6, $7, $8) RETURNING id`,
-            [org.id, version.id, partRow.id, `c${clause}`, String(clause), `Clause ${clause} heading`, body, position++],
+            [
+              org.id,
+              version.id,
+              partRow.id,
+              `c${clause}`,
+              String(clause),
+              `Clause ${clause} heading`,
+              body,
+              position++,
+            ],
           )
         ).rows[0];
         for (const letter of ['a', 'b']) {
@@ -107,7 +116,9 @@ async function main() {
               clauseRow.id,
               `c${clause}${letter}`,
               `(${letter})`,
-              Array.from({ length: 4 }, (_, s) => sentence(clause * 17 + s + letter.charCodeAt(0))).join(' '),
+              Array.from({ length: 4 }, (_, s) =>
+                sentence(clause * 17 + s + letter.charCodeAt(0)),
+              ).join(' '),
               position++,
             ],
           );
@@ -128,7 +139,13 @@ async function main() {
       )
     ).rows[0];
     console.log(
-      JSON.stringify({ organisationId: org.id, constitutionId: constitution.id, versionId: version.id, members: USERS, ...words }),
+      JSON.stringify({
+        organisationId: org.id,
+        constitutionId: constitution.id,
+        versionId: version.id,
+        members: USERS,
+        ...words,
+      }),
     );
   } finally {
     await db.end();

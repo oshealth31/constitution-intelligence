@@ -57,6 +57,7 @@ export default tseslint.config(
   {
     // Load-test helpers and performance scripts print their results.
     files: ['scripts/load/**', 'apps/web/perf/**'],
+    languageOptions: { globals: { ...globals.browser, ...globals.node } },
     rules: { 'no-console': 'off', '@typescript-eslint/no-require-imports': 'off' },
   },
   {

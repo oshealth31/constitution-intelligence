@@ -10,7 +10,8 @@ import {
   PortalLoading,
 } from '@/components/portal-ui';
 import { apiFetch, describeError } from '@/lib/api';
-import { brandStyle, colourWarnings, PLATFORM_COLOURS, safeColour } from '@/lib/branding';
+import { colourWarnings, PLATFORM_COLOURS, safeColour } from '@/lib/branding';
+import { BrandScope } from '@/components/brand-scope';
 import { fileToBase64, LOGO_ACCEPT, LOGO_MAX_BYTES, type BrandingSettings } from '@/lib/portal';
 import { useApi } from '@/lib/use-api';
 import { usePortal } from '../../portal-context';
@@ -238,8 +239,8 @@ export default function BrandingPage() {
 
       <aside aria-label="Preview" className="lg:sticky lg:top-28 lg:self-start">
         <p className="mb-2 text-sm font-semibold tracking-wide text-slate-500 uppercase">Preview</p>
-        <div
-          style={brandStyle({ primary, secondary, accent })}
+        <BrandScope
+          colours={{ primary, secondary, accent }}
           className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 shadow-sm"
         >
           <div className="flex items-center gap-3 bg-[var(--brand-primary)] px-4 py-3 text-[var(--brand-on-primary)]">
@@ -258,7 +259,7 @@ export default function BrandingPage() {
               Read the constitution
             </span>
           </div>
-        </div>
+        </BrandScope>
       </aside>
     </div>
   );

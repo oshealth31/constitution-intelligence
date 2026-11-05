@@ -30,6 +30,7 @@ import {
 } from '@/lib/format';
 import { BillingCard } from '@/components/admin-billing';
 import { DeletionCard } from '@/components/admin-deletion';
+import { BrandScope } from '@/components/brand-scope';
 import { FilesCard } from '@/components/admin-files';
 import type { Plan } from '@/lib/billing';
 import { useApi } from '@/lib/use-api';
@@ -673,26 +674,22 @@ function BrandingCard({ data, busy, run }: SectionProps) {
             </Button>
           </div>
         </form>
-        <div
-          aria-label="Branding preview"
+        <BrandScope
+          colours={{ primary: primaryColour, secondary: secondaryColour, accent: accentColour }}
           className="overflow-hidden rounded-xl border border-ivory-100"
         >
-          <div
-            className="px-4 py-3 text-sm font-semibold text-white"
-            style={{ backgroundColor: primaryColour }}
-          >
-            {displayName || data.organisation.name}
+          <div aria-label="Branding preview">
+            <div className="bg-[var(--brand-primary)] px-4 py-3 text-sm font-semibold text-[var(--brand-on-primary)]">
+              {displayName || data.organisation.name}
+            </div>
+            <div className="space-y-2 bg-[var(--brand-secondary)] p-4 text-[var(--brand-on-secondary)]">
+              <p className="text-xs">{tagline || 'Tagline appears here'}</p>
+              <span className="inline-block rounded-md bg-[var(--brand-accent)] px-3 py-1 text-xs font-medium text-[var(--brand-on-accent)]">
+                Read the constitution
+              </span>
+            </div>
           </div>
-          <div className="space-y-2 p-4" style={{ backgroundColor: secondaryColour }}>
-            <p className="text-xs text-muted">{tagline || 'Tagline appears here'}</p>
-            <span
-              className="inline-block rounded-md px-3 py-1 text-xs font-medium text-white"
-              style={{ backgroundColor: accentColour }}
-            >
-              Read the constitution
-            </span>
-          </div>
-        </div>
+        </BrandScope>
       </div>
     </Card>
   );

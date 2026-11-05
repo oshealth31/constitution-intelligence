@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { Badge } from '@/components/ui';
+import { WidthBar } from '@/components/brand-scope';
 import { Notice, Panel, PortalButton, PortalLoading } from '@/components/portal-ui';
 import { apiFetch, describeError } from '@/lib/api';
 import {
@@ -137,9 +138,9 @@ export default function SubscriptionPage() {
                       aria-valuemin={0}
                       aria-valuemax={100}
                     >
-                      <div
+                      <WidthBar
+                        percent={share}
                         className={`h-2 rounded-full ${share >= 90 ? 'bg-rose-500' : 'bg-[var(--brand-accent)]'}`}
-                        style={{ width: `${share}%` }}
                       />
                     </div>
                   )}

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { WidthBar } from '@/components/brand-scope';
 import { Alert, Card, EmptyState, Loading, PageHeader, Stat, StatusBadge } from '@/components/ui';
 import { describeError, type Overview, type StatusCount, type SystemHealth } from '@/lib/api';
 import { formatDate, formatMetric, formatNumber, metricLabel, statusLabel } from '@/lib/format';
@@ -21,9 +22,9 @@ function Breakdown({ items, empty }: { items: StatusCount[]; empty: string }) {
             </span>
           </div>
           <div className="mt-1 h-1.5 rounded-full bg-ivory-100">
-            <div
+            <WidthBar
+              percent={Math.round((item.count / total) * 100)}
               className="h-full rounded-full bg-teal-500"
-              style={{ width: `${Math.round((item.count / total) * 100)}%` }}
             />
           </div>
         </li>

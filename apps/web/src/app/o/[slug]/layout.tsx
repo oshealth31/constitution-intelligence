@@ -6,7 +6,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { PortalLoading } from '@/components/portal-ui';
 import { ApiError, apiFetch } from '@/lib/api';
 import { brand } from '@/lib/brand';
-import { brandStyle } from '@/lib/branding';
+import { BrandScope } from '@/components/brand-scope';
 import type { PublicPortal } from '@/lib/portal';
 import { PublicPortalContext } from './public-portal-context';
 
@@ -52,10 +52,7 @@ export default function OrganisationPortalLayout({ children }: { children: React
 
   if (state.kind === 'loading') {
     return (
-      <div
-        className="flex min-h-dvh items-center justify-center bg-ivory-50"
-        style={brandStyle(null)}
-      >
+      <div className="flex min-h-dvh items-center justify-center bg-ivory-50">
         <PortalLoading label="Opening your organisation’s portal…" />
       </div>
     );
@@ -85,22 +82,16 @@ export default function OrganisationPortalLayout({ children }: { children: React
   }
   return (
     <PublicPortalContext.Provider value={state.portal}>
-      <div
-        style={brandStyle(state.portal.colours)}
-        className="min-h-dvh bg-slate-50 text-slate-900"
-      >
+      <BrandScope colours={state.portal.colours} className="min-h-dvh bg-slate-50 text-slate-900">
         {children}
-      </div>
+      </BrandScope>
     </PublicPortalContext.Provider>
   );
 }
 
 function PlainMessage({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <main
-      style={brandStyle(null)}
-      className="flex min-h-dvh items-center justify-center bg-ivory-50 px-4 py-12"
-    >
+    <main className="flex min-h-dvh items-center justify-center bg-ivory-50 px-4 py-12">
       <div className="w-full max-w-md rounded-2xl border border-ivory-100 bg-white p-8 text-center shadow-sm">
         <h1 className="text-xl font-semibold text-navy-900">{title}</h1>
         <p className="mt-3 text-base text-muted">{children}</p>

@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { ServiceWorkerRegistration } from '@/components/offline-ui';
 import { Highlighted, Notice, PortalButton, PortalLoading } from '@/components/portal-ui';
-import { brandStyle } from '@/lib/branding';
+import { BrandScope } from '@/components/brand-scope';
 import { formatDate, formatDateTime } from '@/lib/format';
 import {
   freshness,
@@ -119,7 +119,7 @@ export default function OfflineReaderPage() {
 
   if (load.kind === 'loading') {
     return (
-      <main className="mx-auto max-w-3xl p-6" style={brandStyle(null)}>
+      <main className="mx-auto max-w-3xl p-6">
         <ServiceWorkerRegistration />
         <PortalLoading label="Opening the saved copy…" />
       </main>
@@ -128,7 +128,7 @@ export default function OfflineReaderPage() {
 
   if (load.kind === 'none') {
     return (
-      <main className="mx-auto max-w-2xl space-y-4 p-6" style={brandStyle(null)}>
+      <main className="mx-auto max-w-2xl space-y-4 p-6">
         <ServiceWorkerRegistration />
         {connection}
         <h1 className="text-2xl font-bold text-slate-900">Nothing saved for offline reading</h1>
@@ -161,7 +161,7 @@ export default function OfflineReaderPage() {
   };
 
   return (
-    <div style={brandStyle(colours)} className="min-h-dvh">
+    <BrandScope colours={colours} className="min-h-dvh">
       <ServiceWorkerRegistration />
       <header className="bg-[var(--brand-primary)] text-[var(--brand-on-primary)]">
         <div className="mx-auto flex max-w-4xl flex-wrap items-center gap-3 px-4 py-3">
@@ -421,7 +421,7 @@ export default function OfflineReaderPage() {
           </div>
         </section>
       </main>
-    </div>
+    </BrandScope>
   );
 }
 

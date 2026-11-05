@@ -70,12 +70,12 @@ What the owner does, once:
       `tenancy=` lines.
 3. Add four more GitHub secrets (part D):
 
-   | Name               | Value                                                                    |
-   | ------------------ | ------------------------------------------------------------------------ |
-   | `OCI_USER_OCID`    | The value after `user=` (starts with `ocid1.user.`)                      |
-   | `OCI_FINGERPRINT`  | The value after `fingerprint=` (pairs of letters and numbers with `:`)   |
-   | `OCI_TENANCY_OCID` | The value after `tenancy=` (starts with `ocid1.tenancy.`)                |
-   | `OCI_API_KEY`      | The whole `.pem` file from step 2.2, from `-----BEGIN` to the last line  |
+   | Name               | Value                                                                   |
+   | ------------------ | ----------------------------------------------------------------------- |
+   | `OCI_USER_OCID`    | The value after `user=` (starts with `ocid1.user.`)                     |
+   | `OCI_FINGERPRINT`  | The value after `fingerprint=` (pairs of letters and numbers with `:`)  |
+   | `OCI_TENANCY_OCID` | The value after `tenancy=` (starts with `ocid1.tenancy.`)               |
+   | `OCI_API_KEY`      | The whole `.pem` file from step 2.2, from `-----BEGIN` to the last line |
 
 The workflow then runs by itself. GitHub → **Actions** → **Oracle server (create, retrying)**
 shows each attempt: "No free Arm server available right now" means it will try again. When

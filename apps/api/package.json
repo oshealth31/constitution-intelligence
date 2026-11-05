@@ -2,6 +2,7 @@
   "name": "@constitution/api",
   "version": "0.1.0",
   "private": true,
+  "license": "UNLICENSED",
   "description": "Constitution Intelligence API (NestJS modular monolith).",
   "scripts": {
     "build": "nest build",

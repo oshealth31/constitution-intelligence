@@ -5,6 +5,9 @@ constitutions easy to access, search, understand and use.
 
 > _Empowering Your Governance, Safeguarding Your Future._
 
+**Not open source.** The code is visible here, but all rights are reserved: see [LICENSE](LICENSE).
+All organisations, people and data in this repository are fictional.
+
 **Status:** Stage 9 — AI question answering. Members ask questions in their own words and get
 a plain-language explanation with exact citations from their organisation's approved
 constitution, on top of search and the reader (Stage 8), document management (Stage 7), branded

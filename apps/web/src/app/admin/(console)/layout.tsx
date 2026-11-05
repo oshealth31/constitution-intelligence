@@ -161,6 +161,12 @@ export default function ConsoleLayout({ children }: { children: ReactNode }) {
   return (
     <ConsoleUserContext.Provider value={gate.user}>
       <div className="min-h-dvh bg-ivory-50 lg:flex">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:text-navy-900"
+        >
+          Skip to main content
+        </a>
         <aside className="bg-navy-900 text-ivory-50 lg:sticky lg:top-0 lg:flex lg:h-dvh lg:w-64 lg:shrink-0 lg:flex-col">
           <div className="flex items-center justify-between px-5 py-4 lg:block lg:px-6 lg:py-6">
             <div>
@@ -226,7 +232,11 @@ export default function ConsoleLayout({ children }: { children: ReactNode }) {
           </div>
         </aside>
         <div className="min-w-0 flex-1">
-          <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
+          <main
+            id="main"
+            tabIndex={-1}
+            className="mx-auto w-full max-w-7xl px-4 py-6 focus:outline-none sm:px-6 lg:px-10 lg:py-10"
+          >
             {children}
           </main>
         </div>

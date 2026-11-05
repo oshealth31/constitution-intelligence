@@ -8,6 +8,7 @@ import {
   Panel,
   PortalButton,
   PortalLoading,
+  PortalField,
 } from '@/components/portal-ui';
 import { apiFetch, describeError } from '@/lib/api';
 import { colourWarnings, PLATFORM_COLOURS, safeColour } from '@/lib/branding';
@@ -175,19 +176,23 @@ export default function BrandingPage() {
 
         <Panel title="Name, colours and welcome message">
           <form method="post" onSubmit={save} className="space-y-5" aria-label="Branding">
-            <label className="block text-base font-medium text-slate-900">
-              Organisation name (as shown in the portal)
-              <input
-                value={displayName}
-                maxLength={200}
-                placeholder={branding.data?.organisationName}
-                onChange={(event) => setDisplayName(event.target.value)}
-                className={FIELD}
-              />
-              <span className="mt-1 block text-sm font-normal text-slate-600">
-                Leave empty to use “{branding.data?.organisationName}”.
-              </span>
-            </label>
+            <PortalField
+              label={<>Organisation name (as shown in the portal)</>}
+              hint={<>Leave empty to use “{branding.data?.organisationName}”.</>}
+            >
+              {(field) => (
+                <>
+                  <input
+                    {...field}
+                    value={displayName}
+                    maxLength={200}
+                    placeholder={branding.data?.organisationName}
+                    onChange={(event) => setDisplayName(event.target.value)}
+                    className={FIELD}
+                  />
+                </>
+              )}
+            </PortalField>
             <label className="block text-base font-medium text-slate-900">
               Short tagline (optional)
               <input
@@ -197,20 +202,28 @@ export default function BrandingPage() {
                 className={FIELD}
               />
             </label>
-            <label className="block text-base font-medium text-slate-900">
-              Welcome message
-              <textarea
-                value={welcomeMessage}
-                maxLength={1000}
-                rows={4}
-                onChange={(event) => setWelcomeMessage(event.target.value)}
-                className={FIELD}
-              />
-              <span className="mt-1 block text-sm font-normal text-slate-600">
-                Plain text only, up to 1,000 characters. It appears on the home page after members
-                sign in.
-              </span>
-            </label>
+            <PortalField
+              label={<>Welcome message</>}
+              hint={
+                <>
+                  Plain text only, up to 1,000 characters. It appears on the home page after members
+                  sign in.
+                </>
+              }
+            >
+              {(field) => (
+                <>
+                  <textarea
+                    {...field}
+                    value={welcomeMessage}
+                    maxLength={1000}
+                    rows={4}
+                    onChange={(event) => setWelcomeMessage(event.target.value)}
+                    className={FIELD}
+                  />
+                </>
+              )}
+            </PortalField>
             <div className="grid gap-4 sm:grid-cols-3">
               <ColourField label="Primary colour" value={primary} onChange={setPrimary} />
               <ColourField label="Secondary colour" value={secondary} onChange={setSecondary} />

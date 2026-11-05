@@ -136,8 +136,8 @@ items below.
 ## Before general availability (beyond the pilot)
 
 Everything above, plus: penetration test; separate database accounts;
-a load test; a tested Safari/iOS offline experience; screen-reader
-testing; payment-provider decision. (The 14.1.3 parser fix is done: task D9.)
+a load test; a tested Safari/iOS offline experience on a real iPhone (T4); the manual
+screen-reader check (T2, [screen-reader-check.md](../qa/screen-reader-check.md)); payment-provider decision. (The 14.1.3 parser fix is done: task D9.)
 
 ## Sources
 

@@ -1,7 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode, SVGProps } from 'react';
+import {
+  useId,
+  type AnchorHTMLAttributes,
+  type ButtonHTMLAttributes,
+  type ReactNode,
+  type SVGProps,
+} from 'react';
 import { initials } from '@/lib/branding';
 import { highlightTerms } from '@/lib/portal';
 import { useHydrated } from '@/lib/hydrated';
@@ -332,5 +338,41 @@ export function Highlighted({ text, terms }: { text: string; terms: readonly str
         ),
       )}
     </>
+  );
+}
+
+// ----- Labelled field with a hint ------------------------------------------------------------
+
+/**
+ * A label, a field and an optional hint. The hint is linked with aria-describedby rather than
+ * placed inside the label, so screen readers say the label as the field's name and the hint as
+ * extra information (task T2). Pass the field as a function and spread `field` onto it:
+ *   <PortalField label="Simple words" hint="Short sentences.">
+ *     {(field) => <textarea {...field} className={FIELD} />}
+ *   </PortalField>
+ */
+export function PortalField({
+  label,
+  hint,
+  children,
+}: {
+  label: ReactNode;
+  hint?: ReactNode;
+  children: (field: { id: string; 'aria-describedby'?: string }) => ReactNode;
+}) {
+  const id = useId();
+  const hintId = `${id}-hint`;
+  return (
+    <div>
+      <label htmlFor={id} className="block text-base font-medium text-slate-900">
+        {label}
+      </label>
+      {children({ id, 'aria-describedby': hint ? hintId : undefined })}
+      {hint && (
+        <p id={hintId} className="mt-1 text-sm text-slate-600">
+          {hint}
+        </p>
+      )}
+    </div>
   );
 }

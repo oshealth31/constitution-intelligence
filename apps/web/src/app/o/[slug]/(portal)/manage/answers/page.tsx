@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type ChangeEvent, type FormEvent } from 'react';
 import { Badge } from '@/components/ui';
-import { Notice, Panel, PortalButton, PortalLoading } from '@/components/portal-ui';
+import { Notice, Panel, PortalButton, PortalLoading, PortalField } from '@/components/portal-ui';
 import { apiFetch, describeError } from '@/lib/api';
 import { formatDate } from '@/lib/format';
 import {
@@ -174,19 +174,23 @@ function NewAnswerForm() {
             className={FIELD}
           />
         </label>
-        <label className="block text-base font-medium text-slate-900">
-          Clauses it is based on
-          <input
-            value={clauses}
-            onChange={(event) => setClauses(event.target.value)}
-            required
-            placeholder="For example: 6, 7(a)"
-            className={FIELD}
-          />
-          <span className="mt-1 block text-sm font-normal text-slate-600">
-            Clause numbers from the current published constitution, separated by commas.
-          </span>
-        </label>
+        <PortalField
+          label={<>Clauses it is based on</>}
+          hint={<>Clause numbers from the current published constitution, separated by commas.</>}
+        >
+          {(field) => (
+            <>
+              <input
+                {...field}
+                value={clauses}
+                onChange={(event) => setClauses(event.target.value)}
+                required
+                placeholder="For example: 6, 7(a)"
+                className={FIELD}
+              />
+            </>
+          )}
+        </PortalField>
         {error && <Notice tone="error">{error}</Notice>}
         <div className="flex flex-wrap gap-3">
           <PortalButton type="submit" busy={busy}>

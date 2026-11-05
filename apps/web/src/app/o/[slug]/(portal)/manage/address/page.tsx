@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, type FormEvent } from 'react';
-import { Notice, Panel, PortalButton } from '@/components/portal-ui';
+import { Notice, Panel, PortalButton, PortalField } from '@/components/portal-ui';
 import { apiFetch, describeError } from '@/lib/api';
 import { portalPath } from '@/lib/portal';
 import { usePortal } from '../../portal-context';
@@ -55,28 +55,32 @@ export default function PortalAddressPage() {
         className="mt-5 space-y-4"
         aria-label="Change portal address"
       >
-        <label className="block text-base font-medium text-slate-900">
-          New address
-          <span className="mt-2 flex items-stretch overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-[var(--brand-accent)]">
-            <span className="flex items-center bg-slate-100 px-3 text-base text-slate-600">
-              /o/
-            </span>
-            <input
-              value={value}
-              onChange={(event) => {
-                setValue(event.target.value);
-                setConfirmed(false);
-              }}
-              maxLength={50}
-              autoCapitalize="none"
-              spellCheck={false}
-              className="min-h-12 w-full px-3 text-base focus:outline-none"
-            />
-          </span>
-          <span className="mt-1 block text-sm font-normal text-slate-600">
-            3 to 50 lower-case letters, numbers or hyphens, for example “riverside-choir”.
-          </span>
-        </label>
+        <PortalField
+          label={<>New address</>}
+          hint={<>3 to 50 lower-case letters, numbers or hyphens, for example “riverside-choir”.</>}
+        >
+          {(field) => (
+            <>
+              <span className="mt-2 flex items-stretch overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-[var(--brand-accent)]">
+                <span className="flex items-center bg-slate-100 px-3 text-base text-slate-600">
+                  /o/
+                </span>
+                <input
+                  {...field}
+                  value={value}
+                  onChange={(event) => {
+                    setValue(event.target.value);
+                    setConfirmed(false);
+                  }}
+                  maxLength={50}
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  className="min-h-12 w-full px-3 text-base focus:outline-none"
+                />
+              </span>
+            </>
+          )}
+        </PortalField>
         {!valid && value && (
           <Notice tone="warning">
             Use only lower-case letters, numbers and hyphens (3 to 50).

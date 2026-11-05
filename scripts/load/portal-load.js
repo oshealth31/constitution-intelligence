@@ -11,6 +11,7 @@
 //                      itself is measured rather than the flood guard.
 import http from 'k6/http';
 import { check, group, sleep } from 'k6';
+import exec from 'k6/execution';
 import { Counter, Trend } from 'k6/metrics';
 
 const BASE = __ENV.BASE_URL || 'http://127.0.0.1:3100';
@@ -70,13 +71,25 @@ export const options = {
   // Keep each member's sign-in cookie between rounds (k6 clears it by default).
   noCookiesReset: true,
   // Recorded, not enforced: the numbers go into the report.
-  summaryTrendStats: ['avg', 'p(50)', 'p(95)', 'p(99)', 'max'],
+  summaryTrendStats: ['avg', 'p(50)', 'p(95)', 'p(99)', 'max', 'count'],
+  // Always-true thresholds: they make k6 keep the response times per load level for the report.
+  thresholds: Object.fromEntries(
+    ['25', '50', '100', '200'].map((value) => [`http_req_duration{level:${value}}`, ['max>=0']]),
+  ),
 };
 
-const API = {
-  headers: { 'X-Requested-With': 'XMLHttpRequest', Origin: BASE, Accept: 'application/json' },
-};
-const JSON_POST = { headers: { ...API.headers, 'Content-Type': 'application/json' } };
+const HEADERS = { 'X-Requested-With': 'XMLHttpRequest', Origin: BASE, Accept: 'application/json' };
+/** How many members are active right now, rounded up to the load levels 25/50/100/200. */
+function level() {
+  const active = exec.instance.vusActive;
+  return String(active <= 25 ? 25 : active <= 50 ? 50 : active <= 100 ? 100 : 200);
+}
+function api() {
+  return { headers: HEADERS, tags: { level: level() } };
+}
+function pageParams() {
+  return { tags: { level: level() } };
+}
 const TERMS = ['quorum', 'treasurer', 'election', 'clause 250', 'annual general meeting', 'appeal'];
 
 function count(response) {
@@ -107,7 +120,7 @@ function signIn() {
     http.post(
       `${BASE}/api/v1/auth/login`,
       JSON.stringify({ email, password: PASSWORD }),
-      JSON_POST,
+      { headers: { ...HEADERS, 'Content-Type': 'application/json' }, tags: { level: level() } },
     ),
   );
   loginTime.add(Date.now() - started);
@@ -116,7 +129,7 @@ function signIn() {
     check(response, { 'signed in': () => false });
     return false;
   }
-  const me = count(http.get(`${BASE}/api/v1/auth/me`, API));
+  const me = count(http.get(`${BASE}/api/v1/auth/me`, api()));
   const memberships = me.status === 200 ? me.json('memberships') || [] : [];
   state.organisationId = memberships.length > 0 ? memberships[0].organisationId : null;
   state.signedIn = Boolean(state.organisationId);
@@ -129,16 +142,16 @@ export default function () {
     sleep(10); // as a person would wait before trying again
     return;
   }
-  const api = `${BASE}/api/v1/organisations/${state.organisationId}`;
+  const org = `${BASE}/api/v1/organisations/${state.organisationId}`;
 
   group('home', () => {
     const started = Date.now();
-    const page = count(http.get(`${BASE}/o/${SLUG}`));
+    const page = count(http.get(`${BASE}/o/${SLUG}`, pageParams()));
     const responses = http.batch([
-      ['GET', `${BASE}/api/v1/portal/${SLUG}`, null, API],
-      ['GET', `${BASE}/api/v1/auth/me`, null, API],
-      ['GET', `${api}/portal`, null, API],
-      ['GET', `${api}/ai/status`, null, API],
+      ['GET', `${BASE}/api/v1/portal/${SLUG}`, null, api()],
+      ['GET', `${BASE}/api/v1/auth/me`, null, api()],
+      ['GET', `${org}/portal`, null, api()],
+      ['GET', `${org}/ai/status`, null, api()],
     ]);
     responses.forEach(count);
     homeTime.add(Date.now() - started);
@@ -149,11 +162,11 @@ export default function () {
 
   group('read the large constitution', () => {
     const started = Date.now();
-    count(http.get(`${BASE}/o/${SLUG}/read/${CONSTITUTION}`));
-    count(http.get(`${api}/library`, API));
-    count(http.get(`${api}/constitutions/${CONSTITUTION}`, API));
-    const sections = count(http.get(`${api}/versions/${VERSION}/sections`, API));
-    count(http.get(`${api}/simple-words?versionId=${VERSION}`, API));
+    count(http.get(`${BASE}/o/${SLUG}/read/${CONSTITUTION}`, pageParams()));
+    count(http.get(`${org}/library`, api()));
+    count(http.get(`${org}/constitutions/${CONSTITUTION}`, api()));
+    const sections = count(http.get(`${org}/versions/${VERSION}/sections`, api()));
+    count(http.get(`${org}/simple-words?versionId=${VERSION}`, api()));
     readTime.add(Date.now() - started);
     if (sections.status === 200) sectionsBytes.add(sections.body.length);
     check(sections, { 'all clauses 200': (r) => r.status === 200 });
@@ -163,7 +176,7 @@ export default function () {
   group('search', () => {
     const term = TERMS[Math.floor(Math.random() * TERMS.length)];
     const started = Date.now();
-    const response = count(http.get(`${api}/search?q=${encodeURIComponent(term)}`, API));
+    const response = count(http.get(`${org}/search?q=${encodeURIComponent(term)}`, api()));
     searchTime.add(Date.now() - started);
     check(response, { 'search 200': (r) => r.status === 200 });
   });
@@ -196,6 +209,22 @@ export function handleSummary(data) {
     `- Large constitution download: ${Math.round(metric('large_constitution_bytes', 'avg') / 1024)} KB (uncompressed)`,
     '',
   ];
+  const levels = ['25', '50', '100', '200'].filter(
+    (value) => data.metrics[`http_req_duration{level:${value}}`],
+  );
+  if (levels.length > 1) {
+    lines.push(
+      '| Members at once | Requests | Typical (p50) | 95 % within | 99 % within |',
+      '| --- | --- | --- | --- | --- |',
+    );
+    for (const value of levels) {
+      const values = data.metrics[`http_req_duration{level:${value}}`].values;
+      lines.push(
+        `| up to ${value} | ${values.count} | ${Math.round(values['p(50)'])} ms | ${Math.round(values['p(95)'])} ms | ${Math.round(values['p(99)'])} ms |`,
+      );
+    }
+    lines.push('');
+  }
   return {
     stdout: lines.join('\n') + '\n',
     [`load-${SCENARIO}.md`]: lines.join('\n') + '\n',

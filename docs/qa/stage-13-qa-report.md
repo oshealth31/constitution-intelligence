@@ -90,7 +90,7 @@ were fixed and passed in run 3.
 | Real payments                              | No payment provider by design (manual verification). The manual workflow was tested.                                                                                                                                                                         |
 | Browsers other than Chromium               | Firefox, Safari and Edge were not run. Safari matters most (iPhones), especially for offline reading. **Since task T1: Firefox, WebKit, iPhone and Android emulation run on every change (docs/qa/browser-support.md).**                                     |
 | Real phones and tablets                    | Phone screens were emulated in Chromium, not tested on physical iOS or Android devices.                                                                                                                                                                      |
-| Screen readers and keyboard-only use       | Automated scanning finds only part of accessibility problems. No manual test with NVDA, VoiceOver or TalkBack, and no full keyboard walkthrough.                                                                                                             |
+| Screen readers and keyboard-only use       | Automated scanning finds only part of accessibility problems. No manual test with NVDA, VoiceOver or TalkBack, and no full keyboard walkthrough. **Since task T2: an automated keyboard walkthrough runs in every browser (`e2e/keyboard.spec.ts`); the manual screen-reader check is `docs/qa/screen-reader-check.md`.**                                                                                                             |
 | Load and performance                       | No load test (many users at once, large constitutions, slow networks).                                                                                                                                                                                       |
 | Scanned (image-only) PDFs                  | Not supported (no text recognition); only the warning is tested.                                                                                                                                                                                             |
 | The real RBPC constitution in the app      | Tested earlier outside the app (typed version, parser flags); not uploaded into a test run here.                                                                                                                                                             |
@@ -114,8 +114,8 @@ were fixed and passed in run 3.
   open security items from Stage 12 (`docs/security/security-review.md`, U1–U12).
 - **Offline copies** stay on a device until it reconnects or the person signs out
   (`docs/offline.md`).
-- **Form hints are inside labels**, so screen readers read the hint as part of the field name.
-  Allowed by WCAG and not flagged by the scan, but longer than ideal.
+- ~~**Form hints are inside labels**, so screen readers read the hint as part of the field name.~~
+  **Fixed in task T2:** hints are linked with `aria-describedby` (tested).
 - **Development tools** (Vitest and others) have known vulnerabilities; nothing that ships is
   affected (Stage 12, U12). **Fixed later in task D10** (one low item without a fix remains).
 - **Test data:** browser tests use one fixed seed; most API tests create their own data.

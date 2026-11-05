@@ -39,3 +39,14 @@ Run locally with `E2E_BROWSER=<firefox|webkit|mobile-safari|mobile-chrome> pnpm 
   (task T4).
 - Edge is Chromium, so it is covered by the Chromium run; Samsung Internet (Chromium) likewise,
   but neither is run separately.
+
+## Keyboard and screen readers (task T2)
+
+`e2e/keyboard.spec.ts` runs in every browser above: signing in, skipping to the content, using
+the main menu, searching and opening a clause with the keyboard only; a visible focus outline at
+every stop on the member home page; the Control Centre with the keyboard; form hints announced
+as a description (not as part of the field's name); and, on a phone, the reader's Contents
+panel keeping the focus inside, closing with Escape and returning the focus. Fixed along the
+way: hints inside labels, the Contents panel letting the focus escape and not returning it, and
+no "Skip to main content" link in the Control Centre. The person-held check is
+[screen-reader-check.md](screen-reader-check.md).

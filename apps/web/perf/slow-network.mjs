@@ -50,7 +50,12 @@ async function measure(network, index) {
     try {
       await work();
     } catch {
-      const text = (await page.locator('body').innerText().catch(() => '')).slice(0, 300);
+      const text = (
+        await page
+          .locator('body')
+          .innerText()
+          .catch(() => '')
+      ).slice(0, 300);
       console.warn(`${network.name} / ${name}: did not finish. Page showed: ${text}`);
       label = `${name} (DID NOT FINISH in 3 minutes)`;
     }

@@ -82,7 +82,12 @@ function count(response) {
   else if (response.status >= 500) serverErrors.add(1);
   else if (response.status >= 400 || response.status === 0) {
     otherErrors.add(1, { status: String(response.status) });
-    const key = `${response.status} ${response.request.method} ${response.url.replace(/[0-9a-f-]{36}/g, ':id').replace(BASE, '').split('?')[0]}`;
+    const key = `${response.status} ${response.request.method} ${
+      response.url
+        .replace(/[0-9a-f-]{36}/g, ':id')
+        .replace(BASE, '')
+        .split('?')[0]
+    }`;
     if (!otherByStatus[key]) {
       otherByStatus[key] = true;
       console.warn(`other error: ${key}`);

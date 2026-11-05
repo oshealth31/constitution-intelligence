@@ -67,6 +67,8 @@ const scenarios = {
 
 export const options = {
   scenarios: scenarios[SCENARIO],
+  // Keep each member's sign-in cookie between rounds (k6 clears it by default).
+  noCookiesReset: true,
   // Recorded, not enforced: the numbers go into the report.
   summaryTrendStats: ['avg', 'p(50)', 'p(95)', 'p(99)', 'max'],
 };

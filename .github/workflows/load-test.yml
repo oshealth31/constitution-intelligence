@@ -70,7 +70,7 @@ jobs:
         run: |
           start_api() {
             env NODE_ENV=test APP_ENV=test API_HOST=127.0.0.1 API_PORT=4100 \
-              CORS_ORIGINS="$BASE_URL" TRUST_PROXY=true LOG_LEVEL=warn LOG_PRETTY=false \
+              CORS_ORIGINS="$BASE_URL,http://127.0.0.1:3200" TRUST_PROXY=true LOG_LEVEL=warn LOG_PRETTY=false \
               MAIL_TRANSPORT=log AI_PROVIDER=offline "$@" \
               nohup node apps/api/dist/main.js > api.log 2>&1 &
             echo $! > api.pid

@@ -50,6 +50,16 @@ export default tseslint.config(
     },
   },
   {
+    // k6 load-test scripts (task T3) run inside k6, which provides these globals.
+    files: ['scripts/load/**/*.js'],
+    languageOptions: { globals: { __ENV: 'readonly', __VU: 'readonly', __ITER: 'readonly' } },
+  },
+  {
+    // Load-test helpers and performance scripts print their results.
+    files: ['scripts/load/**', 'apps/web/perf/**'],
+    rules: { 'no-console': 'off', '@typescript-eslint/no-require-imports': 'off' },
+  },
+  {
     // Command-line scripts may print to the console.
     files: ['**/*-cli.ts', 'apps/api/src/cli/**/*.ts'],
     rules: { 'no-console': 'off' },

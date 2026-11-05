@@ -59,9 +59,9 @@ jobs:
         run: |
           set -euo pipefail
           cd /srv/constitution/infra/production
-          sudo sh -c "stat -c '%a %U:%G %n' secrets secrets/*" | tee /tmp/permissions
-          grep -q '^700 root:root secrets$' /tmp/permissions
-          grep -q '^640 root:999 secrets/database_server.key$' /tmp/permissions
+          sudo sh -c "stat -c '%a %u:%g %n' secrets secrets/*" | tee /tmp/permissions
+          grep -q '^700 0:0 secrets$' /tmp/permissions
+          grep -q '^640 0:999 secrets/database_server.key$' /tmp/permissions
           if sudo find secrets -name '*.key' ! -name database_server.key | grep -q .; then
             echo "A certificate authority key was left on the server."; exit 1
           fi

@@ -9,9 +9,9 @@ still needed before going live (see U11). This does not show the system is unhac
 
 Workflow: `.github/workflows/zap.yml`
 
-| Trigger | Scans |
-| --- | --- |
-| Every pull request and push to `main` | Passive scan signed out, passive scan signed in |
+| Trigger                                           | Scans                                                                  |
+| ------------------------------------------------- | ---------------------------------------------------------------------- |
+| Every pull request and push to `main`             | Passive scan signed out, passive scan signed in                        |
 | Weekly (Monday 03:17 UTC) and pushes to `scan/**` | The above **plus** an active (attack) scan signed in, up to 40 minutes |
 
 The active scan only ever runs against the throwaway CI copy. It is never pointed at a live
@@ -32,12 +32,12 @@ job summary but do not fail it.
 No High findings. No SQL injection, cross-site scripting, path traversal or similar problems
 were found by the active rules (139 checks passed).
 
-| Rule | Level | Finding | Decision |
-| --- | --- | --- | --- |
-| 10202 | Medium | Absence of anti-CSRF tokens in forms | **Accepted.** See below. |
-| 20012 | Medium | Anti-CSRF tokens check (active) | **Accepted.** Same reason. |
-| 90004 | Low | Cross-Origin-Resource-Policy header missing | **Fixed** for the web app: `Cross-Origin-Resource-Policy: same-origin` added in `apps/web/next.config.ts`. The related "Embedder policy" (COEP) part is left off on purpose: it can block legitimate images and gives no real protection for this app. |
-| 90027 | Low | Cookie slack detector | Informational; the scanner notices pages look the same with fewer cookies (public pages). No action. |
+| Rule  | Level  | Finding                                     | Decision                                                                                                                                                                                                                                               |
+| ----- | ------ | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 10202 | Medium | Absence of anti-CSRF tokens in forms        | **Accepted.** See below.                                                                                                                                                                                                                               |
+| 20012 | Medium | Anti-CSRF tokens check (active)             | **Accepted.** Same reason.                                                                                                                                                                                                                             |
+| 90004 | Low    | Cross-Origin-Resource-Policy header missing | **Fixed** for the web app: `Cross-Origin-Resource-Policy: same-origin` added in `apps/web/next.config.ts`. The related "Embedder policy" (COEP) part is left off on purpose: it can block legitimate images and gives no real protection for this app. |
+| 90027 | Low    | Cookie slack detector                       | Informational; the scanner notices pages look the same with fewer cookies (public pages). No action.                                                                                                                                                   |
 
 ### Why the CSRF findings are accepted
 

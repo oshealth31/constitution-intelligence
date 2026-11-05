@@ -95,7 +95,7 @@ jobs:
           # Start clean: sign-in counters from scenario 1 would otherwise carry over.
           psql "$DATABASE_URL" -qc 'DELETE FROM auth_rate_limits'
           source start-api.sh
-          start_api API_RATE_LIMIT_PER_MINUTE=1000000 LOGIN_MAX_ATTEMPTS_PER_IP=10000
+          start_api API_RATE_LIMIT_PER_MINUTE=1000000 API_RATE_LIMIT_PER_ADDRESS_PER_MINUTE=10000000 LOGIN_MAX_ATTEMPTS_PER_IP=10000
           SCENARIO=capacity k6 run --quiet scripts/load/portal-load.js
       - name: 'Scenario 3: slow phone networks'
         run: |

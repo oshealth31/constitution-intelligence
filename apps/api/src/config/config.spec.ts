@@ -140,6 +140,7 @@ describe('loadConfig', () => {
   it('applies secure abuse-protection and super-admin session defaults', () => {
     const config = loadConfig({ DATABASE_URL: LOCAL_DB });
     expect(config.API_RATE_LIMIT_PER_MINUTE).toBe(600);
+    expect(config.API_RATE_LIMIT_PER_ADDRESS_PER_MINUTE).toBe(12_000);
     expect(config.SUPER_ADMIN_SESSION_IDLE_MINUTES).toBe(30);
     expect(config.SUPER_ADMIN_SESSION_ABSOLUTE_HOURS).toBe(12);
   });

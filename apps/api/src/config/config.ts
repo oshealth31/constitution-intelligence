@@ -87,7 +87,7 @@ export const configSchema = z
       .int()
       .min(30)
       .max(10_000_000)
-      .default(6_000),
+      .default(12_000),
 
     // Platform Super Admin accounts can affect every organisation, so their sessions are shorter.
     SUPER_ADMIN_SESSION_IDLE_MINUTES: z.coerce.number().int().min(5).max(1_440).default(30),

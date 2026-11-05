@@ -43,6 +43,49 @@ a key file), but a phone works too.
      for a failed attempt.
 8. On the instance page, note the **Public IP address** (four numbers, such as `129.151.x.x`).
 
+## B2. Automatic retry when Oracle is "out of capacity"
+
+Free Arm servers in Johannesburg are often all in use. Instead of trying by hand, the
+**Oracle server (create, retrying)** workflow ([.github/workflows/oracle-server.yml](../../.github/workflows/oracle-server.yml))
+tries every 15 minutes, day and night. It uses
+[ops/server/oracle-create-server.sh](../../ops/server/oracle-create-server.sh) and the same
+settings as B3–B6: Ubuntu 24.04, 2 OCPUs and 12 GB (then 1 OCPU and 6 GB), 100 GB at
+10 VPUs/GB, and a public IP address. When the server exists, it opens ports 80 and 443
+([ops/server/oracle-open-web-ports.sh](../../ops/server/oracle-open-web-ports.sh)) and switches
+itself off. It never creates a second Arm server, and it never goes above the free allowance.
+
+The network must exist first. Creating any server once in the console makes it, even one that
+failed with "out of capacity" or the small E2.1.Micro.
+
+What the owner does, once:
+
+1. **SSH key.** Use the private key file downloaded in B5. If there is none, start "Create
+   instance" again, choose **Generate a key pair for me**, tap **Download private key**, then
+   **Cancel**. Add it as the GitHub secret `DEPLOY_SSH_KEY` (part D).
+2. **Oracle API key** (lets GitHub create the server for you):
+   1. Oracle → profile icon (top right) → **My profile** → **Tokens and keys** (or **API
+      keys**) → **Add API key**.
+   2. Choose **Generate API key pair** → **Download private key** (a `.pem` file) → **Add**.
+   3. Oracle shows a **Configuration file preview** with `user=`, `fingerprint=` and
+      `tenancy=` lines.
+3. Add four more GitHub secrets (part D):
+
+   | Name               | Value                                                                    |
+   | ------------------ | ------------------------------------------------------------------------ |
+   | `OCI_USER_OCID`    | The value after `user=` (starts with `ocid1.user.`)                      |
+   | `OCI_FINGERPRINT`  | The value after `fingerprint=` (pairs of letters and numbers with `:`)   |
+   | `OCI_TENANCY_OCID` | The value after `tenancy=` (starts with `ocid1.tenancy.`)                |
+   | `OCI_API_KEY`      | The whole `.pem` file from step 2.2, from `-----BEGIN` to the last line  |
+
+The workflow then runs by itself. GitHub → **Actions** → **Oracle server (create, retrying)**
+shows each attempt: "No free Arm server available right now" means it will try again. When
+it succeeds, the server appears under Compute → Instances. Copy its **Public IP address** into
+`DEPLOY_HOST`.
+
+Anyone holding the API key can manage the Oracle account. It lives only in GitHub's encrypted
+secrets. **Delete it in Oracle (Tokens and keys) once the server exists**, unless it is still
+needed.
+
 ## C. Open the web ports in Oracle's network
 
 1. On the instance page, under **Primary VNIC**, tap the **Subnet** link.

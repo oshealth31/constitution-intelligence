@@ -8,7 +8,9 @@
 //     about 200,000 words (generated text), to test reading and searching a big document.
 'use strict';
 // Resolve libraries from the folder it is run in (apps/api), not from this file's folder.
-const requireHere = require('node:module').createRequire(require('node:path').resolve('package.json'));
+const requireHere = require('node:module').createRequire(
+  require('node:path').resolve('package.json'),
+);
 const { Client } = requireHere('pg');
 const { hash } = requireHere('@node-rs/argon2');
 

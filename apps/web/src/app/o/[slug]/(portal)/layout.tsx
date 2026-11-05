@@ -209,7 +209,11 @@ export default function SignedInPortalLayout({ children }: { children: ReactNode
           <div className="h-1 bg-[var(--brand-accent)]" />
         </header>
 
-        <main id="main" className="mx-auto w-full max-w-6xl px-4 pt-6 pb-28 sm:px-6 md:pb-12">
+        <main
+          id="main"
+          tabIndex={-1}
+          className="mx-auto w-full max-w-6xl px-4 pt-6 pb-28 focus:outline-none sm:px-6 md:pb-12"
+        >
           <ServiceWorkerRegistration />
           <OfflineSyncer
             slug={slug}

@@ -3,7 +3,7 @@
 import { useState, type ChangeEvent } from 'react';
 import { clauseTitle } from '@/components/approved-answer';
 import { Badge } from '@/components/ui';
-import { Notice, Panel, PortalButton, PortalLoading } from '@/components/portal-ui';
+import { Notice, Panel, PortalButton, PortalLoading, PortalField } from '@/components/portal-ui';
 import { apiFetch, describeError } from '@/lib/api';
 import { formatDate } from '@/lib/format';
 import {
@@ -205,9 +205,14 @@ function ClauseEditor({
               Saving changes hides these simple words from members until they are approved again.
             </Notice>
           )}
-          <label className="block text-base font-medium text-slate-900">
-            Simple words
-            <textarea
+          <PortalField
+            label={<>Simple words</>}
+            hint={<>Short sentences and everyday words. Say only what the clause says — add nothing, leave
+              out nothing important.</>}
+          >
+            {(field) => (
+              <>
+            <textarea {...field}
               value={text}
               onChange={(event) => setText(event.target.value)}
               rows={4}
@@ -215,11 +220,9 @@ function ClauseEditor({
               required
               className={FIELD}
             />
-            <span className="mt-1 block text-sm font-normal text-slate-600">
-              Short sentences and everyday words. Say only what the clause says — add nothing, leave
-              out nothing important.
-            </span>
-          </label>
+              </>
+            )}
+          </PortalField>
           <div className="flex flex-wrap gap-3">
             <PortalButton type="submit" busy={busy === 'save'}>
               Save as draft

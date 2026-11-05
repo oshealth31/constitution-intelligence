@@ -80,6 +80,7 @@ function Reader() {
   const [highlighted, setHighlighted] = useState<string | null>(null);
   const [currentKey, setCurrentKey] = useState<string | null>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
+  const contentsDialog = useRef<HTMLDivElement>(null);
   // While the page scrolls to a section someone chose, scrolling must not change "where am I".
   const jumpedAt = useRef(0);
 
@@ -158,12 +159,39 @@ function Reader() {
 
   useEffect(() => {
     if (!contentsOpen) return;
+    // Keyboard and screen-reader users (task T2): focus goes into the panel, stays inside it
+    // while it is open (Tab and Shift+Tab wrap around), Escape closes it, and focus returns to
+    // the button that opened it.
+    const opener = document.activeElement as HTMLElement | null;
     closeButton.current?.focus();
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setContentsOpen(false);
+      if (event.key === 'Escape') {
+        setContentsOpen(false);
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const panel = contentsDialog.current;
+      if (!panel) return;
+      const focusable = [
+        ...panel.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input, select, textarea'),
+      ].filter((element) => element.offsetParent !== null || element === document.activeElement);
+      if (focusable.length === 0) return;
+      const first = focusable[0]!;
+      const last = focusable[focusable.length - 1]!;
+      const active = document.activeElement as HTMLElement | null;
+      if (event.shiftKey && (active === first || !panel.contains(active))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (active === last || !panel.contains(active))) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      if (opener && document.contains(opener)) opener.focus();
+    };
   }, [contentsOpen]);
 
   const goTo = useCallback((refKey: string) => {
@@ -468,6 +496,7 @@ function Reader() {
 
       {contentsOpen && (
         <div
+          ref={contentsDialog}
           className="fixed inset-0 z-40 lg:hidden"
           role="dialog"
           aria-modal="true"
@@ -475,6 +504,7 @@ function Reader() {
         >
           <button
             type="button"
+            tabIndex={-1}
             aria-label="Close contents"
             className="absolute inset-0 bg-black/40"
             onClick={() => setContentsOpen(false)}

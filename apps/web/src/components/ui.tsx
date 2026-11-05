@@ -124,17 +124,36 @@ export function Button({
 const FIELD_CLASSES =
   'mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-ink shadow-sm focus:border-teal-500 focus:ring-2 focus:ring-teal-500/30 focus:outline-none';
 
+/**
+ * A labelled text field. The hint sits OUTSIDE the label and is linked with aria-describedby,
+ * so screen readers read the label as the field's name and the hint as its description
+ * (task T2; before, the hint was read as part of the name).
+ */
 export function TextField({
   label,
   hint,
   ...props
 }: InputHTMLAttributes<HTMLInputElement> & { label: string; hint?: string }) {
+  const generated = useId();
+  const id = props.id ?? generated;
+  const hintId = `${id}-hint`;
   return (
-    <label className="block text-sm font-medium text-navy-900">
-      {label}
-      <input {...props} className={FIELD_CLASSES} />
-      {hint && <span className="mt-1 block text-xs font-normal text-muted">{hint}</span>}
-    </label>
+    <div>
+      <label htmlFor={id} className="block text-sm font-medium text-navy-900">
+        {label}
+      </label>
+      <input
+        {...props}
+        id={id}
+        aria-describedby={hint ? hintId : props['aria-describedby']}
+        className={FIELD_CLASSES}
+      />
+      {hint && (
+        <p id={hintId} className="mt-1 text-xs text-muted">
+          {hint}
+        </p>
+      )}
+    </div>
   );
 }
 

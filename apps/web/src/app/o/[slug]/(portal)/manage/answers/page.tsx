@@ -180,13 +180,14 @@ function NewAnswerForm() {
         >
           {(field) => (
             <>
-          <input {...field}
-            value={clauses}
-            onChange={(event) => setClauses(event.target.value)}
-            required
-            placeholder="For example: 6, 7(a)"
-            className={FIELD}
-          />
+              <input
+                {...field}
+                value={clauses}
+                onChange={(event) => setClauses(event.target.value)}
+                required
+                placeholder="For example: 6, 7(a)"
+                className={FIELD}
+              />
             </>
           )}
         </PortalField>

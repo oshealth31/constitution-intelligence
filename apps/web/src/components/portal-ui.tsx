@@ -1,7 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useId, type AnchorHTMLAttributes, type ButtonHTMLAttributes, type ReactNode, type SVGProps } from 'react';
+import {
+  useId,
+  type AnchorHTMLAttributes,
+  type ButtonHTMLAttributes,
+  type ReactNode,
+  type SVGProps,
+} from 'react';
 import { initials } from '@/lib/branding';
 import { highlightTerms } from '@/lib/portal';
 import { useHydrated } from '@/lib/hydrated';

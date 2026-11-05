@@ -61,22 +61,23 @@ export default function PortalAddressPage() {
         >
           {(field) => (
             <>
-          <span className="mt-2 flex items-stretch overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-[var(--brand-accent)]">
-            <span className="flex items-center bg-slate-100 px-3 text-base text-slate-600">
-              /o/
-            </span>
-            <input {...field}
-              value={value}
-              onChange={(event) => {
-                setValue(event.target.value);
-                setConfirmed(false);
-              }}
-              maxLength={50}
-              autoCapitalize="none"
-              spellCheck={false}
-              className="min-h-12 w-full px-3 text-base focus:outline-none"
-            />
-          </span>
+              <span className="mt-2 flex items-stretch overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-[var(--brand-accent)]">
+                <span className="flex items-center bg-slate-100 px-3 text-base text-slate-600">
+                  /o/
+                </span>
+                <input
+                  {...field}
+                  value={value}
+                  onChange={(event) => {
+                    setValue(event.target.value);
+                    setConfirmed(false);
+                  }}
+                  maxLength={50}
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  className="min-h-12 w-full px-3 text-base focus:outline-none"
+                />
+              </span>
             </>
           )}
         </PortalField>

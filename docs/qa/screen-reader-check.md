@@ -19,19 +19,19 @@ Practise for a minute on the phone's own settings screen first.
 
 Write ✅ (clear), ⚠️ (works but confusing; say what was read out), or ❌ (could not do it).
 
-| #   | Do this                                                                 | Listen for                                                                       | Result |
-| --- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------ |
-| 1   | Open the portal sign-in page                                            | The organisation's name and "Sign in" as a heading                               |        |
-| 2   | Move to the email field                                                 | "Email address, edit box" (not the whole sentence around it)                     |        |
-| 3   | Type and sign in                                                        | It says you are signed in / reads the welcome heading                            |        |
-| 4   | Swipe through the home page from the top                                | First item: "Skip to main content"; the menu items have clear names              |        |
-| 5   | Open **Search**, search for "quorum"                                    | How many results were found; each result's clause number and title               |        |
-| 6   | Open a result                                                           | The clause number and heading, then the text                                     |        |
-| 7   | On a phone screen, open **Contents** in the reader                      | "Contents, dialog"; Close is read first; swiping stays inside the panel           |        |
-| 8   | Close Contents                                                          | You are back on the Contents button                                               |        |
-| 9   | Open **My profile**, move to a field with a hint below it               | The field's name first, then the hint as extra information                       |        |
-| 10  | Make a mistake on purpose (for example a short new password) and submit | The error message is read out without having to look for it                      |        |
-| 11  | Sign out                                                                | It confirms you are signed out                                                    |        |
+| #   | Do this                                                                 | Listen for                                                              | Result |
+| --- | ----------------------------------------------------------------------- | ----------------------------------------------------------------------- | ------ |
+| 1   | Open the portal sign-in page                                            | The organisation's name and "Sign in" as a heading                      |        |
+| 2   | Move to the email field                                                 | "Email address, edit box" (not the whole sentence around it)            |        |
+| 3   | Type and sign in                                                        | It says you are signed in / reads the welcome heading                   |        |
+| 4   | Swipe through the home page from the top                                | First item: "Skip to main content"; the menu items have clear names     |        |
+| 5   | Open **Search**, search for "quorum"                                    | How many results were found; each result's clause number and title      |        |
+| 6   | Open a result                                                           | The clause number and heading, then the text                            |        |
+| 7   | On a phone screen, open **Contents** in the reader                      | "Contents, dialog"; Close is read first; swiping stays inside the panel |        |
+| 8   | Close Contents                                                          | You are back on the Contents button                                     |        |
+| 9   | Open **My profile**, move to a field with a hint below it               | The field's name first, then the hint as extra information              |        |
+| 10  | Make a mistake on purpose (for example a short new password) and submit | The error message is read out without having to look for it             |        |
+| 11  | Sign out                                                                | It confirms you are signed out                                          |        |
 
 ## Results
 

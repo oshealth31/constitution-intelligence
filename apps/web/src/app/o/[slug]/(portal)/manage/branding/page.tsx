@@ -7,7 +7,9 @@ import {
   OrganisationLogo,
   Panel,
   PortalButton,
-  PortalLoading, PortalField } from '@/components/portal-ui';
+  PortalLoading,
+  PortalField,
+} from '@/components/portal-ui';
 import { apiFetch, describeError } from '@/lib/api';
 import { colourWarnings, PLATFORM_COLOURS, safeColour } from '@/lib/branding';
 import { BrandScope } from '@/components/brand-scope';
@@ -180,13 +182,14 @@ export default function BrandingPage() {
             >
               {(field) => (
                 <>
-              <input {...field}
-                value={displayName}
-                maxLength={200}
-                placeholder={branding.data?.organisationName}
-                onChange={(event) => setDisplayName(event.target.value)}
-                className={FIELD}
-              />
+                  <input
+                    {...field}
+                    value={displayName}
+                    maxLength={200}
+                    placeholder={branding.data?.organisationName}
+                    onChange={(event) => setDisplayName(event.target.value)}
+                    className={FIELD}
+                  />
                 </>
               )}
             </PortalField>
@@ -201,18 +204,23 @@ export default function BrandingPage() {
             </label>
             <PortalField
               label={<>Welcome message</>}
-              hint={<>Plain text only, up to 1,000 characters. It appears on the home page after members
-                sign in.</>}
+              hint={
+                <>
+                  Plain text only, up to 1,000 characters. It appears on the home page after members
+                  sign in.
+                </>
+              }
             >
               {(field) => (
                 <>
-              <textarea {...field}
-                value={welcomeMessage}
-                maxLength={1000}
-                rows={4}
-                onChange={(event) => setWelcomeMessage(event.target.value)}
-                className={FIELD}
-              />
+                  <textarea
+                    {...field}
+                    value={welcomeMessage}
+                    maxLength={1000}
+                    rows={4}
+                    onChange={(event) => setWelcomeMessage(event.target.value)}
+                    className={FIELD}
+                  />
                 </>
               )}
             </PortalField>

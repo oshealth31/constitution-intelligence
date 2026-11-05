@@ -173,7 +173,9 @@ function Reader() {
       const panel = contentsDialog.current;
       if (!panel) return;
       const focusable = [
-        ...panel.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input, select, textarea'),
+        ...panel.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input, select, textarea',
+        ),
       ].filter((element) => element.offsetParent !== null || element === document.activeElement);
       if (focusable.length === 0) return;
       const first = focusable[0]!;

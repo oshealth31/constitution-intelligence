@@ -207,19 +207,24 @@ function ClauseEditor({
           )}
           <PortalField
             label={<>Simple words</>}
-            hint={<>Short sentences and everyday words. Say only what the clause says — add nothing, leave
-              out nothing important.</>}
+            hint={
+              <>
+                Short sentences and everyday words. Say only what the clause says — add nothing,
+                leave out nothing important.
+              </>
+            }
           >
             {(field) => (
               <>
-            <textarea {...field}
-              value={text}
-              onChange={(event) => setText(event.target.value)}
-              rows={4}
-              maxLength={3000}
-              required
-              className={FIELD}
-            />
+                <textarea
+                  {...field}
+                  value={text}
+                  onChange={(event) => setText(event.target.value)}
+                  rows={4}
+                  maxLength={3000}
+                  required
+                  className={FIELD}
+                />
               </>
             )}
           </PortalField>

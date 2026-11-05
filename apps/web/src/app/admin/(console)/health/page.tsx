@@ -69,9 +69,53 @@ export default function HealthPage() {
                   : 'not sent.'}
               </p>
             </Card>
+            <AuditSealCard seal={data.checks.auditSeal} />
           </div>
         </div>
       )}
     </>
+  );
+}
+
+/** Tamper-evident audit log (Task D12): the daily seal and the check against the off-site copy. */
+function AuditSealCard({ seal }: { seal: SystemHealth['checks']['auditSeal'] }) {
+  const status = seal?.status ?? 'not_configured';
+  const check = seal?.lastCheck ?? null;
+  const last = seal?.lastSeal ?? null;
+  return (
+    <Card title="Audit log seal" actions={<StatusBadge status={status} />}>
+      <div className="space-y-2 text-sm text-muted">
+        {status === 'not_configured' && (
+          <p>
+            Not running here. On the server, a daily job seals the audit log and checks it against
+            the off-site copy (docs/operations/audit-seal.md).
+          </p>
+        )}
+        {last && (
+          <p>
+            Last sealed {formatDateTime(last.ranAt)}
+            {last.ok
+              ? `: ${last.summary.entries ?? 0} new entries.`
+              : `: failed. ${last.summary.problem ?? ''}`}
+          </p>
+        )}
+        {check && (
+          <p>
+            Last checked {formatDateTime(check.ranAt)}
+            {check.ok
+              ? `: no unexplained differences in ${check.summary.entriesSealed ?? 0} sealed entries.`
+              : `: ${check.summary.problemCount ?? 0} problem(s) found.`}
+          </p>
+        )}
+        {status === 'stale' && <p>The seal or the check has not run for more than 36 hours.</p>}
+        {check && !check.ok && (check.summary.problems ?? []).length > 0 && (
+          <ul className="list-disc pl-5 text-rose-800">
+            {(check.summary.problems ?? []).slice(0, 5).map((problem) => (
+              <li key={problem}>{problem}</li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </Card>
   );
 }

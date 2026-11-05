@@ -34,7 +34,8 @@ ENV NODE_ENV=production API_HOST=0.0.0.0 API_PORT=4000 \
     STORAGE_LOCAL_DIR=/var/lib/constitution/storage
 WORKDIR /app
 COPY --from=build --chown=node:node /out/api ./
-RUN mkdir -p /var/lib/constitution/storage && chown node:node /var/lib/constitution/storage
+RUN mkdir -p /var/lib/constitution/storage /var/lib/constitution/audit-seals /var/lib/constitution/audit-check \
+ && chown node:node /var/lib/constitution/storage /var/lib/constitution/audit-seals /var/lib/constitution/audit-check
 USER node
 EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
@@ -60,7 +61,7 @@ RUN apt-get update \
  && apt-get install -y --no-install-recommends gnupg rclone ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 COPY ops/backup.sh ops/restore.sh ops/export-organisation.sh ops/offsite-copy.sh \
-     ops/offsite-fetch.sh ops/offsite-prune.sh ops/backup-and-copy.sh /ops/
+     ops/offsite-fetch.sh ops/offsite-prune.sh ops/backup-and-copy.sh ops/audit-seal-offsite.sh /ops/
 RUN chmod 0755 /ops/*.sh
 ENTRYPOINT []
 CMD ["/ops/backup.sh"]

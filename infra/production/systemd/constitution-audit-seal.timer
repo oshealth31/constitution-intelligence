@@ -1,0 +1,11 @@
+# Daily at 02:30 (server time), after the 01:30 backup (Task D12).
+[Unit]
+Description=Daily audit log seal and check
+
+[Timer]
+OnCalendar=*-*-* 02:30:00
+Persistent=true
+RandomizedDelaySec=5min
+
+[Install]
+WantedBy=timers.target

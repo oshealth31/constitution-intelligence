@@ -423,6 +423,8 @@ describe.runIf(Boolean(testDatabaseUrl))('tenant isolation', () => {
         'organisation_deletion_requests',
         // One person's requests about their own data (Task D11): platform staff only.
         'data_requests',
+        // Results of the daily audit seal and check (Task D12): platform staff only.
+        'audit_seal_runs',
       ];
       const result = await context.db.execute(sql`
         SELECT c.relname AS name,

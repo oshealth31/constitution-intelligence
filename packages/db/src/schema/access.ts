@@ -210,6 +210,17 @@ export const auditEvents = pgTable('audit_events', {
   userAgent: text('user_agent'),
   requestId: text('request_id'),
   metadata: jsonb('metadata').$type<Record<string, unknown>>().notNull().default({}),
+  /** Running number set by the database (migration 0014); used to seal the log. */
+  seq: bigint('seq', { mode: 'number' }).generatedAlwaysAsIdentity(),
+});
+
+/** Results of the audit sealing job and its daily check (Task D12). */
+export const auditSealRuns = pgTable('audit_seal_runs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  kind: text('kind', { enum: ['seal', 'check'] }).notNull(),
+  ranAt: timestamp('ran_at', { withTimezone: true }).notNull().defaultNow(),
+  ok: boolean('ok').notNull(),
+  summary: jsonb('summary').$type<Record<string, unknown>>().notNull().default({}),
 });
 
 export type Organisation = typeof organisations.$inferSelect;

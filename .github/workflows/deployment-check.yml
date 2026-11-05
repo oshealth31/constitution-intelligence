@@ -89,6 +89,10 @@ jobs:
           openssl rand -hex 32 > secrets/backup_passphrase
           openssl rand -hex 24 > secrets/smtp_password
           openssl rand -hex 32 > secrets/mfa_encryption_key
+          # Audit seal signing key (Task D12), made by the API image itself.
+          docker run --rm --entrypoint node "$API_IMAGE" dist/cli/audit-seal.js --generate-key > secrets/audit_seal_key
+          grep -q 'BEGIN PRIVATE KEY' secrets/audit_seal_key
+          echo "OFFSITE_AUDIT_REMOTE=offsite:/data/audit-seals/prod" >> "$GITHUB_ENV"
           # Throwaway SFTP server standing in for the off-site location: "copier" (add and read
           # only, used by the nightly copy) and "keeper" (may delete, used for pruning).
           mkdir -p ci-offsite-keys
@@ -367,6 +371,22 @@ jobs:
           ls "$root/files" | head
           echo "[export-test] ok $(ls "$root/data" | wc -l) tables, $(find "$root/files" -type f | wc -l) files; no other organisation, no password or token hashes"
 
+      - name: Seal the audit log, copy it off-site and check it (Task D12)
+        run: |
+          set -euo pipefail
+          seal() { docker compose run --rm -T -e AUDIT_SEAL_SETTLE_SECONDS=0 api node dist/cli/audit-seal.js "$@"; }
+          seal --public-key | tail -n 1 | sed 's/^/[seal-test] /'
+          seal --seal | tee seal1.txt
+          grep -q 'Sealed [1-9][0-9]* new entries' seal1.txt
+          docker compose --profile ops run --rm -T ops /ops/audit-seal-offsite.sh | sed 's/^/[seal-test] /'
+          seal --check --dir /var/lib/constitution/audit-check | tee check1.txt
+          grep -q 'Result: OK' check1.txt
+          # The add-only account cannot delete a sealed batch off-site.
+          if docker compose --profile ops run --rm -T ops sh -c 'rclone deletefile "$OFFSITE_AUDIT_REMOTE/audit-seal-000001.json"' >/dev/null 2>&1; then
+            echo "[seal-test] FAIL the add-only account deleted a sealed batch"; exit 1
+          fi
+          echo "[seal-test] ok sealed, copied off-site (add-only), checked: no differences"
+
       - name: Delete one organisation with the server command (after its export)
         run: |
           set -e
@@ -392,6 +412,30 @@ jobs:
           docker compose run --rm -T --entrypoint sh api -c \
             "test ! -e /var/lib/constitution/storage/tenants/$netball && test -d /var/lib/constitution/storage/tenants/$choir"
           echo "[delete-test] ok netball deleted (database and files); choir untouched"
+
+      - name: The audit check allows the deletion but detects tampering (Task D12)
+        run: |
+          set -uo pipefail
+          seal() { docker compose run --rm -T -e AUDIT_SEAL_SETTLE_SECONDS=0 api node dist/cli/audit-seal.js "$@"; }
+          offsite() { docker compose --profile ops run --rm -T ops /ops/audit-seal-offsite.sh >/dev/null; }
+          check() { seal --check --dir /var/lib/constitution/audit-check > "$1" 2>&1; echo $?; }
+          su() { docker compose exec -T postgres psql -U constitution_owner -d constitution -Atqc "$1"; }
+          seal --seal >/dev/null && offsite
+          status="$(check check2.txt)"; cat check2.txt
+          test "$status" = 0 || { echo "[seal-test] FAIL the deletion was not accepted"; exit 1; }
+          grep -Eq '[1-9][0-9]* removed with a deleted organisation' check2.txt
+          # Tampering by someone with full database access (triggers switched off):
+          victim="$(su "SELECT min(seq) FROM audit_events WHERE organisation_id IS NOT NULL")"
+          su "SET session_replication_role = replica; UPDATE audit_events SET action = 'tampered.by.test' WHERE seq = $victim"
+          status="$(check check3.txt)"; cat check3.txt
+          test "$status" = 2 && grep -q "Entry $victim was changed" check3.txt \
+            || { echo "[seal-test] FAIL a changed entry was not detected"; exit 1; }
+          gone="$(su "SELECT max(a.seq) FROM audit_events a JOIN organisations o ON o.id = a.organisation_id WHERE o.slug = 'sample-community-choir'")"
+          su "SET session_replication_role = replica; DELETE FROM audit_events WHERE seq = $gone"
+          status="$(check check4.txt)"; cat check4.txt
+          test "$status" = 2 && grep -q "Entry $gone is missing" check4.txt \
+            || { echo "[seal-test] FAIL a deleted entry was not detected"; exit 1; }
+          echo "[seal-test] ok deletion allowed; a changed and a deleted entry were both detected"
 
       - name: Summary
         if: always()

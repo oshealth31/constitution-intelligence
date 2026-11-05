@@ -49,7 +49,10 @@ export function statusTone(status: string | null | undefined): Tone {
     case 'degraded':
     case 'draft':
     case 'not_configured':
+    case 'stale':
       return 'warning';
+    case 'problem':
+      return 'critical';
     case 'suspended':
     case 'cancelled':
     case 'denied':

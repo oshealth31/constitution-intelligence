@@ -22,6 +22,7 @@ import type { AppConfig } from '../../config/config';
 import { APP_CONFIG } from '../../config/config.module';
 import { DATABASE_POOL, DRIZZLE } from '../../database/database.constants';
 import { AuditService } from '../audit/audit.service';
+import { AuditSealService } from '../audit/audit-seal.service';
 import type { BrandingChange } from '../organisations/branding-input';
 import { StorageService } from '../files/storage.service';
 import { TenantDatabase } from '../tenancy/tenant-database.service';
@@ -96,6 +97,7 @@ export class PlatformDashboardService {
     private readonly audit: AuditService,
     private readonly storage: StorageService,
     private readonly tenantDb: TenantDatabase,
+    private readonly auditSeal: AuditSealService,
   ) {}
 
   async overview() {
@@ -630,6 +632,19 @@ export class PlatformDashboardService {
     }
 
     const storageOk = await this.storage.checkWritable();
+    // Tamper-evident audit log (Task D12): not set up (development) does not make it degraded.
+    let auditSeal: Awaited<ReturnType<AuditSealService['status']>> = {
+      status: 'not_configured',
+      lastSeal: null,
+      lastCheck: null,
+    };
+    if (database.status === 'ok') {
+      try {
+        auditSeal = await this.auditSeal.status();
+      } catch {
+        // leave as not configured
+      }
+    }
     const checks = {
       database,
       migrations,
@@ -638,8 +653,13 @@ export class PlatformDashboardService {
         status: this.config.MAIL_TRANSPORT === 'log' ? 'development_log' : 'not_configured',
         transport: this.config.MAIL_TRANSPORT,
       },
+      auditSeal,
     };
-    const healthy = database.status === 'ok' && migrations.status === 'ok' && storageOk;
+    const healthy =
+      database.status === 'ok' &&
+      migrations.status === 'ok' &&
+      storageOk &&
+      auditSeal.status !== 'problem';
     return {
       status: healthy ? 'ok' : 'degraded',
       checks,

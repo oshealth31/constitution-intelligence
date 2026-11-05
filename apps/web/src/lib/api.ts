@@ -286,6 +286,21 @@ export interface SupportOverview {
   }[];
 }
 
+export interface AuditSealRun {
+  ranAt: string;
+  ok: boolean;
+  summary: {
+    entries?: number;
+    batches?: number;
+    lastSeq?: number;
+    entriesSealed?: number;
+    problemCount?: number;
+    problems?: string[];
+    problem?: string;
+    allowed?: { organisationDeleted: number; platformDeleted: number; anonymised: number };
+  };
+}
+
 export interface SystemHealth {
   status: 'ok' | 'degraded';
   checks: {
@@ -293,6 +308,12 @@ export interface SystemHealth {
     migrations: { status: string; applied: number | null; expected: number };
     storage: { status: string; driver: string };
     email: { status: string; transport: string };
+    /** Tamper-evident audit log (Task D12). */
+    auditSeal?: {
+      status: 'ok' | 'problem' | 'stale' | 'not_configured';
+      lastSeal: AuditSealRun | null;
+      lastCheck: AuditSealRun | null;
+    };
   };
   version: string;
   environment: string;

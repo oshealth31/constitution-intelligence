@@ -1,8 +1,9 @@
 # Secret files (server only)
 
 This folder holds the production secrets as one file each. **The files are never committed**
-(this README is the only tracked file) and must be readable only by the account that runs
-Docker (`chmod 600`, owner root). Create them as described in `docs/operations/secrets.md`:
+(this README is the only tracked file). The folder is owned by root with mode `0700`, so only
+root can enter it; the files are `0644` so their containers can read them (the database key:
+`root:999`, `0640`). Create them as described in `docs/operations/secrets.md`:
 
 | File                                         | Contents                                                                                                                                                                                           |
 | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

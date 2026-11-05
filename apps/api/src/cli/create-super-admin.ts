@@ -4,9 +4,14 @@
 //
 // No password is ever set or printed by this script. It prints a ONE-TIME link
 // (valid for PASSWORD_RESET_TTL_MINUTES) that the person uses to choose their own password.
+//
+// With --send-email the link is emailed to the person instead and NOT printed (Task S2: the
+// deployment workflow's logs are public). The command fails if the email cannot be sent.
 import { z } from 'zod';
+import { MailService } from '../modules/mail/mail.service';
+import { buildSuperAdminSetupEmail } from '../modules/mail/super-admin-email';
 import { PlatformService } from '../modules/platform/platform.service';
-import { createCliContext, readArgument } from './cli-app';
+import { createCliContext, hasFlag, readArgument } from './cli-app';
 
 async function main(): Promise<void> {
   const email = z.email().safeParse(readArgument('email')?.trim().toLowerCase());
@@ -20,6 +25,29 @@ async function main(): Promise<void> {
   const { app, config } = await createCliContext();
   try {
     const result = await app.get(PlatformService).bootstrapSuperAdmin(email.data, name);
+    if (hasFlag('send-email')) {
+      const sent = await app.get(MailService).send({
+        to: result.user.email,
+        subject: 'Your Constitution Intelligence administrator account',
+        ...buildSuperAdminSetupEmail(
+          result.user.displayName,
+          result.setupLink,
+          config.PASSWORD_RESET_TTL_MINUTES,
+        ),
+      });
+      console.log(
+        result.created ? 'Created Platform Super Admin.' : 'Granted Platform Super Admin.',
+      );
+      if (!sent) {
+        console.error(
+          'The setup email could not be sent. Check the email settings, then run again.',
+        );
+        process.exitCode = 1;
+        return;
+      }
+      console.log('A one-time setup link was emailed to the person. It is not shown here.');
+      return;
+    }
     console.log(
       [
         '',

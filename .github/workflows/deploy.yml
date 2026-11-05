@@ -1,0 +1,205 @@
+# Deploy to the production server (Task S2). Runs ONLY when started by hand:
+#   GitHub → Actions → "Deploy" → Run workflow → choose the task.
+# Full guide: docs/operations/oracle-cloud.md.
+#
+# Tasks:
+#   prepare-server      once, on a new server: Docker, automatic updates, SSH and firewall settings
+#   release             build the images for the chosen commit, copy them to the server, back up,
+#                       migrate and start (ops/server/release.sh)
+#   create-super-admin  create the first Platform Super Admin; the one-time link is EMAILED to
+#                       them, never printed
+#   status              show what is running and the last releases
+#
+# GitHub secrets used (Settings → Secrets and variables → Actions):
+#   DEPLOY_HOST     the server's public IP address
+#   DEPLOY_SSH_KEY  the private SSH key for the server's "ubuntu" account
+#   SMTP_KEY        a Brevo SMTP key (written to the server's secrets/smtp_password)
+#   SMTP_LOGIN      the Brevo SMTP login (written to secrets/smtp_user)
+#
+# THIS REPOSITORY IS PUBLIC, AND SO ARE THE LOGS OF THIS WORKFLOW. Nothing here may print a
+# secret, a one-time link or a person's email address. GitHub hides the secrets above in logs.
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: What to do
+        type: choice
+        options: [status, prepare-server, release, create-super-admin]
+        default: status
+      admin_email:
+        description: 'create-super-admin only: email address of the new Super Admin'
+        required: false
+      admin_name:
+        description: 'create-super-admin only: their full name'
+        required: false
+
+# One deployment at a time; a second one waits instead of cancelling the first.
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: ${{ inputs.task }}
+    # Same processor type as the Oracle Ampere server, so the images run there unchanged.
+    runs-on: ubuntu-24.04-arm
+    # Add "Required reviewers" to this environment in Settings → Environments if every run should
+    # wait for an approval.
+    environment: production
+    timeout-minutes: 60
+    env:
+      TASK: ${{ inputs.task }}
+    steps:
+      # Hide the person's email and name from the public log. They are read from the event file,
+      # never put in a step's environment (step environments are printed in the log).
+      - name: Hide personal details in the log
+        run: |
+          for field in admin_email admin_name; do
+            value="$(jq -r --arg f "$field" '.inputs[$f] // ""' "$GITHUB_EVENT_PATH")"
+            if [ -n "$value" ]; then echo "::add-mask::$value"; fi
+          done
+
+      - uses: actions/checkout@v4
+
+      - name: Connect to the server
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_SSH_KEY" ]; then
+            echo "::error::Add the GitHub secrets DEPLOY_HOST and DEPLOY_SSH_KEY first (docs/operations/oracle-cloud.md)."
+            exit 1
+          fi
+          install -d -m 0700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" | tr -d '\r' > ~/.ssh/id_deploy
+          chmod 0600 ~/.ssh/id_deploy
+          if ! ssh-keygen -y -f ~/.ssh/id_deploy > /dev/null 2>&1; then
+            echo "::error::DEPLOY_SSH_KEY is not a valid private key. Paste the whole file, including the BEGIN and END lines."
+            exit 1
+          fi
+          # The server's identity. After the first connection it is recorded in the repository
+          # (infra/production/known_hosts) and must match from then on.
+          ssh-keyscan -T 15 -t ed25519 "$DEPLOY_HOST" 2>/dev/null > /tmp/scanned
+          [ -s /tmp/scanned ] || { echo "::error::The server does not answer on port 22. Check the IP address and the Oracle security list."; exit 1; }
+          echo "Server key fingerprint: $(ssh-keygen -lf /tmp/scanned | awk '{print $2}')"
+          recorded="infra/production/known_hosts"
+          if [ -s "$recorded" ]; then
+            if ! awk '{print $2, $3}' /tmp/scanned | grep -qxFf <(awk '{print $2, $3}' "$recorded"); then
+              echo "::error::The server's key does not match the one recorded in $recorded. Stop and check before connecting (it could be a different machine)."
+              exit 1
+            fi
+            echo "Server key matches the recorded one."
+          else
+            echo "::warning::First connection: no server key recorded yet. Record this fingerprint in $recorded (key: $(awk '{print $2, $3}' /tmp/scanned))."
+          fi
+          sed "s/^[^ ]*/server/" /tmp/scanned > ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<CONF
+          Host server
+            HostName $DEPLOY_HOST
+            User ubuntu
+            IdentityFile ~/.ssh/id_deploy
+            IdentitiesOnly yes
+            HostKeyAlias server
+            ServerAliveInterval 30
+            ConnectTimeout 20
+          CONF
+          ssh server true
+          echo "Connected."
+
+      - name: Prepare the server
+        if: inputs.task == 'prepare-server'
+        run: ssh server 'sudo bash -s' < ops/server/prepare.sh
+
+      - name: Build the images
+        if: inputs.task == 'release'
+        run: |
+          set -euo pipefail
+          version="$(git rev-parse --short=12 HEAD)"
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+          docker build -f infra/production/Dockerfile --target api -t "constitution-api:$version" .
+          docker build -f infra/production/Dockerfile --target web -t "constitution-web:$version" \
+            --build-arg API_INTERNAL_URL=http://api:4000 .
+          docker build -f infra/production/Dockerfile --target ops -t "constitution-ops:$version" .
+          docker image ls 'constitution-*'
+
+      - name: Copy files and images to the server
+        if: inputs.task == 'release'
+        env:
+          SMTP_KEY: ${{ secrets.SMTP_KEY }}
+          SMTP_LOGIN: ${{ secrets.SMTP_LOGIN }}
+        run: |
+          set -euo pipefail
+          ssh server 'sudo docker compose version > /dev/null' || {
+            echo "::error::Docker is not installed. Run the prepare-server task first."; exit 1; }
+          # Application files. The secrets folder on the server keeps its files: the archive
+          # holds only its README.
+          tar -czf - infra/production ops deploy | ssh server \
+            'sudo install -d -m 0755 /srv/constitution && sudo tar -xzf - -C /srv/constitution --no-same-owner'
+          # Email account, from GitHub secrets, sent through the encrypted connection (never on a
+          # command line). Only written when the secret is set, so it can be rotated by changing
+          # the secret and running a release.
+          if [ -n "$SMTP_KEY" ]; then
+            printf '%s' "$SMTP_KEY" | ssh server \
+              'sudo install -d -m 0700 /srv/constitution/infra/production/secrets && sudo tee /srv/constitution/infra/production/secrets/smtp_password > /dev/null'
+          fi
+          if [ -n "$SMTP_LOGIN" ]; then
+            printf '%s' "$SMTP_LOGIN" | ssh server \
+              'sudo tee /srv/constitution/infra/production/secrets/smtp_user > /dev/null'
+          fi
+          echo "Sending images (this takes a few minutes)..."
+          docker save "constitution-api:$VERSION" "constitution-web:$VERSION" "constitution-ops:$VERSION" |
+            zstd -T0 -3 | ssh server 'zstd -d | sudo docker load'
+
+      - name: Release
+        if: inputs.task == 'release'
+        run: ssh server "sudo RELEASED_BY='${{ github.actor }} (run ${{ github.run_id }})' bash /srv/constitution/ops/server/release.sh $VERSION"
+
+      - name: Check from outside
+        if: inputs.task == 'release'
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+        run: |
+          site="$(sed -n 's/^SITE_ADDRESS=//p' deploy/production.env | tail -n 1)"
+          resolved="$(getent ahostsv4 "$site" | awk 'NR==1 {print $1}')"
+          if [ "$resolved" != "$DEPLOY_HOST" ]; then
+            echo "::notice::$site does not point to the server yet (task S4), so the HTTPS check is skipped."
+            exit 0
+          fi
+          bash ops/check-health.sh "https://$site"
+
+      - name: Create the first Super Admin
+        if: inputs.task == 'create-super-admin'
+        run: |
+          set -euo pipefail
+          ADMIN_EMAIL="$(jq -r '.inputs.admin_email // ""' "$GITHUB_EVENT_PATH" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+          ADMIN_NAME="$(jq -r '.inputs.admin_name // ""' "$GITHUB_EVENT_PATH" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+          [[ "$ADMIN_EMAIL" =~ ^[^[:space:]\'\"]+@[^[:space:]\'\"]+\.[a-zA-Z]{2,}$ ]] || { echo "::error::admin_email is not a valid address."; exit 1; }
+          [[ "$ADMIN_NAME" =~ ^[[:alpha:][:space:].\'-]{2,80}$ ]] || { echo "::error::admin_name must be 2-80 letters."; exit 1; }
+          # Sent on standard input, so neither value is on a command line or in the log.
+          printf '%s\n%s\n' "$ADMIN_EMAIL" "$ADMIN_NAME" | ssh server '
+            set -euo pipefail
+            read -r email; read -r name
+            cd /srv/constitution/infra/production
+            sudo docker compose run --rm -T api node dist/cli/create-super-admin.js \
+              --email "$email" --name "$name" --send-email'
+
+      - name: Status
+        if: inputs.task == 'status' || always()
+        continue-on-error: true
+        run: |
+          ssh server '
+            echo "== Server"; uptime; df -h / | tail -n 1; free -h | sed -n 2p
+            if command -v docker > /dev/null && [ -f /srv/constitution/infra/production/.env ]; then
+              cd /srv/constitution/infra/production
+              echo "== Running"; sudo docker compose ps --format "table {{.Service}}\t{{.Status}}"
+            else
+              echo "Application not installed yet."
+            fi
+            echo "== Last releases"; tail -n 5 /srv/constitution/releases.log 2>/dev/null || echo "none"
+          '

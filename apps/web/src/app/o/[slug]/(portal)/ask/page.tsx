@@ -122,7 +122,7 @@ function AskWithAi({ status }: { status: AiStatus }) {
         </Notice>
       )}
 
-      <form onSubmit={onSubmit} aria-label="Ask a question" className="space-y-3">
+      <form method="post" onSubmit={onSubmit} aria-label="Ask a question" className="space-y-3">
         <label htmlFor="question" className="block text-base font-medium text-slate-900">
           Your question
         </label>
@@ -286,7 +286,7 @@ function ClauseFinder() {
         unsure.
       </Notice>
 
-      <form
+      <form method="post"
         onSubmit={(event: FormEvent<HTMLFormElement>) => {
           event.preventDefault();
           void find(question);
@@ -593,7 +593,7 @@ function Feedback({ api, messageId }: { api: string; messageId: string }) {
             </PortalButton>
           </div>
           {helpful === false && (
-            <form
+            <form method="post"
               className="mt-3 space-y-2"
               aria-label="What was wrong?"
               onSubmit={(event) => {

@@ -155,7 +155,7 @@ function PlanForm({ plan, onDone }: { plan: Plan | null; onDone: () => Promise<v
 
   return (
     <Card title={plan ? `Edit ${plan.name}` : 'New plan'}>
-      <form onSubmit={submit} aria-label="Plan" className="grid gap-4 sm:grid-cols-2">
+      <form method="post" onSubmit={submit} aria-label="Plan" className="grid gap-4 sm:grid-cols-2">
         {!plan && (
           <TextField
             label="Code"

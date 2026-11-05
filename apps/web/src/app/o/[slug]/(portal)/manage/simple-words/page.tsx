@@ -187,7 +187,7 @@ function ClauseEditor({
       )}
 
       {editing ? (
-        <form
+        <form method="post"
           aria-label={`Write simple words for ${clause.referenceLabel ?? title}`}
           className="mt-3 space-y-3"
           onSubmit={(event) => {

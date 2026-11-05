@@ -50,7 +50,7 @@ function ResetPasswordForm() {
     );
   }
   return (
-    <form onSubmit={onSubmit} className="space-y-5" aria-label="Choose a new password">
+    <form method="post" onSubmit={onSubmit} className="space-y-5" aria-label="Choose a new password">
       {error && <Alert>{error}</Alert>}
       <TextField
         label="New password"

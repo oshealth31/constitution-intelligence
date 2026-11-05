@@ -211,7 +211,7 @@ function SubscriptionActions({
         )}
       </div>
       {action && (
-        <form
+        <form method="post"
           className="mt-3 space-y-3 rounded-lg border border-ivory-100 p-3"
           aria-label={`${action[0]!.toUpperCase()}${action.slice(1)} subscription`}
           onSubmit={(event: FormEvent<HTMLFormElement>) => {
@@ -280,7 +280,7 @@ function IssueInvoice({ busy, run }: { busy: string | null; run: Run }) {
     );
   }
   return (
-    <form
+    <form method="post"
       className="space-y-3 rounded-lg border border-ivory-100 p-3"
       aria-label="Issue an invoice"
       onSubmit={(event: FormEvent<HTMLFormElement>) => {
@@ -520,7 +520,7 @@ function RecordPayment({
   const [reference, setReference] = useState('');
   const [paidOn, setPaidOn] = useState(new Date().toISOString().slice(0, 10));
   return (
-    <form
+    <form method="post"
       className="mt-2 grid gap-3 rounded-lg border border-ivory-100 p-3 sm:grid-cols-2"
       aria-label={`Record a payment for ${invoice.number}`}
       onSubmit={(event: FormEvent<HTMLFormElement>) => {

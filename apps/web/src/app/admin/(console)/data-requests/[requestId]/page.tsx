@@ -159,7 +159,7 @@ export default function DataRequestPage() {
               Download the copy
             </a>
             {request.kind === 'copy' && (
-              <form
+              <form method="post"
                 onSubmit={act('complete', 'complete', { note }, 'Request marked as answered.')}
                 className="mt-4 space-y-2"
               >
@@ -185,7 +185,7 @@ export default function DataRequestPage() {
             title="Correct their details"
             description="Leave a field empty to keep it. A new email address signs them out everywhere, so they sign in again with it."
           >
-            <form
+            <form method="post"
               onSubmit={act(
                 'correct',
                 'correct',
@@ -237,7 +237,7 @@ export default function DataRequestPage() {
                 ))}
               </div>
             ) : (
-              <form
+              <form method="post"
                 onSubmit={act(
                   'delete',
                   'delete-person',
@@ -297,7 +297,7 @@ export default function DataRequestPage() {
 
         {open && (
           <Card title="Cancel this request" description="For example if the person withdrew it.">
-            <form
+            <form method="post"
               onSubmit={act('cancel', 'cancel', { reason: cancelReason }, 'Request cancelled.')}
               className="space-y-3"
             >

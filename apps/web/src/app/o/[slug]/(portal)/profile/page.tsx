@@ -96,7 +96,7 @@ export default function ProfilePage() {
           <dt className="font-medium text-slate-600">Your role</dt>
           <dd className="text-slate-900">{home.you.roleLabel}</dd>
         </dl>
-        <form onSubmit={saveName} className="mt-5 space-y-3" aria-label="Change your name">
+        <form method="post" onSubmit={saveName} className="mt-5 space-y-3" aria-label="Change your name">
           <label className="block text-base font-medium text-slate-900">
             Your name
             <input
@@ -119,7 +119,7 @@ export default function ProfilePage() {
         title="Change password"
         description="Use at least 12 characters. A short sentence you can remember works well."
       >
-        <form onSubmit={changePassword} className="space-y-4" aria-label="Change password">
+        <form method="post" onSubmit={changePassword} className="space-y-4" aria-label="Change password">
           <label className="block text-base font-medium text-slate-900">
             Current password
             <input

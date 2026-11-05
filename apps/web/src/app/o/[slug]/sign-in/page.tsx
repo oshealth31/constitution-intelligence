@@ -67,7 +67,7 @@ export default function PortalSignInPage() {
             />
           </div>
         ) : (
-          <form
+          <form method="post"
             onSubmit={onSubmit}
             aria-label="Sign in"
             className="h-fit w-full max-w-md space-y-5 rounded-2xl bg-white p-6 shadow-xl sm:p-8"

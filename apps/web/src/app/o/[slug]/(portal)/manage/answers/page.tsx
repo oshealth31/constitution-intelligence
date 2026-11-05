@@ -151,7 +151,7 @@ function NewAnswerForm() {
   }
   return (
     <Panel title="Write a new answer">
-      <form onSubmit={submit} aria-label="Write a new answer" className="space-y-4">
+      <form method="post" onSubmit={submit} aria-label="Write a new answer" className="space-y-4">
         <label className="block text-base font-medium text-slate-900">
           Question, as a member would ask it
           <input

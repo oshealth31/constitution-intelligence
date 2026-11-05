@@ -302,7 +302,7 @@ function EditForm({
     );
   }
   return (
-    <form onSubmit={save} aria-label="Edit answer" className="mt-4 space-y-4">
+    <form method="post" onSubmit={save} aria-label="Edit answer" className="mt-4 space-y-4">
       {answer.status === 'approved' && (
         <Notice tone="warning">
           Saving changes hides this answer from members until it is approved again.

@@ -10,6 +10,7 @@ import {
   type SelectHTMLAttributes,
 } from 'react';
 import { WidthBar } from '@/components/brand-scope';
+import { useHydrated } from '@/lib/hydrated';
 import { statusLabel, statusTone, type Tone } from '@/lib/format';
 
 const TONE_CLASSES: Record<Tone, string> = {
@@ -102,10 +103,11 @@ export function Button({
   className = '',
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: ButtonVariant; busy?: boolean }) {
+  const hydrated = useHydrated();
   return (
     <button
       {...props}
-      disabled={props.disabled || busy}
+      disabled={props.disabled || busy || (props.type === 'submit' && !hydrated)}
       className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60 ${BUTTON_CLASSES[variant]} ${className}`}
     >
       {busy && (

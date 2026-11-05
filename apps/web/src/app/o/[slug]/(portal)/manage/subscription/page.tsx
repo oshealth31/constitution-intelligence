@@ -346,7 +346,7 @@ function ReportPayment({
     );
   }
   return (
-    <form
+    <form method="post"
       onSubmit={submit}
       aria-label={`Report a payment for ${invoice.number}`}
       className="mt-3 space-y-3"

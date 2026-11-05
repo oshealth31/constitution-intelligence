@@ -76,9 +76,18 @@ export const configSchema = z
     LOGIN_MAX_ATTEMPTS_PER_EMAIL: z.coerce.number().int().min(1).max(100).default(5),
     LOGIN_MAX_ATTEMPTS_PER_IP: z.coerce.number().int().min(1).max(10_000).default(50),
 
-    // General abuse protection: requests allowed from one network address per minute, per
-    // running copy of the API (health checks are not counted). See docs/security/security-review.md.
+    // General abuse protection: requests allowed per minute, per running copy of the API (health
+    // checks are not counted): per signed-in session, or per address without a session.
+    // See docs/security/security-review.md.
     API_RATE_LIMIT_PER_MINUTE: z.coerce.number().int().min(30).max(1_000_000).default(600),
+    // Requests per minute from one address in total, however many people share it (a church's
+    // Wi-Fi, a mobile network): signed-in people each have the budget above (task T3).
+    API_RATE_LIMIT_PER_ADDRESS_PER_MINUTE: z.coerce
+      .number()
+      .int()
+      .min(30)
+      .max(10_000_000)
+      .default(12_000),
 
     // Platform Super Admin accounts can affect every organisation, so their sessions are shorter.
     SUPER_ADMIN_SESSION_IDLE_MINUTES: z.coerce.number().int().min(5).max(1_440).default(30),

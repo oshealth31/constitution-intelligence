@@ -1,0 +1,139 @@
+# Load and speed test (task T3). Runs when a branch named "perf/<anything>" is pushed (it is
+# too slow for every change). FICTIONAL data in a throwaway database on the CI machine; never
+# pointed at a real server. Results are printed in the log and the job summary.
+#
+# The API and web app run here in their built (production) form, without Docker or the HTTPS
+# proxy, on one GitHub machine (4 processors, 16 GB) shared with the load generator: the numbers
+# are a guide to the code's behaviour, not a measurement of the future server.
+name: Load test
+
+on:
+  push:
+    branches: ['perf/**']
+
+permissions:
+  contents: read
+
+jobs:
+  load:
+    name: Load and speed test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_DB: ci
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    env:
+      DATABASE_URL: postgresql://ci@localhost:5432/ci
+      STORAGE_LOCAL_DIR: /tmp/load-storage
+      API_INTERNAL_URL: http://127.0.0.1:4100
+      BASE_URL: http://127.0.0.1:3100
+      LOAD_USERS: '200'
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: pnpm install --frozen-lockfile
+      - name: Build packages, API and web app
+        run: |
+          pnpm build:packages
+          pnpm --filter @constitution/api run build
+          pnpm --filter @constitution/web run build
+      - name: Database, fictional organisations, 200 members and a 500-clause constitution
+        run: |
+          pnpm --filter @constitution/db run migrate
+          APP_ENV=local NODE_ENV=development LOG_LEVEL=warn node apps/api/dist/cli/seed-dev.js > /dev/null
+          password="$(openssl rand -hex 16)"
+          echo "::add-mask::$password"
+          echo "LOAD_PASSWORD=$password" >> "$GITHUB_ENV"
+          out="$(cd apps/api && LOAD_PASSWORD="$password" node ../../scripts/load/prepare.cjs)"
+          echo "$out"
+          echo "LOAD_CONSTITUTION_ID=$(echo "$out" | jq -r .constitutionId)" >> "$GITHUB_ENV"
+          echo "LOAD_VERSION_ID=$(echo "$out" | jq -r .versionId)" >> "$GITHUB_ENV"
+      - uses: grafana/setup-k6-action@v1
+      - name: Start the API (production limits) and the web app
+        run: |
+          start_api() {
+            env NODE_ENV=test APP_ENV=test API_HOST=127.0.0.1 API_PORT=4100 \
+              CORS_ORIGINS="$BASE_URL,http://127.0.0.1:3200" TRUST_PROXY=true LOG_LEVEL=warn LOG_PRETTY=false \
+              MAIL_TRANSPORT=log AI_PROVIDER=offline "$@" \
+              nohup node apps/api/dist/main.js > api.log 2>&1 &
+            echo $! > api.pid
+            for i in $(seq 1 60); do curl -fs http://127.0.0.1:4100/api/v1/health/live >/dev/null && break; sleep 1; done
+          }
+          declare -f start_api > start-api.sh
+          start_api
+          (cd apps/web && nohup node ./node_modules/next/dist/bin/next start --port 3100 --hostname 127.0.0.1 > ../../web.log 2>&1 &)
+          for i in $(seq 1 60); do curl -fs "$BASE_URL/api/health" >/dev/null && break; sleep 1; done
+          curl -fs "$BASE_URL/o/sample-community-choir/sign-in" >/dev/null
+          # Memory of the API, the web app and the database, and the machine's load, every 5 s.
+          (while true; do
+             ps -eo rss=,comm= | awk '$2 ~ /^(node|next-server|postgres)/ {m[$2] += $1} END {for (p in m) print "rss", p, m[p]}'
+             echo "load $(cut -d' ' -f1 /proc/loadavg)"
+             sleep 5
+           done) > usage.log &
+      - name: 'Scenario 1: a meeting, 120 members on ONE Wi-Fi network, production limits'
+        run: SCENARIO=meeting k6 run --quiet scripts/load/portal-load.js
+      - name: 'Scenario 2: capacity, 25 → 200 members, per-address limits raised'
+        run: |
+          kill "$(cat api.pid)"; sleep 2
+          # Start clean: sign-in counters from scenario 1 would otherwise carry over.
+          psql "$DATABASE_URL" -qc 'DELETE FROM auth_rate_limits'
+          source start-api.sh
+          start_api API_RATE_LIMIT_PER_MINUTE=1000000 API_RATE_LIMIT_PER_ADDRESS_PER_MINUTE=10000000 LOGIN_MAX_ATTEMPTS_PER_IP=10000
+          SCENARIO=capacity k6 run --quiet scripts/load/portal-load.js
+      - name: 'Scenario 3: slow phone networks'
+        run: |
+          pnpm --filter @constitution/web exec playwright install --with-deps chromium
+          psql "$DATABASE_URL" -qc 'DELETE FROM auth_rate_limits'
+          # The same compression as the production proxy (Caddy: zstd, gzip), in front of the app.
+          printf ':3200 {\n\tencode zstd gzip\n\treverse_proxy 127.0.0.1:3100\n}\n' > Caddyfile.perf
+          docker run -d --name perf-caddy --network host -v "$PWD/Caddyfile.perf:/etc/caddy/Caddyfile:ro" caddy:2.8-alpine
+          for i in $(seq 1 30); do curl -fs http://127.0.0.1:3200/api/health >/dev/null && break; sleep 1; done
+          cd apps/web && BASE_URL=http://127.0.0.1:3200 node perf/slow-network.mjs && mv slow-network.md ../../
+      - name: Results
+        if: always()
+        run: |
+          {
+            echo '# Load and speed test (fictional data, CI machine)'
+            echo
+            cat load-meeting.md load-capacity.md slow-network.md 2>/dev/null
+            echo '## Peak memory (RSS) and processor during the run'
+            echo
+            awk '$1 == "rss" {if ($3 > rss[$2]) rss[$2] = $3}
+                 $1 == "load" {if ($2 > load) load = $2}
+                 END {for (p in rss) printf "- %s (all processes): up to %d MB\n", p, rss[p]/1024;
+                      printf "- Machine load (1-minute average, 4 processors): up to %s\n", load}' usage.log
+            echo
+            echo '## API errors logged'
+            echo
+            grep -c '"level":50' api.log || true
+          } | tee results.md >> "$GITHUB_STEP_SUMMARY"
+          cat results.md
+      - name: Keep the raw results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-test-results
+          path: |
+            results.md
+            load-*.json
+            api.log
+            web.log
+            usage.log
+          retention-days: 14

@@ -6,6 +6,7 @@ import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { isDeployedEnvironment, type AppConfig } from './config/config';
 import { createRequestThrottle } from './common/request-throttle';
+import { SECURE_SESSION_COOKIE, SESSION_COOKIE } from './modules/auth/session-cookie';
 
 /** Creates the API application with all global settings applied. */
 export async function createApp(config: AppConfig): Promise<NestExpressApplication> {
@@ -62,6 +63,8 @@ export function configureApp(app: NestExpressApplication, config: AppConfig): vo
   app.use(
     createRequestThrottle({
       limit: config.API_RATE_LIMIT_PER_MINUTE,
+      addressLimit: config.API_RATE_LIMIT_PER_ADDRESS_PER_MINUTE,
+      sessionCookies: [SESSION_COOKIE, SECURE_SESSION_COOKIE],
       skipPrefixes: ['/api/v1/health/'],
     }),
   );

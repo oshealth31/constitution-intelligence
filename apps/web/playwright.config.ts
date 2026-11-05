@@ -26,6 +26,7 @@ const apiEnv: Record<string, string> = {
   // Every browser test signs in from the same address.
   LOGIN_MAX_ATTEMPTS_PER_IP: '1000',
   API_RATE_LIMIT_PER_MINUTE: '100000',
+  API_RATE_LIMIT_PER_ADDRESS_PER_MINUTE: '1000000',
   // No AI account in CI: the offline mode quotes the best passage instead of asking a model.
   AI_PROVIDER: 'offline',
 };

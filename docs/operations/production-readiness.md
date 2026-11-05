@@ -123,7 +123,7 @@ items below.
 - Provider and location; data-centre security; who at the provider can access the server or disks.
 - Off-site backup location; disk encryption at rest; snapshots.
 - Firewall/DDoS protection in front of the site (U5).
-- Sizing confirmed by a load test (not done, see the Stage 13 QA report).
+- Sizing confirmed by a load test: done on a CI machine (task T3, [load-test.md](../qa/load-test.md)); repeat on the real server.
 
 ### Operational
 

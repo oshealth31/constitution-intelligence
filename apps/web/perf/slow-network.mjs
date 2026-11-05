@@ -83,7 +83,11 @@ async function measure(network, index) {
   });
   await step('Open the 500-clause constitution (first clause shows)', async () => {
     await page.goto(`${BASE}/o/${SLUG}/read/${CONSTITUTION}`, { timeout: 180_000 });
-    await page.locator('article').getByText('Clause 1 heading').first().waitFor({ timeout: 180_000 });
+    await page
+      .locator('article')
+      .getByText('Clause 1 heading')
+      .first()
+      .waitFor({ timeout: 180_000 });
   });
   await step('Home page again (browser cache warm)', async () => {
     await page.goto(`${BASE}/o/${SLUG}`, { timeout: 180_000 });

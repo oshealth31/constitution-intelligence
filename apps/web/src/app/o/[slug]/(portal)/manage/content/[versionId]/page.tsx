@@ -366,7 +366,8 @@ function WorkflowPanel({
           ? `${version.sectionsNeedingReview} section${version.sectionsNeedingReview === 1 ? ' still needs' : 's still need'} checking first.`
           : null;
     content = canEdit ? (
-      <form method="post"
+      <form
+        method="post"
         aria-label="Send for approval"
         className="space-y-3"
         onSubmit={(event: FormEvent<HTMLFormElement>) => {
@@ -418,7 +419,8 @@ function WorkflowPanel({
   } else if (version.status === 'in_review') {
     content = canApprove ? (
       <div className="space-y-4">
-        <form method="post"
+        <form
+          method="post"
           aria-label="Approve"
           className="space-y-3"
           onSubmit={(event: FormEvent<HTMLFormElement>) => {
@@ -446,7 +448,8 @@ function WorkflowPanel({
             Approve
           </PortalButton>
         </form>
-        <form method="post"
+        <form
+          method="post"
           aria-label="Send back for changes"
           className="space-y-3 border-t border-slate-200 pt-4"
           onSubmit={(event: FormEvent<HTMLFormElement>) => {
@@ -489,7 +492,8 @@ function WorkflowPanel({
     );
   } else if (version.status === 'approved') {
     content = canApprove ? (
-      <form method="post"
+      <form
+        method="post"
         aria-label="Make this the current version"
         className="space-y-3"
         onSubmit={(event: FormEvent<HTMLFormElement>) => {
@@ -545,7 +549,8 @@ function WorkflowPanel({
           <summary className="cursor-pointer text-base font-medium text-slate-800">
             Archive this version
           </summary>
-          <form method="post"
+          <form
+            method="post"
             aria-label="Archive this version"
             className="mt-3 space-y-3"
             onSubmit={(event: FormEvent<HTMLFormElement>) => {
@@ -766,7 +771,8 @@ function SectionForm({
   const [heading, setHeading] = useState(initial.heading ?? '');
   const [body, setBody] = useState(initial.body);
   return (
-    <form method="post"
+    <form
+      method="post"
       className="space-y-3"
       aria-label={submitLabel}
       onSubmit={(event: FormEvent<HTMLFormElement>) => {

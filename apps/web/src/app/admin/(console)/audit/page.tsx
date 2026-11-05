@@ -71,7 +71,8 @@ function AuditLog() {
         description="Append-only record of sign-ins, permission decisions and every privileged change. Entries cannot be edited or deleted."
       />
       <Card>
-        <form method="post"
+        <form
+          method="post"
           className="mb-5 grid gap-3 md:grid-cols-[1fr_220px_160px_auto] md:items-end"
           onSubmit={(event) => {
             event.preventDefault();

@@ -157,7 +157,8 @@ export default function DocumentsPage() {
           title="Add another document"
           description="For example a code of conduct or by-laws. You can upload its file next."
         >
-          <form method="post"
+          <form
+            method="post"
             onSubmit={createConstitution}
             className="flex flex-col gap-3 sm:flex-row sm:items-end"
             aria-label="Add another document"
@@ -233,7 +234,8 @@ function UploadForm({
   }
 
   return (
-    <form method="post"
+    <form
+      method="post"
       onSubmit={upload}
       aria-label={`Upload a new version of ${title}`}
       className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4"

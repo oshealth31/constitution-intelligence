@@ -18,7 +18,8 @@ describe('forms (Task T1)', () => {
     for (const file of sourceFiles(path.resolve(__dirname, '..'))) {
       const text = readFileSync(file, 'utf8');
       // method="post" is kept as the first attribute of every <form>.
-      if (/<form\b(?!\s+method="post")/.test(text)) missing.push(path.relative(process.cwd(), file));
+      if (/<form\b(?!\s+method="post")/.test(text))
+        missing.push(path.relative(process.cwd(), file));
     }
     expect(missing).toEqual([]);
   });

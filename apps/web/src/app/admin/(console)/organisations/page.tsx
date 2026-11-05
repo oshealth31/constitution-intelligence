@@ -56,7 +56,12 @@ function CreateOrganisationForm({ onCancel }: { onCancel: () => void }) {
       title="New organisation"
       description="Creates the organisation with default branding and a 30-day trial."
     >
-      <form method="post" onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-2" aria-label="New organisation">
+      <form
+        method="post"
+        onSubmit={onSubmit}
+        className="grid gap-4 sm:grid-cols-2"
+        aria-label="New organisation"
+      >
         {error && (
           <div className="sm:col-span-2">
             <Alert>{error}</Alert>
@@ -125,7 +130,8 @@ export default function OrganisationsPage() {
       )}
 
       <Card>
-        <form method="post"
+        <form
+          method="post"
           className="mb-5 grid gap-3 sm:grid-cols-[1fr_200px_auto] sm:items-end"
           onSubmit={(event) => {
             event.preventDefault();

@@ -59,7 +59,8 @@ export default function SignInPage() {
             />
           </div>
         ) : (
-          <form method="post"
+          <form
+            method="post"
             onSubmit={onSubmit}
             className="space-y-5 rounded-2xl bg-white p-6 shadow-xl sm:p-8"
             aria-label="Sign in"

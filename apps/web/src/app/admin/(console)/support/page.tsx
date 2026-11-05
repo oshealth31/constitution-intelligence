@@ -82,7 +82,12 @@ function TwoStepResetCard() {
       title="Reset someone's two-step sign-in"
       description="For a person who lost their phone and their recovery codes. Confirm who is asking before you do this: it is recorded in the audit log and the person is emailed."
     >
-      <form method="post" onSubmit={onSubmit} className="space-y-4" aria-label="Reset two-step sign-in">
+      <form
+        method="post"
+        onSubmit={onSubmit}
+        className="space-y-4"
+        aria-label="Reset two-step sign-in"
+      >
         {notice && <Alert tone={notice.tone}>{notice.text}</Alert>}
         <TextField
           label="Their email address"

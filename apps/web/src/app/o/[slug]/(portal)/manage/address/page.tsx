@@ -49,7 +49,12 @@ export default function PortalAddressPage() {
           {portalPath(slug)}
         </strong>
       </p>
-      <form method="post" onSubmit={save} className="mt-5 space-y-4" aria-label="Change portal address">
+      <form
+        method="post"
+        onSubmit={save}
+        className="mt-5 space-y-4"
+        aria-label="Change portal address"
+      >
         <label className="block text-base font-medium text-slate-900">
           New address
           <span className="mt-2 flex items-stretch overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm focus-within:ring-2 focus-within:ring-[var(--brand-accent)]">

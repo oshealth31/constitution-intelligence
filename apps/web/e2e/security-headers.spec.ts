@@ -20,7 +20,9 @@ async function watchViolations(page: Page): Promise<string[]> {
     // WebKit (Safari) reports an EMPTY style attribute that React leaves on <select> elements
     // as a violation. Nothing is blocked from showing (there is no style in it), so it is not
     // counted; it is still printed for the record (found in task T1).
-    if (/^Content Security Policy violation: style-src-attr inline on select .* style="" /.test(text)) {
+    if (
+      /^Content Security Policy violation: style-src-attr inline on select .* style="" /.test(text)
+    ) {
       console.log(`[ignored, empty style] ${text.slice(0, 160)}`);
       return;
     }

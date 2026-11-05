@@ -1,0 +1,97 @@
+# Rehearses the server scripts used by the Deploy workflow (Task S2) on a throwaway GitHub
+# machine: prepare-server, a first installation, then an upgrade (which must back up first and
+# keep every secret). It never connects to the real server. The site address is "localhost", so
+# no real HTTPS certificate is requested.
+name: Deploy rehearsal
+
+on:
+  pull_request:
+    paths:
+      - 'ops/**'
+      - 'infra/production/**'
+      - 'deploy/**'
+      - '.github/workflows/deploy.yml'
+      - '.github/workflows/deploy-rehearsal.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'ops/**'
+      - 'infra/production/**'
+      - 'deploy/**'
+      - '.github/workflows/deploy*.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  rehearsal:
+    name: Deploy rehearsal (prepare, install, upgrade)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the images (two versions)
+        run: |
+          set -euo pipefail
+          docker build -f infra/production/Dockerfile --target api -t constitution-api:first .
+          docker build -f infra/production/Dockerfile --target web -t constitution-web:first \
+            --build-arg API_INTERNAL_URL=http://api:4000 .
+          docker build -f infra/production/Dockerfile --target ops -t constitution-ops:first .
+          for name in api web ops; do docker tag "constitution-$name:first" "constitution-$name:second"; done
+
+      - name: Prepare the server (as the Deploy workflow does)
+        run: sudo bash -s < ops/server/prepare.sh
+
+      - name: Copy files (as the Deploy workflow does)
+        run: |
+          set -euo pipefail
+          # The real address would ask Let's Encrypt for a certificate; use localhost instead.
+          sed -i 's/^SITE_ADDRESS=.*/SITE_ADDRESS=localhost/' deploy/production.env
+          tar -czf - infra/production ops deploy | sudo tar -xzf - -C /srv/constitution --no-same-owner
+          printf '%s' 'rehearsal-not-a-real-key' | sudo tee /srv/constitution/infra/production/secrets/smtp_password > /dev/null
+          printf '%s' 'rehearsal@smtp-brevo.com' | sudo tee /srv/constitution/infra/production/secrets/smtp_user > /dev/null
+
+      - name: First installation
+        run: sudo RELEASED_BY=rehearsal bash /srv/constitution/ops/server/release.sh first
+
+      - name: Check the installation
+        run: |
+          set -euo pipefail
+          cd /srv/constitution/infra/production
+          sudo stat -c '%a %U:%G %n' secrets secrets/* | tee /tmp/permissions
+          grep -q '^700 root:root secrets$' /tmp/permissions
+          grep -q '^640 root:999 secrets/database_server.key$' /tmp/permissions
+          if sudo find secrets -name '*.key' ! -name database_server.key | grep -q .; then
+            echo "A certificate authority key was left on the server."; exit 1
+          fi
+          # Nobody but root may enter the secrets folder.
+          if ls secrets > /dev/null 2>&1; then echo "secrets/ is readable by a normal user."; exit 1; fi
+          sudo grep -q '^CORS_ORIGINS=https://localhost$' api.env
+          sudo grep -q '^SMTP_USER=rehearsal@smtp-brevo.com$' api.env
+          sudo grep -q '^APP_VERSION=first$' api.env
+          sudo grep -q '^API_IMAGE=constitution-api:first$' .env
+          code="$(curl -sk -o /dev/null -w '%{http_code}' https://localhost/api/v1/health/ready)"
+          echo "Through HTTPS: $code"; [ "$code" = 200 ]
+          sudo sh -c 'cd secrets && sha256sum *' > /tmp/secrets-before
+
+      - name: Upgrade (backs up first, keeps the secrets)
+        run: sudo RELEASED_BY=rehearsal bash /srv/constitution/ops/server/release.sh second
+
+      - name: Check the upgrade
+        run: |
+          set -euo pipefail
+          cd /srv/constitution/infra/production
+          sudo sh -c 'cd secrets && sha256sum *' > /tmp/secrets-after
+          diff /tmp/secrets-before /tmp/secrets-after && echo "Secrets unchanged."
+          sudo ls backups | grep -E '.' && echo "Backup made before the upgrade."
+          sudo grep -q '^APP_VERSION=second$' api.env
+          sudo test -f api.env.previous
+          test "$(wc -l < /srv/constitution/releases.log)" -eq 2
+          code="$(curl -sk -o /dev/null -w '%{http_code}' https://localhost/api/v1/health/ready)"
+          echo "Through HTTPS: $code"; [ "$code" = 200 ]
+
+      - name: Logs on failure
+        if: failure()
+        run: |
+          cd /srv/constitution/infra/production && sudo docker compose logs --tail 80 || true

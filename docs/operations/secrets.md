@@ -16,9 +16,13 @@ the layout on every change.
 
 1. **Production secrets are generated for production.** Never reuse a development or test
    password, key or certificate, and never copy a development `.env` file to a server.
-2. Secrets live only in `infra/production/secrets/` on the server: one file each, owner root,
-   mode `0600` (`0640` with group 999 for the database key), excluded from git (`.gitignore`),
-   from Docker image builds (`.dockerignore`) and from backups' plain text (backups are encrypted).
+2. Secrets live only in `infra/production/secrets/` on the server: one file each, owned by
+   root. **The folder is `0700`** (only root can enter it). The files are `0644` (the database
+   key: `0640`, group 999). They must stay readable because Compose mounts each file into its
+   container unchanged, where the application runs as an unprivileged user. (Corrected in
+   task S2: an earlier version said `0600`, which would stop the API from reading its secrets.)
+   They are excluded from git (`.gitignore`), from Docker image builds (`.dockerignore`) and from
+   backups' plain text (backups are encrypted).
 3. Containers receive secrets as read-only files under `/run/secrets/` (Compose secrets) and
    read them through `*_FILE` settings (`DATABASE_URL_FILE`, `ANTHROPIC_API_KEY_FILE`). Secret
    values are therefore not in environment variables, `docker inspect` output, or logs.
@@ -29,6 +33,9 @@ the layout on every change.
 6. Leaving staff: rotate every secret they could read, the same day.
 
 ## Creating the files (first installation)
+
+On the Oracle Cloud server the **Deploy** workflow does this automatically
+([oracle-cloud.md](oracle-cloud.md), `ops/server/make-secrets.sh`). The manual steps are:
 
 On the server, as root, in `/srv/constitution/infra/production/secrets/`:
 
@@ -54,7 +61,8 @@ openssl x509 -req -in server.csr -CA database_ca.crt -CAkey /secure/offline/data
   -CAcreateserial -days 825 -extfile san.ext -out database_server.crt
 rm server.csr san.ext
 chown root:999 database_server.key && chmod 0640 database_server.key
-chmod 0600 postgres_password app_db_password migrator_db_password backup_passphrase database_url database_migrator_url smtp_password mfa_encryption_key rclone.conf
+chmod 0644 postgres_password app_db_password migrator_db_password backup_passphrase database_url database_migrator_url smtp_password mfa_encryption_key rclone.conf
+chown root:root . && chmod 0700 .   # the folder is what keeps them private
 ```
 
 Write the backup passphrase on paper (or a password manager the owner controls), seal it, and

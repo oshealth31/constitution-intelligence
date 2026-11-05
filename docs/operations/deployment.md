@@ -1,6 +1,10 @@
 # Deployment
 
 How to install Constitution Intelligence on a server for **staging** or **production**.
+
+**For the Oracle Cloud server, use [oracle-cloud.md](oracle-cloud.md)**: the Deploy workflow
+does sections 1–4 and 6 below from GitHub (Task S2). This page is the manual procedure it
+follows, for any other server.
 Nothing is deployed automatically: every step below is run by a named person, and production
 needs the owner's written approval (see [production-readiness.md](production-readiness.md)).
 
@@ -84,7 +88,8 @@ or shown by the script:
 docker compose run --rm -T api node dist/cli/create-super-admin.js --email <named.person@...> --name "<Full Name>"
 ```
 
-(See `apps/api/src/cli/create-super-admin.ts` for its options.) The person opens the link and
+(See `apps/api/src/cli/create-super-admin.ts` for its options; add `--send-email` to email the link
+instead of printing it.) The person opens the link and
 chooses their own password. At their first sign-in the Control Centre asks them to set up
 **two-step sign-in** with an authenticator app (required for Super Admins) and shows 10 recovery
 codes to keep somewhere safe. Create a second Super Admin early, so that one can reset the

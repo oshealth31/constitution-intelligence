@@ -28,3 +28,8 @@ export function readArgument(name: string): string | undefined {
   const value = index === -1 ? undefined : process.argv[index + 1];
   return value && !value.startsWith('--') ? value : undefined;
 }
+
+/** True when `--name` is on the command line (a switch without a value). */
+export function hasFlag(name: string): boolean {
+  return process.argv.includes(`--${name}`);
+}

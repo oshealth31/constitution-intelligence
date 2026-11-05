@@ -1,0 +1,3 @@
+# OWASP ZAP findings that were checked and accepted (task T5), one per line:
+# <rule id><TAB><why it is not a problem here>
+# Only High and Medium findings need to be listed; anything not listed fails the scan.

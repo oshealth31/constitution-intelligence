@@ -83,8 +83,10 @@ jobs:
           set -euo pipefail
           cd /srv/constitution/infra/production
           sudo sh -c 'cd secrets && sha256sum *' > /tmp/secrets-after
-          diff /tmp/secrets-before /tmp/secrets-after && echo "Secrets unchanged."
-          sudo ls backups | grep -E '.' && echo "Backup made before the upgrade."
+          diff /tmp/secrets-before /tmp/secrets-after
+          echo "Secrets unchanged."
+          sudo ls backups | grep -E '.'
+          echo "Backup made before the upgrade."
           sudo grep -q '^APP_VERSION=second$' api.env
           sudo test -f api.env.previous
           test "$(wc -l < /srv/constitution/releases.log)" -eq 2

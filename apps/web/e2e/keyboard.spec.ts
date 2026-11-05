@@ -16,7 +16,7 @@ async function focused(page: Page) {
     return {
       tag: element.tagName.toLowerCase(),
       id: element.id,
-      text: (element.getAttribute('aria-label') ?? element.textContent ?? '').trim().slice(0, 80),
+      text: (element.getAttribute('aria-label') ?? element.textContent ?? '').replace(/\s+/g, ' ').trim().slice(0, 300),
       label: (element as HTMLInputElement).labels?.[0]?.textContent?.trim() ?? '',
       // A focus outline, or the focus ring (box-shadow) used on form fields.
       indicator:
@@ -77,7 +77,7 @@ test('a member signs in, skips to the content and searches with the keyboard onl
   await page.keyboard.type('quorum');
   await page.keyboard.press('Enter');
   await expect(page.getByText(/quorum/i).first()).toBeVisible();
-  await tabTo(page, (target) => target.tag === 'a' && /Quorum/i.test(target.text));
+  await tabTo(page, (target) => target.tag === 'a' && /Quorum/i.test(target.text), 80);
   await page.keyboard.press('Enter');
   await expect(page.getByRole('note', { name: 'Reference for this section' })).toBeVisible();
 });

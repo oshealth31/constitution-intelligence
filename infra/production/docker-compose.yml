@@ -59,9 +59,15 @@ services:
       MFA_ENCRYPTION_KEY_FILE: /run/secrets/mfa_encryption_key
       # The database's certificate authority, so the API can verify the database it talks to.
       NODE_EXTRA_CA_CERTS: /run/secrets/database_ca.crt
-    secrets: [database_url, database_ca.crt, smtp_password, mfa_encryption_key]
+      # Tamper-evident audit log (Task D12): the signing key and where sealed batches go.
+      AUDIT_SEAL_KEY_FILE: /run/secrets/audit_seal_key
+      AUDIT_SEAL_DIR: /var/lib/constitution/audit-seals
+    secrets: [database_url, database_ca.crt, smtp_password, mfa_encryption_key, audit_seal_key]
     volumes:
       - storage:/var/lib/constitution/storage
+      - audit-seals:/var/lib/constitution/audit-seals
+      # The copy downloaded back from off-site, which the daily check compares with.
+      - audit-check:/var/lib/constitution/audit-check:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -103,6 +109,10 @@ services:
       # Off-site copy (Task D7): an rclone destination such as "offsite:constitution-backups/prod",
       # set in ./.env as OFFSITE_REMOTE. The account in secrets/rclone.conf may only ADD files.
       OFFSITE_REMOTE: ${OFFSITE_REMOTE:-}
+      # Sealed audit batches (Task D12), e.g. "offsite:constitution-audit-seals/prod", in ./.env.
+      OFFSITE_AUDIT_REMOTE: ${OFFSITE_AUDIT_REMOTE:-}
+      AUDIT_SEAL_DIR: /audit-seals
+      AUDIT_CHECK_DIR: /audit-check
       RCLONE_CONFIG: /run/secrets/rclone.conf
       # Verify the database's certificate (libpq settings).
       PGSSLMODE: verify-full
@@ -112,6 +122,8 @@ services:
       - storage:/storage:ro
       - ./backups:/backups
       - ./exports:/exports
+      - audit-seals:/audit-seals:ro
+      - audit-check:/audit-check
     depends_on:
       postgres:
         condition: service_healthy
@@ -175,6 +187,10 @@ secrets:
     file: ./secrets/rclone.conf
   mfa_encryption_key:
     file: ./secrets/mfa_encryption_key
+  # Ed25519 key that signs the sealed audit batches (Task D12). Create it with
+  #   docker compose run --rm -T --no-deps api node dist/cli/audit-seal.js --generate-key
+  audit_seal_key:
+    file: ./secrets/audit_seal_key
   database_ca.crt:
     file: ./secrets/database_ca.crt
   database_server.crt:
@@ -185,6 +201,8 @@ secrets:
 volumes:
   postgres-data:
   storage:
+  audit-seals:
+  audit-check:
   caddy-data:
   caddy-config:
 

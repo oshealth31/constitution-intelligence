@@ -113,7 +113,7 @@ items below.
 ### Security (from docs/security/security-review.md)
 
 - ~~U1 two-step sign-in~~ (done, D2) · ~~U3 separate database accounts~~ (done, D4) · ~~U4 document parsing in an
-  isolated process~~ (done, D8) · ~~U6 leaked-password check~~ (done, D5; the lock-out part of U6 remains) · U8 tamper-evident audit copy ·
+  isolated process~~ (done, D8) · ~~U6 leaked-password check~~ (done, D5; the lock-out part of U6 remains) · ~~U8 tamper-evident audit copy~~ (done, D12; needs write-once off-site storage, S6) ·
   U11 independent penetration test before general availability · U12 development-tool
   vulnerabilities (done in task D10; one low item has no fix yet).
 

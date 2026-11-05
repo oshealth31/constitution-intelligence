@@ -1,0 +1,18 @@
+# Daily seal of the audit log, off-site copy and check (Task D12). Installed by
+# docs/operations/audit-seal.md. Runs after the 01:30 backup.
+[Unit]
+Description=Constitution Intelligence: seal the audit log, copy it off-site and check it
+Wants=network-online.target docker.service
+After=network-online.target docker.service constitution-backup.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/srv/constitution/infra/production
+# 1. Seal new audit entries into signed batches (fingerprints only, no personal data).
+ExecStart=/usr/bin/docker compose run --rm -T api node dist/cli/audit-seal.js --seal
+# 2. Copy new batches off-site (add-only account) and download the off-site copy back.
+ExecStart=/usr/bin/docker compose --profile ops run --rm -T ops /ops/audit-seal-offsite.sh
+# 3. Compare the database with the off-site copy. Exits non-zero on any unexplained
+#    difference: systemd then marks the run "failed" (systemctl is-failed constitution-audit-seal).
+ExecStart=/usr/bin/docker compose run --rm -T api node dist/cli/audit-seal.js --check --dir /var/lib/constitution/audit-check
+TimeoutStartSec=1h

@@ -1,6 +1,8 @@
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
-  brandStyle,
+  brandProperties,
   colourWarnings,
   contrastRatio,
   initials,
@@ -25,7 +27,7 @@ describe('branding colours', () => {
   });
 
   it('never puts an unsafe value into the page styles', () => {
-    const style = brandStyle({
+    const style = brandProperties({
       primary: 'red; background: url(https://evil.test/steal)',
       secondary: '#ffffff',
       accent: 'expression(alert(1))',
@@ -48,9 +50,9 @@ describe('branding colours', () => {
   });
 
   it('falls back to navy for links when the primary colour is too light', () => {
-    const style = brandStyle({ primary: '#FFE066' }) as Record<string, string>;
+    const style = brandProperties({ primary: '#FFE066' }) as Record<string, string>;
     expect(style['--brand-ink']).toBe('#0B1F3A');
-    const dark = brandStyle({ primary: '#4A2B6B' }) as Record<string, string>;
+    const dark = brandProperties({ primary: '#4A2B6B' }) as Record<string, string>;
     expect(dark['--brand-ink']).toBe('#4A2B6B');
   });
 
@@ -67,5 +69,14 @@ describe('branding colours', () => {
     expect(initials('Sample Netball Club')).toBe('SN');
     expect(initials('Choir (fictional)')).toBe('C');
     expect(initials('  ')).toBe('?');
+  });
+});
+
+describe('platform default colours in the stylesheet (Task D13)', () => {
+  it('match brandProperties(null), so pages look right before colours load', () => {
+    const css = readFileSync(path.join(__dirname, '..', 'app', 'globals.css'), 'utf8');
+    for (const [name, value] of Object.entries(brandProperties(null))) {
+      expect(css, name).toMatch(new RegExp(`${name}:\\s*${value};`, 'i'));
+    }
   });
 });

@@ -1,5 +1,3 @@
-import type { CSSProperties } from 'react';
-
 /**
  * Organisation branding in the browser.
  *
@@ -66,9 +64,13 @@ export function isReadable(text: string, background: string): boolean {
 
 /**
  * CSS variables for a portal. Components use var(--brand-primary) and friends, so every
- * organisation's portal is the same code with different settings.
+ * organisation's portal is the same code with different settings. They are applied with
+ * useCssProperties (never as a style="" attribute, Task D13); the platform defaults are in
+ * globals.css, so a page looks right before its organisation's colours load.
  */
-export function brandStyle(colours: Partial<BrandColours> | null | undefined): CSSProperties {
+export function brandProperties(
+  colours: Partial<BrandColours> | null | undefined,
+): Record<string, string> {
   const primary = safeColour(colours?.primary, PLATFORM_COLOURS.primary);
   const secondary = safeColour(colours?.secondary, PLATFORM_COLOURS.secondary);
   const accent = safeColour(colours?.accent, PLATFORM_COLOURS.accent);
@@ -82,7 +84,7 @@ export function brandStyle(colours: Partial<BrandColours> | null | undefined): C
     '--brand-accent': accent,
     '--brand-on-accent': readableTextOn(accent),
     '--brand-ink': ink,
-  } as CSSProperties;
+  };
 }
 
 /** Plain-language warnings shown to administrators while they choose colours. */

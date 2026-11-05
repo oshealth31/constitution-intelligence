@@ -1,9 +1,10 @@
 import type { NextConfig } from 'next';
 
-// Fixed policy for the small static offline page (inline <style>, no scripts).
+// Fixed policy for the small static offline page (no scripts). Its one <style> block is allowed
+// by its SHA-256 fingerprint only (Task D13); a test recomputes it from the file.
 // Kept in step with STATIC_PAGE_POLICY in src/lib/security-headers.ts (checked by a test).
 const STATIC_PAGE_POLICY =
-  "default-src 'none'; style-src 'unsafe-inline'; img-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'";
+  "default-src 'none'; style-src 'sha256-aqupHH3T9AP4iV5oIpLZbEo8/sjFjujINWfvQ/5o500='; img-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'";
 
 // Security headers for every response. The page Content Security Policy (with a fresh nonce per
 // page) is added in src/proxy.ts; static files get the fixed policy below.

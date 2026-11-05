@@ -56,6 +56,10 @@ back to navy if the primary colour is too light to read on white.
 
 - **Colours** are exact 6-digit hex codes, checked by the API, the database and again in the browser
   before they are used. A stored value can never add other CSS (no keywords, `url()`, `;` etc.).
+  They are applied as CSS variables from the site's own script, never as `style=""` attributes:
+  the Content Security Policy allows no inline styles (Task D13). Use `<BrandScope colours>`
+  (components/brand-scope.tsx) for a branded area; outside it the platform defaults in
+  `globals.css` apply.
 - **Text** (name, tagline, welcome message) is stored and shown as plain text. React escapes it, so
   `<script>` or `<img onerror>` appear as ordinary characters and never run. Hidden control characters
   are refused. A browser test checks this end to end.

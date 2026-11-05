@@ -4,6 +4,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
+import { signInControlCentre } from './qa-helpers';
 
 const accounts = JSON.parse(
   readFileSync(path.join(__dirname, '.auth', 'accounts.json'), 'utf8'),
@@ -57,6 +58,59 @@ test('the member and admin pages work with no policy violations', async ({ page 
     await page.goto(address);
     await expect(page.locator('main')).toBeVisible();
   }
+  expect(violations).toEqual([]);
+});
+
+// Task D13: no inline styles are allowed at all in production, yet each organisation's colours
+// (and bar widths) still appear: they are set from the site's own script.
+test('no inline styles are allowed, and organisation colours still show', async ({ page }) => {
+  const violations = await watchViolations(page);
+  const response = await page.goto(`${CHOIR}/sign-in`);
+  const policy = response?.headers()['content-security-policy'] ?? '';
+  expect(policy).toMatch(/style-src 'self'(;|$)/);
+  expect(policy).not.toContain('unsafe-inline');
+
+  await page.getByLabel('Email address').fill('owner@sample.test');
+  await page.getByLabel('Password').fill(accounts['owner@sample.test'] ?? '');
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page.locator('#welcome-heading')).toBeVisible();
+  // The choir's plum (#4A2B6B) header, not the platform navy default.
+  await expect(page.locator('header').first()).toHaveCSS('background-color', 'rgb(74, 43, 107)');
+
+  for (const address of [`${CHOIR}/manage/branding`, `${CHOIR}/manage/subscription`]) {
+    await page.goto(address);
+    await expect(page.locator('main')).toBeVisible();
+  }
+  // The branding preview uses the same colours.
+  await page.goto(`${CHOIR}/manage/branding`);
+  await expect(
+    page.getByLabel('Preview', { exact: true }).locator('[data-brand-scope] > div').first(),
+  ).toHaveCSS('background-color', 'rgb(74, 43, 107)');
+
+  expect(violations).toEqual([]);
+});
+
+test('the Control Centre shows bars and colours with no inline styles', async ({ page }) => {
+  const violations = await watchViolations(page);
+  await signInControlCentre(page);
+  await page.getByRole('link', { name: 'Organisations' }).first().click();
+  await page.getByRole('link', { name: 'Sample Community Choir (fictional)' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Sample Community Choir');
+  const bar = page.getByRole('progressbar').first().locator('div').first();
+  await expect(bar).toBeVisible();
+  expect(await bar.evaluate((element) => element.getBoundingClientRect().width)).toBeGreaterThan(0);
+  await expect(page.getByLabel('Branding preview').locator('div').first()).toHaveCSS(
+    'background-color',
+    'rgb(74, 43, 107)',
+  );
+  expect(violations).toEqual([]);
+});
+
+test('the static offline page is styled, with only its own style block allowed', async ({ page }) => {
+  const violations = await watchViolations(page);
+  const response = await page.goto('/offline-fallback.html');
+  expect(response?.headers()['content-security-policy']).toMatch(/style-src 'sha256-[^']+'/);
+  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(251, 248, 241)');
   expect(violations).toEqual([]);
 });
 

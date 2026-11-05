@@ -32,6 +32,22 @@ export default tseslint.config(
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },
     },
+    rules: {
+      // The Content Security Policy allows no inline styles (Task D13): use classes, or
+      // useCssProperties / <BrandScope> / <WidthBar> for values only known at run time.
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "JSXAttribute[name.name='style']",
+          message:
+            'No style="" attributes: the Content Security Policy blocks them. Use classes or useCssProperties (lib/css-properties.ts).',
+        },
+        {
+          selector: "JSXOpeningElement[name.name='style']",
+          message: 'No <style> blocks in pages: the Content Security Policy blocks them.',
+        },
+      ],
+    },
   },
   {
     // Command-line scripts may print to the console.

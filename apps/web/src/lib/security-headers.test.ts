@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -17,6 +18,22 @@ describe('buildContentSecurityPolicy', () => {
     expect(policy).toContain("object-src 'none'");
     expect(policy).toContain("connect-src 'self'");
     expect(policy).toContain("base-uri 'self'");
+  });
+
+  it('allows no inline styles in production (Task D13)', () => {
+    expect(buildContentSecurityPolicy('n')).toContain("style-src 'self';");
+    expect(buildContentSecurityPolicy('n')).not.toContain('unsafe-inline');
+    expect(buildContentSecurityPolicy('n', true)).toMatch(/style-src 'self' 'unsafe-inline'/);
+  });
+
+  it("allows the offline page's own <style> block by its fingerprint only", () => {
+    const html = readFileSync(path.resolve(process.cwd(), 'public', 'offline-fallback.html'), 'utf8');
+    const blocks = [...html.matchAll(/<style>([\s\S]*?)<\/style>/g)];
+    expect(blocks).toHaveLength(1);
+    expect(html).not.toMatch(/style="/);
+    const hash = createHash('sha256').update(blocks[0]![1]!, 'utf8').digest('base64');
+    expect(STATIC_PAGE_POLICY).toContain(`style-src 'sha256-${hash}'`);
+    expect(STATIC_PAGE_POLICY).not.toContain('unsafe-inline');
   });
 
   it('allows eval only in development', () => {

@@ -16,7 +16,7 @@ import {
 } from '@/components/portal-ui';
 import { ApiError, apiFetch, type CurrentUser } from '@/lib/api';
 import { brand } from '@/lib/brand';
-import { brandStyle } from '@/lib/branding';
+import { BrandScope } from '@/components/brand-scope';
 import { canManage, portalPath, type AiStatus, type PortalHome } from '@/lib/portal';
 import {
   ConnectionBanner,
@@ -140,7 +140,7 @@ export default function SignedInPortalLayout({ children }: { children: ReactNode
   const { session } = gate;
   const { home } = session;
   // Colours from the signed-in settings (the freshest copy, e.g. just after an administrator saves).
-  const style = brandStyle(home.organisation.colours);
+  const colours = home.organisation.colours;
   const navigation = [
     { href: portalPath(slug), label: 'Home', short: 'Home', icon: HomeIcon, exact: true },
     { href: portalPath(slug, '/library'), label: 'Read', short: 'Read', icon: BookIcon },
@@ -170,7 +170,7 @@ export default function SignedInPortalLayout({ children }: { children: ReactNode
 
   return (
     <PortalSessionContext.Provider value={{ ...session, reload: load }}>
-      <div style={style} className="min-h-dvh">
+      <BrandScope colours={colours} className="min-h-dvh">
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2"
@@ -259,7 +259,7 @@ export default function SignedInPortalLayout({ children }: { children: ReactNode
             })}
           </ul>
         </nav>
-      </div>
+      </BrandScope>
     </PortalSessionContext.Provider>
   );
 }

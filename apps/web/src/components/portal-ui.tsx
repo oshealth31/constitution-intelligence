@@ -7,7 +7,7 @@ import { highlightTerms } from '@/lib/portal';
 
 /**
  * Building blocks for organisation portals. Colours come from the CSS variables set by
- * brandStyle() (see lib/branding.ts), so the same components show each organisation's look.
+ * brandProperties() via <BrandScope> (see lib/branding.ts), so the same components show each organisation's look.
  */
 
 // ----- Icons (simple outlines; always shown together with a text label) ----------------------
@@ -99,6 +99,14 @@ export const CloseIcon = (props: SVGProps<SVGSVGElement>) => (
  * The organisation's logo, or its initials when it has none. Logos are only ever shown with
  * an <img> tag from our own API (which serves checked PNG/JPEG/WebP files), so they cannot run code.
  */
+/** Fixed sizes (no style="" attribute, Task D13): pixels → classes for the box and initials. */
+const LOGO_SIZES = {
+  32: 'size-8 text-xs',
+  40: 'size-10 text-[15px]',
+  56: 'size-14 text-[21px]',
+  72: 'size-[72px] text-[27px]',
+} as const;
+
 export function OrganisationLogo({
   name,
   logoUrl,
@@ -106,8 +114,9 @@ export function OrganisationLogo({
 }: {
   name: string;
   logoUrl: string | null;
-  size?: number;
+  size?: keyof typeof LOGO_SIZES;
 }) {
+  const sizeClass = LOGO_SIZES[size];
   const safeUrl = logoUrl && logoUrl.startsWith('/api/v1/portal/') ? logoUrl : null;
   if (safeUrl) {
     return (
@@ -116,16 +125,14 @@ export function OrganisationLogo({
         alt={`${name} logo`}
         width={size}
         height={size}
-        className="shrink-0 rounded-full bg-white object-contain"
-        style={{ width: size, height: size }}
+        className={`shrink-0 rounded-full bg-white object-contain ${sizeClass}`}
       />
     );
   }
   return (
     <span
       aria-hidden="true"
-      className="inline-flex shrink-0 items-center justify-center rounded-full bg-[var(--brand-accent)] font-semibold text-[var(--brand-on-accent)]"
-      style={{ width: size, height: size, fontSize: Math.round(size * 0.38) }}
+      className={`inline-flex shrink-0 items-center justify-center rounded-full bg-[var(--brand-accent)] font-semibold text-[var(--brand-on-accent)] ${sizeClass}`}
     >
       {initials(name)}
     </span>

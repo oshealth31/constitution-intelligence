@@ -9,6 +9,7 @@ import {
   type ReactNode,
   type SelectHTMLAttributes,
 } from 'react';
+import { WidthBar } from '@/components/brand-scope';
 import { statusLabel, statusTone, type Tone } from '@/lib/format';
 
 const TONE_CLASSES: Record<Tone, string> = {
@@ -287,7 +288,7 @@ export function ProgressBar({
         aria-valuenow={value}
         className="h-2 w-full overflow-hidden rounded-full bg-ivory-100"
       >
-        <div className="h-full rounded-full bg-teal-500" style={{ width: `${percent}%` }} />
+        <WidthBar percent={percent} className="h-full rounded-full bg-teal-500" />
       </div>
       <p className="mt-1 text-xs text-muted">
         {value} of {total} steps

@@ -23,6 +23,18 @@
     system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
 }
 
+:root {
+  /* Portal brand colours: the platform defaults, replaced per organisation by the page's own
+     script (useCssProperties). Kept in step with brandProperties(null) by a unit test. */
+  --brand-primary: #0B1F3A;
+  --brand-on-primary: #FFFFFF;
+  --brand-secondary: #F5EFE2;
+  --brand-on-secondary: #111827;
+  --brand-accent: #1BA6A6;
+  --brand-on-accent: #111827;
+  --brand-ink: #0B1F3A;
+}
+
 html {
   color: var(--color-ink);
   background-color: var(--color-ivory-50);

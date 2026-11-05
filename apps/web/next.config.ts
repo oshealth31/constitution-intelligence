@@ -17,6 +17,8 @@ const securityHeaders = [
     value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()',
   },
   { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+  // Other websites may not embed our files (pages, scripts, images) in their own pages (Task T5).
+  { key: 'Cross-Origin-Resource-Policy', value: 'same-origin' },
   // HTTPS only, for a year. Browsers ignore this header on plain-HTTP local addresses.
   ...(process.env.NODE_ENV === 'production'
     ? [{ key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' }]

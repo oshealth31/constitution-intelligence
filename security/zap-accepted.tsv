@@ -1,3 +1,5 @@
 # OWASP ZAP findings that were checked and accepted (task T5), one per line:
 # <rule id><TAB><why it is not a problem here>
 # Only High and Medium findings need to be listed; anything not listed fails the scan.
+10202	Forms are handled by the page script and sent to the API with fetch; the API refuses every change without the X-Requested-With header or from another website (CsrfGuard, tested in apps/api/test/security.e2e.spec.ts), and the session cookie is HttpOnly and SameSite=Lax. A plain cross-site form post cannot add that header.
+20012	Same defence as 10202: the API checks a custom header and the Origin instead of a token in the form. Verified by the forged-request tests in apps/api/test/security.e2e.spec.ts.

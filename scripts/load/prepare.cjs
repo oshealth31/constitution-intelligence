@@ -7,8 +7,10 @@
 //   - a second, very large published constitution: 20 parts, 500 clauses, 1,000 sub-clauses,
 //     about 200,000 words (generated text), to test reading and searching a big document.
 'use strict';
-const { Client } = require('pg');
-const { hash } = require('@node-rs/argon2');
+// Resolve libraries from the folder it is run in (apps/api), not from this file's folder.
+const requireHere = require('node:module').createRequire(require('node:path').resolve('package.json'));
+const { Client } = requireHere('pg');
+const { hash } = requireHere('@node-rs/argon2');
 
 const SLUG = process.env.LOAD_SLUG || 'sample-community-choir';
 const USERS = Number(process.env.LOAD_USERS || 200);

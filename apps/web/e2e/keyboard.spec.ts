@@ -71,8 +71,10 @@ test('a member signs in, skips to the content and searches with the keyboard onl
   await page.keyboard.press('Enter');
   expect((await focused(page))?.id).toBe('main');
 
-  // From the top: the main menu, then Search.
-  await page.keyboard.press('Shift+Tab');
+  // From the top of the page again: the main menu, then Search. (Shift+Tab from the content
+  // behaves differently between browsers, so the page is opened afresh.)
+  await page.reload();
+  await expect(page.locator('#welcome-heading')).toBeVisible();
   await tabTo(page, (target) => target.tag === 'a' && target.text === 'Search');
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(/\/search$/);

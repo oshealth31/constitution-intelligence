@@ -176,7 +176,7 @@ function Reader() {
         ...panel.querySelectorAll<HTMLElement>(
           'a[href], button:not([disabled]), input, select, textarea',
         ),
-      ].filter((element) => element.offsetParent !== null || element === document.activeElement);
+      ].filter((element) => element.tabIndex >= 0 && element.getClientRects().length > 0);
       if (focusable.length === 0) return;
       const first = focusable[0]!;
       const last = focusable[focusable.length - 1]!;

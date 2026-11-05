@@ -23,15 +23,16 @@ Results of 5 Nov 2026 (final run, after the fixes below).
 All members at one address (like a church's Wi-Fi, or a mobile network that puts many phones
 behind one address), signing in within a minute, with the **production limits**.
 
-|                              | Before the fixes | After the fixes |
-| ---------------------------- | ---------------- | --------------- |
-| Sign-ins refused             | **1,034**        | **0**           |
-| Requests refused (429)       | 5,015            | 0               |
-| Requests failed              | 59 %             | 0 %             |
-| Response time, 95 % within   | (mostly refused) | 86 ms           |
-| Open the large constitution  | (mostly refused) | 330 ms (95 %)   |
+|                             | Before the fixes | After the fixes |
+| --------------------------- | ---------------- | --------------- |
+| Sign-ins refused            | **1,034**        | **0**           |
+| Requests refused (429)      | 5,015            | 0               |
+| Requests failed             | 59 %             | 0 %             |
+| Response time, 95 % within  | (mostly refused) | 86 ms           |
+| Open the large constitution | (mostly refused) | 330 ms (95 %)   |
 
 **Fixed:**
+
 - **Successful sign-ins no longer count towards the per-address sign-in limit.** Only failed
   ones do, so guessing passwords from one address is still stopped after 50 failures in 15
   minutes. Before, the 51st member to sign in at a meeting was locked out for 15 minutes.

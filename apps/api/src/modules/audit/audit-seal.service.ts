@@ -107,7 +107,9 @@ export function keyFingerprint(publicKey: KeyObject): string {
 }
 
 export function publicKeyFrom(pem: string): KeyObject {
-  return pem.includes('PRIVATE KEY') ? createPublicKey(createPrivateKey(pem)) : createPublicKey(pem);
+  return pem.includes('PRIVATE KEY')
+    ? createPublicKey(createPrivateKey(pem))
+    : createPublicKey(pem);
 }
 
 function payloadOf(file: BatchPayload): BatchPayload {
@@ -270,8 +272,11 @@ export class AuditSealService {
     if (lastBatch) {
       const deletedOrganisations = new Set(
         (
-          (await this.db.execute(sql`SELECT id::text AS id FROM organisations WHERE deleted_at IS NOT NULL`))
-            .rows as { id: string }[]
+          (
+            await this.db.execute(
+              sql`SELECT id::text AS id FROM organisations WHERE deleted_at IS NOT NULL`,
+            )
+          ).rows as { id: string }[]
         ).map((row) => row.id),
       );
       const latest = async (action: string) =>
@@ -296,7 +301,9 @@ export class AuditSealService {
         const inDatabase = new Map(rows.map((row) => [Number(row.seq), row]));
         for (const row of rows) {
           if (!sealed.has(Number(row.seq))) {
-            problems.push(`Entry ${row.seq} is in the database but in no sealed batch (added later).`);
+            problems.push(
+              `Entry ${row.seq} is in the database but in no sealed batch (added later).`,
+            );
           }
         }
         for (let seq = from + 1; seq <= to; seq += 1) {

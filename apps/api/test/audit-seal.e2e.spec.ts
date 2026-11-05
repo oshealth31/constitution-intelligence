@@ -150,7 +150,9 @@ describe.runIf(Boolean(testDatabaseUrl))('tamper-evident audit log', () => {
       await tx.execute(
         sql`UPDATE organisations SET deleted_at = now(), status = 'archived' WHERE id = ${organisation.id}`,
       );
-      await tx.execute(sql`SELECT set_config('app.deleting_organisation_id', ${organisation.id}, true)`);
+      await tx.execute(
+        sql`SELECT set_config('app.deleting_organisation_id', ${organisation.id}, true)`,
+      );
       await tx.execute(sql`DELETE FROM audit_events WHERE organisation_id = ${organisation.id}`);
     });
     const result = await checkNow();
@@ -159,7 +161,10 @@ describe.runIf(Boolean(testDatabaseUrl))('tamper-evident audit log', () => {
   });
 
   it('allows anonymising a person deleted by a data request (decision A1)', async () => {
-    const staff = await createUser(context.db, { email: uniqueEmail('seal-staff'), superAdmin: true });
+    const staff = await createUser(context.db, {
+      email: uniqueEmail('seal-staff'),
+      superAdmin: true,
+    });
     const person = await createUser(context.db, { email: uniqueEmail('seal-person') });
     await record('test.person.action', null, person.id);
     await sealNow();
@@ -176,7 +181,13 @@ describe.runIf(Boolean(testDatabaseUrl))('tamper-evident audit log', () => {
       staff.id,
       META,
     );
-    await requests.deletePerson(created.request.id, person.email, 'Asked in writing (fictional)', staff.id, META);
+    await requests.deletePerson(
+      created.request.id,
+      person.email,
+      'Asked in writing (fictional)',
+      staff.id,
+      META,
+    );
     const result = await checkNow();
     expect(result.problems).toEqual([]);
     expect(result.allowed.anonymised).toBeGreaterThanOrEqual(1);

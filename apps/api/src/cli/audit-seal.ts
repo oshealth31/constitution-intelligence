@@ -11,7 +11,11 @@
 // give a public key instead, so the check can be done with only the public key.
 import { generateKeyPairSync } from 'node:crypto';
 import { readFileSync } from 'node:fs';
-import { AuditSealService, keyFingerprint, publicKeyFrom } from '../modules/audit/audit-seal.service';
+import {
+  AuditSealService,
+  keyFingerprint,
+  publicKeyFrom,
+} from '../modules/audit/audit-seal.service';
 import { createCliContext, readArgument } from './cli-app';
 
 const USAGE = [
@@ -82,7 +86,9 @@ async function main(): Promise<void> {
         `Allowed differences: ${result.allowed.organisationDeleted} removed with a deleted organisation, ` +
           `${result.allowed.platformDeleted} removed during an organisation deletion, ` +
           `${result.allowed.anonymised} anonymised after a person was deleted.`,
-        result.ok ? 'Result: OK, no unexplained differences.' : `Result: ${result.problemCount} PROBLEM(S):`,
+        result.ok
+          ? 'Result: OK, no unexplained differences.'
+          : `Result: ${result.problemCount} PROBLEM(S):`,
         ...result.problems.map((problem) => `  - ${problem}`),
       ].join('\n'),
     );

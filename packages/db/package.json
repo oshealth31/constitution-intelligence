@@ -2,6 +2,7 @@
   "name": "@constitution/db",
   "version": "0.1.0",
   "private": true,
+  "license": "UNLICENSED",
   "description": "Database connection, schema and migrations for Constitution Intelligence.",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

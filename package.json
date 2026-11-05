@@ -2,6 +2,7 @@
   "name": "constitution-intelligence",
   "version": "0.1.0",
   "private": true,
+  "license": "UNLICENSED",
   "description": "Constitution Intelligence \u2014 managed multi-tenant SaaS for organisational constitutions.",
   "packageManager": "pnpm@10.28.0",
   "engines": {

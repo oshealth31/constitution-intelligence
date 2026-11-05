@@ -32,6 +32,16 @@ export class RateLimitService {
     return Number(row?.attempts ?? 1);
   }
 
+  /** The number of attempts for `key` in the current window, without recording one. */
+  async count(key: string, windowSeconds: number): Promise<number> {
+    const windowStart = new Date(Date.now() - windowSeconds * 1000).toISOString();
+    const result = await this.db.execute(sql`
+      SELECT attempts FROM auth_rate_limits
+      WHERE key = ${key} AND window_started_at >= ${windowStart}::timestamptz`);
+    const row = result.rows[0] as { attempts?: number | string } | undefined;
+    return Number(row?.attempts ?? 0);
+  }
+
   /**
    * Counts one attempt and refuses with 429 once `max` attempts were made in the window.
    * The refusal carries reason RATE_LIMITED so the web app can explain it.

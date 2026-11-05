@@ -5,7 +5,7 @@ import { maskEmail } from '../modules/auth/auth.service';
 import { sessionCookieName } from '../modules/auth/session-cookie';
 import { createRequestThrottle } from './request-throttle';
 
-function fakeExchange(ip: string, path = '/api/v1/search') {
+function fakeExchange(ip: string, path = '/api/v1/search', cookie?: string) {
   const response = {
     statusCode: 200,
     headers: {} as Record<string, string>,
@@ -23,7 +23,11 @@ function fakeExchange(ip: string, path = '/api/v1/search') {
       return this;
     },
   };
-  return { request: { ip, path } as never, response: response as never, raw: response };
+  return {
+    request: { ip, path, headers: cookie ? { cookie } : {} } as never,
+    response: response as never,
+    raw: response,
+  };
 }
 
 describe('createRequestThrottle', () => {
@@ -52,6 +56,29 @@ describe('createRequestThrottle', () => {
     const later = fakeExchange('10.0.0.1');
     throttle(later.request, later.response, next);
     expect(next).toHaveBeenCalledTimes(5);
+  });
+
+  it('gives each signed-in session on a shared address its own budget, under a cap for the address', () => {
+    const throttle = createRequestThrottle({
+      limit: 2,
+      addressLimit: 5,
+      sessionCookies: ['ci_session'],
+      now: () => 0,
+    });
+    const next = vi.fn();
+    const send = (cookie?: string) => {
+      const exchange = fakeExchange('10.9.9.9', '/api/v1/search', cookie);
+      throttle(exchange.request, exchange.response, next);
+      return exchange.raw.statusCode;
+    };
+    // Two members on the same Wi-Fi: 2 requests each are fine.
+    expect([send('ci_session=alice'), send('ci_session=alice')]).toEqual([200, 200]);
+    expect([send('other=x; ci_session=bob'), send('ci_session=bob')]).toEqual([200, 200]);
+    // A third request from Alice's session is over her budget.
+    expect(send('ci_session=alice')).toBe(429);
+    // The address as a whole: 5 in total (made-up cookies cannot get around it).
+    expect(send('ci_session=made-up-1')).toBe(429);
+    expect(next).toHaveBeenCalledTimes(4);
   });
 
   it('never counts the skipped paths', () => {

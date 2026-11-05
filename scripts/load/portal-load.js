@@ -23,6 +23,8 @@ const SCENARIO = __ENV.SCENARIO || 'capacity';
 
 const refused = new Counter('refused_too_many_requests'); // 429
 const serverErrors = new Counter('server_errors'); // 5xx
+const otherErrors = new Counter('other_errors'); // other 4xx
+const otherByStatus = {};
 const loginRefused = new Counter('login_refused');
 const loginTime = new Trend('step_login', true);
 const homeTime = new Trend('step_home', true);
@@ -77,7 +79,15 @@ const TERMS = ['quorum', 'treasurer', 'election', 'clause 250', 'annual general 
 
 function count(response) {
   if (response.status === 429) refused.add(1);
-  if (response.status >= 500) serverErrors.add(1);
+  else if (response.status >= 500) serverErrors.add(1);
+  else if (response.status >= 400 || response.status === 0) {
+    otherErrors.add(1, { status: String(response.status) });
+    const key = `${response.status} ${response.request.method} ${response.url.replace(/[0-9a-f-]{36}/g, ':id').replace(BASE, '').split('?')[0]}`;
+    if (!otherByStatus[key]) {
+      otherByStatus[key] = true;
+      console.warn(`other error: ${key}`);
+    }
+  }
   return response;
 }
 
@@ -158,6 +168,7 @@ export function handleSummary(data) {
     const values = data.metrics[name] && data.metrics[name].values;
     return values && values[stat] !== undefined ? values[stat] : 0;
   };
+  // 429 responses are deliberate refusals, counted on their own line, not as failures here.
   const ms = (name) =>
     `p50 ${Math.round(metric(name, 'p(50)'))} ms · p95 ${Math.round(metric(name, 'p(95)'))} ms · p99 ${Math.round(metric(name, 'p(99)'))} ms · max ${Math.round(metric(name, 'max'))} ms`;
   const lines = [
@@ -168,6 +179,7 @@ export function handleSummary(data) {
     `- Failed requests: ${(metric('http_req_failed', 'rate') * 100).toFixed(2)} %`,
     `- Refused as "too many requests" (429): ${metric('refused_too_many_requests', 'count')}`,
     `- Server errors (5xx): ${metric('server_errors', 'count')}`,
+    `- Other errors (4xx, timeouts): ${metric('other_errors', 'count')}`,
     `- Sign-ins refused: ${metric('login_refused', 'count')}`,
     `- Every request: ${ms('http_req_duration')}`,
     `- Sign in: ${ms('step_login')}`,

@@ -92,13 +92,20 @@ jobs:
       - name: 'Scenario 2: capacity, 25 → 200 members, per-address limits raised'
         run: |
           kill "$(cat api.pid)"; sleep 2
+          # Start clean: sign-in counters from scenario 1 would otherwise carry over.
+          psql "$DATABASE_URL" -qc 'DELETE FROM auth_rate_limits'
           source start-api.sh
           start_api API_RATE_LIMIT_PER_MINUTE=1000000 LOGIN_MAX_ATTEMPTS_PER_IP=10000
           SCENARIO=capacity k6 run --quiet scripts/load/portal-load.js
       - name: 'Scenario 3: slow phone networks'
         run: |
           pnpm --filter @constitution/web exec playwright install --with-deps chromium
-          cd apps/web && node perf/slow-network.mjs && mv slow-network.md ../../
+          psql "$DATABASE_URL" -qc 'DELETE FROM auth_rate_limits'
+          # The same compression as the production proxy (Caddy: zstd, gzip), in front of the app.
+          printf ':3200 {\n\tencode zstd gzip\n\treverse_proxy 127.0.0.1:3100\n}\n' > Caddyfile.perf
+          docker run -d --name perf-caddy --network host -v "$PWD/Caddyfile.perf:/etc/caddy/Caddyfile:ro" caddy:2.8-alpine
+          for i in $(seq 1 30); do curl -fs http://127.0.0.1:3200/api/health >/dev/null && break; sleep 1; done
+          cd apps/web && BASE_URL=http://127.0.0.1:3200 node perf/slow-network.mjs && mv slow-network.md ../../
       - name: Results
         if: always()
         run: |

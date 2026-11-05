@@ -46,9 +46,16 @@ async function measure(network, index) {
   async function step(name, work) {
     bytes = 0;
     const started = Date.now();
-    await work();
+    let label = name;
+    try {
+      await work();
+    } catch {
+      const text = (await page.locator('body').innerText().catch(() => '')).slice(0, 300);
+      console.warn(`${network.name} / ${name}: did not finish. Page showed: ${text}`);
+      label = `${name} (DID NOT FINISH in 3 minutes)`;
+    }
     results.push({
-      step: name,
+      step: label,
       seconds: (Date.now() - started) / 1000,
       kilobytes: Math.round(bytes / 1024),
     });

@@ -56,13 +56,16 @@ export class AuthService {
   async login(email: string, password: string, meta: RequestMeta): Promise<LoginResult> {
     const emailKey = `login:email:${hashToken(email)}`;
     const ipKey = `login:ip:${meta.ipAddress ?? 'unknown'}`;
-    const [emailAttempts, ipAttempts] = await Promise.all([
+    // Per address, only FAILED sign-ins count (task T3): many members share one address on a
+    // church's Wi-Fi or a mobile network, and their successful sign-ins must not lock each other
+    // out. Guessing passwords from one address is still stopped after the limit.
+    const [emailAttempts, ipFailures] = await Promise.all([
       this.rateLimits.hit(emailKey, this.windowSeconds),
-      this.rateLimits.hit(ipKey, this.windowSeconds),
+      this.rateLimits.count(ipKey, this.windowSeconds),
     ]);
     if (
       emailAttempts > this.config.LOGIN_MAX_ATTEMPTS_PER_EMAIL ||
-      ipAttempts > this.config.LOGIN_MAX_ATTEMPTS_PER_IP
+      ipFailures >= this.config.LOGIN_MAX_ATTEMPTS_PER_IP
     ) {
       await this.audit.record({
         action: 'auth.login.rate_limited',
@@ -77,6 +80,7 @@ export class AuthService {
     const user = await this.usersService.findByEmail(email);
     const passwordOk = await this.passwords.verify(user?.passwordHash, password);
     if (!user || !passwordOk) {
+      await this.rateLimits.hit(ipKey, this.windowSeconds);
       await this.audit.record({
         action: 'auth.login.failed',
         outcome: 'failure',

@@ -204,6 +204,21 @@ describe.runIf(Boolean(testDatabaseUrl))('authentication', () => {
       expect(events.some((event) => event.targetId === maskEmail(user.email))).toBe(true);
     });
 
+    it('does not count successful sign-ins against the address (members on one Wi-Fi)', async () => {
+      const limited = await startTestApp({ LOGIN_MAX_ATTEMPTS_PER_IP: '3' });
+      try {
+        for (let person = 0; person < 6; person += 1) {
+          const member = await createUser(limited.db, { email: uniqueEmail(`wifi-${person}`) });
+          await client(limited)
+            .post('/api/v1/auth/login')
+            .send({ email: member.email, password: TEST_PASSWORD })
+            .expect(200);
+        }
+      } finally {
+        await limited.close();
+      }
+    });
+
     it('limits attempts from one network address across many accounts', async () => {
       const limited = await startTestApp({ LOGIN_MAX_ATTEMPTS_PER_IP: '3' });
       try {

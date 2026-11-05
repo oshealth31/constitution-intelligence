@@ -39,7 +39,9 @@ async function main(): Promise<void> {
         result.created ? 'Created Platform Super Admin.' : 'Granted Platform Super Admin.',
       );
       if (!sent) {
-        console.error('The setup email could not be sent. Check the email settings, then run again.');
+        console.error(
+          'The setup email could not be sent. Check the email settings, then run again.',
+        );
         process.exitCode = 1;
         return;
       }

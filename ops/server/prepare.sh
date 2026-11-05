@@ -67,6 +67,8 @@ X11Forwarding no
 MaxAuthTries 3
 CONF
 if command -v sshd > /dev/null; then
+  # sshd -t needs this folder, which only exists while SSH is running (on demand in 24.04).
+  install -d -m 0755 /run/sshd
   sshd -t
   # Ubuntu 24.04 starts SSH on demand; this reloads it only if it is running.
   systemctl try-reload-or-restart ssh.service

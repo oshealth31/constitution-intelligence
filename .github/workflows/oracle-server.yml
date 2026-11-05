@@ -1,0 +1,118 @@
+# Keeps trying to create the free Oracle Cloud Arm server (Task S2), every 15 minutes, because
+# Oracle's free Arm servers in Johannesburg are often all in use. As soon as the server exists it
+# opens the web ports (80, 443) and switches itself off. Can also be started by hand.
+# Guide: docs/operations/oracle-cloud.md ("Automatic retry").
+#
+# GitHub secrets (Settings → Secrets and variables → Actions):
+#   OCI_TENANCY_OCID, OCI_USER_OCID, OCI_FINGERPRINT  from Oracle → Profile → API keys
+#   OCI_API_KEY      the API private key file (.pem) downloaded when the API key was added
+#   DEPLOY_SSH_KEY   the server's SSH private key (its public key is derived from it here)
+#
+# THE LOGS ARE PUBLIC: nothing here prints the IP address, an OCID or a key.
+name: Oracle server (create, retrying)
+
+on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: oracle-server
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  actions: write # to switch this workflow off once the server exists
+
+jobs:
+  create:
+    name: Create the Arm server if there is room
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the secrets
+        id: secrets
+        env:
+          OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
+          OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
+          OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+          OCI_API_KEY: ${{ secrets.OCI_API_KEY }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          missing=""
+          for name in OCI_TENANCY_OCID OCI_USER_OCID OCI_FINGERPRINT OCI_API_KEY DEPLOY_SSH_KEY; do
+            [ -n "${!name}" ] || missing="$missing $name"
+          done
+          if [ -n "$missing" ]; then
+            # Not an error: the owner has not added them yet. Do nothing until they are there.
+            echo "::notice::Waiting for the GitHub secrets:$missing (docs/operations/oracle-cloud.md)."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up the Oracle command-line tool
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
+          OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
+          OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+          OCI_API_KEY: ${{ secrets.OCI_API_KEY }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          pipx install oci-cli > /dev/null
+          install -d -m 0700 ~/.oci ~/.ssh
+          printf '%s\n' "$OCI_API_KEY" | tr -d '\r' > ~/.oci/api_key.pem
+          chmod 0600 ~/.oci/api_key.pem
+          cat > ~/.oci/config <<CONF
+          [DEFAULT]
+          user=$OCI_USER_OCID
+          fingerprint=$OCI_FINGERPRINT
+          tenancy=$OCI_TENANCY_OCID
+          region=af-johannesburg-1
+          key_file=~/.oci/api_key.pem
+          CONF
+          chmod 0600 ~/.oci/config
+          # The server's public SSH key, from the private key already in GitHub for the Deploy workflow.
+          printf '%s\n' "$DEPLOY_SSH_KEY" | tr -d '\r' > ~/.ssh/id_deploy
+          chmod 0600 ~/.ssh/id_deploy
+          ssh-keygen -y -f ~/.ssh/id_deploy > ~/.ssh/id_deploy.pub || {
+            echo "::error::DEPLOY_SSH_KEY is not a valid private key."; exit 1; }
+          oci iam region-subscription list --output json > /dev/null || {
+            echo "::error::Oracle refused the API key. Check OCI_USER_OCID, OCI_FINGERPRINT and OCI_API_KEY."; exit 1; }
+          echo "Signed in to Oracle (Johannesburg)."
+
+      - name: Try to create the server
+        id: create
+        if: steps.secrets.outputs.ready == 'true'
+        env:
+          TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
+        run: |
+          set +e
+          SSH_PUBLIC_KEY="$(cat ~/.ssh/id_deploy.pub)" bash ops/server/oracle-create-server.sh
+          status=$?
+          set -e
+          if [ "$status" = 3 ]; then
+            echo "::notice::No free Arm server available right now. Trying again in 15 minutes."
+            echo "done=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          [ "$status" = 0 ] || exit "$status"
+          echo "done=true" >> "$GITHUB_OUTPUT"
+
+      - name: Open the web ports
+        if: steps.create.outputs.done == 'true'
+        env:
+          TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
+        run: bash ops/server/oracle-open-web-ports.sh
+
+      - name: Switch off the retries
+        if: steps.create.outputs.done == 'true' && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh workflow disable oracle-server.yml --repo "$GITHUB_REPOSITORY"
+          echo "::notice::The server exists. Retries are switched off. Next: copy its public IP address into the DEPLOY_HOST secret (docs/operations/oracle-cloud.md)."

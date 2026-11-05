@@ -76,3 +76,12 @@ export async function organisationIdFor(page: Page, slug: string): Promise<strin
   if (!found) throw new Error(`Not a member of ${slug}`);
   return found.organisationId;
 }
+
+/**
+ * Phone-sized screen options for test.use (Task T1). Firefox has no "mobile" mode, so there
+ * only the screen size and touch are set; the iPhone and Android runs use their own device.
+ */
+export function phone(width: number, height: number) {
+  const firefox = process.env.E2E_BROWSER === 'firefox';
+  return { viewport: { width, height }, hasTouch: true, ...(firefox ? {} : { isMobile: true }) };
+}

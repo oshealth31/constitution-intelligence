@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { expect, test, type Page } from '@playwright/test';
-import { enterTwoStepCodeIfNeeded } from './qa-helpers';
+import { enterTwoStepCodeIfNeeded, phone } from './qa-helpers';
 
 const accounts = JSON.parse(
   readFileSync(path.join(__dirname, '.auth', 'accounts.json'), 'utf8'),
@@ -171,8 +171,8 @@ test('an organisation administrator cannot use the control centre', async ({ pag
   expect(response.status()).toBe(403);
 });
 
-test.describe('on a phone', () => {
-  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+test.describe('on a phone', { tag: '@phone' }, () => {
+  test.use(phone(390, 844));
 
   test('the control centre is usable on a small screen', async ({ page }) => {
     await signIn(page, SUPER_ADMIN);

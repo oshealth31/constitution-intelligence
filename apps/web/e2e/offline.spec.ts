@@ -53,7 +53,7 @@ async function goOffline(context: BrowserContext, page: Page) {
   await expect.poll(() => page.evaluate(() => navigator.onLine)).toBe(false);
 }
 
-test('save for offline reading, read and search offline, then sync when back online', async ({
+test('save for offline reading, read and search offline, then sync when back online', { tag: '@phone' }, async ({
   page,
   context,
 }) => {
@@ -116,7 +116,7 @@ test('save for offline reading, read and search offline, then sync when back onl
   expect(await cachedUrls(page)).not.toContain(`/offline/${SLUG}`);
 });
 
-test('the Ask page explains that live AI does not work offline', async ({ page, context }) => {
+test('the Ask page explains that live AI does not work offline', { tag: '@phone' }, async ({ page, context }) => {
   await signIn(page);
   await page
     .getByRole('navigation', { name: 'Main', exact: true })
@@ -132,7 +132,7 @@ test('the Ask page explains that live AI does not work offline', async ({ page, 
   await expect(page.getByLabel('Your question')).toBeVisible();
 });
 
-test('signing out removes the saved copy from the device', async ({ page }) => {
+test('signing out removes the saved copy from the device', { tag: '@phone' }, async ({ page }) => {
   await signIn(page);
   await saveForOffline(page);
   await page

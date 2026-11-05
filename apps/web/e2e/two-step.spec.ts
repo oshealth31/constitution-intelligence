@@ -4,12 +4,12 @@
 // "Sample New Staff Member", who has no two-step sign-in at the start of every run.
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { accounts, apiFrom, signInControlCentre } from './qa-helpers';
+import { accounts, apiFrom, signInControlCentre, phone } from './qa-helpers';
 import { codeForStep, currentStep } from './totp';
 
 const NEW_STAFF = 'newstaff@sample.test';
 
-test.use({ viewport: { width: 360, height: 740 }, isMobile: true, hasTouch: true });
+test.use(phone(360, 740));
 
 async function passwordStep(page: Page) {
   await page.goto('/admin/sign-in');
@@ -30,7 +30,7 @@ async function fitsThePhone(page: Page) {
   expect(sideways).toBeLessThanOrEqual(1);
 }
 
-test('a new Super Admin sets up two-step sign-in, then signs in with it', async ({
+test('a new Super Admin sets up two-step sign-in, then signs in with it', { tag: '@phone' }, async ({
   page,
   browser,
 }) => {

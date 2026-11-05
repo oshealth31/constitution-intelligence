@@ -134,3 +134,68 @@ jobs:
 
       - name: Run browser tests against the real API and database
         run: pnpm --filter @constitution/web run test:e2e
+
+  # Task T1: the same tests in Firefox and Safari's engine (WebKit), and the phone tests on an
+  # emulated iPhone (WebKit) and Android phone (Chrome). Each browser gets its own database.
+  e2e-browsers:
+    name: Browser tests (${{ matrix.browser }})
+    needs: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [firefox, webkit, mobile-safari, mobile-chrome]
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_DB: ci
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+
+    env:
+      DATABASE_URL: postgresql://ci@localhost:5432/ci
+      STORAGE_LOCAL_DIR: /tmp/ci-e2e-storage
+      API_INTERNAL_URL: http://127.0.0.1:4100
+      E2E_BROWSER: ${{ matrix.browser }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - run: pnpm install --frozen-lockfile
+      - name: Build packages, API and web app
+        run: |
+          pnpm build:packages
+          pnpm --filter @constitution/api run build
+          pnpm --filter @constitution/web run build
+      - name: Apply database migrations
+        run: pnpm --filter @constitution/db run migrate
+      - name: Install the browser engine
+        run: |
+          case "$E2E_BROWSER" in
+            firefox) engine=firefox ;;
+            webkit|mobile-safari) engine=webkit ;;
+            *) engine=chromium ;;
+          esac
+          pnpm --filter @constitution/web exec playwright install --with-deps "$engine"
+      - name: Run browser tests
+        run: pnpm --filter @constitution/web run test:e2e
+      - name: Keep failure traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: traces-${{ matrix.browser }}
+          path: apps/web/test-results
+          retention-days: 7

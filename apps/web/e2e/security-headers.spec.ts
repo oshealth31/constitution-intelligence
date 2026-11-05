@@ -24,8 +24,12 @@ async function watchViolations(page: Page): Promise<string[]> {
         target && 'tagName' in target
           ? `${target.tagName.toLowerCase()}${target.getAttribute('type') ? `[type=${target.getAttribute('type')}]` : ''}${target.id ? `#${target.id}` : ''}`
           : 'document';
+      const detail =
+        target && 'outerHTML' in target
+          ? ` style="${target.getAttribute('style') ?? ''}" html=${target.outerHTML.slice(0, 160)}`
+          : '';
       console.error(
-        `Content Security Policy violation: ${event.violatedDirective} ${event.blockedURI} on ${where} (${event.sourceFile}:${event.lineNumber})`,
+        `Content Security Policy violation: ${event.violatedDirective} ${event.blockedURI} on ${where} (${event.sourceFile}:${event.lineNumber}:${event.columnNumber})${detail}`,
       );
     });
   });

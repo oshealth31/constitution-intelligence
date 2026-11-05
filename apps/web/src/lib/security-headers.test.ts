@@ -27,7 +27,10 @@ describe('buildContentSecurityPolicy', () => {
   });
 
   it("allows the offline page's own <style> block by its fingerprint only", () => {
-    const html = readFileSync(path.resolve(process.cwd(), 'public', 'offline-fallback.html'), 'utf8');
+    const html = readFileSync(
+      path.resolve(process.cwd(), 'public', 'offline-fallback.html'),
+      'utf8',
+    );
     const blocks = [...html.matchAll(/<style>([\s\S]*?)<\/style>/g)];
     expect(blocks).toHaveLength(1);
     expect(html).not.toMatch(/style="/);

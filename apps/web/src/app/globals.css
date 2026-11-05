@@ -26,13 +26,13 @@
 :root {
   /* Portal brand colours: the platform defaults, replaced per organisation by the page's own
      script (useCssProperties). Kept in step with brandProperties(null) by a unit test. */
-  --brand-primary: #0B1F3A;
-  --brand-on-primary: #FFFFFF;
-  --brand-secondary: #F5EFE2;
+  --brand-primary: #0b1f3a;
+  --brand-on-primary: #ffffff;
+  --brand-secondary: #f5efe2;
   --brand-on-secondary: #111827;
-  --brand-accent: #1BA6A6;
+  --brand-accent: #1ba6a6;
   --brand-on-accent: #111827;
-  --brand-ink: #0B1F3A;
+  --brand-ink: #0b1f3a;
 }
 
 html {

@@ -106,7 +106,9 @@ test('the Control Centre shows bars and colours with no inline styles', async ({
   expect(violations).toEqual([]);
 });
 
-test('the static offline page is styled, with only its own style block allowed', async ({ page }) => {
+test('the static offline page is styled, with only its own style block allowed', async ({
+  page,
+}) => {
   const violations = await watchViolations(page);
   const response = await page.goto('/offline-fallback.html');
   expect(response?.headers()['content-security-policy']).toMatch(/style-src 'sha256-[^']+'/);

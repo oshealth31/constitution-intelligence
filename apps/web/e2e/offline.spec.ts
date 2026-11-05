@@ -48,6 +48,16 @@ async function cachedUrls(page: Page): Promise<string[]> {
   });
 }
 
+/** Opens a section from whichever main menu is showing (top on large screens, bottom on phones). */
+async function openFromMenu(page: Page, name: string, short: string) {
+  const bottom = page.getByRole('navigation', { name: 'Main (bottom)' });
+  if (await bottom.isVisible()) {
+    await bottom.getByRole('link', { name: short, exact: true }).click();
+  } else {
+    await page.getByRole('navigation', { name: 'Main', exact: true }).getByRole('link', { name }).click();
+  }
+}
+
 async function goOffline(context: BrowserContext, page: Page) {
   await context.setOffline(true);
   await expect.poll(() => page.evaluate(() => navigator.onLine)).toBe(false);
@@ -56,7 +66,14 @@ async function goOffline(context: BrowserContext, page: Page) {
 test(
   'save for offline reading, read and search offline, then sync when back online',
   { tag: '@phone' },
-  async ({ page, context }) => {
+  async ({ page, context, browserName }) => {
+    // Playwright cannot take Firefox's service worker offline (its offline switch does not reach
+    // the worker), so the worker never sees a failed request there. Real Firefox does; the same
+    // journey runs in Chromium, WebKit (Safari), iPhone and Android.
+    test.skip(
+      browserName === 'firefox',
+      "Playwright's offline switch does not reach Firefox's service worker",
+    );
     await signIn(page);
     await saveForOffline(page);
 
@@ -122,10 +139,7 @@ test(
   { tag: '@phone' },
   async ({ page, context }) => {
     await signIn(page);
-    await page
-      .getByRole('navigation', { name: 'Main', exact: true })
-      .getByRole('link', { name: 'Ask' })
-      .click();
+    await openFromMenu(page, 'Ask', 'Ask');
     await expect(page.getByLabel('Your question')).toBeVisible();
     await goOffline(context, page);
     await expect(
@@ -140,10 +154,7 @@ test(
 test('signing out removes the saved copy from the device', { tag: '@phone' }, async ({ page }) => {
   await signIn(page);
   await saveForOffline(page);
-  await page
-    .getByRole('navigation', { name: 'Main', exact: true })
-    .getByRole('link', { name: 'My profile' })
-    .click();
+  await openFromMenu(page, 'My profile', 'Profile');
   await page
     .getByRole('button', { name: /^Sign out/ })
     .first()

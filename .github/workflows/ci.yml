@@ -192,6 +192,12 @@ jobs:
           pnpm --filter @constitution/web exec playwright install --with-deps "$engine"
       - name: Run browser tests
         run: pnpm --filter @constitution/web run test:e2e
+      - name: Show what the page looked like when a test failed
+        if: failure()
+        run: |
+          find apps/web/test-results -name error-context.md | while read -r file; do
+            echo "::group::$file"; head -c 6000 "$file"; echo; echo "::endgroup::"
+          done
       - name: Keep failure traces
         if: failure()
         uses: actions/upload-artifact@v4

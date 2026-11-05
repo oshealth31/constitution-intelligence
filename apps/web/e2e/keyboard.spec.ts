@@ -17,7 +17,7 @@ async function focused(page: Page) {
       tag: element.tagName.toLowerCase(),
       id: element.id,
       text: (element.getAttribute('aria-label') ?? element.textContent ?? '').trim().slice(0, 80),
-      label: element.labels?.[0]?.textContent?.trim() ?? '',
+      label: (element as HTMLInputElement).labels?.[0]?.textContent?.trim() ?? '',
       // A focus outline, or the focus ring (box-shadow) used on form fields.
       indicator:
         (style.outlineStyle !== 'none' && parseFloat(style.outlineWidth) > 0) ||

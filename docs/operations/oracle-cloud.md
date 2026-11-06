@@ -47,7 +47,7 @@ a key file), but a phone works too.
 
 Free Arm servers in Johannesburg are often all in use. Instead of trying by hand, the
 **Oracle server (create, retrying)** workflow ([.github/workflows/oracle-server.yml](../../.github/workflows/oracle-server.yml))
-tries every 15 minutes, day and night. It uses
+tries every few minutes, day and night. It uses
 [ops/server/oracle-create-server.sh](../../ops/server/oracle-create-server.sh) and the same
 settings as B3–B6: Ubuntu 24.04, 2 OCPUs and 12 GB (then 1 OCPU and 6 GB), 100 GB at
 10 VPUs/GB, and a public IP address. When the server exists, it opens ports 80 and 443

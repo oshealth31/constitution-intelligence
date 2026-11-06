@@ -64,7 +64,9 @@ for size in $sizes; do
   fi
   echo "== Trying $ocpus OCPU, $memory GB"
   set +e
-  result="$(oci compute instance launch --output json \
+  # --no-retry: one request per attempt. The tool's own automatic retries would send many
+  # requests in a row, and Oracle then answers "TooManyRequests" instead of trying.
+  result="$(oci compute instance launch --output json --no-retry \
     --compartment-id "$compartment" --availability-domain "$ad" \
     --display-name "$name" --shape "$shape" \
     --shape-config "{\"ocpus\": $ocpus, \"memoryInGBs\": $memory}" \
@@ -80,6 +82,7 @@ for size in $sizes; do
   if grep -qiE 'out of (host )?capacity|TooManyRequests|LimitExceeded' <<<"$result"; then
     # Only the reason, never the full answer (it can contain account details).
     echo "Not this time: $(grep -oiE 'out of (host )?capacity|TooManyRequests|LimitExceeded' <<<"$result" | head -n 1)."
+    grep -oE '"message": "[^"]{0,160}' <<<"$result" | head -n 1 || true
     continue
   fi
   echo "Oracle refused the request for another reason:" >&2

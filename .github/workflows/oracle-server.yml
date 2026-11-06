@@ -1,4 +1,4 @@
-# Keeps trying to create the free Oracle Cloud Arm server (Task S2), every 15 minutes, because
+# Keeps trying to create the free Oracle Cloud Arm server (Task S2), every few minutes, because
 # Oracle's free Arm servers in Johannesburg are often all in use. As soon as the server exists it
 # opens the web ports (80, 443) and switches itself off. Can also be started by hand.
 # Guide: docs/operations/oracle-cloud.md ("Automatic retry").
@@ -11,9 +11,12 @@
 # THE LOGS ARE PUBLIC: nothing here prints the IP address, an OCID or a key.
 name: Oracle server (create, retrying)
 
+# GitHub often delays or skips scheduled runs (only a few ran in the first hours), so each run
+# keeps trying by itself for up to about 5.5 hours, once every few minutes. The schedule only
+# starts a new run when the previous one has ended.
 on:
   schedule:
-    - cron: '7,22,37,52 * * * *'
+    - cron: '17 * * * *'
   workflow_dispatch:
 
 concurrency:
@@ -28,7 +31,7 @@ jobs:
   create:
     name: Create the Arm server if there is room
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
 
@@ -91,17 +94,22 @@ jobs:
         env:
           TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
         run: |
-          set +e
-          SSH_PUBLIC_KEY="$(cat ~/.ssh/id_deploy.pub)" bash ops/server/oracle-create-server.sh
-          status=$?
-          set -e
-          if [ "$status" = 3 ]; then
-            echo "::notice::No free Arm server available right now. Trying again in 15 minutes."
-            echo "done=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          [ "$status" = 0 ] || exit "$status"
-          echo "done=true" >> "$GITHUB_OUTPUT"
+          # Up to 80 attempts, about 4 minutes apart (about 5 hours 20 minutes in all).
+          for attempt in $(seq 1 80); do
+            echo "== Attempt $attempt at $(date -u +%H:%M) UTC"
+            set +e
+            SSH_PUBLIC_KEY="$(cat ~/.ssh/id_deploy.pub)" bash ops/server/oracle-create-server.sh
+            status=$?
+            set -e
+            if [ "$status" = 0 ]; then
+              echo "done=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            [ "$status" = 3 ] || exit "$status"
+            sleep 240
+          done
+          echo "::notice::No free Arm server became available during this run. The next run continues."
+          echo "done=false" >> "$GITHUB_OUTPUT"
 
       - name: Open the web ports
         if: steps.create.outputs.done == 'true'

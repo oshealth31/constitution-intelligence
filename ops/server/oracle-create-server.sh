@@ -83,6 +83,9 @@ for size in $sizes; do
     # Only the reason, never the full answer (it can contain account details).
     echo "Not this time: $(grep -oiE 'out of (host )?capacity|TooManyRequests|LimitExceeded' <<<"$result" | head -n 1)."
     grep -oE '"message": "[^"]{0,160}' <<<"$result" | head -n 1 || true
+    # A second request straight after the first is refused as "too many requests", so wait
+    # before trying the next size.
+    sleep "${SIZE_PAUSE_SECONDS:-60}"
     continue
   fi
   echo "Oracle refused the request for another reason:" >&2

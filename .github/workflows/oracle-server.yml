@@ -94,8 +94,8 @@ jobs:
         env:
           TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
         run: |
-          # Up to 80 attempts, about 4 minutes apart (about 5 hours 20 minutes in all).
-          for attempt in $(seq 1 80); do
+          # Up to 70 attempts, about 4-5 minutes apart (about 5 hours in all).
+          for attempt in $(seq 1 70); do
             echo "== Attempt $attempt at $(date -u +%H:%M) UTC"
             set +e
             SSH_PUBLIC_KEY="$(cat ~/.ssh/id_deploy.pub)" bash ops/server/oracle-create-server.sh
@@ -110,6 +110,14 @@ jobs:
           done
           echo "::notice::No free Arm server became available during this run. The next run continues."
           echo "done=false" >> "$GITHUB_OUTPUT"
+
+      # GitHub's hourly schedule is unreliable (sometimes hours late), so each run starts the next
+      # one itself. It stops when the server exists, or when the workflow is switched off.
+      - name: Start the next run
+        if: steps.secrets.outputs.ready == 'true' && steps.create.outputs.done == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run oracle-server.yml --repo "$GITHUB_REPOSITORY" --ref main
 
       - name: Open the web ports
         if: steps.create.outputs.done == 'true'

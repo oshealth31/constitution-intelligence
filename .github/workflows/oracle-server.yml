@@ -94,11 +94,17 @@ jobs:
         env:
           TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
         run: |
-          # Up to 70 attempts, about 4-5 minutes apart (about 5 hours in all).
-          for attempt in $(seq 1 70); do
+          # Keep trying for up to 5 hours (well inside the job's time limit, so the next run is always
+          # started). One request per attempt: Oracle refuses a second request a minute later as
+          # "TooManyRequests", so the sizes take turns: 2 OCPU/12 GB, then 1 OCPU/6 GB.
+          deadline=$(( $(date +%s) + 5 * 3600 ))
+          attempt=0
+          while [ "$(date +%s)" -lt "$deadline" ]; do
+            attempt=$((attempt + 1))
+            if [ $((attempt % 2)) = 1 ]; then size="2:12"; else size="1:6"; fi
             echo "== Attempt $attempt at $(date -u +%H:%M) UTC"
             set +e
-            SSH_PUBLIC_KEY="$(cat ~/.ssh/id_deploy.pub)" bash ops/server/oracle-create-server.sh
+            SIZES="$size" SSH_PUBLIC_KEY="$(cat ~/.ssh/id_deploy.pub)" bash ops/server/oracle-create-server.sh
             status=$?
             set -e
             if [ "$status" = 0 ]; then
@@ -106,7 +112,7 @@ jobs:
               exit 0
             fi
             [ "$status" = 3 ] || exit "$status"
-            sleep 240
+            sleep 180
           done
           echo "::notice::No free Arm server became available during this run. The next run continues."
           echo "done=false" >> "$GITHUB_OUTPUT"

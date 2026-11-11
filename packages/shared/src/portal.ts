@@ -8,22 +8,39 @@ export const SLUG_PATTERN = /^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$/;
 
 /**
  * Words the platform needs for itself. Keep in sync with the
- * organisations_slug_not_reserved constraint in migration 0003.
+ * organisations_slug_not_reserved constraint (migration 0015) and the web app's copy in
+ * apps/web/src/lib/short-link.ts.
+ *
+ * Since the short links (constitutionintel.com/<address>, Task "short portal link"), an
+ * address shares the top level with the site's own pages, so this list also holds the pages
+ * that exist today (offline, icons) and the usual pages a public website adds later.
  */
 export const RESERVED_SLUGS: readonly string[] = [
+  'about',
   'admin',
   'api',
   'app',
   'assets',
   'auth',
+  'blog',
+  'careers',
+  'contact',
   'control-centre',
+  'docs',
+  'faq',
   'forgot-password',
   'help',
+  'icons',
+  'legal',
   'login',
   'logout',
   'manage',
+  'news',
+  'offline',
   'platform',
   'portal',
+  'pricing',
+  'privacy',
   'reset-password',
   'settings',
   'sign-in',
@@ -31,6 +48,7 @@ export const RESERVED_SLUGS: readonly string[] = [
   'static',
   'status',
   'support',
+  'terms',
   'www',
 ];
 

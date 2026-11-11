@@ -371,6 +371,8 @@ describe.runIf(Boolean(testDatabaseUrl))('organisation portals', () => {
         .send({ slug: 'new-address-1' })
         .expect(403);
       await tenant.owner.patch(orgUrl(tenant, '/settings')).send({ slug: 'admin' }).expect(400);
+      // Reserved since the short links (/offline is a page of the website).
+      await tenant.owner.patch(orgUrl(tenant, '/settings')).send({ slug: 'offline' }).expect(400);
       await tenant.owner
         .patch(orgUrl(tenant, '/settings'))
         .send({ slug: 'Bad Address' })

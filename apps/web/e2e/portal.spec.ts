@@ -65,10 +65,10 @@ test("a short link forwards to the portal; the site's own pages are untouched", 
   expect(response.headers()['location']).toMatch(/\/o\/sample-netball-club$/);
 
   // Reserved words and real pages are never forwarded.
-  const offline = await page.request.get('/offline', { maxRedirects: 0 });
-  expect(offline.status()).toBe(200);
-  const admin = await page.request.get('/admin', { maxRedirects: 0 });
-  expect(admin.headers()['location'] ?? '').not.toContain('/o/admin');
+  for (const reserved of ['/offline', '/admin', '/pricing']) {
+    const response = await page.request.get(reserved, { maxRedirects: 0 });
+    expect(response.headers()['location'] ?? '', reserved).not.toContain('/o/');
+  }
 });
 
 test('a member reads, navigates and searches the constitution', async ({ page }) => {

@@ -54,9 +54,8 @@ export const RESERVED_ADDRESSES: readonly string[] = [
  * word) → null, so the request is handled as usual.
  */
 export function shortLinkTarget(pathname: string): string | null {
-  const match = /^\/([^/]+)\/?$/.exec(pathname);
-  if (!match) return null;
-  const address = match[1];
+  const address = /^\/([^/]+)\/?$/.exec(pathname)?.[1];
+  if (!address) return null;
   if (!PORTAL_ADDRESS_PATTERN.test(address) || RESERVED_ADDRESSES.includes(address)) {
     return null;
   }

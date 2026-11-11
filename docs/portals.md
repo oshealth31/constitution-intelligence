@@ -6,6 +6,14 @@ Every organisation gets its own branded portal on the shared platform at:
 /o/<portal address>        e.g. /o/sample-community-choir
 ```
 
+**Short link:** `/<portal address>` (for example `constitutionintel.com/rbpc`) forwards to
+`/o/<portal address>` with a temporary redirect (307), keeping any `?…` part. It is handled in
+`apps/web/src/proxy.ts` (`lib/short-link.ts`): only one path segment that is a valid,
+non-reserved address is forwarded, so the site's own pages never are. Because addresses now share
+the top level with the website, the reserved words include its current pages (`offline`, `icons`)
+and the pages a public website usually adds (`about`, `pricing`, `privacy`, `terms`, …;
+migration 0015). A test checks that every top-level page and public file stays reserved.
+
 There is one code base for all organisations. A portal's look comes entirely from the
 organisation's saved settings, loaded each time a page opens. No organisation has separate code.
 
@@ -140,5 +148,8 @@ The seed prints one-time random passwords for every account. All data is fiction
   can be added later without changing portal code.
 - Logos are not resized or re-encoded on upload; size is limited to 512 KB and display size is fixed
   by the page.
-- Changing the portal address does not keep a redirect from the old address.
+- Changing the portal address does not keep a redirect from the old address (neither the full
+  link nor the short link).
+- A new top-level page on the website must have its name added to the reserved words first
+  (shared `RESERVED_SLUGS`, the web copy and a migration), or an organisation could hold it.
 - "Ask a question" (AI answers) is not part of the portal yet; it arrives with the AI stage.

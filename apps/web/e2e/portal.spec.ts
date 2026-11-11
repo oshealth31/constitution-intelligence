@@ -53,6 +53,22 @@ test('each organisation has its own branded sign-in page from the same code', as
   await expect(page.getByRole('heading', { name: 'We could not find this portal' })).toBeVisible();
 });
 
+test('a short link forwards to the portal; the site\'s own pages are untouched', async ({ page }) => {
+  await page.goto('/sample-community-choir?from=whatsapp');
+  await expect(page).toHaveURL(/\/o\/sample-community-choir\?from=whatsapp$/);
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+
+  const response = await page.request.get('/sample-netball-club', { maxRedirects: 0 });
+  expect(response.status()).toBe(307);
+  expect(response.headers()['location']).toMatch(/\/o\/sample-netball-club$/);
+
+  // Reserved words and real pages are never forwarded.
+  const offline = await page.request.get('/offline', { maxRedirects: 0 });
+  expect(offline.status()).toBe(200);
+  const admin = await page.request.get('/admin', { maxRedirects: 0 });
+  expect(admin.headers()['location'] ?? '').not.toContain('/o/admin');
+});
+
 test('a member reads, navigates and searches the constitution', async ({ page }) => {
   await portalSignIn(page, CHOIR, 'member@sample.test');
   await expect(

@@ -106,6 +106,13 @@
       "when": 1793910000000,
       "tag": "0014_audit_seal",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1793920000000,
+      "tag": "0015_more_reserved_addresses",
+      "breakpoints": true
     }
   ]
 }

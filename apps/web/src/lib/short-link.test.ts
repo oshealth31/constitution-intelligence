@@ -1,10 +1,7 @@
 import { readdirSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import {
-  RESERVED_SLUGS,
-  SLUG_PATTERN,
-} from '../../../../packages/shared/src/portal';
+import { RESERVED_SLUGS, SLUG_PATTERN } from '../../../../packages/shared/src/portal';
 import { PORTAL_ADDRESS_PATTERN, RESERVED_ADDRESSES, shortLinkTarget } from './short-link';
 
 describe('short portal links', () => {
@@ -43,7 +40,7 @@ describe('short portal links', () => {
     expect([...RESERVED_ADDRESSES].sort()).toEqual([...RESERVED_SLUGS].sort());
   });
 
-  it('never shadows one of the web app\'s own top-level pages', () => {
+  it("never shadows one of the web app's own top-level pages", () => {
     // Every folder directly under src/app (a page) and every file in public/ must be reserved
     // or impossible as an address, or an organisation could take its name.
     const appDir = path.resolve(__dirname, '../app');

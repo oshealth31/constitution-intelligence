@@ -53,7 +53,9 @@ test('each organisation has its own branded sign-in page from the same code', as
   await expect(page.getByRole('heading', { name: 'We could not find this portal' })).toBeVisible();
 });
 
-test('a short link forwards to the portal; the site\'s own pages are untouched', async ({ page }) => {
+test("a short link forwards to the portal; the site's own pages are untouched", async ({
+  page,
+}) => {
   await page.goto('/sample-community-choir?from=whatsapp');
   await expect(page).toHaveURL(/\/o\/sample-community-choir\?from=whatsapp$/);
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();

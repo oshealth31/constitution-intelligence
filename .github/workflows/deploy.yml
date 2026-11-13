@@ -34,7 +34,14 @@ on:
       task:
         description: What to do
         type: choice
-        options: [status, prepare-server, release, create-super-admin, test-alert, setup-offsite, backup-now]
+        options:
+          - status
+          - prepare-server
+          - release
+          - create-super-admin
+          - test-alert
+          - setup-offsite
+          - backup-now
         default: status
       admin_email:
         description: 'create-super-admin only: email address of the new Super Admin'

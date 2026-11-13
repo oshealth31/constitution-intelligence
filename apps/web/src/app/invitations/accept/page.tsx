@@ -29,7 +29,11 @@ function problemFrom(caught: unknown): Problem {
   if (caught instanceof ApiError && caught.status === 401) {
     return { kind: 'has-account', text: caught.message };
   }
-  if (caught instanceof ApiError && caught.status === 403 && /different email/i.test(caught.message)) {
+  if (
+    caught instanceof ApiError &&
+    caught.status === 403 &&
+    /different email/i.test(caught.message)
+  ) {
     return { kind: 'other-account', text: caught.message };
   }
   return { kind: 'message', text: describeError(caught) };
@@ -124,7 +128,12 @@ function AcceptInvitationForm() {
         </div>
       )}
 
-      <form method="post" onSubmit={onSubmit} className="space-y-5" aria-label="Create your account">
+      <form
+        method="post"
+        onSubmit={onSubmit}
+        className="space-y-5"
+        aria-label="Create your account"
+      >
         <p className="text-sm text-navy-700">
           Choose your name and a password to create your account and join your organisation.
         </p>

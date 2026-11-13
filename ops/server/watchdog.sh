@@ -65,8 +65,10 @@ throttled="$(grep -cE '"statusCode":429' <<<"$api_log")"
 [ "$throttled" -le 200 ] || problem flood "PROBLEM: $throttled requests were refused as too many in the last 10 minutes (possible flood)."
 
 # 6. Sign-in attack, from the audit log (counts only).
-failed_logins="$(compose exec -T postgres psql -U postgres -d constitution -tAc \
+failed_logins="$(compose exec -T postgres psql -U constitution_owner -d constitution -tAc \
   "SELECT count(*) FROM audit_events WHERE action = 'auth.login.failed' AND occurred_at > now() - interval '10 minutes'" 2>/dev/null | tr -dc '0-9')"
+# If the count cannot be read at all, say so (a silent "0" would hide an attack).
+[ -n "$failed_logins" ] || problem sign-in-check "PROBLEM: the failed sign-in count could not be read from the database."
 [ "${failed_logins:-0}" -le 50 ] || problem sign-in "PROBLEM: $failed_logins failed sign-ins in the last 10 minutes (possible attack)."
 
 # 7. Backups and the audit seal, once their timers are installed (tasks S6/S7).

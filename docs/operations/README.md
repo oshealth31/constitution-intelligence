@@ -4,6 +4,7 @@
 | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
 | [production-readiness.md](production-readiness.md)           | Go-live recommendation, readiness checklist, unresolved legal, privacy, security, hosting and operational requirements |
 | [deployment.md](deployment.md)                               | Server layout, first installation, HTTPS requirements, releasing a new version                                         |
+| [go-live-check.md](go-live-check.md)                         | Task S7: the evidence for each go-live condition, the restore test, the recovery keys, the owner's sign-off            |
 | [oracle-cloud.md](oracle-cloud.md)                           | The production server on Oracle Cloud and the Deploy workflow (owner's step-by-step guide)                             |
 | [database-migrations.md](database-migrations.md)             | Applying and writing migrations                                                                                        |
 | [secrets.md](secrets.md)                                     | Creating, storing and rotating secrets                                                                                 |

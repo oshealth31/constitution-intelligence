@@ -15,6 +15,9 @@
 #                       OCI_* secrets (an Oracle API key); delete that key afterwards.
 #   backup-now          take a backup now, copy it off-site, check the copy, seal the audit log
 #                       and copy it off-site, and prove the server's key cannot delete (S6)
+#   restore-test        download the newest off-site backup, restore it into a NEW database
+#                       and storage on the server, compare, check the security rules, start the
+#                       API on it, then remove it (S7). Live data is never touched.
 #
 # GitHub secrets used (Settings → Secrets and variables → Actions):
 #   DEPLOY_HOST     the server's public IP address
@@ -42,6 +45,7 @@ on:
           - test-alert
           - setup-offsite
           - backup-now
+          - restore-test
         default: status
       admin_email:
         description: 'create-super-admin only: email address of the new Super Admin'
@@ -285,6 +289,10 @@ jobs:
               if rclone deletefile \"\$OFFSITE_REMOTE/\$newest\$first\" 2>/dev/null; then echo \"FAIL: the server key could delete a backup\"; exit 1; fi
               echo \"ok: deleting a backup was refused\""
             echo "== Timers"; systemctl list-timers "constitution-*" --no-pager | head -n 6'
+
+      - name: Restore test from the off-site backup
+        if: inputs.task == 'restore-test'
+        run: ssh server 'sudo bash /srv/constitution/ops/server/restore-test.sh'
 
       - name: Status
         if: inputs.task == 'status' || always()

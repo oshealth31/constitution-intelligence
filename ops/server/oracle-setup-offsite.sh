@@ -14,9 +14,16 @@
 #   - an S3 access key for that user, printed ONLY to the file given as the first argument
 #     (rclone configuration), never to the log. Skipped if KEEP_EXISTING_KEY=1.
 #
-# Needs: TENANCY_OCID; the OCI CLI configured for region af-johannesburg-1.
+# Needs: TENANCY_OCID, OWNER_USER_OCID (the signed-in owner); the OCI CLI configured for region
+# af-johannesburg-1.
 set -euo pipefail
 : "${TENANCY_OCID:?}"
+# Pasted secrets often carry a space, a line break or the "tenancy=" label: remove them.
+TENANCY_OCID="$(printf '%s' "$TENANCY_OCID" | tr -d '[:space:]' | sed 's/^tenancy=//')"
+[[ "$TENANCY_OCID" =~ ^ocid1\.tenancy\.[a-z0-9._-]+$ ]] || {
+  echo "OCI_TENANCY_OCID does not look like a tenancy OCID (it must start with ocid1.tenancy.)." >&2
+  exit 1
+}
 rclone_out="${1:?Usage: oracle-setup-offsite.sh <rclone.conf to write>}"
 region=af-johannesburg-1
 compartment="$TENANCY_OCID"
@@ -87,7 +94,15 @@ fi
 user_id="$(oci_json iam user list --compartment-id "$compartment" --all |
   jq -r --arg n "$user_name" '.data[]? | select(.name == $n) | .id' | head -n 1)"
 if [ -z "$user_id" ]; then
+  # Identity domains need an email address for every user. Use the owner's address with a
+  # "+constitution-backup" tag (delivered to the owner; never printed).
+  owner_email="$(oci_json iam user get --user-id "${OWNER_USER_OCID:?}" | jq -r '.data.email // empty')"
+  [[ "$owner_email" == *@* ]] || { echo "Could not read the owner's email address in Oracle." >&2; exit 1; }
+  if [ -n "${GITHUB_ACTIONS:-}" ]; then echo "::add-mask::$owner_email"; fi
+  backup_email="${owner_email%@*}+constitution-backup@${owner_email#*@}"
+  if [ -n "${GITHUB_ACTIONS:-}" ]; then echo "::add-mask::$backup_email"; fi
   user_id="$(oci_json iam user create --compartment-id "$compartment" --name "$user_name" \
+    --email "$backup_email" \
     --description "Used only by the Constitution Intelligence server to add backups (Task S6)" | jq -r '.data.id')"
   echo "user created"
 fi
@@ -119,8 +134,9 @@ if [ "${KEEP_EXISTING_KEY:-0}" = 1 ]; then
 fi
 echo "== Access key"
 # A user may hold at most two keys: remove the oldest when two exist already.
+# (The command prints nothing at all when the user has no keys yet.)
 keys="$(oci_json iam customer-secret-key list --user-id "$user_id")"
-if [ "$(jq '.data | length' <<<"$keys")" -ge 2 ]; then
+if [ "$(jq '.data // [] | length' <<<"${keys:-{\}}")" -ge 2 ]; then
   oldest="$(jq -r '.data | sort_by(."time-created") | .[0].id' <<<"$keys")"
   oci iam customer-secret-key delete --user-id "$user_id" --customer-secret-key-id "$oldest" --force
   echo "oldest access key removed"

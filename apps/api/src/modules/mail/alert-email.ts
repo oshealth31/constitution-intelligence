@@ -16,7 +16,8 @@ export function parseAlertRecipients(value: string): string[] {
   if (unique.length === 0) throw new Error('No alert recipients are set.');
   if (unique.length > 5) throw new Error('At most 5 alert recipients.');
   for (const entry of unique) {
-    if (!z.email().safeParse(entry).success) throw new Error('An alert recipient is not a valid email address.');
+    if (!z.email().safeParse(entry).success)
+      throw new Error('An alert recipient is not a valid email address.');
   }
   return unique;
 }

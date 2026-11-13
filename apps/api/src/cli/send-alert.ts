@@ -50,7 +50,11 @@ async function main(): Promise<void> {
   const mail = new MailService(config, logger as never);
   let failures = 0;
   for (const to of recipients) {
-    const sent = await mail.send({ to, subject: subject.data.replace(/[\r\n]+/g, ' '), ...message });
+    const sent = await mail.send({
+      to,
+      subject: subject.data.replace(/[\r\n]+/g, ' '),
+      ...message,
+    });
     if (!sent) failures += 1;
   }
   await mail.onModuleDestroy();

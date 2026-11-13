@@ -36,11 +36,11 @@ Docker restarts a container whose health check fails three times (`restart: unle
 
 Three layers, all free:
 
-| Layer | What | Where | Who is told |
-| --- | --- | --- | --- |
-| **Uptime monitor** | `/api/health` and `/api/v1/health/ready` every 5 minutes, from outside | UptimeRobot (free plan), set up by the owner (below) | Its email and phone app |
-| **Live site check** | `ops/check-health.sh` daily: HTTPS, HTTP→HTTPS redirect, HSTS, certificate > 14 days, API ready | GitHub Actions, `.github/workflows/site-check.yml` (04:41 UTC) | GitHub emails the owner when the run fails |
-| **Server watchdog** | Every 10 minutes on the server: containers, site through HTTPS, certificate, disk > 80 %, memory, server errors, email failures, request floods, failed sign-ins, and (once their timers are installed) backups and the audit seal | `ops/server/watchdog.sh`, timer `constitution-watchdog.timer`, installed by every release | Email to the named responders |
+| Layer               | What                                                                                                                                                                                                                               | Where                                                                                     | Who is told                                |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------ |
+| **Uptime monitor**  | `/api/health` and `/api/v1/health/ready` every 5 minutes, from outside                                                                                                                                                             | UptimeRobot (free plan), set up by the owner (below)                                      | Its email and phone app                    |
+| **Live site check** | `ops/check-health.sh` daily: HTTPS, HTTP→HTTPS redirect, HSTS, certificate > 14 days, API ready                                                                                                                                    | GitHub Actions, `.github/workflows/site-check.yml` (04:41 UTC)                            | GitHub emails the owner when the run fails |
+| **Server watchdog** | Every 10 minutes on the server: containers, site through HTTPS, certificate, disk > 80 %, memory, server errors, email failures, request floods, failed sign-ins, and (once their timers are installed) backups and the audit seal | `ops/server/watchdog.sh`, timer `constitution-watchdog.timer`, installed by every release | Email to the named responders              |
 
 The uptime pages hold no personal data, so an outside service may check them. The watchdog's
 emails hold only counts and states, never personal data.

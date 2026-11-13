@@ -34,7 +34,10 @@ async function main(): Promise<void> {
   // configuration check, so a placeholder is supplied when it is missing.
   const config = loadConfig({
     ...process.env,
-    DATABASE_URL: process.env.DATABASE_URL ?? 'postgresql://unused@localhost/unused',
+    // On the server DATABASE_URL_FILE is set instead; both together are refused.
+    ...(process.env.DATABASE_URL || process.env.DATABASE_URL_FILE
+      ? {}
+      : { DATABASE_URL: 'postgresql://unused@localhost/unused' }),
     LOG_LEVEL: 'warn',
   });
   if (config.MAIL_TRANSPORT !== 'smtp') {

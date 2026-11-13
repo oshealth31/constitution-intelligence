@@ -42,7 +42,10 @@ async function main(): Promise<void> {
   }
   const config = loadConfig({
     ...process.env,
-    DATABASE_URL: process.env.DATABASE_URL ?? 'postgresql://unused@localhost/unused',
+    // On the server DATABASE_URL_FILE is set instead; both together are refused.
+    ...(process.env.DATABASE_URL || process.env.DATABASE_URL_FILE
+      ? {}
+      : { DATABASE_URL: 'postgresql://unused@localhost/unused' }),
     LOG_LEVEL: 'warn',
   });
   const site = new URL(config.WEB_BASE_URL).host;

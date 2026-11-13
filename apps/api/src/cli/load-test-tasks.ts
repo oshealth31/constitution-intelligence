@@ -74,7 +74,7 @@ export async function createLoadTestData(
     await tx.execute(sql`
       INSERT INTO memberships (organisation_id, user_id, role)
       SELECT ${organisation.id}::uuid, id::uuid, 'member'
-      FROM unnest(${userIds.map((row) => row.id)}::text[]) AS id`);
+      FROM unnest(string_to_array(${userIds.map((row) => row.id).join(',')}, ',')) AS id`);
     const constitution = (
       await tx.execute(
         sql`INSERT INTO constitutions (organisation_id, title)

@@ -264,11 +264,16 @@ jobs:
             cd /srv/constitution/infra/production
             grep -q "^OFFSITE_REMOTE=offsite:" .env || { echo "Off-site copies are not set up: run setup-offsite, then release."; exit 1; }
             echo "== Backup and off-site copy"
-            sudo systemctl start constitution-backup.service
-            sudo journalctl -u constitution-backup.service -n 40 --no-pager -o cat | grep -E "backup|offsite|verified|copied|error" | tail -n 15
+            failed=0
+            sudo systemctl start constitution-backup.service || failed=1
+            sudo journalctl -u constitution-backup.service -n 60 --no-pager -o cat --since "-15min" |
+              grep -viE "^ *(container|network) " | grep -vE "@|[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | tail -n 25
+            [ "$failed" = 0 ] || { echo "FAIL: the backup or its off-site copy failed (above)."; exit 1; }
             echo "== Audit seal, off-site copy and check"
-            sudo systemctl start constitution-audit-seal.service
-            sudo journalctl -u constitution-audit-seal.service -n 40 --no-pager -o cat | grep -viE "^ *(container|network)" | tail -n 12
+            sudo systemctl start constitution-audit-seal.service || failed=1
+            sudo journalctl -u constitution-audit-seal.service -n 60 --no-pager -o cat --since "-15min" |
+              grep -viE "^ *(container|network) " | grep -vE "@|[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | tail -n 20
+            [ "$failed" = 0 ] || { echo "FAIL: the audit seal or its off-site check failed (above)."; exit 1; }
             echo "== Ages"
             sudo bash systemd/check-backups.sh
             echo "== Off-site backups"

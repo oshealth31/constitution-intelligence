@@ -26,20 +26,21 @@ fictional data). But a public go-live needs things that do not exist yet:
    required for Super Admins and offered to Owners and Administrators; tested in CI (API tests
    and phone-sized browser tests). Since task T1 the browser tests also run in Firefox, WebKit
    (Safari), an emulated iPhone and an emulated Android phone ([browser-support.md](../qa/browser-support.md)); real phones are task T4.
-5. **Operations are documented, not running**: no monitoring, no alerts, no off-site backups,
-   no named on-call people, and no restore test on real infrastructure.
+5. **Operations: partly running (Nov 2026).** Server on Oracle Cloud (S2), HTTPS (S4),
+   monitoring and alerts (S5) and off-site backups (S6) are running. Still missing: a restore
+   test on the real backups (S7) and agreed response times for the named responders.
 
 ### What would make it "Ready with conditions" (controlled pilot with RBPC only)
 
-| #   | Condition                                                                                                                                   | Type             |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
-| C1  | Hosting chosen and approved by the owner (in Botswana, or a destination the Act allows); server prepared per [deployment.md](deployment.md) | Decision + setup |
-| C2  | ✅ Email: SMTP sending (D1) and Brevo account, authenticated domain, live test (S3). New SMTP key on the real server                        | Setup            |
-| C3  | ✅ Two-step sign-in for Super Admins (D2). `MFA_ENCRYPTION_KEY` created on the real server and kept offline                                 | Development      |
-| C4  | Pilot agreement with RBPC covering data protection roles, plus a privacy notice for members                                                 | Legal            |
-| C5  | Off-site encrypted backup copy running, **and one restore test on the real server's backup recorded**                                       | Setup + test     |
-| C6  | Uptime monitor and the critical alerts from [logging-and-monitoring.md](logging-and-monitoring.md) running; two named responders            | Setup            |
-| C7  | Deployment check green on the release commit; owner's written go-ahead                                                                      | Approval         |
+| #   | Condition                                                                                                                                                                                                                                                     | Type             |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| C1  | Hosting chosen and approved by the owner (in Botswana, or a destination the Act allows); server prepared per [deployment.md](deployment.md). **Server running on Oracle Cloud Johannesburg (S2, S4); the destination still needs the data-protection review** | Decision + setup |
+| C2  | ✅ Email: SMTP sending (D1) and Brevo account, authenticated domain, live test (S3). New SMTP key on the real server                                                                                                                                          | Setup            |
+| C3  | ✅ Two-step sign-in for Super Admins (D2). `MFA_ENCRYPTION_KEY` created on the real server and kept offline                                                                                                                                                   | Development      |
+| C4  | Pilot agreement with RBPC covering data protection roles, plus a privacy notice for members                                                                                                                                                                   | Legal            |
+| C5  | Off-site encrypted backup copy running (**S6: Oracle Object Storage, Johannesburg, add-only key**), **and one restore test on the real server's backup recorded** (S7)                                                                                        | Setup + test     |
+| C6  | ✅ Uptime monitor and the critical alerts from [logging-and-monitoring.md](logging-and-monitoring.md) running; two named responders (S5)                                                                                                                      | Setup            |
+| C7  | Deployment check green on the release commit; owner's written go-ahead                                                                                                                                                                                        | Approval         |
 
 With C1–C7 met, a **pilot with one organisation**, a small group of known users, AI off and
 manual payments is reasonable. Wider launch also needs the "Before general availability"

@@ -10,6 +10,11 @@
 #                       them, never printed
 #   status              show what is running and the last releases
 #   test-alert          send a test alert email to the named responders (Task S5)
+#   setup-offsite       create the off-site backup buckets and an add-only key in the owner's
+#                       Oracle account, and put the key on the server (Task S6). Needs the
+#                       OCI_* secrets (an Oracle API key); delete that key afterwards.
+#   backup-now          take a backup now, copy it off-site, check the copy, seal the audit log
+#                       and copy it off-site, and prove the server's key cannot delete (S6)
 #
 # GitHub secrets used (Settings → Secrets and variables → Actions):
 #   DEPLOY_HOST     the server's public IP address
@@ -29,7 +34,14 @@ on:
       task:
         description: What to do
         type: choice
-        options: [status, prepare-server, release, create-super-admin, test-alert]
+        options:
+          - status
+          - prepare-server
+          - release
+          - create-super-admin
+          - test-alert
+          - setup-offsite
+          - backup-now
         default: status
       admin_email:
         description: 'create-super-admin only: email address of the new Super Admin'
@@ -209,6 +221,64 @@ jobs:
               node dist/cli/send-alert.js --to "$recipients" --subject "Constitution Intelligence: test alert"
             echo "== Watchdog"; systemctl list-timers constitution-watchdog.timer --no-pager | head -n 3
             sudo journalctl -u constitution-watchdog.service -n 3 --no-pager -o cat | grep watchdog || true'
+
+      - name: Set up the off-site backup location (Oracle Object Storage)
+        if: inputs.task == 'setup-offsite'
+        env:
+          OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
+          OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
+          OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+          OCI_API_KEY: ${{ secrets.OCI_API_KEY }}
+        run: |
+          set -euo pipefail
+          for name in OCI_TENANCY_OCID OCI_USER_OCID OCI_FINGERPRINT OCI_API_KEY; do
+            [ -n "${!name}" ] || { echo "::error::Add the GitHub secret $name (an Oracle API key; docs/operations/backup-and-restore.md)."; exit 1; }
+          done
+          pipx install oci-cli > /dev/null
+          install -d -m 0700 ~/.oci
+          printf '%s\n' "$OCI_API_KEY" | tr -d '\r' > ~/.oci/api_key.pem
+          chmod 0600 ~/.oci/api_key.pem
+          printf '[DEFAULT]\nuser=%s\nfingerprint=%s\ntenancy=%s\nregion=af-johannesburg-1\nkey_file=~/.oci/api_key.pem\n' \
+            "$OCI_USER_OCID" "$OCI_FINGERPRINT" "$OCI_TENANCY_OCID" > ~/.oci/config
+          chmod 0600 ~/.oci/config
+          keep=0
+          if ssh server 'sudo test -s /srv/constitution/infra/production/secrets/rclone.conf'; then
+            echo "The server already has an off-site key; keeping it."
+            keep=1
+          fi
+          KEEP_EXISTING_KEY=$keep TENANCY_OCID="$OCI_TENANCY_OCID" bash ops/server/oracle-setup-offsite.sh /tmp/rclone.conf
+          if [ "$keep" = 0 ]; then
+            ssh server 'sudo install -d -m 0700 /srv/constitution/infra/production/secrets &&
+              sudo tee /srv/constitution/infra/production/secrets/rclone.conf > /dev/null &&
+              sudo chmod 0644 /srv/constitution/infra/production/secrets/rclone.conf' < /tmp/rclone.conf
+            rm -f /tmp/rclone.conf
+            echo "Off-site key installed on the server. Next: run the release task, then backup-now."
+          fi
+
+      - name: Back up now and check the off-site copies
+        if: inputs.task == 'backup-now'
+        run: |
+          ssh server '
+            set -euo pipefail
+            cd /srv/constitution/infra/production
+            grep -q "^OFFSITE_REMOTE=offsite:" .env || { echo "Off-site copies are not set up: run setup-offsite, then release."; exit 1; }
+            echo "== Backup and off-site copy"
+            sudo systemctl start constitution-backup.service
+            sudo journalctl -u constitution-backup.service -n 40 --no-pager -o cat | grep -E "backup|offsite|verified|copied|error" | tail -n 15
+            echo "== Audit seal, off-site copy and check"
+            sudo systemctl start constitution-audit-seal.service
+            sudo journalctl -u constitution-audit-seal.service -n 40 --no-pager -o cat | grep -viE "^ *(container|network)" | tail -n 12
+            echo "== Ages"
+            sudo bash systemd/check-backups.sh
+            echo "== Off-site backups"
+            sudo docker compose --profile ops run --rm -T --entrypoint sh ops -c "rclone lsf --dirs-only \"\$OFFSITE_REMOTE\" | tail -n 5"
+            echo "== The server key must not be able to delete"
+            sudo docker compose --profile ops run --rm -T --entrypoint sh ops -c "
+              newest=\$(rclone lsf --dirs-only \"\$OFFSITE_REMOTE\" | sort | tail -n 1)
+              first=\$(rclone lsf \"\$OFFSITE_REMOTE/\$newest\" | head -n 1)
+              if rclone deletefile \"\$OFFSITE_REMOTE/\$newest\$first\" 2>/dev/null; then echo \"FAIL: the server key could delete a backup\"; exit 1; fi
+              echo \"ok: deleting a backup was refused\""
+            echo "== Timers"; systemctl list-timers "constitution-*" --no-pager | head -n 6'
 
       - name: Status
         if: inputs.task == 'status' || always()

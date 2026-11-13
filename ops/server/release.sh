@@ -10,7 +10,8 @@
 #  3. back up the database first, if one already exists
 #  4. start the database, apply migrations, start the application and HTTPS
 #  5. install the watchdog timer (Task S5)
-#  6. record the release in /srv/constitution/releases.log
+#  6. install the nightly backup and audit-seal timers once off-site copies are set up (S6)
+#  7. record the release in /srv/constitution/releases.log
 # Output contains no secret values (the workflow's log is public).
 set -euo pipefail
 version="${1:?Usage: release.sh <version>}"
@@ -44,13 +45,13 @@ payment="$(setting BILLING_PAYMENT_INSTRUCTIONS)"
 [[ "$site" =~ ^[a-z0-9.-]+$ ]] || { echo "SITE_ADDRESS is missing or invalid in deploy/production.env" >&2; exit 1; }
 [ -n "$mail_from" ] || { echo "MAIL_FROM is missing in deploy/production.env" >&2; exit 1; }
 
+# Off-site locations (Task S6): only used once secrets/rclone.conf holds the access key.
 offsite_remote="" offsite_audit_remote=""
-if [ -f .env ]; then
-  # Kept from earlier releases: set up in task S6.
-  offsite_remote="$(sed -n 's/^OFFSITE_REMOTE=//p' .env | tail -n 1)"
-  offsite_audit_remote="$(sed -n 's/^OFFSITE_AUDIT_REMOTE=//p' .env | tail -n 1)"
-  cp -p .env .env.previous
+if [ -s secrets/rclone.conf ]; then
+  offsite_remote="$(setting OFFSITE_REMOTE)"
+  offsite_audit_remote="$(setting OFFSITE_AUDIT_REMOTE)"
 fi
+[ -f .env ] && cp -p .env .env.previous
 cat > .env.new <<CONF
 # Written by ops/server/release.sh for release $version. Change deploy/production.env instead.
 SITE_ADDRESS=$site
@@ -113,7 +114,20 @@ if [ ! -s secrets/alert_recipients ]; then
   echo "No alert recipients yet: add the GitHub secret ALERT_EMAILS and run a release."
 fi
 
-echo "== 6. Record"
+echo "== 6. Backup and audit-seal timers (Task S6)"
+if [ -d /run/systemd/system ] && [ -n "$offsite_remote" ] && [ -n "$offsite_audit_remote" ]; then
+  # The timers run at 01:30 and 02:30 Botswana time.
+  timedatectl set-timezone Africa/Gaborone 2>/dev/null || true
+  install -m 0644 "$prod"/systemd/constitution-backup.{service,timer} \
+    "$prod"/systemd/constitution-audit-seal.{service,timer} /etc/systemd/system/
+  systemctl daemon-reload
+  systemctl enable --now constitution-backup.timer constitution-audit-seal.timer > /dev/null
+  echo "Nightly backup (01:30) and audit seal (02:30) timers enabled; off-site copies on."
+else
+  echo "Off-site location not set up yet (task S6): nightly timers not installed."
+fi
+
+echo "== 7. Record"
 printf '%s\t%s\t%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$version" "${RELEASED_BY:-unknown}" >> "$root/releases.log"
 
 # Keep the images of the last three releases (for a rollback), remove older ones.

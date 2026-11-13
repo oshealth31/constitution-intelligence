@@ -34,7 +34,7 @@ always match its rows. Files are never overwritten by the application (new versi
 files), which makes the archive simple to check. If storage moves to an object-storage service
 later, its versioning and a separate copy replace the `tar` step.
 
-### Off-site copy (Task D7: built and tested; the location is still to be chosen, setup S6)
+### Off-site copy (Task D7; location set up in Task S6)
 
 A backup on the same server does not survive losing the server. Every night the backup is
 copied to a second location by `ops/offsite-copy.sh`, using [rclone](https://rclone.org), which
@@ -57,6 +57,34 @@ Storage, Backblaze B2, Cloudflare R2 or an in-country provider; SFTP to another 
 - **Getting a backup back** (lost server): `ops/offsite-fetch.sh` lists the off-site backups;
   `ops/offsite-fetch.sh <folder>` downloads one into an empty folder and checks its checksums,
   then restore it as below.
+
+**The location chosen (S6, November 2026): Oracle Object Storage in Johannesburg**, in the
+owner's own Oracle account, using the free allowance (20 GB). Set up by the Deploy workflow task
+`setup-offsite` ([ops/server/oracle-setup-offsite.sh](../../ops/server/oracle-setup-offsite.sh)):
+
+| Bucket                     | Holds                                              | Retention rule (nobody can delete or change before) | Removed                                       |
+| -------------------------- | -------------------------------------------------- | --------------------------------------------------- | --------------------------------------------- |
+| `constitution-backups`     | the nightly encrypted backups, folder `prod/`      | 35 days                                             | automatically after 100 days (lifecycle rule) |
+| `constitution-audit-seals` | the daily sealed audit batches (fingerprints only) | 7 years                                             | never automatically                           |
+
+- The server uses its own Oracle user, `constitution-backup-writer`, whose policy allows only
+  listing, reading and **adding** objects in these two buckets (no delete, no overwrite). Its S3
+  access key is in `secrets/rclone.conf` on the server only. The `backup-now` task proves a delete
+  is refused.
+- The retention rules are **not locked**, so the owner can still change them. Locking them
+  (irreversible) is a decision for the go-live check (S7).
+- **Limits of this choice:** same provider and same region as the server, so it protects against
+  losing the server or its disk, and against someone who takes over the server, but **not
+  against losing the whole Oracle account** or a region-wide outage. A second copy elsewhere
+  (another provider, in Botswana if possible) is recommended once there is budget. The
+  data-protection review must confirm South Africa as the location.
+- Pruning by `ops/offsite-prune.sh` is not needed: the lifecycle rule removes backups after
+  100 days (about 100 daily copies; small enough for the free allowance at pilot size).
+
+**Owner steps (once):** create an Oracle API key again (Profile → Tokens and keys → Add API key,
+as for the server retry) and put it in the GitHub secrets `OCI_USER_OCID`, `OCI_FINGERPRINT`,
+`OCI_TENANCY_OCID`, `OCI_API_KEY`. Run the Deploy tasks `setup-offsite`, `release`, `backup-now`.
+Then **delete the API key in Oracle** and the four GitHub secrets.
 
 **Choosing the location (S6)**: in Botswana if possible, or wherever the data-protection review
 allows (the backups contain personal data, even though encrypted); a different provider or at

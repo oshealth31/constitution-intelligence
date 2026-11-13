@@ -14,7 +14,8 @@
 #   - an S3 access key for that user, printed ONLY to the file given as the first argument
 #     (rclone configuration), never to the log. Skipped if KEEP_EXISTING_KEY=1.
 #
-# Needs: TENANCY_OCID; the OCI CLI configured for region af-johannesburg-1.
+# Needs: TENANCY_OCID, OWNER_USER_OCID (the signed-in owner); the OCI CLI configured for region
+# af-johannesburg-1.
 set -euo pipefail
 : "${TENANCY_OCID:?}"
 # Pasted secrets often carry a space, a line break or the "tenancy=" label: remove them.
@@ -93,7 +94,15 @@ fi
 user_id="$(oci_json iam user list --compartment-id "$compartment" --all |
   jq -r --arg n "$user_name" '.data[]? | select(.name == $n) | .id' | head -n 1)"
 if [ -z "$user_id" ]; then
+  # Identity domains need an email address for every user. Use the owner's address with a
+  # "+constitution-backup" tag (delivered to the owner; never printed).
+  owner_email="$(oci_json iam user get --user-id "${OWNER_USER_OCID:?}" | jq -r '.data.email // empty')"
+  [[ "$owner_email" == *@* ]] || { echo "Could not read the owner's email address in Oracle." >&2; exit 1; }
+  if [ -n "${GITHUB_ACTIONS:-}" ]; then echo "::add-mask::$owner_email"; fi
+  backup_email="${owner_email%@*}+constitution-backup@${owner_email#*@}"
+  if [ -n "${GITHUB_ACTIONS:-}" ]; then echo "::add-mask::$backup_email"; fi
   user_id="$(oci_json iam user create --compartment-id "$compartment" --name "$user_name" \
+    --email "$backup_email" \
     --description "Used only by the Constitution Intelligence server to add backups (Task S6)" | jq -r '.data.id')"
   echo "user created"
 fi

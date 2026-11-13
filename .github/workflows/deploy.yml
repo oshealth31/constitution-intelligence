@@ -246,7 +246,8 @@ jobs:
             echo "The server already has an off-site key; keeping it."
             keep=1
           fi
-          KEEP_EXISTING_KEY=$keep TENANCY_OCID="$OCI_TENANCY_OCID" bash ops/server/oracle-setup-offsite.sh /tmp/rclone.conf
+          KEEP_EXISTING_KEY=$keep TENANCY_OCID="$OCI_TENANCY_OCID" OWNER_USER_OCID="$(printf '%s' "$OCI_USER_OCID" | tr -d '[:space:]' | sed 's/^user=//')" \
+            bash ops/server/oracle-setup-offsite.sh /tmp/rclone.conf
           if [ "$keep" = 0 ]; then
             ssh server 'sudo install -d -m 0700 /srv/constitution/infra/production/secrets &&
               sudo tee /srv/constitution/infra/production/secrets/rclone.conf > /dev/null &&

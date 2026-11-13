@@ -16,6 +16,7 @@ import {
   type ContentStatusConstitution,
   type VersionReview,
 } from '@/lib/portal';
+import { PUBLISH_STEPS_HELP } from '@/lib/publish-guide';
 import { useApi } from '@/lib/use-api';
 import { usePortal } from '../../portal-context';
 
@@ -62,12 +63,27 @@ export default function DocumentsPage() {
 
   return (
     <div className="space-y-5">
-      <p className="max-w-3xl text-base text-slate-600">
-        Every version goes through these steps: <strong>Draft</strong> (check the text against the
-        original) → <strong>In review</strong> → <strong>Approved</strong> by an administrator →{' '}
-        <strong>Published</strong> as the current version. Nothing is shown to members until it is
-        published.
-      </p>
+      <Panel title="How to publish a constitution">
+        <ol className="space-y-2">
+          {PUBLISH_STEPS_HELP.map((step, index) => (
+            <li key={step.label} className="flex gap-3 text-base text-slate-800">
+              <span
+                aria-hidden="true"
+                className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[var(--brand-primary)] text-sm font-bold text-[var(--brand-on-primary)]"
+              >
+                {index + 1}
+              </span>
+              <span>
+                <strong>{step.label}.</strong> {step.text}
+              </span>
+            </li>
+          ))}
+        </ol>
+        <p className="mt-3 text-sm text-slate-600">
+          Nothing is shown to members until step 5. Each version&apos;s page shows your progress
+          and what to do next.
+        </p>
+      </Panel>
 
       {status.data?.length === 0 && <Notice>No documents have been added yet.</Notice>}
 

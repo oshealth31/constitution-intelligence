@@ -62,10 +62,10 @@ Storage, Backblaze B2, Cloudflare R2 or an in-country provider; SFTP to another 
 owner's own Oracle account, using the free allowance (20 GB). Set up by the Deploy workflow task
 `setup-offsite` ([ops/server/oracle-setup-offsite.sh](../../ops/server/oracle-setup-offsite.sh)):
 
-| Bucket | Holds | Retention rule (nobody can delete or change before) | Removed |
-| --- | --- | --- | --- |
-| `constitution-backups` | the nightly encrypted backups, folder `prod/` | 35 days | automatically after 100 days (lifecycle rule) |
-| `constitution-audit-seals` | the daily sealed audit batches (fingerprints only) | 7 years | never automatically |
+| Bucket                     | Holds                                              | Retention rule (nobody can delete or change before) | Removed                                       |
+| -------------------------- | -------------------------------------------------- | --------------------------------------------------- | --------------------------------------------- |
+| `constitution-backups`     | the nightly encrypted backups, folder `prod/`      | 35 days                                             | automatically after 100 days (lifecycle rule) |
+| `constitution-audit-seals` | the daily sealed audit batches (fingerprints only) | 7 years                                             | never automatically                           |
 
 - The server uses its own Oracle user, `constitution-backup-writer`, whose policy allows only
   listing, reading and **adding** objects in these two buckets (no delete, no overwrite). Its S3

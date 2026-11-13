@@ -24,13 +24,7 @@ export function scrollToElement(id: string) {
  * "Your progress": the five steps from upload to publishing, a progress bar, what to do now,
  * and a button that jumps to the place on the page where it is done.
  */
-export function PublishGuidePanel({
-  guide,
-  onGo,
-}: {
-  guide: PublishGuide;
-  onGo: () => void;
-}) {
+export function PublishGuidePanel({ guide, onGo }: { guide: PublishGuide; onGo: () => void }) {
   const total = guide.steps.length;
   const finished = guide.percent === 100;
   return (

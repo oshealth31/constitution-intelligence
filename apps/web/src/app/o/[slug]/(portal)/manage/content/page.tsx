@@ -80,8 +80,8 @@ export default function DocumentsPage() {
           ))}
         </ol>
         <p className="mt-3 text-sm text-slate-600">
-          Nothing is shown to members until step 5. Each version&apos;s page shows your progress
-          and what to do next.
+          Nothing is shown to members until step 5. Each version&apos;s page shows your progress and
+          what to do next.
         </p>
       </Panel>
 

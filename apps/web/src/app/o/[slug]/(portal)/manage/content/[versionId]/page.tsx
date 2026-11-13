@@ -98,7 +98,8 @@ export default function VersionReviewPage() {
         <h2
           id="version-title"
           tabIndex={-1}
-          className="mt-1 flex flex-wrap items-center gap-2 text-xl font-bold text-slate-900 sm:text-2xl">
+          className="mt-1 flex flex-wrap items-center gap-2 text-xl font-bold text-slate-900 sm:text-2xl"
+        >
           Version {version.versionNumber}: {version.label} <StatusBadge status={version.status} />
         </h2>
       </header>

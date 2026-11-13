@@ -48,7 +48,7 @@ export function PublishGuidePanel({ guide, onGo }: { guide: PublishGuide; onGo: 
         aria-valuetext={`${guide.percent}% done, step ${Math.min(guide.stepNumber, total)} of ${total}`}
         className="mt-2 h-3 w-full overflow-hidden rounded-full bg-slate-200"
       >
-<WidthBar
+        <WidthBar
           percent={guide.percent}
           className={`h-full rounded-full transition-[width] duration-500 ${finished ? 'bg-emerald-600' : 'bg-[var(--brand-primary)]'}`}
         />

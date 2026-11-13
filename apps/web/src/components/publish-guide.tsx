@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { PublishGuide } from '@/lib/publish-guide';
+import { WidthBar } from './brand-scope';
 import { PortalButton } from './portal-ui';
 
 function reducedMotion(): boolean {
@@ -47,9 +48,9 @@ export function PublishGuidePanel({ guide, onGo }: { guide: PublishGuide; onGo: 
         aria-valuetext={`${guide.percent}% done, step ${Math.min(guide.stepNumber, total)} of ${total}`}
         className="mt-2 h-3 w-full overflow-hidden rounded-full bg-slate-200"
       >
-        <div
+<WidthBar
+          percent={guide.percent}
           className={`h-full rounded-full transition-[width] duration-500 ${finished ? 'bg-emerald-600' : 'bg-[var(--brand-primary)]'}`}
-          style={{ width: `${guide.percent}%` }}
         />
       </div>
 

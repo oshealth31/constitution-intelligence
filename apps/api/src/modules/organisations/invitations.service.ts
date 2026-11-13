@@ -68,6 +68,8 @@ export interface AcceptInvitationInput {
 
 export interface AcceptInvitationResult {
   organisationId: string;
+  /** The portal address, so the web app can take the person to their portal. */
+  organisationSlug: string;
   role: OrganisationRole;
   /** Set when a new account was created; the caller signs the new user in. */
   newUserId?: string;
@@ -250,7 +252,11 @@ export class InvitationsService {
   ): Promise<AcceptInvitationResult> {
     const now = new Date();
     const [row] = await this.db
-      .select({ invitation: invitations, organisationStatus: organisations.status })
+      .select({
+        invitation: invitations,
+        organisationStatus: organisations.status,
+        organisationSlug: organisations.slug,
+      })
       .from(invitations)
       .innerJoin(organisations, eq(invitations.organisationId, organisations.id))
       .where(
@@ -387,6 +393,7 @@ export class InvitationsService {
 
     return {
       organisationId: invitation.organisationId,
+      organisationSlug: row.organisationSlug,
       role: invitation.role,
       newUserId: existingUser ? undefined : result.userId,
     };

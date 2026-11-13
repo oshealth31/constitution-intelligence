@@ -27,6 +27,7 @@ export const RESERVED_ADDRESSES: readonly string[] = [
   'forgot-password',
   'help',
   'icons',
+  'invitations',
   'legal',
   'login',
   'logout',

@@ -112,6 +112,17 @@ jobs:
           sudo docker compose up -d --wait web
           run; grep -q 'FIXED: container-web is back to normal' /tmp/watchdog.out
 
+      - name: The alert command starts with the server's settings (Task S5)
+        run: |
+          cd /srv/constitution/infra/production
+          # The rehearsal's email key is not real, so sending fails; the settings must load.
+          printf 'TEST\n' | sudo docker compose run --rm -T --no-deps api \
+            node dist/cli/send-alert.js --to rehearsal@example.org --subject "Rehearsal alert" \
+            > /tmp/alert.out 2>&1 || true
+          cat /tmp/alert.out
+          if grep -q 'Invalid configuration' /tmp/alert.out; then exit 1; fi
+          grep -qE 'could not be sent|Alert sent' /tmp/alert.out
+
       - name: Logs on failure
         if: failure()
         run: |

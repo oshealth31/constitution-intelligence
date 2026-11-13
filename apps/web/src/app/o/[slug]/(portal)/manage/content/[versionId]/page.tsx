@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useState, type FormEvent, type ReactNode } from 'react';
 import { Badge, StatusBadge } from '@/components/ui';
 import { BackLink, Notice, Panel, PortalButton, PortalLoading } from '@/components/portal-ui';
@@ -12,12 +12,13 @@ import {
   extractionLabel,
   portalPath,
   sectionTitle,
-  WORKFLOW_STEPS,
   workflowStep,
   type ReviewSection,
   type VersionReview,
 } from '@/lib/portal';
+import { publishGuide } from '@/lib/publish-guide';
 import { useApi } from '@/lib/use-api';
+import { BackToTop, PublishGuidePanel, scrollToElement } from '@/components/publish-guide';
 import { usePortal } from '../../../portal-context';
 
 const FIELD =
@@ -39,6 +40,7 @@ type Message = { tone: 'success' | 'error'; text: string } | null;
 export default function VersionReviewPage() {
   const { api, slug, home } = usePortal();
   const { versionId } = useParams<{ versionId: string }>();
+  const router = useRouter();
   const review = useApi<VersionReview>(`${api}/versions/${versionId}/review`);
   const [message, setMessage] = useState<Message>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -83,6 +85,7 @@ export default function VersionReviewPage() {
   const version = review.data;
   const editable = version.editable && canEdit;
   const step = workflowStep(version.status);
+  const guide = publishGuide(version, { canEdit, canApprove });
   const visible = onlyFlagged
     ? version.sections.filter((section) => section.needsReview)
     : version.sections;
@@ -92,33 +95,30 @@ export default function VersionReviewPage() {
       <BackLink href={portalPath(slug, '/manage/content')}>Back to Documents</BackLink>
       <header>
         <p className="text-sm font-medium text-slate-600">{version.constitution?.title}</p>
-        <h2 className="mt-1 flex flex-wrap items-center gap-2 text-xl font-bold text-slate-900 sm:text-2xl">
+        <h2
+          id="version-title"
+          tabIndex={-1}
+          className="mt-1 flex flex-wrap items-center gap-2 text-xl font-bold text-slate-900 sm:text-2xl"
+        >
           Version {version.versionNumber}: {version.label} <StatusBadge status={version.status} />
         </h2>
       </header>
 
-      <ol aria-label="Approval steps" className="grid gap-2 sm:grid-cols-4">
-        {WORKFLOW_STEPS.map((item, index) => {
-          const done = step >= 0 && index < step;
-          const currentStep = index === step;
-          return (
-            <li
-              key={item.status}
-              aria-current={currentStep ? 'step' : undefined}
-              className={`rounded-xl border px-3 py-2 text-sm font-medium ${
-                currentStep
-                  ? 'border-[var(--brand-primary)] bg-[var(--brand-primary)] text-[var(--brand-on-primary)]'
-                  : done
-                    ? 'border-emerald-200 bg-emerald-50 text-emerald-900'
-                    : 'border-slate-200 bg-white text-slate-600'
-              }`}
-            >
-              {done ? '✓ ' : `${index + 1}. `}
-              {item.label}
-            </li>
-          );
-        })}
-      </ol>
+      {guide && (
+        <PublishGuidePanel
+          guide={guide}
+          onGo={() => {
+            if (guide.target === 'documents') {
+              router.push(portalPath(slug, '/manage/content'));
+            } else if (guide.target === 'next-section') {
+              const next = version.sections.find((section) => section.needsReview);
+              if (next) scrollToElement(`section-${next.id}`);
+            } else if (guide.target === 'approval') {
+              scrollToElement('approval');
+            }
+          }}
+        />
+      )}
       {step < 0 && (
         <Notice>
           This version is <strong>{version.status}</strong>. It is kept unchanged for the record.
@@ -232,6 +232,7 @@ export default function VersionReviewPage() {
           </Panel>
         </aside>
       </div>
+      <BackToTop focusId="version-title" />
     </div>
   );
 }
@@ -542,7 +543,7 @@ function WorkflowPanel({
 
   const canArchive = canApprove && !['published', 'archived'].includes(version.status);
   return (
-    <Panel title="Approval">
+    <Panel title="Approval" id="approval">
       {content}
       {canArchive && (
         <details className="mt-4 border-t border-slate-200 pt-4">
@@ -625,6 +626,8 @@ function SectionItem({
 
   return (
     <li
+      id={`section-${section.id}`}
+      tabIndex={-1}
       className={`rounded-xl border p-4 ${indent} ${
         section.needsReview ? 'border-amber-300 bg-amber-50' : 'border-slate-200 bg-white'
       }`}

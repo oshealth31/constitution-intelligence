@@ -72,6 +72,23 @@ test('upload, check, approve and publish a document; members only see it once pu
   const reviewUrl = page.url();
   await expect(page.getByText('Needs checking.')).toBeVisible();
   await expect(page.getByText(/Check this: Clause 3 follows 1/)).toBeVisible();
+
+  // The guide shows the step, the progress, and jumps to the section to check.
+  const progress = page.getByRole('progressbar', { name: 'Progress towards publishing' });
+  await expect(progress).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Step 2 of 5' })).toBeVisible();
+  await page.getByRole('button', { name: /Go to the next section to check/ }).click();
+  await expect(page.locator('li[id^="section-"]:focus')).toContainText('Check this');
+
+  // Back to top appears after scrolling and returns to the version heading. A short window
+  // makes sure the page is long enough to scroll on every browser size.
+  const size = page.viewportSize();
+  await page.setViewportSize({ width: size?.width ?? 390, height: 400 });
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await page.getByRole('button', { name: 'Back to top' }).click();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeLessThan(50);
+  await expect(page.locator('#version-title')).toBeFocused();
+  if (size) await page.setViewportSize(size);
   await expect(page.getByRole('link', { name: 'Download the original' })).toBeVisible();
   const sendButton = page.getByRole('button', { name: 'Send for approval' });
   await expect(sendButton).toBeDisabled();
@@ -108,6 +125,8 @@ test('upload, check, approve and publish a document; members only see it once pu
   await page.goto(reviewUrl);
   await page.getByRole('button', { name: 'Approve' }).click();
   await expect(page.getByText('Approved. You can now make it the current version.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Step 5 of 5' })).toBeVisible();
+  await expect(progress).toHaveAttribute('aria-valuenow', '80');
   const makeCurrent = page.getByRole('button', { name: 'Make current' });
   await expect(makeCurrent).toBeDisabled();
   await page.getByLabel('Yes, make this the current constitution.').check();

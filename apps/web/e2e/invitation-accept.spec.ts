@@ -11,7 +11,10 @@ test('a bad or used invitation link shows a clear message from the API', async (
   await page.getByLabel('Password', { exact: true }).fill('a long enough test password');
   await page.getByLabel('Confirm password').fill('a long enough test password');
   await page.getByRole('button', { name: 'Create account and join' }).click();
-  await expect(page.getByRole('alert')).toContainText(/invitation/i);
+  // (Next.js adds its own empty route-announcer alert, so filter by text.)
+  await expect(
+    page.getByRole('alert').filter({ hasText: 'invalid, has expired or has already been used' }),
+  ).toBeVisible();
 });
 
 test('a link without its token says so', async ({ page }) => {
@@ -68,5 +71,5 @@ test('passwords that do not match are caught before sending', async ({ page }) =
   await page.getByLabel('Password', { exact: true }).fill('a long enough test password');
   await page.getByLabel('Confirm password').fill('a different test password!');
   await page.getByRole('button', { name: 'Create account and join' }).click();
-  await expect(page.getByRole('alert')).toContainText('do not match');
+  await expect(page.getByRole('alert').filter({ hasText: 'do not match' })).toBeVisible();
 });

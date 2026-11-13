@@ -32,17 +32,41 @@ of the organisation's account plus the retention period** (it is part of the org
 
 Docker restarts a container whose health check fails three times (`restart: unless-stopped`).
 
-## Monitoring and alerting
+## Monitoring and alerting (Task S5)
 
-Nothing is monitored yet: there is no server. Set up at deployment, before the first
-organisation goes live:
+Three layers, all free:
 
-1. **Uptime monitor** outside the server, every minute: `/api/health` and `/api/v1/health/ready`.
-   These pages hold no personal data, so an external service may be used.
-2. **`ops/check-health.sh` daily** from cron on a second machine: catches the certificate
-   expiring within 14 days and a broken HTTPS redirect.
-3. **Server metrics**: disk, memory and CPU, from the host or the provider's console.
-4. **Log alerts** in the log store, with these starting thresholds:
+| Layer               | What                                                                                                                                                                                                                               | Where                                                                                     | Who is told                                |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------ |
+| **Uptime monitor**  | `/api/health` and `/api/v1/health/ready` every 5 minutes, from outside                                                                                                                                                             | UptimeRobot (free plan), set up by the owner (below)                                      | Its email and phone app                    |
+| **Live site check** | `ops/check-health.sh` daily: HTTPS, HTTP→HTTPS redirect, HSTS, certificate > 14 days, API ready                                                                                                                                    | GitHub Actions, `.github/workflows/site-check.yml` (04:41 UTC)                            | GitHub emails the owner when the run fails |
+| **Server watchdog** | Every 10 minutes on the server: containers, site through HTTPS, certificate, disk > 80 %, memory, server errors, email failures, request floods, failed sign-ins, and (once their timers are installed) backups and the audit seal | `ops/server/watchdog.sh`, timer `constitution-watchdog.timer`, installed by every release | Email to the named responders              |
+
+The uptime pages hold no personal data, so an outside service may check them. The watchdog's
+emails hold only counts and states, never personal data.
+
+**Watchdog emails** go to the addresses in the GitHub secret `ALERT_EMAILS` (comma-separated,
+at most 5; the Deploy workflow writes them to `secrets/alert_recipients` on the server). A new
+problem is emailed at once, repeated every 6 hours while it lasts, and a "FIXED" line is sent
+when it clears. At most 24 alert emails a day (Brevo's free plan allows 300). Test with the
+Deploy workflow's `test-alert` task. The deploy rehearsal checks that a stopped container is
+reported once, not repeated, and reported fixed.
+
+**Setting up UptimeRobot (owner, once):**
+
+1. Create a free account at uptimerobot.com, with two-step sign-in.
+2. **Add New Monitor** → type **HTTP(s)** → name `Website`, URL
+   `https://constitutionintel.com/api/health`, interval **5 minutes**.
+3. Again: name `API and database`, URL `https://constitutionintel.com/api/v1/health/ready`.
+4. Alert contacts: your email; install the UptimeRobot phone app for push alerts. Add the second
+   responder as an alert contact.
+
+Server metrics beyond the watchdog's disk and memory checks: Oracle Cloud console → the instance →
+**Metrics**.
+
+Not monitored yet: log shipping to a searchable store (the server keeps 5 × 20 MB per container).
+
+The thresholds:
 
 | Alert              | Condition                                                                                    | Severity | First response                                                                                         |
 | ------------------ | -------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
@@ -57,5 +81,6 @@ organisation goes live:
 | Backup missing     | No new backup folder in 26 hours, or the backup job exits non-zero                           | High     | Run it by hand; see [backup-and-restore.md](backup-and-restore.md)                                     |
 | Support access     | Any `support.content_accessed` audit event                                                   | Info     | Confirm it matches a support ticket                                                                    |
 
-Alerts go to two named people by email and SMS/WhatsApp. Somebody must be able to act within
-4 hours on working days. That service level is still to be agreed (see production-readiness.md).
+Alerts go to two named people (`ALERT_EMAILS`, UptimeRobot contacts). Somebody must be able to
+act within 4 hours on working days. That service level is still to be agreed (see
+production-readiness.md).

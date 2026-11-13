@@ -9,12 +9,15 @@
 #   create-super-admin  create the first Platform Super Admin; the one-time link is EMAILED to
 #                       them, never printed
 #   status              show what is running and the last releases
+#   test-alert          send a test alert email to the named responders (Task S5)
 #
 # GitHub secrets used (Settings → Secrets and variables → Actions):
 #   DEPLOY_HOST     the server's public IP address
 #   DEPLOY_SSH_KEY  the private SSH key for the server's "ubuntu" account
 #   SMTP_KEY        a Brevo SMTP key (written to the server's secrets/smtp_password)
 #   SMTP_LOGIN      the Brevo SMTP login (written to secrets/smtp_user)
+#   ALERT_EMAILS    the named responders' email addresses, separated by commas (Task S5;
+#                   written to secrets/alert_recipients; the watchdog emails them)
 #
 # THIS REPOSITORY IS PUBLIC, AND SO ARE THE LOGS OF THIS WORKFLOW. Nothing here may print a
 # secret, a one-time link or a person's email address. GitHub hides the secrets above in logs.
@@ -26,7 +29,7 @@ on:
       task:
         description: What to do
         type: choice
-        options: [status, prepare-server, release, create-super-admin]
+        options: [status, prepare-server, release, create-super-admin, test-alert]
         default: status
       admin_email:
         description: 'create-super-admin only: email address of the new Super Admin'
@@ -133,6 +136,7 @@ jobs:
         env:
           SMTP_KEY: ${{ secrets.SMTP_KEY }}
           SMTP_LOGIN: ${{ secrets.SMTP_LOGIN }}
+          ALERT_EMAILS: ${{ secrets.ALERT_EMAILS }}
         run: |
           set -euo pipefail
           ssh server 'sudo docker compose version > /dev/null' || {
@@ -147,6 +151,10 @@ jobs:
           if [ -n "$SMTP_KEY" ]; then
             printf '%s' "$SMTP_KEY" | ssh server \
               'sudo install -d -m 0700 /srv/constitution/infra/production/secrets && sudo tee /srv/constitution/infra/production/secrets/smtp_password > /dev/null'
+          fi
+          if [ -n "$ALERT_EMAILS" ]; then
+            printf '%s' "$ALERT_EMAILS" | tr ',;' '\n\n' | ssh server \
+              'sudo tee /srv/constitution/infra/production/secrets/alert_recipients > /dev/null'
           fi
           if [ -n "$SMTP_LOGIN" ]; then
             printf '%s' "$SMTP_LOGIN" | ssh server \
@@ -188,6 +196,19 @@ jobs:
             cd /srv/constitution/infra/production
             sudo docker compose run --rm -T api node dist/cli/create-super-admin.js \
               --email "$email" --name "$name" --send-email'
+
+      - name: Send a test alert
+        if: inputs.task == 'test-alert'
+        run: |
+          ssh server '
+            set -euo pipefail
+            cd /srv/constitution/infra/production
+            recipients="$(sudo cat secrets/alert_recipients 2>/dev/null | tr "\n" ",")"
+            [ -n "${recipients//[ ,]/}" ] || { echo "No alert recipients: add the GitHub secret ALERT_EMAILS and run a release."; exit 1; }
+            printf "TEST: this is a test alert. No action is needed.\n" | sudo docker compose run --rm -T --no-deps api \
+              node dist/cli/send-alert.js --to "$recipients" --subject "Constitution Intelligence: test alert"
+            echo "== Watchdog"; systemctl list-timers constitution-watchdog.timer --no-pager | head -n 3
+            sudo journalctl -u constitution-watchdog.service -n 3 --no-pager -o cat | grep watchdog || true'
 
       - name: Status
         if: inputs.task == 'status' || always()

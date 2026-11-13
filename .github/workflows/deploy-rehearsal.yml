@@ -93,6 +93,25 @@ jobs:
           code="$(curl -sk -o /dev/null -w '%{http_code}' https://localhost/api/v1/health/ready)"
           echo "Through HTTPS: $code"; [ "$code" = 200 ]
 
+      - name: Watchdog finds a problem, reports it once, and reports the fix (Task S5)
+        env:
+          WATCHDOG_DRY_RUN: '1'
+          WATCHDOG_DISK_LIMIT: '99'
+          # Caddy's own certificate for "localhost" lasts only hours.
+          WATCHDOG_CERT_DAYS: '0'
+          WATCHDOG_STATE_DIR: /tmp/watchdog-state
+        run: |
+          set -euo pipefail
+          run() { sudo -E bash /srv/constitution/ops/server/watchdog.sh | tee /tmp/watchdog.out; }
+          systemctl is-enabled constitution-watchdog.timer
+          run; grep -q 'watchdog: 0 problem(s)' /tmp/watchdog.out
+          cd /srv/constitution/infra/production && sudo docker compose stop web
+          run; grep -q 'PROBLEM: the web container is not running' /tmp/watchdog.out
+          grep -q 'answers' /tmp/watchdog.out   # the site check fails too
+          run; grep -q '0 line(s) to report' /tmp/watchdog.out   # not repeated within 6 hours
+          sudo docker compose up -d --wait web
+          run; grep -q 'FIXED: container-web is back to normal' /tmp/watchdog.out
+
       - name: Logs on failure
         if: failure()
         run: |

@@ -109,6 +109,9 @@ repository secret**. Add four secrets. Paste each value **only** into GitHub, ne
 | `SMTP_LOGIN`     | Brevo → **SMTP & API** → **SMTP** tab → the **Login** shown there.                                                                                                                               |
 | `SMTP_KEY`       | Brevo → **SMTP & API** → **SMTP** → **Generate a new SMTP key**, named `production server`. Copy it straight into GitHub. Brevo shows it only once; if it is lost, delete it and make a new one. |
 
+For alerts (Task S5) add `ALERT_EMAILS`: the named responders' email addresses, separated by
+commas (for example two people), then run a release.
+
 Then tell Claude (or the technical person) **"Server ready"**. The IP address and keys are
 already in GitHub, so they are not needed in the chat.
 

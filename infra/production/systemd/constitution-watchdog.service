@@ -1,0 +1,10 @@
+# Server watchdog (Task S5): checks the platform and emails the named responders.
+[Unit]
+Description=Constitution Intelligence watchdog
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/bash /srv/constitution/ops/server/watchdog.sh
+TimeoutStartSec=5min

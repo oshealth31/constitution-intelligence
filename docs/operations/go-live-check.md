@@ -7,15 +7,15 @@ data. It collects the evidence for conditions C1–C7 in
 
 ## Status (13 November 2026)
 
-| #   | Condition | Status | Evidence |
-| --- | --- | --- | --- |
-| C1  | Server running; hosting destination approved | **Running; approval waits for the data-protection review (L stages)** | Oracle Cloud Johannesburg ([oracle-cloud.md](oracle-cloud.md)); HTTPS live check passes daily |
-| C2  | Email working on the real server | ✅ | Administrator and invitation emails delivered via Brevo; domain authenticated |
-| C3  | Two-step sign-in; `mfa_encryption_key` kept offline | **Two-step on; key not yet copied offline** (step 2 below) | Super Admin set up with an authenticator app |
-| C4  | Pilot agreement with RBPC, privacy notice for members | **Not done (L stages)** | — |
-| C5  | Off-site backups running; one restore test on the real backups | **Off-site running (S6); restore test: step 1 below** | Nightly 01:30 backup, checked copy in Oracle Object Storage; delete refused for the server key |
-| C6  | Monitoring and alerts; two named responders | ✅ | Watchdog every 10 min, daily outside check, UptimeRobot; test alert received |
-| C7  | Deployment check green on the release; owner's written go-ahead | **Checks green; go-ahead below, after C1 and C4** | All CI checks on every merged change |
+| #   | Condition                                                       | Status                                                                | Evidence                                                                                       |
+| --- | --------------------------------------------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| C1  | Server running; hosting destination approved                    | **Running; approval waits for the data-protection review (L stages)** | Oracle Cloud Johannesburg ([oracle-cloud.md](oracle-cloud.md)); HTTPS live check passes daily  |
+| C2  | Email working on the real server                                | ✅                                                                    | Administrator and invitation emails delivered via Brevo; domain authenticated                  |
+| C3  | Two-step sign-in; `mfa_encryption_key` kept offline             | **Two-step on; key not yet copied offline** (step 2 below)            | Super Admin set up with an authenticator app                                                   |
+| C4  | Pilot agreement with RBPC, privacy notice for members           | **Not done (L stages)**                                               | —                                                                                              |
+| C5  | Off-site backups running; one restore test on the real backups  | **Off-site running (S6); restore test: step 1 below**                 | Nightly 01:30 backup, checked copy in Oracle Object Storage; delete refused for the server key |
+| C6  | Monitoring and alerts; two named responders                     | ✅                                                                    | Watchdog every 10 min, daily outside check, UptimeRobot; test alert received                   |
+| C7  | Deployment check green on the release; owner's written go-ahead | **Checks green; go-ahead below, after C1 and C4**                     | All CI checks on every merged change                                                           |
 
 Also open before general availability (not needed for the RBPC pilot, but recommended):
 independent penetration test (U11), real-phone checks (T4), screen-reader check (T2 manual).
@@ -53,6 +53,7 @@ They are shown nowhere by the workflows, because GitHub logs are public. Read th
 
    (Answer `yes` to the question about the server's fingerprint; it must be
    `SHA256:7tzv94yA2Jjwjvui9l2YtHXY73STe7sa8dpuQLjWoGY`.)
+
 4. Write both values on paper exactly as shown (8 groups of 8 characters each), labelled with
    their names and the date. Check each group twice. Make two copies; seal each in an envelope;
    keep them in two different safe places.

@@ -114,12 +114,18 @@ echo "== 5. The application on the restored copy"
 app_password="$(cat secrets/app_db_password)"
 printf 'postgresql://constitution_app:%s@postgres:5432/%s' "$app_password" "$test_db" > "$work/app_url"
 chmod 0644 "$work/app_url"
+# Mount each secret file on its own, as Compose does: the API runs as an unprivileged user who
+# may read the files (0644) but not enter the secrets folder (0700).
+secret_mounts=()
+for f in database_ca.crt smtp_password mfa_encryption_key audit_seal_key; do
+  secret_mounts+=(-v "$prod/secrets/$f:/s/$f:ro")
+done
 docker run -d --name "$api_container" --network "$network" --env-file api.env \
   -e DATABASE_URL_FILE=/fetch/app_url -e NODE_EXTRA_CA_CERTS=/s/database_ca.crt \
   -e SMTP_PASSWORD_FILE=/s/smtp_password -e MFA_ENCRYPTION_KEY_FILE=/s/mfa_encryption_key \
   -e AUDIT_SEAL_KEY_FILE=/s/audit_seal_key \
-  -v "$work:/fetch:ro" -v "$prod/secrets:/s:ro" -v "$volume:/var/lib/constitution/storage" \
-  "$api_image" > /dev/null
+  -v "$work:/fetch:ro" -v "$volume:/var/lib/constitution/storage" \
+  "${secret_mounts[@]}" "$api_image" > /dev/null
 ready=0
 for _ in $(seq 1 30); do
   if docker exec "$api_container" node -e "fetch('http://127.0.0.1:4000/api/v1/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" 2>/dev/null; then ready=1; break; fi

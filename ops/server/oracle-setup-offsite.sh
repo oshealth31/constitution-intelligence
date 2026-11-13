@@ -134,8 +134,9 @@ if [ "${KEEP_EXISTING_KEY:-0}" = 1 ]; then
 fi
 echo "== Access key"
 # A user may hold at most two keys: remove the oldest when two exist already.
+# (The command prints nothing at all when the user has no keys yet.)
 keys="$(oci_json iam customer-secret-key list --user-id "$user_id")"
-if [ "$(jq '.data | length' <<<"$keys")" -ge 2 ]; then
+if [ "$(jq '.data // [] | length' <<<"${keys:-{\}}")" -ge 2 ]; then
   oldest="$(jq -r '.data | sort_by(."time-created") | .[0].id' <<<"$keys")"
   oci iam customer-secret-key delete --user-id "$user_id" --customer-secret-key-id "$oldest" --force
   echo "oldest access key removed"

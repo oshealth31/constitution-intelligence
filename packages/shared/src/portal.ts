@@ -8,7 +8,7 @@ export const SLUG_PATTERN = /^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$/;
 
 /**
  * Words the platform needs for itself. Keep in sync with the
- * organisations_slug_not_reserved constraint (migration 0015) and the web app's copy in
+ * organisations_slug_not_reserved constraint (migrations 0015, 0016) and the web app's copy in
  * apps/web/src/lib/short-link.ts.
  *
  * Since the short links (constitutionintel.com/<address>, Task "short portal link"), an
@@ -31,6 +31,7 @@ export const RESERVED_SLUGS: readonly string[] = [
   'forgot-password',
   'help',
   'icons',
+  'invitations',
   'legal',
   'login',
   'logout',

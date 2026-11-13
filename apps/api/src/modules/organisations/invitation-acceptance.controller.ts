@@ -52,6 +52,10 @@ export class InvitationAcceptanceController {
       const session = await this.sessions.create(result.newUserId, meta);
       setSessionCookie(response, session.token, session.expiresAt, this.config);
     }
-    return { organisationId: result.organisationId, role: result.role };
+    return {
+      organisationId: result.organisationId,
+      organisationSlug: result.organisationSlug,
+      role: result.role,
+    };
   }
 }

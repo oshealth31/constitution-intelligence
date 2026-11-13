@@ -312,7 +312,13 @@ describe.runIf(Boolean(testDatabaseUrl))('access control', () => {
         .expect(401);
 
       const agent = await signIn(context, existing.email);
-      await agent.post('/api/v1/invitations/accept').send({ token }).expect(200);
+      const accepted = await agent.post('/api/v1/invitations/accept').send({ token }).expect(200);
+      // The web app uses the portal address to take the person to their portal.
+      expect(accepted.body).toEqual({
+        organisationId: organisation.id,
+        organisationSlug: organisation.slug,
+        role: 'content_reviewer',
+      });
       const me = await agent.get('/api/v1/auth/me').expect(200);
       expect(me.body.memberships).toEqual([
         expect.objectContaining({ organisationId: organisation.id, role: 'content_reviewer' }),

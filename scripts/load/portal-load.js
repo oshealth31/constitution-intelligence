@@ -111,9 +111,7 @@ export const options = {
   summaryTrendStats: ['avg', 'p(50)', 'p(95)', 'p(99)', 'max', 'count'],
   // Always-true thresholds: they make k6 keep the response times per load level for the report.
   thresholds: {
-    ...Object.fromEntries(
-      LEVELS.map((value) => [`http_req_duration{level:${value}}`, ['max>=0']]),
-    ),
+    ...Object.fromEntries(LEVELS.map((value) => [`http_req_duration{level:${value}}`, ['max>=0']])),
     ...SAFETY,
   },
 };

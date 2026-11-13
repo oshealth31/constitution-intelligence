@@ -26,9 +26,7 @@ describe('load test names', () => {
     for (const slug of ['rbpc', 'load-test-', 'load-test-abc', 'x-load-test-202611132130']) {
       expect(isLoadTestSlug(slug)).toBe(false);
     }
-    expect(loadTestEmail('load-test-202611132130', 7)).toBe(
-      'load-test-202611132130-7@example.com',
-    );
+    expect(loadTestEmail('load-test-202611132130', 7)).toBe('load-test-202611132130-7@example.com');
   });
 });
 

@@ -1,0 +1,175 @@
+# Load test on the REAL server (task T3, live). Runs ONLY when started by hand:
+#   GitHub → Actions → "Live load test" → Run workflow → choose the task.
+#
+#   run     creates a FICTIONAL organisation ("load-test-<time>") with 200 fictional members
+#           and a very large fictional constitution, runs k6 against https://constitutionintel.com
+#           from this GitHub machine (10 → 150 members at once, about 10 minutes; it STOPS BY
+#           ITSELF if more than 5 % of requests fail or the slowest 5 % take over 3 seconds),
+#           records the server's processor and memory every 10 seconds, then suspends the
+#           fictional organisation and requests its deletion. Real organisations are never
+#           touched: the tool (apps/api/src/cli/load-test-data.ts) refuses any other address.
+#   delete  24 hours after "run": deletes the fictional organisation and its members.
+#
+# THIS REPOSITORY IS PUBLIC, AND SO ARE THE LOGS. The fictional password is random, masked and
+# never stored; the output shows ids and counts only.
+name: Live load test
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: What to do
+        type: choice
+        options:
+          - run
+          - delete
+        default: run
+
+# Never at the same time as a release or another production task.
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  live:
+    name: ${{ inputs.task }}
+    runs-on: ubuntu-24.04
+    environment: production
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Connect to the server
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "$DEPLOY_HOST" ] || [ -z "$DEPLOY_SSH_KEY" ]; then
+            echo "::error::Add the GitHub secrets DEPLOY_HOST and DEPLOY_SSH_KEY first (docs/operations/oracle-cloud.md)."
+            exit 1
+          fi
+          install -d -m 0700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" | tr -d '\r' > ~/.ssh/id_deploy
+          chmod 0600 ~/.ssh/id_deploy
+          if ! ssh-keygen -y -f ~/.ssh/id_deploy > /dev/null 2>&1; then
+            echo "::error::DEPLOY_SSH_KEY is not a valid private key. Paste the whole file, including the BEGIN and END lines."
+            exit 1
+          fi
+          # The server's identity. After the first connection it is recorded in the repository
+          # (infra/production/known_hosts) and must match from then on.
+          ssh-keyscan -T 15 -t ed25519 "$DEPLOY_HOST" 2>/dev/null > /tmp/scanned
+          [ -s /tmp/scanned ] || { echo "::error::The server does not answer on port 22. Check the IP address and the Oracle security list."; exit 1; }
+          echo "Server key fingerprint: $(ssh-keygen -lf /tmp/scanned | awk '{print $2}')"
+          recorded="infra/production/known_hosts"
+          if [ -s "$recorded" ]; then
+            if ! awk '{print $2, $3}' /tmp/scanned | grep -qxFf <(awk '{print $2, $3}' "$recorded"); then
+              echo "::error::The server's key does not match the one recorded in $recorded. Stop and check before connecting (it could be a different machine)."
+              exit 1
+            fi
+            echo "Server key matches the recorded one."
+          else
+            echo "::warning::First connection: no server key recorded yet. Record this fingerprint in $recorded (key: $(awk '{print $2, $3}' /tmp/scanned))."
+          fi
+          sed "s/^[^ ]*/server/" /tmp/scanned > ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<CONF
+          Host server
+            HostName $DEPLOY_HOST
+            User ubuntu
+            IdentityFile ~/.ssh/id_deploy
+            IdentitiesOnly yes
+            HostKeyAlias server
+            ServerAliveInterval 30
+            ConnectTimeout 20
+          CONF
+          ssh server true
+          echo "Connected."
+
+      - name: Create the fictional organisation, members and constitution
+        if: inputs.task == 'run'
+        run: |
+          set -euo pipefail
+          password="$(openssl rand -hex 24)"
+          echo "::add-mask::$password"
+          echo "LOAD_PASSWORD=$password" >> "$GITHUB_ENV"
+          out="$(printf '%s' "$password" | ssh server '
+            cd /srv/constitution/infra/production
+            sudo docker compose run --rm -T --no-deps api node dist/cli/load-test-data.js --create --members 200' | tail -n 1)"
+          echo "$out"
+          {
+            echo "LOAD_SLUG=$(echo "$out" | jq -r .slug)"
+            echo "LOAD_CONSTITUTION_ID=$(echo "$out" | jq -r .constitutionId)"
+            echo "LOAD_VERSION_ID=$(echo "$out" | jq -r .versionId)"
+          } >> "$GITHUB_ENV"
+
+      - uses: grafana/setup-k6-action@v1
+        if: inputs.task == 'run'
+
+      - name: Run the load test (stops by itself if the site struggles)
+        if: inputs.task == 'run'
+        env:
+          BASE_URL: https://constitutionintel.com
+          LOAD_USERS: '200'
+          SCENARIO: live
+        run: |
+          set -uo pipefail
+          # The server's processor and memory every 10 seconds, while the test runs.
+          ssh server 'for i in $(seq 1 80); do
+              echo "load $(cut -d" " -f1 /proc/loadavg) mem $(free -m | awk "/^Mem:/ {print \$3}")"
+              sudo docker stats --no-stream --format "stat {{.Name}} {{.CPUPerc}} {{.MemUsage}}" | sed "s/constitution-intelligence-//"
+              sleep 8
+            done' > usage.log 2>&1 &
+          monitor=$!
+          k6 run --quiet scripts/load/portal-load.js
+          code=$?
+          kill "$monitor" 2>/dev/null || true
+          if [ "$code" -eq 99 ]; then
+            echo "::warning::The test stopped early: the site got slow or returned errors (see the results)."
+          elif [ "$code" -ne 0 ]; then
+            echo "::warning::k6 ended with code $code."
+          fi
+          exit 0
+
+      - name: Suspend the fictional organisation and request its deletion
+        if: always() && inputs.task == 'run'
+        run: |
+          ssh server '
+            cd /srv/constitution/infra/production
+            sudo docker compose run --rm -T --no-deps api node dist/cli/load-test-data.js --finish' | tail -n 1
+
+      - name: Results
+        if: always() && inputs.task == 'run'
+        run: |
+          {
+            echo '# Live load test (fictional data, real server)'
+            echo
+            cat load-live.md 2>/dev/null || echo 'No k6 results.'
+            echo '## Server during the test'
+            echo
+            awk '$1 == "load" {if ($2 > load) load = $2; if ($4 > mem) mem = $4}
+                 $1 == "stat" {cpu = $3; sub("%", "", cpu); if (cpu + 0 > c[$2]) c[$2] = cpu + 0; m[$2] = $4}
+                 END {printf "- Processor load (1-minute average, 1 core): up to %s\n", load;
+                      printf "- Memory in use (whole server, of about 6 GB): up to %d MB\n", mem;
+                      for (s in c) printf "- %s: processor up to %s %%, memory at the end %s\n", s, c[s], m[s]}' usage.log 2>/dev/null
+          } | tee results.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Keep the raw results
+        if: always() && inputs.task == 'run'
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-load-test-results
+          path: |
+            results.md
+            load-live.json
+            usage.log
+          retention-days: 14
+
+      - name: Delete the fictional organisation (24 hours after the test)
+        if: inputs.task == 'delete'
+        run: |
+          ssh server '
+            cd /srv/constitution/infra/production
+            sudo docker compose run --rm -T --no-deps api node dist/cli/load-test-data.js --delete' | tail -n 1

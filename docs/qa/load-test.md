@@ -91,3 +91,23 @@ about 170 KB of app code; after that the browser keeps it.
 - Uploading and processing documents under load (rare, administrators only), the Control
   Centre, and AI (off).
 - Very long runs (hours or days).
+
+## On the real server (live)
+
+`.github/workflows/live-load-test.yml`, started by hand (GitHub → Actions → "Live load test"):
+
+- **run**: creates a FICTIONAL organisation `load-test-<time>` with 200 fictional members
+  (`<slug>-<n>@example.com`, a random password that is masked and never stored) and the same
+  500-clause fictional constitution, then runs `scripts/load/portal-load.js` with
+  `SCENARIO=live` against https://constitutionintel.com from a GitHub machine: 10 → 25 → 50 →
+  100 → 150 members at once over about 10 minutes, with the **production limits**. It **stops
+  by itself** if more than 5 % of requests fail or the slowest 5 % take over 3 seconds. The
+  server's processor and memory are recorded every 10 seconds. Afterwards the fictional
+  organisation is suspended (its members are signed out and blocked) and its deletion is
+  requested.
+- **delete**: at least 24 hours later (the waiting period of every deletion), deletes the
+  fictional organisation and its members.
+
+The tool (`apps/api/src/cli/load-test-data.ts`, tested in `apps/api/test/load-test-data.e2e.spec.ts`)
+refuses any organisation whose address is not `load-test-<12 digits>`, so real organisations
+cannot be touched. Run it late in the evening, when members are unlikely to be reading.

@@ -17,6 +17,12 @@
 # Needs: TENANCY_OCID; the OCI CLI configured for region af-johannesburg-1.
 set -euo pipefail
 : "${TENANCY_OCID:?}"
+# Pasted secrets often carry a space, a line break or the "tenancy=" label: remove them.
+TENANCY_OCID="$(printf '%s' "$TENANCY_OCID" | tr -d '[:space:]' | sed 's/^tenancy=//')"
+[[ "$TENANCY_OCID" =~ ^ocid1\.tenancy\.[a-z0-9._-]+$ ]] || {
+  echo "OCI_TENANCY_OCID does not look like a tenancy OCID (it must start with ocid1.tenancy.)." >&2
+  exit 1
+}
 rclone_out="${1:?Usage: oracle-setup-offsite.sh <rclone.conf to write>}"
 region=af-johannesburg-1
 compartment="$TENANCY_OCID"

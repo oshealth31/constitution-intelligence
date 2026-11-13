@@ -9,6 +9,10 @@
 //   SCENARIO=capacity  more and more members at once (25 → 50 → 100 → 200), to find where
 //                      it slows down. Run with the per-address limits raised, so the server
 //                      itself is measured rather than the flood guard.
+//   SCENARIO=live      the REAL server (.github/workflows/live-load-test.yml), with its normal
+//                      limits and FICTIONAL data in a "load-test-…" organisation: 10 → 25 → 50
+//                      → 100 → 150 members, and it STOPS BY ITSELF if more than 5 % of requests
+//                      fail or the slowest 5 % take longer than 3 seconds.
 import http from 'k6/http';
 import { check, group, sleep } from 'k6';
 import exec from 'k6/execution';
@@ -21,6 +25,10 @@ const PASSWORD = __ENV.LOAD_PASSWORD;
 const CONSTITUTION = __ENV.LOAD_CONSTITUTION_ID;
 const VERSION = __ENV.LOAD_VERSION_ID;
 const SCENARIO = __ENV.SCENARIO || 'capacity';
+// The live test's fictional members are <slug>-<n>@example.com (apps/api/src/cli/load-test-data.ts).
+const EMAIL = (n) =>
+  SCENARIO === 'live' ? `${SLUG}-${n}@example.com` : `loadtest-${n}@sample.test`;
+const LEVELS = SCENARIO === 'live' ? [10, 25, 50, 100, 150] : [25, 50, 100, 200];
 
 const refused = new Counter('refused_too_many_requests'); // 429
 const serverErrors = new Counter('server_errors'); // 5xx
@@ -64,7 +72,36 @@ const scenarios = {
       gracefulRampDown: '15s',
     },
   },
+  live: {
+    live: {
+      executor: 'ramping-vus',
+      startVUs: 0,
+      stages: [
+        { duration: '30s', target: 10 },
+        { duration: '1m', target: 10 },
+        { duration: '30s', target: 25 },
+        { duration: '1m', target: 25 },
+        { duration: '30s', target: 50 },
+        { duration: '1m', target: 50 },
+        { duration: '30s', target: 100 },
+        { duration: '1m30s', target: 100 },
+        { duration: '30s', target: 150 },
+        { duration: '1m30s', target: 150 },
+        { duration: '15s', target: 0 },
+      ],
+      gracefulRampDown: '15s',
+    },
+  },
 };
+
+// The live test protects the real site: it stops early when the site is struggling.
+const SAFETY =
+  SCENARIO === 'live'
+    ? {
+        http_req_failed: [{ threshold: 'rate<0.05', abortOnFail: true, delayAbortEval: '30s' }],
+        http_req_duration: [{ threshold: 'p(95)<3000', abortOnFail: true, delayAbortEval: '30s' }],
+      }
+    : {};
 
 export const options = {
   scenarios: scenarios[SCENARIO],
@@ -73,16 +110,19 @@ export const options = {
   // Recorded, not enforced: the numbers go into the report.
   summaryTrendStats: ['avg', 'p(50)', 'p(95)', 'p(99)', 'max', 'count'],
   // Always-true thresholds: they make k6 keep the response times per load level for the report.
-  thresholds: Object.fromEntries(
-    ['25', '50', '100', '200'].map((value) => [`http_req_duration{level:${value}}`, ['max>=0']]),
-  ),
+  thresholds: {
+    ...Object.fromEntries(
+      LEVELS.map((value) => [`http_req_duration{level:${value}}`, ['max>=0']]),
+    ),
+    ...SAFETY,
+  },
 };
 
 const HEADERS = { 'X-Requested-With': 'XMLHttpRequest', Origin: BASE, Accept: 'application/json' };
-/** How many members are active right now, rounded up to the load levels 25/50/100/200. */
+/** How many members are active right now, rounded up to the next load level. */
 function level() {
   const active = exec.instance.vusActive;
-  return String(active <= 25 ? 25 : active <= 50 ? 50 : active <= 100 ? 100 : 200);
+  return String(LEVELS.find((value) => active <= value) ?? LEVELS[LEVELS.length - 1]);
 }
 function api() {
   return { headers: HEADERS, tags: { level: level() } };
@@ -114,7 +154,7 @@ function count(response) {
 const state = { signedIn: false, organisationId: null };
 
 function signIn() {
-  const email = `loadtest-${((__VU - 1) % USERS) + 1}@sample.test`;
+  const email = EMAIL(((__VU - 1) % USERS) + 1);
   const started = Date.now();
   const response = count(
     http.post(`${BASE}/api/v1/auth/login`, JSON.stringify({ email, password: PASSWORD }), {
@@ -208,7 +248,7 @@ export function handleSummary(data) {
     `- Large constitution download: ${Math.round(metric('large_constitution_bytes', 'avg') / 1024)} KB (uncompressed)`,
     '',
   ];
-  const levels = ['25', '50', '100', '200'].filter(
+  const levels = LEVELS.map(String).filter(
     (value) => data.metrics[`http_req_duration{level:${value}}`],
   );
   if (levels.length > 1) {

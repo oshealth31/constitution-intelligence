@@ -1,0 +1,4 @@
+# The production server's SSH host key (Task S2), recorded on the first connection on
+# 2026-11-13 (fingerprint SHA256:7tzv94yA2Jjwjvui9l2YtHXY73STe7sa8dpuQLjWoGY). The Deploy
+# workflow refuses a server whose key does not match. Format: <name> <key type> <key>.
+server ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILLmIU600rWk/a52F0lVqwqJ4ARHlpDrxoSdHzMj/q9+

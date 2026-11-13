@@ -1,0 +1,26 @@
+# Daily outside-in check of the live site (Task S5): HTTPS answers, HTTP redirects to HTTPS,
+# HSTS is sent, the certificate has more than 14 days left, the API and database are ready.
+# Runs on a GitHub machine, so it is independent of the server. A failure is a red run, and
+# GitHub emails the repository owner. The uptime monitor (UptimeRobot) checks every 5 minutes;
+# this adds the certificate and HTTPS settings it does not.
+name: Live site check
+
+on:
+  schedule:
+    - cron: '41 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check the live site from outside
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check https://constitutionintel.com
+        run: |
+          site="$(sed -n 's/^SITE_ADDRESS=//p' deploy/production.env | tail -n 1)"
+          bash ops/check-health.sh "https://$site"

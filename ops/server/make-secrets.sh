@@ -72,4 +72,6 @@ for file in postgres_password app_db_password migrator_db_password backup_passph
   smtp_password smtp_user; do
   if [ -e "$file" ]; then chown root:root "$file"; chmod 0644 "$file"; fi
 done
+# The responders' addresses are read only by the watchdog on the server, as root.
+if [ -e alert_recipients ]; then chown root:root alert_recipients; chmod 0600 alert_recipients; fi
 echo "Secrets checked."

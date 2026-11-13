@@ -9,7 +9,8 @@
 #  2. write .env and api.env from deploy/production.env (the previous ones are kept as *.previous)
 #  3. back up the database first, if one already exists
 #  4. start the database, apply migrations, start the application and HTTPS
-#  5. record the release in /srv/constitution/releases.log
+#  5. install the watchdog timer (Task S5)
+#  6. record the release in /srv/constitution/releases.log
 # Output contains no secret values (the workflow's log is public).
 set -euo pipefail
 version="${1:?Usage: release.sh <version>}"
@@ -98,7 +99,21 @@ docker compose exec -T web node -e "
     .then(rs=>{rs.forEach(([p,s])=>console.log((s===200?'ok   ':'FAIL ')+p+' '+s));process.exit(rs.every(([,s])=>s===200)?0:1)})
     .catch(e=>{console.error('FAIL',e.message);process.exit(1)})"
 
-echo "== 5. Record"
+echo "== 5. Watchdog (Task S5)"
+# Checks the platform every 10 minutes and emails the responders (secrets/alert_recipients).
+if [ -d /run/systemd/system ]; then
+  install -m 0644 "$prod/systemd/constitution-watchdog.service" "$prod/systemd/constitution-watchdog.timer" /etc/systemd/system/
+  systemctl daemon-reload
+  systemctl enable --now constitution-watchdog.timer > /dev/null
+  echo "Watchdog timer enabled (every 10 minutes)."
+else
+  echo "No systemd: watchdog timer not installed."
+fi
+if [ ! -s secrets/alert_recipients ]; then
+  echo "No alert recipients yet: add the GitHub secret ALERT_EMAILS and run a release."
+fi
+
+echo "== 6. Record"
 printf '%s\t%s\t%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$version" "${RELEASED_BY:-unknown}" >> "$root/releases.log"
 
 # Keep the images of the last three releases (for a rollback), remove older ones.

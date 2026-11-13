@@ -29,6 +29,7 @@ import { LimitsService } from '../subscriptions/limits.service';
 import { DocumentsService } from './documents.service';
 import { RateLimitService } from '../auth/rate-limit.service';
 import { ABUSE_LIMITS, HOUR_SECONDS } from '../auth/abuse-limits';
+import { isFormOrJson } from './upload-body';
 
 // eslint-disable-next-line no-control-regex -- refusing control characters is the point
 const CONTROL = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/;
@@ -158,8 +159,7 @@ export class DocumentsController {
     @Req() request: AppRequest,
   ) {
     const id = parseId(constitutionId, 'Constitution');
-    const contentType = String(request.headers['content-type'] ?? '').toLowerCase();
-    if (contentType.includes('json') || contentType.includes('form')) {
+    if (isFormOrJson(request.headers['content-type'])) {
       throw new BadRequestException('Send the document itself as the request body.');
     }
     const parsedLabel = parseInput(optionalLine(200), label);

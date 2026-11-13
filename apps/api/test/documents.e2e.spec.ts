@@ -152,6 +152,14 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
         .set('Content-Type', 'application/pdf')
         .send(constitutionPdf('Test'))
         .expect(400);
+      for (const type of ['multipart/form-data; boundary=x', 'application/x-www-form-urlencoded']) {
+        await a.admin
+          .post(url(a, `/constitutions/${a.ids.constitutionId}/versions`))
+          .set('Content-Type', type)
+          .set('X-File-Name', 'constitution.pdf')
+          .send('file=x')
+          .expect(400);
+      }
     });
   });
 
@@ -223,7 +231,10 @@ describe.runIf(Boolean(testDatabaseUrl))('constitution document management', () 
         ],
         { trackedInsertion: 'Inserted sentence.' },
       );
-      const response = await upload(a.reviewer, a, 'constitution.docx', docx);
+      // The real Word media type, as browsers send it (its "openxmlformats" once tripped the form check).
+      const response = await upload(a.reviewer, a, 'constitution.docx', docx, {
+        contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      });
       expect(response.status).toBe(201);
       expect(response.body.extraction.status).toBe('needs_review');
       expect(

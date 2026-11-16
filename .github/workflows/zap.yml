@@ -49,7 +49,7 @@ jobs:
       ACTIVE: ${{ github.event_name == 'schedule' || startsWith(github.ref, 'refs/heads/scan/') }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:

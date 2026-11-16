@@ -49,7 +49,7 @@ jobs:
       # The production layout plus a throwaway mail server (CI only).
       COMPOSE_FILE: docker-compose.yml:docker-compose.ci.yml
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build production images
         working-directory: .

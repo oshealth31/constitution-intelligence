@@ -115,7 +115,9 @@ jobs:
           LOAD_USERS: '200'
           SCENARIO: live
         run: |
-          set -uo pipefail
+          # GitHub runs steps with "bash -e"; turn that off so k6 stopping early (code 99) does
+          # not end the step before the monitor is stopped and the outcome is reported.
+          set +e
           # The server's processor and memory every 10 seconds, while the test runs.
           ssh server 'for i in $(seq 1 80); do
               echo "load $(cut -d" " -f1 /proc/loadavg) mem $(free -m | awk "/^Mem:/ {print \$3}")"
@@ -154,7 +156,7 @@ jobs:
                  END {printf "- Processor load (1-minute average, 1 core): up to %s\n", load;
                       printf "- Memory in use (whole server, of about 6 GB): up to %d MB\n", mem;
                       for (s in c) printf "- %s: processor up to %s %%, memory at the end %s\n", s, c[s], m[s]}' usage.log 2>/dev/null
-          } | tee results.md >> "$GITHUB_STEP_SUMMARY"
+          } | tee results.md | tee -a "$GITHUB_STEP_SUMMARY"
 
       - name: Keep the raw results
         if: always() && inputs.task == 'run'
